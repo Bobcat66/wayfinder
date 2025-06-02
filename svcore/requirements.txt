@@ -1,3 +1,0 @@
-pyntcore==2025.3.2.1
-robotpy-apriltag==2025.3.2.1
-robotpy-cscore==2025.3.2.1
