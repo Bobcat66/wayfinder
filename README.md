@@ -1,5 +1,3 @@
 # SLAMVision
 
-SLAMVision is a robot pose estimation system for FRC combining vision-based pose estimation with a GTSAM-based SLAM solver. It contains three components: slamvision-client, which is a web interface used for configuration, slamvision-core, which is the main SLAMVision system, and slamvision-lib, which provides an easy to use abstraction over the SLAMVision Networktables API, and contains various robot-side utilities for SLAMVision.
-
-Requirements: GTSAM, OpenCV, WPILib C++. (Note, the WPILib AprilTag library is used for AprilTag detection)
+SLAMVision is a robot pose estimation system for FRC combining vision-based pose estimation with a GTSAM-based SLAM solver. It contains three components: svclient, which is a web interface used for configuration, svcore, which is the main SLAMVision system, and svlib, which provides an easy to use abstraction over the SLAMVision Networktables API, and contains various robot-side utilities for SLAMVision.

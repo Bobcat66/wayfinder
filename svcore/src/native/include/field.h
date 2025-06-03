@@ -7,7 +7,6 @@
 #pragma once
 
 #include <gtsam/geometry/Pose3.h>
-#include <frc/apriltag/AprilTagFieldLayout.h>
 
 namespace svcore {
 
