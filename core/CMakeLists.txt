@@ -2,10 +2,8 @@ cmake_minimum_required(VERSION 3.25)
 project(wayfinder-core CXX C)
 
 find_package(OpenCV REQUIRED)
-find_package(GTSAM REQUIRED)
 
-set(CPP_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/native/cpp)
-file(GLOB_RECURSE SOURCES CONFIGURE_DEPENDS src/native/*.cpp)
+file(GLOB_RECURSE SOURCES CONFIGURE_DEPENDS src/native/cpp/*.cpp)
 add_executable(wayfinder ${SOURCES})
 
 target_link_libraries(wayfinder PRIVATE
@@ -14,10 +12,9 @@ target_link_libraries(wayfinder PRIVATE
     ntcore
     cscore
 ) # In deployment builds, this will link statically, and there will be a cmake build type variable set in the top-level CMake file. I'll put that in eventually. For now, this is nowhere near deployment
-
+file(GLOB_RECURSE HEADERS CONFIGURE_DEPENDS src/native/include/*.h)
 target_include_directories(wayfinder
     PRIVATE
     ${OpenCV_INCLUDE_DIRS}
-    ${GTSAM_INCLUDE_DIR}
     ${CMAKE_CURRENT_SOURCE_DIR}/src/native/include
 )
