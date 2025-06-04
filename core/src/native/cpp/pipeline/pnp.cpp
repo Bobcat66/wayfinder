@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: BSD-3-Clause
 
 #include "pipeline/pnp.h"
-#include "utils/cv2gtsam_interface.h"
-#include "utils/gtsam_geometry.h"
+#include "utils/interface/cv2gtsam.h"
+#include "utils/geometry.h"
 
 #include <opencv2/calib3d.hpp>
 #include <gtsam/geometry/Pose3.h>

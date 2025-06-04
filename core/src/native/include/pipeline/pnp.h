@@ -5,8 +5,6 @@
 
 #include "types.h"
 #include "field.h"
-#include "utils/cv2gtsam_interface.h"
-#include "utils/gtsam_geometry.h"
 
 namespace wf {
 
