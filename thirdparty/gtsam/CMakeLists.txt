@@ -13,7 +13,6 @@ set(GTSAM_BUILD_CONVENIENCE_LIBRARIES OFF)
 set(GTSAM_BUILD_TESTS OFF)
 set(GTSAM_BUILD_EXAMPLES_ALWAYS OFF)
 set(GTSAM_BUILD_DOCS OFF)
-set(GTSAM_CMAKE_BUILD_TYPE Release)
 fetchcontent_declare(
     gtsam
     GIT_REPOSITORY    https://github.com/borglab/gtsam.git
