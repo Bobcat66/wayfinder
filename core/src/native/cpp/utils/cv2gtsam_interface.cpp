@@ -5,7 +5,6 @@
 
 #include <opencv2/calib3d.hpp>
 
-
 static const cv::Mat cvToGtsamRotTransform = (cv::Mat_<double>(3,3) << 
       0,  0,  1,
      -1,  0,  0,
