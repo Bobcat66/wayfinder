@@ -12,7 +12,7 @@ target_link_libraries(wayfinder PRIVATE
     ntcore
     cscore
 ) # In deployment builds, this will link statically, and there will be a cmake build type variable set in the top-level CMake file. I'll put that in eventually. For now, this is nowhere near deployment
-file(GLOB_RECURSE HEADERS CONFIGURE_DEPENDS src/native/include/*.h)
+
 target_include_directories(wayfinder
     PRIVATE
     ${OpenCV_INCLUDE_DIRS}
