@@ -14,7 +14,7 @@ namespace wf {
     // Applies a translation to a pose in the pose frame
     inline gtsam::Pose3 translatePoseFrame(const gtsam::Pose3& pose, const gtsam::Point3& translation) {
         // Transform the pose by the frame
-        gtsam::Point3 transform = gtsam::Pose3(gtsam::Rot3::Identity(), translation);
+        gtsam::Pose3 transform = gtsam::Pose3(gtsam::Rot3::Identity(), translation);
         return pose.compose(transform);
     }
 
@@ -25,7 +25,7 @@ namespace wf {
 
     inline gtsam::Pose2 translatePoseFrame(const gtsam::Pose2& pose, const gtsam::Point2& translation) {
         // Transform the pose by the frame
-        gtsam::Point2 transform = gtsam::Pose2(gtsam::Rot2::Identity(), translation);
+        gtsam::Pose2 transform = gtsam::Pose2(gtsam::Rot2::Identity(), translation);
         return pose.compose(transform);
     }
 

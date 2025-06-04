@@ -2,8 +2,8 @@
 // SPDX-License-Identifier: BSD-3-Clause
 
 #include "utils/geometry.h"
-#include "utils/interface/cv2wpilib.h"
-#include "utils/interface/cv2gtsam.h"
+#include "utils/coordinates.h"
+#include "utils/cv2gtsam_interface.h"
 
 #include <opencv2/calib3d.hpp>
 

@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: BSD-3-Clause
 
 #include "pipeline/pnp.h"
-#include "utils/interface/cv2gtsam.h"
+#include "utils/cv2gtsam_interface.h"
 #include "utils/geometry.h"
 
 #include <opencv2/calib3d.hpp>
@@ -75,6 +75,7 @@ std::optional<AprilTagPoseObservation> solvePnP(
             fieldLayout.tagSize / 2.0 
         );
         for (const auto& cornerPose : cornerPoses) {
+            
             objectPoints.emplace_back(cornerPose.x(), cornerPose.y(), cornerPose.z());
         }
     }

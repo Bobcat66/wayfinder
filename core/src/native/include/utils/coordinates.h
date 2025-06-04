@@ -6,6 +6,7 @@
 #include <Eigen/Core>
 #include <gtsam/geometry/Pose3.h>
 #include <opencv2/core/mat.hpp>
+#include <cassert>
 
 
 static const Eigen::Matrix3d T_cw = (Eigen::Matrix<double,3,3,Eigen::RowMajor>() << 
@@ -28,7 +29,15 @@ namespace wf {
 
     // Changes the frame of an OpenCV vector to WPILib's coordinate system,
     inline Eigen::Vector3d cvToWPILibCoords(const Eigen::Vector3d& t_c) {
-        Eigen::Vector3d t_w = t_c * T_cw; // Apply the basis transformation to the translation vector
+        Eigen::Vector3d t_w = T_cw * t_c; // Apply the basis transformation to the translation vector
         return t_w;
+    }
+
+    // Changes the frame of an OpenCV matrix to WPILib's coordinate system,
+    template<typename Scalar_,int Rows_>
+    inline Eigen::Matrix<Scalar_,Rows_,3> WPILibToCvCoords(const Eigen::Matrix<Scalar_,Rows_,3>& M_w) {
+        assert(M_w.cols() == 3); // Ensure the input matrix has 3 columns
+        Eigen::Matrix<Scalar_,Rows_,3> M_c = T_wc * M_w; // Apply the basis transformation to the rotation matrix
+        return M_c;
     }
 }
