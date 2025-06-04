@@ -6,7 +6,6 @@
 #include "types.h"
 
 #include <string>
-#include <map>
 #include <memory>
 
 namespace wf {

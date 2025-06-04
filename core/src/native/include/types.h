@@ -10,6 +10,7 @@
 #include <stdint.h>
 #include <vector>
 #include <optional>
+#include <map>
 
 namespace wf {
 
