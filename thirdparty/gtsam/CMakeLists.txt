@@ -19,4 +19,4 @@ fetchcontent_declare(
     GIT_REPOSITORY    https://github.com/borglab/gtsam.git
     GIT_TAG           4.3a0
 )
-fetchcontent_makeavailable(apriltag)
+fetchcontent_makeavailable(gtsam)
