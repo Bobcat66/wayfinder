@@ -6,7 +6,9 @@ include(FetchContent)
 
 set(FETCHCONTENT_BASE_DIR ${CMAKE_BINARY_DIR}/_deps)
 
-# Fetch WPILib
+# Fetch WPILib, configure it to only build CSCore and NTCore and their dependencies.
+# This is a minimal configuration that allows us to use the WPILib networking and camera libraries without building the entire WPILib suite.
+# This is needed because WPIMath uses a custom version of Eigen which is not compatible with the Eigen version used by GTSAM.
 set(WITH_WPIMATH OFF)
 set(WITH_WPILIB OFF)
 set(WITH_TESTS OFF)
@@ -15,7 +17,7 @@ set(WITH_SIMULATION_MODULES OFF)
 fetchcontent_declare(
     allwpilib
     GIT_REPOSITORY    https://github.com/wpilibsuite/allwpilib.git
-    GIT_TAG           1efaaefd78a634599b522fc2420c7283722554fb
+    GIT_TAG           v2025.3.2
 )
 fetchcontent_makeavailable(allwpilib)
 
