@@ -13,7 +13,7 @@
 
 using namespace wf;
 
-std::optional<AprilTagPoseObservation> solvePnP(
+std::optional<CameraPoseObservation> solvePnP(
     const std::vector<AprilTagObservation>& observations,
     const FieldLayout& fieldLayout,
     const CameraIntrinsics& cameraIntrinsics,
@@ -110,12 +110,13 @@ std::optional<AprilTagPoseObservation> solvePnP(
             const gtsam::Pose3 fieldPose1_w = fieldToTagPose.compose(tagPose0_w.inverse());
             double error0 = reprojectionErrors[0];
             double error1 = reprojectionErrors[1];
-            return AprilTagPoseObservation{
-                .tagsUsed = tagsUsed,
-                .fieldPose0 = fieldPose0_w,
-                .error0 = error0,
-                .fieldPose1 = std::optional<gtsam::Pose3>(fieldPose1_w),
-                .error1 = std::optional<double>(error1)
+            return std::optional<CameraPoseObservation>{
+                std::in_place,
+                tagsUsed,
+                fieldPose0_w,
+                error0,
+                std::optional<gtsam::Pose3>(fieldPose1_w),
+                std::optional<double>(error1)
             }; // Todo: Optimize this construction
         }
     } else {

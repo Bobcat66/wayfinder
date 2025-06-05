@@ -21,7 +21,7 @@ namespace wf {
         double hammingDistance;
     };
 
-    struct RelativeTagPoseObservation {
+    struct AprilTagPoseObservation {
         int id;
         std::vector<cv::Point2d> corners;
         double decisionMargin;
@@ -33,12 +33,18 @@ namespace wf {
     };
     // Observation of a single AprilTag's pose relative to the camera
 
-    struct AprilTagPoseObservation {
+    struct CameraPoseObservation {
         std::vector<int> tagsUsed;
         gtsam::Pose3 fieldPose0;
         double error0;
         std::optional<gtsam::Pose3> fieldPose1;
         std::optional<double> error1;
+        CameraPoseObservation(
+            const std::vector<int>& tags, 
+            const gtsam::Pose3& pose0, double err0, 
+            const std::optional<gtsam::Pose3>& pose1 = std::nullopt, 
+            const std::optional<double>& err1 = std::nullopt
+        ) : tagsUsed(tags), fieldPose0(pose0), error0(err0), fieldPose1(pose1), error1(err1) {}
     };
 
     struct PoseSLAMEstimate {
