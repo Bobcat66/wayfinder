@@ -22,7 +22,7 @@ namespace wf {
         cv::cv2eigen(CV_M, Eigen_M);
 
         // Create GTSAM Rot3 from Eigen matrix
-        return M;
+        return Eigen_M;
     }
 
     inline Eigen::Vector3d cvVec3ToEigen_64F(const cv::Mat& CV_v) {
