@@ -3,6 +3,7 @@
 
 #include "pipeline/pnp.h"
 #include "utils/cv2gtsam_interface.h"
+#include "utils/coordinates.h"
 #include "utils/geometry.h"
 
 #include <opencv2/calib3d.hpp>
@@ -48,34 +49,35 @@ std::optional<AprilTagPoseObservation> solvePnP(
         for (const auto& corner : obs.corners) {
             imagePoints.push_back(corner);
         }
+        gtsam::Pose3 tagPose_c = WPILibPose3ToCvPose3(tag->pose);
         // Emplacing object points based on the tag's pose
         // TODO: Check the offsets
+        // These are in OpenCV coordinates
         cornerPoses[0] = translatePoseFrame(
-            tag->pose, 
-            0.0,
-            fieldLayout.tagSize / 2.0, 
-            fieldLayout.tagSize / 2.0 
+            tagPose_c, 
+            -fieldLayout.tagSize / 2.0,
+            -fieldLayout.tagSize / 2.0, 
+            0.0 
         );
         cornerPoses[1] = translatePoseFrame(
-            tag->pose, 
-            0.0,
+            tagPose_c, 
             fieldLayout.tagSize / 2.0, 
-            -fieldLayout.tagSize / 2.0 
+            -fieldLayout.tagSize / 2.0,
+            0.0
         );
         cornerPoses[2] = translatePoseFrame(
-            tag->pose, 
-            0.0,
-            -fieldLayout.tagSize / 2.0, 
-            -fieldLayout.tagSize / 2.0 
+            tagPose_c, 
+            fieldLayout.tagSize / 2.0, 
+            fieldLayout.tagSize / 2.0,
+            0.0
         );
         cornerPoses[3] = translatePoseFrame(
-            tag->pose, 
-            0.0,
+            tagPose_c,
             -fieldLayout.tagSize / 2.0, 
-            fieldLayout.tagSize / 2.0 
+            fieldLayout.tagSize / 2.0,
+            0.0
         );
         for (const auto& cornerPose : cornerPoses) {
-            
             objectPoints.emplace_back(cornerPose.x(), cornerPose.y(), cornerPose.z());
         }
     }
@@ -101,8 +103,20 @@ std::optional<AprilTagPoseObservation> solvePnP(
         if (!success) {
             return std::nullopt; // Failed to solve PnP
         } else {
-            
-            return std::nullopt; // Placeholder for single tag case
+            const gtsam::Pose3 fieldToTagPose = tagPoses[0];
+            const gtsam::Pose3 tagPose0_w = cvPoseVecsToWPILibPose3(rvecs[0], tvecs[0]);
+            const gtsam::Pose3 tagPose1_w = cvPoseVecsToWPILibPose3(rvecs[1], tvecs[1]);
+            const gtsam::Pose3 fieldPose0_w = fieldToTagPose.compose(tagPose0_w.inverse());
+            const gtsam::Pose3 fieldPose1_w = fieldToTagPose.compose(tagPose0_w.inverse());
+            double error0 = reprojectionErrors[0];
+            double error1 = reprojectionErrors[1];
+            return AprilTagPoseObservation{
+                .tagsUsed = tagsUsed,
+                .fieldPose0 = fieldPose0_w,
+                .error0 = error0,
+                .fieldPose1 = std::optional<gtsam::Pose3>(fieldPose1_w),
+                .error1 = std::optional<double>(error1)
+            }; // Todo: Optimize this construction
         }
     } else {
         return std::nullopt; // Placeholder for multiple tags case

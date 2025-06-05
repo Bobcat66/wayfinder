@@ -48,7 +48,7 @@ namespace wf {
     }
 
     // Converts OpenCV rotation vector and translation vector to GTSAM Pose3, also changes the coordinate system from OpenCV to WPIlib
-    inline gtsam::Pose3 cvPoseToWPILibPose(const cv::Mat& CV_r_c, const cv::Mat& CV_t_c){
+    inline gtsam::Pose3 cvPoseVecsToWPILibPose3(const cv::Mat& CV_r_c, const cv::Mat& CV_t_c){
         // Convert OpenCV rotation vector to rotation matrix
         cv::Mat CV_R_c;
         cv::Rodrigues(CV_r_c, CV_R_c);
@@ -63,5 +63,37 @@ namespace wf {
             gtsam::Rot3(R_w),
             gtsam::Point3(t_w)
         ); 
+    }
+
+    // Converts GTSAM Pose3 in WPILib coordinates to OpenCV rotation vector and translation vector, also changes the coordinate system from WPILib to OpenCV
+    inline void WPILibPose3ToCvPoseVecs(const gtsam::Pose3& pose_w, cv::Mat& CV_r_c, cv::Mat& CV_t_c) {
+        // Convert the pose to Eigen
+        Eigen::Matrix3d R_w = pose_w.rotation().matrix();
+        Eigen::Vector3d t_w = pose_w.translation().vector();
+
+        // Convert the rotation matrix and translation vector to OpenCV coordinates
+        Eigen::Matrix3d R_c = WPILibToCvCoords(R_w);
+        Eigen::Vector3d t_c = WPILibToCvCoords(t_w);
+
+        // Convert the rotation matrix to a rotation vector
+        cv::Rodrigues(Eigen::Map<const cv::Mat>(R_c.data(), 3, 3), CV_r_c);
+        
+        // Convert the translation vector to OpenCV format
+        CV_t_c = cv::Mat(t_c.data(), true).reshape(1, 3); // Reshape to 1x3
+    }
+
+    inline gtsam::Pose3 WPILibPose3ToCvPose3(const gtsam::Pose3& pose_w) {
+        // Convert the pose to Eigen
+        Eigen::Matrix3d R_w = pose_w.rotation().matrix();
+        Eigen::Vector3d t_w = pose_w.translation().vector();
+
+        // Convert the rotation matrix and translation vector to OpenCV coordinates
+        Eigen::Matrix3d R_c = WPILibToCvCoords(R_w);
+        Eigen::Vector3d t_c = WPILibToCvCoords(t_w);
+
+        return gtsam::Pose3(
+            gtsam::Rot3(R_c),
+            gtsam::Point3(t_c)
+        ); // TODO: See if this can be made more eefficient with move semantics or something, IDK
     }
 }
