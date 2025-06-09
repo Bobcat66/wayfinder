@@ -5,20 +5,21 @@
 
 #include "types.h"
 #include "field.h"
+#include <optional>
 
 namespace wf {
 
-    RelativeTagPoseObservation solvePnP_TagRelative(
-        const AprilTagObservation& observations,
-        const FieldLayout& fieldLayout,
-        const CameraIntrinsics& cameraIntrinsics
-    );
-
-    AprilTagPoseObservation solvePnP(
+    std::optional<AprilTagPoseObservation> solvePnP(
         const std::vector<AprilTagObservation>& observations,
         const FieldLayout& fieldLayout,
         const CameraIntrinsics& cameraIntrinsics,
         const std::vector<int>& ignoreList
+    );
+
+    std::optional<TagRelativePoseObservation> solvePnP_TagRelative(
+        const AprilTagObservation& observation,
+        const FieldLayout& fieldLayout,
+        const CameraIntrinsics& cameraIntrinsics
     );
 
 }

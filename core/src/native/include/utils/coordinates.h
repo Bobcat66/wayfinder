@@ -9,6 +9,7 @@
 #include <gtsam/geometry/Pose3.h>
 #include <opencv2/core/mat.hpp>
 #include <opencv2/calib3d.hpp>
+#include <opencv2/core/eigen.hpp>
 #include <cassert>
 
 // Transforms OpenCV basis vectors to WPILib basis vectors
@@ -69,23 +70,25 @@ namespace wf {
     inline void WPILibPose3ToCvPoseVecs(const gtsam::Pose3& pose_w, cv::Mat& CV_r_c, cv::Mat& CV_t_c) {
         // Convert the pose to Eigen
         Eigen::Matrix3d R_w = pose_w.rotation().matrix();
-        Eigen::Vector3d t_w = pose_w.translation().vector();
+        Eigen::Vector3d t_w = pose_w.translation().matrix();
 
         // Convert the rotation matrix and translation vector to OpenCV coordinates
         Eigen::Matrix3d R_c = WPILibToCvCoords(R_w);
         Eigen::Vector3d t_c = WPILibToCvCoords(t_w);
 
         // Convert the rotation matrix to a rotation vector
-        cv::Rodrigues(Eigen::Map<const cv::Mat>(R_c.data(), 3, 3), CV_r_c);
+        cv::Mat CV_R_c;
+        cv::eigen2cv(R_c,CV_R_c);
+        cv::Rodrigues(EigenMatrix3dToCV(R_c), CV_r_c);
         
         // Convert the translation vector to OpenCV format
-        CV_t_c = cv::Mat(t_c.data(), true).reshape(1, 3); // Reshape to 1x3
+        cv::eigen2cv(t_c,CV_t_c);
     }
 
     inline gtsam::Pose3 WPILibPose3ToCvPose3(const gtsam::Pose3& pose_w) {
         // Convert the pose to Eigen
         Eigen::Matrix3d R_w = pose_w.rotation().matrix();
-        Eigen::Vector3d t_w = pose_w.translation().vector();
+        Eigen::Vector3d t_w = pose_w.translation().matrix();
 
         // Convert the rotation matrix and translation vector to OpenCV coordinates
         Eigen::Matrix3d R_c = WPILibToCvCoords(R_w);

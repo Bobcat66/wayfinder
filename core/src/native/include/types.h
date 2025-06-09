@@ -21,25 +21,35 @@ namespace wf {
         double hammingDistance;
     };
 
-    struct AprilTagPoseObservation {
+    struct TagRelativePoseObservation {
         int id;
         std::vector<cv::Point2d> corners;
         double decisionMargin;
         double hammingDistance;
-        gtsam::Pose3 tagPose0;
+        cv::Mat rvec0;
+        cv::Mat tvec0;
         double error0;
-        gtsam::Pose3 tagPose1;
+        cv::Mat rvec1;
+        cv::Mat tvec1;
         double error1;
+        TagRelativePoseObservation(
+            int _id,
+            const std::vector<cv::Point2d>& _corners,
+            double _decisionMargin, double _hammingDistance,
+            const cv::Mat& _rvec0, const cv::Mat& _tvec0, double _error0,
+            const cv::Mat& _rvec1, const cv::Mat& _tvec1, double _error1
+        ) : id(_id), corners(_corners), decisionMargin(_decisionMargin), hammingDistance(_hammingDistance),
+        rvec0(_rvec0), tvec0(_tvec0), error0(_error0), rvec1(_rvec1), tvec1(_tvec1), error1(_error1) {}
     };
     // Observation of a single AprilTag's pose relative to the camera
 
-    struct CameraPoseObservation {
+    struct AprilTagPoseObservation {
         std::vector<int> tagsUsed;
         gtsam::Pose3 fieldPose0;
         double error0;
         std::optional<gtsam::Pose3> fieldPose1;
         std::optional<double> error1;
-        CameraPoseObservation(
+        AprilTagPoseObservation(
             const std::vector<int>& tags, 
             const gtsam::Pose3& pose0, double err0, 
             const std::optional<gtsam::Pose3>& pose1 = std::nullopt, 

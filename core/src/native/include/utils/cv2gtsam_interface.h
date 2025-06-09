@@ -12,6 +12,7 @@
 #include <opencv2/core.hpp>
 #include <Eigen/Core>
 
+// For some type safety, and convenience. Maybe remove?
 namespace wf {
 
     // Converts OpenCV 3x3 Mat of type CV_64F to an Eigen 3d matrix
@@ -32,6 +33,22 @@ namespace wf {
         cv::cv2eigen(CV_v, Eigen_v);
 
         return Eigen_v;
+    }
+
+    inline cv::Mat EigenVector3dToCV(const Eigen::Vector3d Eigen_v) {
+        cv::Mat CV_v;
+
+        cv::eigen2cv(Eigen_v,CV_v);
+        
+        return CV_v;
+    }
+
+    inline cv::Mat EigenMatrix3dToCV(const Eigen::Matrix3d Eigen_M) {
+        cv::Mat CV_M;
+
+        cv::eigen2cv(Eigen_M,CV_M);
+        
+        return CV_M;
     }
 
 }

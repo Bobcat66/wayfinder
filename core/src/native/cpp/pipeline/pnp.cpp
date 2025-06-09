@@ -9,11 +9,70 @@
 #include <opencv2/calib3d.hpp>
 #include <gtsam/geometry/Pose3.h>
 #include <array>
-#include <optional>
 
 using namespace wf;
 
-std::optional<CameraPoseObservation> solvePnP(
+std::optional<TagRelativePoseObservation> solvePnP_TagRelative(
+    const AprilTagObservation& observation,
+    const FieldLayout& fieldLayout,
+    const CameraIntrinsics& cameraIntrinsics
+) {
+    std::vector<cv::Mat> rvecs, tvecs;
+    std::vector<double> reprojectionErrors;
+    std::vector<cv::Point2d> imagePoints;
+    std::vector<cv::Point3d> objectPoints;
+    for (const auto& corner : observation.corners) {
+        imagePoints.push_back(corner);
+    }
+    objectPoints.emplace_back(
+        -fieldLayout.tagSize / 2.0,
+        fieldLayout.tagSize / 2.0, 
+        0.0
+    );
+    objectPoints.emplace_back(
+        fieldLayout.tagSize / 2.0, 
+        fieldLayout.tagSize / 2.0,
+        0.0
+    );
+    objectPoints.emplace_back(
+        fieldLayout.tagSize / 2.0, 
+        -fieldLayout.tagSize / 2.0,
+        0.0
+    );
+    objectPoints.emplace_back(
+        -fieldLayout.tagSize / 2.0, 
+        -fieldLayout.tagSize / 2.0,
+        0.0
+    );
+    bool success = cv::solvePnPGeneric(
+        objectPoints,
+        imagePoints,
+        cameraIntrinsics.cameraMatrix,
+        cameraIntrinsics.distCoeffs,
+        rvecs,
+        tvecs,
+        false,
+        cv::SOLVEPNP_IPPE_SQUARE,
+        cv::noArray(),
+        cv::noArray(),
+        reprojectionErrors
+    );
+    if (!success) {
+        return std::nullopt; //PnP was not successful, give up
+    } else {
+        return std::optional<TagRelativePoseObservation>{
+            std::in_place,
+            observation.id,
+            observation.corners,
+            observation.decisionMargin,
+            observation.hammingDistance,
+            rvecs[0], tvecs[0], reprojectionErrors[0],
+            rvecs[1], tvecs[1], reprojectionErrors[1]
+        };
+    }
+}
+
+std::optional<AprilTagPoseObservation> solvePnP(
     const std::vector<AprilTagObservation>& observations,
     const FieldLayout& fieldLayout,
     const CameraIntrinsics& cameraIntrinsics,
@@ -87,6 +146,27 @@ std::optional<CameraPoseObservation> solvePnP(
     } else if (tagsUsed.size() == 1) {
         std::vector<cv::Mat> rvecs, tvecs;
         std::vector<double> reprojectionErrors;
+        objectPoints.clear();
+        objectPoints.emplace_back(
+            -fieldLayout.tagSize / 2.0,
+            fieldLayout.tagSize / 2.0, 
+            0.0
+        );
+        objectPoints.emplace_back(
+            fieldLayout.tagSize / 2.0, 
+            fieldLayout.tagSize / 2.0,
+            0.0
+        );
+        objectPoints.emplace_back(
+            fieldLayout.tagSize / 2.0, 
+            -fieldLayout.tagSize / 2.0,
+            0.0
+        );
+        objectPoints.emplace_back(
+            -fieldLayout.tagSize / 2.0, 
+            -fieldLayout.tagSize / 2.0,
+            0.0
+        );
         bool success = cv::solvePnPGeneric(
             objectPoints,
             imagePoints,
@@ -101,7 +181,7 @@ std::optional<CameraPoseObservation> solvePnP(
             reprojectionErrors
         );
         if (!success) {
-            return std::nullopt; // Failed to solve PnP
+            return std::nullopt; // Failed to solve PnP, give up
         } else {
             const gtsam::Pose3 fieldToTagPose = tagPoses[0];
             const gtsam::Pose3 tagPose0_w = cvPoseVecsToWPILibPose3(rvecs[0], tvecs[0]);
@@ -110,7 +190,7 @@ std::optional<CameraPoseObservation> solvePnP(
             const gtsam::Pose3 fieldPose1_w = fieldToTagPose.compose(tagPose0_w.inverse());
             double error0 = reprojectionErrors[0];
             double error1 = reprojectionErrors[1];
-            return std::optional<CameraPoseObservation>{
+            return std::optional<AprilTagPoseObservation>{
                 std::in_place,
                 tagsUsed,
                 fieldPose0_w,
@@ -120,6 +200,34 @@ std::optional<CameraPoseObservation> solvePnP(
             }; // Todo: Optimize this construction
         }
     } else {
+        cv::Mat tvec, rvec;
+        std::vector<double> reprojectionErrors;
+        bool success = cv::solvePnPGeneric(
+            objectPoints,
+            imagePoints,
+            cameraIntrinsics.cameraMatrix,
+            cameraIntrinsics.distCoeffs,
+            rvec,
+            tvec,
+            false,
+            cv::SOLVEPNP_SQPNP,
+            cv::noArray(),
+            cv::noArray(),
+            reprojectionErrors
+        );
+        if (!success) {
+            return std::nullopt; // Failed to solve PnP, give up
+        } else {
+            return std::optional<AprilTagPoseObservation>{
+                std::in_place,
+                tagsUsed,
+                cvPoseVecsToWPILibPose3(rvec,tvec),
+                reprojectionErrors[0],
+                std::nullopt,
+                std::nullopt
+            };
+        }
+        
         return std::nullopt; // Placeholder for multiple tags case
     }
 };
