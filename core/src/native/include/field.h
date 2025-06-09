@@ -10,6 +10,19 @@
 
 namespace wf {
 
+    struct FieldLayout {
+        std::map<int, AprilTag> aprilTags;
+        std::string tagFamily;
+        double tagSize;
+        const AprilTag* getTag(int id) const {
+            auto it = aprilTags.find(id);
+            if (it != aprilTags.end()) {
+                return &it->second;
+            }
+            return nullptr; // Not found
+        }
+    };
+
     class FieldLoader {
         public:
         void loadFieldLayoutJSON(const std::string& filename);

@@ -4,6 +4,7 @@
 #include "types.h"
 #include "field.h"
 #include "pipeline/pnp.h"
+#include "pipeline/apriltag_detector.h"
 #include "utils/cv2gtsam_interface.h"
 
 #include <iostream>

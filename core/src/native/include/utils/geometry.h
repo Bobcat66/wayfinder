@@ -10,6 +10,8 @@
 #include <Eigen/Core>
 
 namespace wf {
+
+    constexpr double pi = 3.1415926535897932;
     
     // Applies a translation to a pose in the pose frame
     inline gtsam::Pose3 translatePoseFrame(const gtsam::Pose3& pose, const gtsam::Point3& translation) {

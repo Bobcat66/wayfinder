@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: BSD-3-Clause
 
 #include "pipeline/pnp.h"
+
 #include "utils/cv2gtsam_interface.h"
 #include "utils/coordinates.h"
 #include "utils/geometry.h"

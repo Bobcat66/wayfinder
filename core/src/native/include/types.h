@@ -68,22 +68,9 @@ namespace wf {
         cv::Mat distCoeffs;
     };
 
-        struct AprilTag {
+    struct AprilTag {
         int id;
         gtsam::Pose3 pose;
-    };
-
-    struct FieldLayout {
-        std::map<int, AprilTag> aprilTags;
-        std::string tagFamily;
-        double tagSize;
-        const AprilTag* getTag(int id) const {
-            auto it = aprilTags.find(id);
-            if (it != aprilTags.end()) {
-                return &it->second;
-            }
-            return nullptr; // Not found
-        }
     };
 
 }
