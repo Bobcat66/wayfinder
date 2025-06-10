@@ -3,7 +3,7 @@
 
 #include "pipeline/ApriltagDetector.h"
 
-#include <map>
+#include <apriltag.h>
 #include <tag36h11.h>
 #include <tag36h10.h>
 #include <tag25h9.h>
@@ -14,7 +14,12 @@
 #include <tagStandard41h12.h>
 #include <tagStandard52h13.h>
 
+#include <map>
+
 using namespace wf;
+
+typedef apriltag_family_t* (*apriltag_family_creator)();
+typedef void (*apriltag_family_destructor)(apriltag_family_t*);
 
 static constexpr apriltag_family_creator family_creators[] = {
     tag36h11_create,
@@ -46,15 +51,22 @@ ApriltagDetector::ApriltagDetector() {
 
 ApriltagDetector::~ApriltagDetector() {
     // Destroy apriltag detector
-    apriltag_detector_destroy(cdetector);
+    apriltag_detector_destroy(
+        static_cast<apriltag_detector_t*>(cdetector)
+    );
 
     // Destroy apriltag families
-    for (auto& [key,value] : apriltagFamilies){
-        family_destructors[key](value);
+    for (auto& [familyID,family] : apriltagFamilies){
+        family_destructors[familyID](
+            static_cast<apriltag_family_t*>(family)
+        );
     }
 }
 
 void ApriltagDetector::addFamily(TagFamily familyID){
     auto family = family_creators[familyID]();
-    apriltag_detector_add_family(cdetector,family);
+    apriltag_detector_add_family(
+        static_cast<apriltag_detector_t*>(cdetector),
+        static_cast<apriltag_family_t*>(family)
+    );
 }

@@ -7,7 +7,6 @@
 #include "utils/geometry.h"
 #include "utils/units.h"
 
-#include <apriltag.h>
 #include <gtsam/geometry/Rot2.h>
 
 #include <unordered_map>
@@ -15,9 +14,6 @@
 #include <cmath>
 
 namespace wf {
-
-    typedef apriltag_family_t* (*apriltag_family_creator)();
-    typedef void (*apriltag_family_destructor)(apriltag_family_t*);
     
     enum TagFamily {
         TAG_36H11,
@@ -53,8 +49,8 @@ namespace wf {
     class ApriltagDetector {
         const QuadThresholdParams qtps;
         const ApriltagDetectorConfig config;
-        std::unordered_map<int,apriltag_family_t*> apriltagFamilies;
-        apriltag_detector_t* cdetector;
+        std::unordered_map<int,void*> apriltagFamilies;
+        void* cdetector;
 
         public:
         ApriltagDetector();

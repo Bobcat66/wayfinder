@@ -18,20 +18,20 @@ target_link_libraries(wayfindercore
     PUBLIC
     gtsam
     ${OpenCV_LIBS}
+    spdlog::spdlog
     PRIVATE
     ${GSTREAMER_LIBRARIES}
     ${GSTREAMER_BASE_LIBRARIES}
     ntcore
     cscore
     apriltag
-    spdlog::spdlog
 ) # In deployment builds, this will link statically, and there will be a cmake build type variable set in the top-level CMake file. I'll put that in eventually. For now, this is nowhere near deployment
 
 target_include_directories(wayfindercore 
     PUBLIC 
     ${CMAKE_CURRENT_SOURCE_DIR}/src/main/native/include
-    PRIVATE
     ${OpenCV_INCLUDE_DIRS}
+    PRIVATE
     ${GSTREAMER_INCLUDE_DIRS}
     ${GSTREAMER_BASE_INCLUDE_DIRS}
 )
@@ -44,7 +44,12 @@ file(GLOB_RECURSE TESTSOURCES
 )
 add_executable(run_tests ${TESTSOURCES})
 
-target_link_libraries(run_tests wayfindercore)
+target_link_libraries(run_tests 
+    PRIVATE
+    GTest::gtest
+    GTest::gtest_main
+    wayfindercore
+)
 
 
 
