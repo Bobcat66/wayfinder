@@ -13,11 +13,14 @@ add_library(wayfindercore ${CORESOURCES})
 pkg_check_modules(GSTREAMER REQUIRED gstreamer-1.0)
 pkg_check_modules(GSTREAMER_BASE REQUIRED gstreamer-base-1.0)
 
-target_link_libraries(wayfindercore PRIVATE
+# TODO: Figure out the library interface
+target_link_libraries(wayfindercore 
+    PUBLIC
+    gtsam
     ${OpenCV_LIBS}
+    PRIVATE
     ${GSTREAMER_LIBRARIES}
     ${GSTREAMER_BASE_LIBRARIES}
-    gtsam
     ntcore
     cscore
     apriltag
