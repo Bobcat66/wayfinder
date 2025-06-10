@@ -4,7 +4,7 @@ project(wayfinder-core CXX C)
 find_package(OpenCV REQUIRED)
 find_package(PkgConfig REQUIRED)
 
-file(GLOB_RECURSE SOURCES CONFIGURE_DEPENDS src/native/cpp/*.cpp)
+file(GLOB_RECURSE SOURCES CONFIGURE_DEPENDS src/main/native/cpp/*.cpp)
 add_executable(wayfinder ${SOURCES})
 
 pkg_check_modules(GSTREAMER REQUIRED gstreamer-1.0)
@@ -26,5 +26,5 @@ target_include_directories(wayfinder
     ${OpenCV_INCLUDE_DIRS}
     ${GSTREAMER_INCLUDE_DIRS}
     ${GSTREAMER_BASE_INCLUDE_DIRS}
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/native/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/main/native/include
 )

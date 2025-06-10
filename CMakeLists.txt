@@ -12,6 +12,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 # Ideally none of the dependencies would bundle any dependencies that are used by other dependencies, and everything
 # would rely on a shared set of libraries bundled with this project
 
+add_subdirectory(thirdparty/googletest)
 add_subdirectory(thirdparty/apriltag)
 add_subdirectory(thirdparty/wpilib)
 add_subdirectory(thirdparty/gtsam)
