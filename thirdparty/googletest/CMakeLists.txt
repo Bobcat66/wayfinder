@@ -10,4 +10,6 @@ fetchcontent_declare(
     GIT_REPOSITORY    https://github.com/google/googletest
     GIT_TAG           v1.17.0
 )
+
+set(INSTALL_GTEST OFF CACHE BOOL "" FORCE)
 fetchcontent_makeavailable(googletest)
