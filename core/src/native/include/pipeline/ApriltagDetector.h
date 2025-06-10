@@ -5,10 +5,12 @@
 
 #include "types.h"
 #include "utils/geometry.h"
+#include "utils/units.h"
 
 #include <apriltag.h>
 #include <gtsam/geometry/Rot2.h>
 
+#include <unordered_map>
 #include <vector>
 #include <cmath>
 
@@ -26,7 +28,8 @@ namespace wf {
         TAG_CIRCLE_49H12,
         TAG_CUSTOM_48H12,
         TAG_STANDARD_41H12,
-        TAG_STANDARD_52H13
+        TAG_STANDARD_52H13,
+        N_FAMILIES // Number of defined families
     };
 
     struct ApriltagDetectorConfig {
@@ -41,19 +44,22 @@ namespace wf {
     struct QuadThresholdParams {
         int minClusterPixels = 300;
         int maxNumMaxima = 10;
-        double criticalAngleRads = pi/4.0;
+        double criticalAngleRads = degreesToRadians(45.0);
         float maxLineFitMSE = 10.0f;
         int minWhiteBlackDiff = 5;
         bool deglitch = false;
     };
 
     class ApriltagDetector {
-        public:
+        const QuadThresholdParams qtps;
+        const ApriltagDetectorConfig config;
+        std::unordered_map<int,apriltag_family_t*> apriltagFamilies;
+        apriltag_detector_t* cdetector;
 
+        public:
         ApriltagDetector();
-        ApriltagDetector(TagFamily family);
         ~ApriltagDetector();
-        std::vector<AprilTagObservation> Detect(const cv::Mat& image) const;
+        std::vector<AprilTagObservation> detect(const cv::Mat& image) const;
         const QuadThresholdParams& getQuadThresholdParams() const;
         const ApriltagDetectorConfig& getConfig() const;
         void setQuadThresholdParams(const QuadThresholdParams);
@@ -61,10 +67,6 @@ namespace wf {
         void addFamily(TagFamily family);
         void removeFamily(TagFamily family);
         void clearFamilies();
-
-        private:
-        std::map<int,apriltag_family_t*> apriltagFamilies;
-        apriltag_detector_t* impl;
     };
 
 

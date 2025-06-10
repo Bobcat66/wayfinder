@@ -7,11 +7,17 @@
 
 #include <string>
 #include <memory>
+#include <unordered_map>
 
 namespace wf {
 
+    struct AprilTag {
+        int id;
+        gtsam::Pose3 pose;
+    };
+
     struct FieldLayout {
-        std::map<int, AprilTag> aprilTags;
+        std::unordered_map<int, AprilTag> aprilTags;
         std::string tagFamily;
         double tagSize;
         const AprilTag* getTag(int id) const {

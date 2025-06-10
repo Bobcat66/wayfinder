@@ -10,7 +10,6 @@
 #include <stdint.h>
 #include <vector>
 #include <optional>
-#include <map>
 
 namespace wf {
 
@@ -66,11 +65,6 @@ namespace wf {
     struct CameraIntrinsics {
         cv::Mat cameraMatrix;
         cv::Mat distCoeffs;
-    };
-
-    struct AprilTag {
-        int id;
-        gtsam::Pose3 pose;
     };
 
 }

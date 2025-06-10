@@ -4,9 +4,12 @@
 #include "types.h"
 #include "field.h"
 #include "pipeline/pnp.h"
-#include "pipeline/apriltag_detector.h"
+#include "pipeline/ApriltagDetector.h"
 #include "utils/cv2gtsam_interface.h"
 
+#include <spdlog/spdlog.h>
+
+#include <cstdlib>
 #include <iostream>
 
 int main() {
