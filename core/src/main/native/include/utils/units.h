@@ -5,12 +5,27 @@
 
 #include "utils/geometry.h"
 
+#include <concepts>
+
 namespace wf {
-    constexpr inline double metersToInches(double meters) {return meters * 39.3701;}
-    
-    constexpr inline double inchesToInches(double inches) {return inches / 39.3701;}
 
-    constexpr inline double degreesToRadians(double degrees) {return degrees * (pi / 180);}
+    template <std::floating_point T>
+    constexpr inline T metersToInches(T meters) {
+        return meters * 10000 / 254;
+    }
 
-    constexpr inline double radiansToDegrees(double radians) {return radians * (180 / pi);}
+    template <std::floating_point T>
+    constexpr inline T inchesToMeters(T inches) {
+        return inches * 254 / 10000;
+    }
+
+    template <std::floating_point T>
+    constexpr inline T degreesToRadians(T degrees) {
+        return degrees * static_cast<T>(constants::pi) / static_cast<T>(180);
+    }
+
+    template <std::floating_point T>
+    constexpr inline T radiansToDegrees(T radians) {
+        return radians * static_cast<T>(180) / static_cast<T>(constants::pi);
+    }
 }

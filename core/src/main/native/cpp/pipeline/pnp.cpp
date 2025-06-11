@@ -143,7 +143,7 @@ std::optional<AprilTagPoseObservation> solvePnP(
     }
 
     if (tagsUsed.size() == 0) {
-        return std::nullopt;
+        return std::nullopt; // No tags found, give up
     } else if (tagsUsed.size() == 1) {
         std::vector<cv::Mat> rvecs, tvecs;
         std::vector<double> reprojectionErrors;
@@ -191,14 +191,14 @@ std::optional<AprilTagPoseObservation> solvePnP(
             const gtsam::Pose3 fieldPose1_w = fieldToTagPose.compose(tagPose0_w.inverse());
             double error0 = reprojectionErrors[0];
             double error1 = reprojectionErrors[1];
-            return std::optional<AprilTagPoseObservation>{
+            return std::optional<AprilTagPoseObservation>(
                 std::in_place,
-                tagsUsed,
-                fieldPose0_w,
+                std::move(tagsUsed),
+                std::move(fieldPose0_w),
                 error0,
-                std::optional<gtsam::Pose3>(fieldPose1_w),
-                std::optional<double>(error1)
-            }; // Todo: Optimize this construction
+                std::move(fieldPose1_w),
+                error1
+            ); // Todo: Optimize this construction
         }
     } else {
         cv::Mat tvec, rvec;
@@ -219,14 +219,12 @@ std::optional<AprilTagPoseObservation> solvePnP(
         if (!success) {
             return std::nullopt; // Failed to solve PnP, give up
         } else {
-            return std::optional<AprilTagPoseObservation>{
+            return std::optional<AprilTagPoseObservation>(
                 std::in_place,
-                tagsUsed,
+                std::move(tagsUsed),
                 cvPoseVecsToWPILibPose3(rvec,tvec),
-                reprojectionErrors[0],
-                std::nullopt,
-                std::nullopt
-            };
+                reprojectionErrors[0]
+            );
         }
         
         return std::nullopt; // Placeholder for multiple tags case

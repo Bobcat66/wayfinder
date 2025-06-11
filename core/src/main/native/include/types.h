@@ -13,14 +13,7 @@
 
 namespace wf {
 
-    struct AprilTagObservation {
-        int id;
-        std::vector<cv::Point2d> corners;
-        double decisionMargin;
-        double hammingDistance;
-    };
-
-    struct TagRelativePoseObservation {
+    struct AprilTagPoseObservation {
         int id;
         std::vector<cv::Point2d> corners;
         double decisionMargin;
@@ -31,35 +24,50 @@ namespace wf {
         cv::Mat rvec1;
         cv::Mat tvec1;
         double error1;
-        TagRelativePoseObservation(
-            int _id,
-            const std::vector<cv::Point2d>& _corners,
-            double _decisionMargin, double _hammingDistance,
-            const cv::Mat& _rvec0, const cv::Mat& _tvec0, double _error0,
-            const cv::Mat& _rvec1, const cv::Mat& _tvec1, double _error1
-        ) : id(_id), corners(_corners), decisionMargin(_decisionMargin), hammingDistance(_hammingDistance),
-        rvec0(_rvec0), tvec0(_tvec0), error0(_error0), rvec1(_rvec1), tvec1(_tvec1), error1(_error1) {}
+        AprilTagPoseObservation(
+            int id_,
+            const std::vector<cv::Point2d> corners_,
+            double decisionMargin_, double hammingDistance_,
+            cv::Mat rvec0_, cv::Mat tvec0_, double error0_,
+            cv::Mat rvec1_, cv::Mat tvec1_, double error1_
+        ) : id(id_), 
+            corners(std::move(corners_)), 
+            decisionMargin(decisionMargin_), hammingDistance(hammingDistance_),
+            rvec0(std::move(rvec0_)), tvec0(std::move(tvec0_)), error0(error0_), 
+            rvec1(std::move(rvec1_)), tvec1(std::move(tvec1_)), error1(error1_) {}
     };
     // Observation of a single AprilTag's pose relative to the camera
 
-    struct AprilTagPoseObservation {
+    struct CameraPoseObservation {
         std::vector<int> tagsUsed;
         gtsam::Pose3 fieldPose0;
         double error0;
         std::optional<gtsam::Pose3> fieldPose1;
         std::optional<double> error1;
-        AprilTagPoseObservation(
-            const std::vector<int>& tags, 
-            const gtsam::Pose3& pose0, double err0, 
-            const std::optional<gtsam::Pose3>& pose1 = std::nullopt, 
-            const std::optional<double>& err1 = std::nullopt
-        ) : tagsUsed(tags), fieldPose0(pose0), error0(err0), fieldPose1(pose1), error1(err1) {}
+
+        CameraPoseObservation(
+            std::vector<int> tagsUsed_, 
+            gtsam::Pose3 fieldPose0_, double error0_
+        ) : tagsUsed(std::move(tagsUsed_)), 
+            fieldPose0(std::move(fieldPose0_)), error0(error0_), 
+            fieldPose1(std::nullopt), error1(std::nullopt) {}
+        CameraPoseObservation(
+            std::vector<int> tagsUsed_, 
+            gtsam::Pose3 fieldPose0_, double error0_,
+            gtsam::Pose3 fieldPose1_, double error1_
+        ) : tagsUsed(std::move(tagsUsed_)), 
+            fieldPose0(std::move(fieldPose0_)), error0(error0_), 
+            fieldPose1(std::make_optional(std::move(fieldPose1_))), error1(std::make_optional(error1_)) {}
     };
 
-    struct PoseSLAMEstimate {
+    struct SE2PoseSLAMEstimate {
         gtsam::Pose2 pose;
         double residual;
         uint64_t timestamp;
+
+        SE2PoseSLAMEstimate(
+            gtsam::Pose2 pose_, double residual, uint64_t timestamp
+        ) : pose(std::move(pose_)), residual(residual), timestamp(timestamp) {}
     };
 
     struct CameraIntrinsics {

@@ -4,14 +4,14 @@
 #pragma once
 
 #include "types.h"
-#include "field.h"
+#include "apriltag/apriltag_field.h"
 
 #include <optional>
 
 namespace wf {
 
     std::optional<AprilTagPoseObservation> solvePnP(
-        const std::vector<AprilTagObservation>& observations,
+        const std::vector<AprilTagDetection>& observations,
         const FieldLayout& fieldLayout,
         const CameraIntrinsics& cameraIntrinsics,
         const std::vector<int>& ignoreList

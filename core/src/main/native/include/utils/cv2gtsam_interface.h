@@ -17,7 +17,7 @@ namespace wf {
 
     // Converts OpenCV 3x3 Mat of type CV_64F to an Eigen 3d matrix
     inline Eigen::Matrix3d cvMat3ToEigen_64F(const cv::Mat& CV_M) {
-        CV_Assert(CV_M.rows == 3 && CV_M.cols == 3 && CV_M.type() == CV_64F);
+        assert(CV_M.rows == 3 && CV_M.cols == 3 && CV_M.type() == CV_64F);
 
         Eigen::Matrix3d Eigen_M;
         cv::cv2eigen(CV_M, Eigen_M);
@@ -27,7 +27,7 @@ namespace wf {
     }
 
     inline Eigen::Vector3d cvVec3ToEigen_64F(const cv::Mat& CV_v) {
-        CV_Assert(CV_v.rows == 1 && CV_v.cols == 3 && CV_v.type() == CV_64F);
+        assert(CV_v.rows == 1 && CV_v.cols == 3 && CV_v.type() == CV_64F);
 
         Eigen::Vector3d Eigen_v;
         cv::cv2eigen(CV_v, Eigen_v);
