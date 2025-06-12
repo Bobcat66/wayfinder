@@ -1,7 +1,7 @@
 // Copyright (c) 2025 Jesse Kane
 // SPDX-License-Identifier: BSD-3-Clause
 
-#include "fiducial/ApriltagDetector.h"
+#include "wfcore/fiducial/ApriltagDetector.h"
 
 #include <apriltag.h>
 #include <tag36h11.h>

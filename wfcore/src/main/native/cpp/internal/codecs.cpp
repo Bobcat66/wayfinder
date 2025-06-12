@@ -16,7 +16,7 @@ namespace wf::impl {
 
     // TODO: make hardware-accelerated codecs the default
     GstElement* getDefaultDecoder(Compression compression, const std::string& instanceName){
-        return getUniversalEncoder(compression, instanceName);
+        return getSoftwareDecoder(compression, instanceName);
     }
 
     // this returns a fallback software decoder, if possible
@@ -26,42 +26,42 @@ namespace wf::impl {
                 return nullptr;
             case Compression::MJPEG:
                 if (!findGSTPlugin("jpeg")) {
-                    logger->warning("jpeg plugin not installed, MJPEG software codecs will NOT be available");
+                    logger->warn("jpeg plugin not installed, MJPEG software codecs will NOT be available");
                 }
                 return getGSTElement("jpegdec",instanceName);
             case Compression::H264:
                 if (!findGSTPlugin("openh264")) {
-                    logger->warning("openh264 plugin not installed, H264 software codecs will NOT be available");
+                    logger->warn("openh264 plugin not installed, H264 software codecs will NOT be available");
                 }
                 return wf::impl::getGSTElement("openh264dec",instanceName);
             case Compression::H265:
                 if (!wf::impl::findGSTPlugin("de265")) {
-                    logger->warning("de265 plugin not installed, H265 software decoding will NOT be available");
+                    logger->warn("de265 plugin not installed, H265 software decoding will NOT be available");
                 }
                 return nullptr;
         }
     }
     // TODO: make hardware-accelerated codecs the default
     GstElement* getDefaultEncoder(Compression compression, const std::string& instanceName) {
-        return getUniversalEncoder(compression); // Placeholder
+        return getSoftwareEncoder(compression, instanceName); // Placeholder
     }
 
-    GstElement getSoftwareEncoder(Compression compression, const std::string& instanceName) {
+    GstElement* getSoftwareEncoder(Compression compression, const std::string& instanceName) {
         switch (compression) {
             case Compression::RAW:
                 return nullptr;
             case Compression::MJPEG:
                 if (wf::impl::findGSTPlugin("jpeg")) {
-                    logger->warning("jpeg plugin not installed, MJPEG software codecs will NOT be available");
+                    logger->warn("jpeg plugin not installed, MJPEG software codecs will NOT be available");
                 }
                 return wf::impl::getGSTElement("jpegenc",instanceName);
             case Compression::H264:
                 if (!wf::impl::findGSTPlugin("openh264")) {
-                    logger->warning("openh264 plugin not installed, H264 software codecs will NOT be available");
+                    logger->warn("openh264 plugin not installed, H264 software codecs will NOT be available");
                 }
                 return wf::impl::getGSTElement("openh264enc",instanceName);
             case Compression::H265:
-                logger->warning("H265 software encoders are not available");
+                logger->warn("H265 software encoders are not available");
                 return nullptr;
         }
     }

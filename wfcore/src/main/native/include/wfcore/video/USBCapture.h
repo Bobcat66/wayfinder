@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include <wfcore/video/codecs.h>
+#include "wfcore/video/formats.h"
 #include <opencv2/core/mat.hpp>
 
 #include <cstdint>

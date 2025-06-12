@@ -9,8 +9,6 @@
 #include <gst/gstplugin.h>
 #include <gst/gstelementfactory.h>
 
-#define GST_ELEMENT(x) static_cast<GstElement*>(x)
-
 namespace wf::impl {
     // Populates the plugin blocklist
     void populateGSTBlocklist();
@@ -26,7 +24,7 @@ namespace wf::impl {
     inline bool loadGSTPlugin(const gchar* pluginName) {return loadGSTPlugin(std::string(pluginName));}
 
     // Fetches a GST element, returns a nullptr if the operation fails
-    GstElement* getGSTElement(const std::string& elementType, std::string& instanceName);
+    GstElement* getGSTElement(const std::string& elementType, const std::string& instanceName);
     inline GstElement* getGSTElement(const gchar* elementType, const gchar* instanceName) {
         return getGSTElement(std::string(elementType),std::string(instanceName));
     }
