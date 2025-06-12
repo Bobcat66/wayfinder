@@ -23,8 +23,8 @@ target_link_libraries(wfcore
     ntcore
     cscore
     apriltag
-    SHARED ${GSTREAMER_LIBRARIES}
-    SHARED ${GSTREAMER_BASE_LIBRARIES} #GStreamer, being LGPL-licensed, cannot be statically linked to this project
+    ${GSTREAMER_LIBRARIES}
+    ${GSTREAMER_BASE_LIBRARIES} #GStreamer, being LGPL-licensed, cannot be statically linked to this project
 ) # In deployment builds, this will link statically, and there will be a cmake build type variable set in the top-level CMake file. I'll put that in eventually. For now, this is nowhere near deployment
 
 target_include_directories(wfcore 

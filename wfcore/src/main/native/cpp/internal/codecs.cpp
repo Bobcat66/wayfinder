@@ -40,7 +40,9 @@ namespace wf::impl {
                 }
                 return nullptr;
         }
+        return nullptr; // This shouldn't ever be called, but just in case
     }
+
     // TODO: make hardware-accelerated codecs the default
     GstElement* getDefaultEncoder(Compression compression, const std::string& instanceName) {
         return getSoftwareEncoder(compression, instanceName); // Placeholder
@@ -64,6 +66,7 @@ namespace wf::impl {
                 logger->warn("H265 software encoders are not available");
                 return nullptr;
         }
+        return nullptr; // This should never be called, but just in case
     }
 
 }

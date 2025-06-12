@@ -1,7 +1,7 @@
 #include <iostream>
 
-#include "utils/coordinates.h"
-#include "utils/units.h"
+#include "wfcore/utils/coordinates.h"
+#include "wfcore/utils/units.h"
 
 #include <gtest/gtest.h>
 
