@@ -3,10 +3,10 @@
 
 #pragma once
 
-#include "types.h"
-#include "apriltag/AprilTagDetection.h"
-#include "utils/geometry.h"
-#include "utils/units.h"
+#include "wfcore/types.h"
+#include "wfcore/fiducial/ApriltagDetection.h"
+#include "wfcore/utils/geometry.h"
+#include "wfcore/utils/units.h"
 
 #include <gtsam/geometry/Rot2.h>
 
@@ -17,7 +17,7 @@
 
 namespace wf {
 
-    struct AprilTagDetectorConfig {
+    struct ApriltagDetectorConfig {
         int numThreads = 1;
         float quadDecimate = 2.0f;
         float quadSigma = 0.0f;
@@ -35,27 +35,27 @@ namespace wf {
         bool deglitch = false;
     };
 
-    class AprilTagDetector {
+    class ApriltagDetector {
         std::vector<void*> families;
         void* cdetector;
 
         public:
-        AprilTagDetector();
-        ~AprilTagDetector();
-        std::vector<AprilTagDetection> detect(int width, int height, int stride, uint8_t* buf) const;
-        std::vector<AprilTagDetection> detect(int width, int height, uint8_t* buf) const {
+        ApriltagDetector();
+        ~ApriltagDetector();
+        std::vector<ApriltagDetection> detect(int width, int height, int stride, uint8_t* buf) const;
+        std::vector<ApriltagDetection> detect(int width, int height, uint8_t* buf) const {
             return detect(width,height,width,buf);
         }
-        std::vector<AprilTagDetection> detect(const cv::Mat& im) const {
+        std::vector<ApriltagDetection> detect(const cv::Mat& im) const {
             assert(im.type() == CV_8UC1); // Asserts that the matrix contains an 8 bit grayscale image
             return detect(im.rows,im.cols,im.step[0],im.data);
         };
         // Returns a copy of the QTPs
         QuadThresholdParams getQuadThresholdParams() const;
         // Returns a copy of the configs
-        AprilTagDetectorConfig getConfig() const;
+        ApriltagDetectorConfig getConfig() const;
         void setQuadThresholdParams(const QuadThresholdParams);
-        void setConfig(const AprilTagDetectorConfig);
+        void setConfig(const ApriltagDetectorConfig);
         void addFamily(const std::string& familyName);
         void removeFamily(const std::string& familyName);
         void clearFamilies();

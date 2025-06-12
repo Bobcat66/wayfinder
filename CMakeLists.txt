@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.25)
-project(wayfinder-all)
+project(wayfinder VERSION 0.0.1)
 
 set(CMAKE_CXX_STANDARD 20)
 
@@ -17,5 +17,5 @@ add_subdirectory(thirdparty/apriltag)
 add_subdirectory(thirdparty/wpilib)
 add_subdirectory(thirdparty/gtsam)
 add_subdirectory(thirdparty/spdlog)
-add_subdirectory(core)
+add_subdirectory(wfcore)
 

@@ -17,11 +17,12 @@ namespace wf {
 
     // Aliases for logging levels, meant to simplify instantiation of loggers for related subsystems
     namespace LogGroup {
-        constexpr spdlog::level::level_enum General  = spdlog::level::info;
-        constexpr spdlog::level::level_enum Pipeline = spdlog::level::info;
-        constexpr spdlog::level::level_enum Network  = spdlog::level::warn;
-        constexpr spdlog::level::level_enum Config   = spdlog::level::debug;
-        constexpr spdlog::level::level_enum System   = spdlog::level::debug;
+        constexpr spdlog::level::level_enum General   = spdlog::level::info;
+        constexpr spdlog::level::level_enum Pipeline  = spdlog::level::info;
+        constexpr spdlog::level::level_enum Gstreamer = spdlog::level::info;
+        constexpr spdlog::level::level_enum Network   = spdlog::level::warn;
+        constexpr spdlog::level::level_enum Config    = spdlog::level::debug;
+        constexpr spdlog::level::level_enum System    = spdlog::level::debug;
     } // TODO: tune these logging levels
 
     class LoggerManager {

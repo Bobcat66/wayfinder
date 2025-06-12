@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "utils/cv2gtsam_interface.h"
+#include "wfcore/utils/cv2gtsam_interface.h"
 
 #include <Eigen/Core>
 #include <gtsam/geometry/Pose3.h>

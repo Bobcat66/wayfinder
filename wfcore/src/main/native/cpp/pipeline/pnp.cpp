@@ -1,11 +1,11 @@
 // Copyright (c) 2025 Jesse Kane
 // SPDX-License-Identifier: BSD-3-Clause
 
-#include "pipeline/pnp.h"
+#include "wfcore/pipeline/pnp.h"
 
-#include "utils/cv2gtsam_interface.h"
-#include "utils/coordinates.h"
-#include "utils/geometry.h"
+#include "wfcore/utils/cv2gtsam_interface.h"
+#include "wfcore/utils/coordinates.h"
+#include "wfcore/utils/geometry.h"
 
 #include <opencv2/calib3d.hpp>
 #include <gtsam/geometry/Pose3.h>
@@ -13,16 +13,16 @@
 
 using namespace wf;
 
-std::optional<TagRelativePoseObservation> solvePnP_TagRelative(
-    const AprilTagObservation& observation,
-    const FieldLayout& fieldLayout,
+std::optional<ApriltagRelativePoseObservation> solvePNPApriltagRelative(
+    const ApriltagDetection& detection,
+    const ApriltagField& fieldLayout,
     const CameraIntrinsics& cameraIntrinsics
 ) {
     std::vector<cv::Mat> rvecs, tvecs;
     std::vector<double> reprojectionErrors;
     std::vector<cv::Point2d> imagePoints;
     std::vector<cv::Point3d> objectPoints;
-    for (const auto& corner : observation.corners) {
+    for (const auto& corner : detection.corners) {
         imagePoints.push_back(corner);
     }
     objectPoints.emplace_back(
@@ -61,21 +61,21 @@ std::optional<TagRelativePoseObservation> solvePnP_TagRelative(
     if (!success) {
         return std::nullopt; //PnP was not successful, give up
     } else {
-        return std::optional<TagRelativePoseObservation>{
+        return std::optional<ApriltagRelativePoseObservation>{
             std::in_place,
-            observation.id,
-            observation.corners,
-            observation.decisionMargin,
-            observation.hammingDistance,
+            detection.id,
+            detection.corners,
+            detection.decisionMargin,
+            detection.hammingDistance,
             rvecs[0], tvecs[0], reprojectionErrors[0],
             rvecs[1], tvecs[1], reprojectionErrors[1]
         };
     }
 }
 
-std::optional<AprilTagPoseObservation> solvePnP(
-    const std::vector<AprilTagObservation>& observations,
-    const FieldLayout& fieldLayout,
+std::optional<ApriltagFieldPoseObservation> solvePNPApriltag(
+    const std::vector<ApriltagDetection>& detections,
+    const ApriltagField& fieldLayout,
     const CameraIntrinsics& cameraIntrinsics,
     const std::vector<int>& ignoreList
 ) {
@@ -83,30 +83,30 @@ std::optional<AprilTagPoseObservation> solvePnP(
     // consider switching to an arena allocator or some other memory management strategy.
     // IDT it'll cause issues, but it's worth noting
     std::vector<cv::Point3d> objectPoints;
-    objectPoints.reserve(observations.size() * 4);
+    objectPoints.reserve(detections.size() * 4);
     std::vector<cv::Point2d> imagePoints;
-    imagePoints.reserve(observations.size() * 4);
+    imagePoints.reserve(detections.size() * 4);
     std::vector<int> tagsUsed;
-    tagsUsed.reserve(observations.size());
+    tagsUsed.reserve(detections.size());
     std::vector<gtsam::Pose3> tagPoses;
-    tagPoses.reserve(observations.size());
+    tagPoses.reserve(detections.size());
     // We might be reserving more space than we need, as tags could be filtered out by the ignoreList.
 
     // Memory pool for storing corner poses
     std::array<gtsam::Pose3, 4> cornerPoses;
-    for (const auto& obs : observations) {
-        if (std::find(ignoreList.begin(), ignoreList.end(), obs.id) != ignoreList.end()) {
+    for (const auto& det : detections) {
+        if (std::find(ignoreList.begin(), ignoreList.end(), det.id) != ignoreList.end()) {
             continue; // Skip ignored tags
         }
-        const wf::AprilTag* tag = fieldLayout.getTag(obs.id);
+        const wf::Apriltag* tag = fieldLayout.getTag(det.id);
         if (!tag) {
             continue; // Skip tags without a pose
         }
-        tagsUsed.push_back(obs.id);
+        tagsUsed.push_back(det.id);
         tagPoses.push_back(tag->pose);
 
         // Assuming the tag corners are in the order: top-left, top-right, bottom-right, bottom-left
-        for (const auto& corner : obs.corners) {
+        for (const auto& corner : det.corners) {
             imagePoints.push_back(corner);
         }
         gtsam::Pose3 tagPose_c = WPILibPose3ToCvPose3(tag->pose);
@@ -191,14 +191,14 @@ std::optional<AprilTagPoseObservation> solvePnP(
             const gtsam::Pose3 fieldPose1_w = fieldToTagPose.compose(tagPose0_w.inverse());
             double error0 = reprojectionErrors[0];
             double error1 = reprojectionErrors[1];
-            return std::optional<AprilTagPoseObservation>(
+            return std::optional<ApriltagFieldPoseObservation>{
                 std::in_place,
                 std::move(tagsUsed),
                 std::move(fieldPose0_w),
                 error0,
                 std::move(fieldPose1_w),
                 error1
-            ); // Todo: Optimize this construction
+            }; // Todo: Optimize this construction
         }
     } else {
         cv::Mat tvec, rvec;
@@ -219,7 +219,7 @@ std::optional<AprilTagPoseObservation> solvePnP(
         if (!success) {
             return std::nullopt; // Failed to solve PnP, give up
         } else {
-            return std::optional<AprilTagPoseObservation>(
+            return std::optional<ApriltagFieldPoseObservation>(
                 std::in_place,
                 std::move(tagsUsed),
                 cvPoseVecsToWPILibPose3(rvec,tvec),

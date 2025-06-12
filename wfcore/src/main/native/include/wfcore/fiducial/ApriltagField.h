@@ -11,7 +11,7 @@
 
 namespace wf {
 
-    class AprilTag {
+    class Apriltag {
         public:
         int id;
         gtsam::Pose3 pose;
@@ -19,13 +19,13 @@ namespace wf {
         std::string dumpJSON() const;
     };
 
-    // AprilTag Layout for an FRC Field
-    class AprilTagField {
+    // Apriltag Layout for an FRC Field
+    class ApriltagField {
         public:
-        std::unordered_map<int, AprilTag> aprilTags;
+        std::unordered_map<int, Apriltag> aprilTags;
         std::string tagFamily;
         double tagSize;
-        const AprilTag* getTag(int id) const;/* {
+        const Apriltag* getTag(int id) const;/* {
             auto it = aprilTags.find(id);
             if (it != aprilTags.end()) {
                 return &it->second;
@@ -36,8 +36,8 @@ namespace wf {
         // dumps JSON string
         std::string dumpJSON() const;
 
-        static AprilTagField loadFromJSONFile(const std::string& filepath);
-        static AprilTagField loadFromJSONString(const std::string& json);
+        static ApriltagField loadFromJSONFile(const std::string& filepath);
+        static ApriltagField loadFromJSONString(const std::string& json);
     };
 
 }

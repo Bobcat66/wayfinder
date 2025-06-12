@@ -7,13 +7,13 @@
 
 namespace wf {
 
-    struct AprilTagDetection {
+    struct ApriltagDetection {
         int id;
         std::vector<cv::Point2d> corners;
         double decisionMargin;
         double hammingDistance;
         std::string family;
-        AprilTagDetection(
+        ApriltagDetection(
             int id_, 
             std::vector<cv::Point2d> corners_, 
             double decisionMargin_, double hammingDistance_,
