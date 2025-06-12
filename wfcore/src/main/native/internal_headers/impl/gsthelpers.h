@@ -9,6 +9,8 @@
 #include <gst/gstplugin.h>
 #include <gst/gstelementfactory.h>
 
+#define GST_ELEMENT(x) static_cast<GstElement*>(x)
+
 namespace wf::impl {
     // Populates the plugin blocklist
     void populateGSTBlocklist();
