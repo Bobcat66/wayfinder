@@ -13,7 +13,7 @@
 
 namespace wf {
 
-    using logger_ptr = std::shared_ptr<spdlog::logger>;
+    using loggerPtr = std::shared_ptr<spdlog::logger>;
 
     // Aliases for logging levels, meant to simplify instantiation of loggers for related subsystems
     namespace LogGroup {
@@ -32,9 +32,9 @@ namespace wf {
             return instance;
         }
 
-        logger_ptr getLogger(const std::string& name, const spdlog::level::level_enum logLevel);
+        loggerPtr getLogger(const std::string& name, const spdlog::level::level_enum logLevel);
         
-        logger_ptr getLogger(const std::string& name);
+        loggerPtr getLogger(const std::string& name);
 
         private:
         static LoggerManager* instancePtr;
