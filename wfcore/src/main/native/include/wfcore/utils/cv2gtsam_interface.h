@@ -7,9 +7,8 @@
 #include <gtsam/geometry/Pose2.h>
 #include <gtsam/geometry/Point3.h>
 #include <gtsam/geometry/Point2.h>
-#include <opencv2/core/types.hpp>
-#include <opencv2/core/eigen.hpp>
 #include <opencv2/core.hpp>
+#include <opencv2/core/eigen.hpp>
 #include <Eigen/Core>
 
 // For some type safety, and convenience. Maybe remove?

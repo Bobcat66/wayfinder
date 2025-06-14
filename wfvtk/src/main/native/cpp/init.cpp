@@ -2,5 +2,5 @@
 #include <gst/gst.h>
 
 void wfvtk::init() {
-    gst_init();
+    gst_init(nullptr,nullptr);
 }

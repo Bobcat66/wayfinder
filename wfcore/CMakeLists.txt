@@ -3,6 +3,8 @@ project(wayfinder-core CXX C)
 
 set(CMAKE_CXX_STANDARD 20)
 
+find_package(OpenCV REQUIRED)
+
 file(GLOB_RECURSE CORESOURCES 
     CONFIGURE_DEPENDS 
     "${CMAKE_CURRENT_SOURCE_DIR}/src/main/native/cpp/*.cpp"
