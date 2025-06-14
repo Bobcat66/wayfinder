@@ -26,5 +26,6 @@ namespace wf {
         virtual ~InferenceEngine() = default;
         virtual bool loadModel(const std::string& modelPath) = 0;
         virtual std::vector<ObjectDetection> infer(const Frame& input) = 0;
+        virtual std::string modelFormat() const = 0; // the model file extension expected by this inference engine
     };
 }
