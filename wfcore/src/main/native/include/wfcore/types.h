@@ -1,5 +1,5 @@
 // Copyright (c) 2025 Jesse Kane
-// SPDX-License-Identifier: BSD-3-Clause
+// SPDX-License-Identifier: GPL-3.0-or-later
 
 #pragma once
 
@@ -7,7 +7,7 @@
 #include <opencv2/core/types.hpp>
 #include <gtsam/geometry/Pose3.h>
 #include <gtsam/geometry/Pose2.h>
-#include <stdint.h>
+#include <cstdint>
 #include <vector>
 #include <optional>
 

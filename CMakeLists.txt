@@ -17,5 +17,6 @@ add_subdirectory(thirdparty/apriltag)
 add_subdirectory(thirdparty/wpilib)
 add_subdirectory(thirdparty/gtsam)
 add_subdirectory(thirdparty/spdlog)
+add_subdirectory(wfvtk)
 add_subdirectory(wfcore)
 
