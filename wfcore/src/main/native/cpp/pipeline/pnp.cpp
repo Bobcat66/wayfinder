@@ -17,7 +17,7 @@ namespace wf {
         const ApriltagDetection& detection,
         const ApriltagField& fieldLayout,
         const CameraIntrinsics& cameraIntrinsics
-    ) {
+    ) noexcept {
         std::vector<cv::Mat> rvecs, tvecs;
         std::vector<double> reprojectionErrors;
         std::vector<cv::Point2d> imagePoints;
@@ -77,8 +77,8 @@ namespace wf {
         const std::vector<ApriltagDetection>& detections,
         const ApriltagField& fieldLayout,
         const CameraIntrinsics& cameraIntrinsics,
-        const std::vector<int>& ignoreList
-    ) {
+        const std::unordered_set<int>& ignoreList
+    ) noexcept {
         // TODO: Profile and check if this causes unacceptable heap churn, if so,
         // consider switching to an arena allocator or some other memory management strategy.
         // IDT it'll cause issues, but it's worth noting
@@ -230,7 +230,7 @@ namespace wf {
             return std::nullopt; // Placeholder for multiple tags case
         }
     };
-    
+
 }
 
 

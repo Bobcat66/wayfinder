@@ -5,11 +5,26 @@
 
 #include "wfcore/pipeline/Pipeline.h"
 #include "wfcore/fiducial/ApriltagDetector.h"
+#include "wfcore/fiducial/ApriltagField.h"
 
 namespace wf {
 
+    struct ApriltagPipelineConfiguration {
+        ApriltagDetectorConfig detConfig;
+        QuadThresholdParams detQTPs;
+        std::unordered_set<int> detectorExcludes;
+        std::unordered_set<int> SolvePNPExcludes; // Does not effect tag relative solvePNP
+        bool solveTagRelative; // Whether or not to solve tag relative
+    };
+
     class ApriltagPipeline : public Pipeline {
         public:
-        PipelineResult process(const cv::Mat& frame) const; // TODO, make this override explicit when an implementation exists
+        ApriltagPipeline(ApriltagPipelineConfiguration config_, CameraIntrinsics intrinsics_, ApriltagField field_);
+        [[nodiscard]] PipelineResult process(const Frame& frame) const noexcept override; // TODO, make this override explicit when an implementation exists
+        private:
+        ApriltagPipelineConfiguration config;
+        CameraIntrinsics intrinsics;
+        ApriltagField field;
+        ApriltagDetector detector;
     };
 }

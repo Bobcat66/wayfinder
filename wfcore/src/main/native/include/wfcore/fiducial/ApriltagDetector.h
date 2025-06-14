@@ -42,11 +42,11 @@ namespace wf {
         public:
         ApriltagDetector();
         ~ApriltagDetector();
-        std::vector<ApriltagDetection> detect(int width, int height, int stride, uint8_t* buf) const;
-        std::vector<ApriltagDetection> detect(int width, int height, uint8_t* buf) const {
+        [[nodiscard]] std::vector<ApriltagDetection> detect(int width, int height, int stride, uint8_t* buf) const noexcept;
+        [[nodiscard]] std::vector<ApriltagDetection> detect(int width, int height, uint8_t* buf) const noexcept {
             return detect(width,height,width,buf);
         }
-        std::vector<ApriltagDetection> detect(const cv::Mat& im) const {
+        [[nodiscard]] std::vector<ApriltagDetection> detect(const cv::Mat& im) const noexcept {
             assert(im.type() == CV_8UC1); // Asserts that the matrix contains an 8 bit grayscale image
             return detect(im.rows,im.cols,im.step[0],im.data);
         };

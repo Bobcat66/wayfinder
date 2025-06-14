@@ -11,8 +11,7 @@
 
 namespace wf {
 
-    class Apriltag {
-        public:
+    struct Apriltag {
         int id;
         gtsam::Pose3 pose;
 
@@ -20,18 +19,13 @@ namespace wf {
     };
 
     // Apriltag Layout for an FRC Field
-    class ApriltagField {
-        public:
+    struct ApriltagField {
         std::unordered_map<int, Apriltag> aprilTags;
         std::string tagFamily;
         double tagSize;
-        const Apriltag* getTag(int id) const;/* {
-            auto it = aprilTags.find(id);
-            if (it != aprilTags.end()) {
-                return &it->second;
-            }
-            return nullptr; // Not found
-        }*/
+        ApriltagField(std::unordered_map<int, Apriltag> aprilTags_, std::string tagFamily_, double tagSize_)
+        : aprilTags(std::move(aprilTags_)), tagFamily(std::move(tagFamily_)), tagSize(tagSize_) {}
+        const Apriltag* getTag(int id) const noexcept;
 
         // dumps JSON string
         std::string dumpJSON() const;

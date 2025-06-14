@@ -64,7 +64,7 @@ namespace wf {
         }
     }
 
-    std::vector<ApriltagDetection> ApriltagDetector::detect(int height, int width, int stride, uint8_t* buf) const {
+    std::vector<ApriltagDetection> ApriltagDetector::detect(int height, int width, int stride, uint8_t* buf) const noexcept {
         image_u8_t im = {height,width,stride,buf};
 
         // Perform detection, returns a zarray of results
