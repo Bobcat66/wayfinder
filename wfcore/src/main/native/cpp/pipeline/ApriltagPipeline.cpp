@@ -38,11 +38,11 @@ namespace wf {
             intrinsics,
             config.SolvePNPExcludes
         );
-        return PipelineResult(
-            PipelineType::Apriltag,
+        return PipelineResult::ApriltagPipelineResult(
             atagPoses,
-            
-        )
+            fieldPose,
+            frame
+        );
     }
 
 }

@@ -4,7 +4,6 @@
 #pragma once
 
 #include "wfcore/fiducial/ApriltagDetector.h"
-#include "wfcore/pipeline/Pipeline.h"
 #include <unordered_set>
 
 namespace wf {

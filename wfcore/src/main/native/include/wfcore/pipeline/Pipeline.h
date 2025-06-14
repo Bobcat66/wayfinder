@@ -8,6 +8,8 @@
 #include "wfcore/fiducial/ApriltagDetector.h"
 #include "wfcore/pipeline/pnp.h"
 #include "wfcore/inference/InferenceEngine.h"
+#include <vector>
+#include <optional>
 
 namespace wf {
     /* 
