@@ -11,6 +11,12 @@ file(GLOB_RECURSE CORESOURCES
 )
 add_library(wfcore ${CORESOURCES})
 
+if(WF_CV_OPENCL)
+    add_compile_definitions(__USE_CV_OPENCL)
+elseif(WF_CV_CUDA)
+    add_compile_definitions(__USE_CV_CUDA)
+endif()
+
 # TODO: Figure out the library interface
 target_link_libraries(wfcore 
     PUBLIC

@@ -20,7 +20,9 @@ namespace wf {
     class ApriltagPipeline : public Pipeline {
         public:
         ApriltagPipeline(ApriltagPipelineConfiguration config_, CameraIntrinsics intrinsics_, ApriltagField field_);
-        [[nodiscard]] PipelineResult process(const Frame& frame) const noexcept override; // TODO, make this override explicit when an implementation exists
+        [[nodiscard]] 
+        PipelineResult process(const Frame& frame) const noexcept override; // TODO, make this override explicit when an implementation exists
+        ~ApriltagPipeline() override = default;
         private:
         ApriltagPipelineConfiguration config;
         CameraIntrinsics intrinsics;

@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 #include "wfcore/fiducial/ApriltagDetector.h"
+#include "wfcore/logging/LoggerManager.h"
 
 #include <apriltag.h>
 #include <tag36h11.h>
@@ -21,6 +22,8 @@
 #define C_DETECTOR static_cast<apriltag_detector_t*>(cdetector)
 
 namespace wf {
+
+    static loggerPtr logger = LoggerManager::getInstance().getLogger("ApriltagDetector",LogGroup::General);
 
     typedef apriltag_family_t* (*apriltag_family_creator)();
     typedef void (*apriltag_family_destructor)(apriltag_family_t*);
@@ -59,8 +62,8 @@ namespace wf {
         apriltag_detector_destroy(C_DETECTOR);
 
         // Destroy apriltag families
-        for (auto family : families){
-            family_destructors.at({C_FAMILY(family)->name})(C_FAMILY(family));
+        for (auto& [familyName, family] : families){
+            family_destructors.at(familyName)(C_FAMILY(family));
         }
     }
 
@@ -120,9 +123,62 @@ namespace wf {
         };
     }
 
+    void ApriltagDetector::setQuadThresholdParams(const QuadThresholdParams params) {
+        auto& qtp = C_DETECTOR->qtp;
+        qtp.min_cluster_pixels = params.minClusterPixels;
+        qtp.max_nmaxima = params.maxNumMaxima;
+        qtp.critical_rad = params.criticalAngleRads;
+        qtp.cos_critical_rad = std::cos(params.criticalAngleRads);
+        qtp.max_line_fit_mse = params.maxLineFitMSE;
+        qtp.min_white_black_diff = params.minWhiteBlackDiff;
+        qtp.deglitch = params.deglitch;
+    }
+
+    void ApriltagDetector::setConfig(const ApriltagDetectorConfig config) {
+        C_DETECTOR->nthreads = config.numThreads;
+        C_DETECTOR->quad_decimate = config.quadDecimate;
+        C_DETECTOR->quad_sigma = config.quadSigma;
+        C_DETECTOR->refine_edges = config.refineEdges;
+        C_DETECTOR->decode_sharpening = config.decodeSharpening;
+        C_DETECTOR->debug = config.debug;
+    }
+
+    void ApriltagDetector::removeFamily(const std::string& familyName) {
+        auto it = families.find(familyName);
+        if (it == families.end()) {
+            return;
+        }
+        apriltag_detector_remove_family(
+            C_DETECTOR,
+            C_FAMILY(it->second)
+        );
+        family_destructors.at(familyName)(C_FAMILY(it->second));
+        families.erase(it);
+    }
+
     void ApriltagDetector::addFamily(const std::string& familyName){
-        auto family = family_creators.at(familyName)();
+        if (families.find(familyName) != families.end()){
+            return;
+        }
+        auto it = family_creators.find(familyName);
+        if (it == family_creators.end()) {
+            logger->warn("{} is not a valid apriltag family",familyName);
+            return;
+        }
+        auto family = (it->second)();
+        families[familyName] = family;
         apriltag_detector_add_family(C_DETECTOR,C_FAMILY(family));
+    }
+
+    void ApriltagDetector::clearFamilies() {
+        for (auto it = families.begin(); it != families.end();) {
+            apriltag_detector_remove_family(
+                C_DETECTOR,
+                C_FAMILY(it->second)
+            );
+            family_destructors.at(it->first)(C_FAMILY(it->second));
+            it = families.erase(it);
+        }
     }
 
 }

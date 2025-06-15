@@ -47,7 +47,7 @@ set(WF_IMG_BACKEND "cpu" CACHE STRING "Backend for hardware-accelerated image pr
 set_property(CACHE WF_IMG_BACKEND PROPERTY STRINGS ${ALLOWED_IMG_BACKENDS})
 
 set(WF_AI_BACKEND "cpu" CACHE STRING "Backend for hardware-accelerated AI inference")
-set_property(CACHE AI_BACKEND PROPERTY STRINGS ${ALLOWED_AI_BACKENDS})
+set_property(CACHE WF_AI_BACKEND PROPERTY STRINGS ${ALLOWED_AI_BACKENDS})
 
 option(WF_CV_OPENCL "Enable OpenCL acceleration in OpenCV" ON)
 option(WF_CV_CUDA "Enable CUDA acceleration in OpenCV" OFF)
@@ -72,14 +72,13 @@ endfunction()
 validate_backend("IMG_BACKEND" "${WF_IMG_BACKEND}" "ALLOWED_IMG_BACKENDS")
 validate_backend("AI_BACKEND" "${WF_AI_BACKEND}" "ALLOWED_AI_BACKENDS")
 
+find_package(GTest REQUIRED)
+
 add_subdirectory(thirdparty/googletest)
 add_subdirectory(thirdparty/apriltag)
 add_subdirectory(thirdparty/wpilib)
 add_subdirectory(thirdparty/gtsam)
 add_subdirectory(thirdparty/spdlog)
-if(WF_USE_ONNX)
-    add_subdirectory(thirdparty/onnxruntime)
-endif()
 add_subdirectory(wfvtk)
 add_subdirectory(wfcore)
 

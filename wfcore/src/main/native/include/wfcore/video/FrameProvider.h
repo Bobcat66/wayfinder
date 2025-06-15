@@ -13,6 +13,6 @@ namespace wf {
         virtual Frame getFrame() noexcept;
         virtual ~FrameProvider() noexcept = default;
         virtual const std::string& getName() const noexcept;
-        virtual FrameFormat getFrameFormat() const noexcept;
+        virtual StreamFormat getFrameFormat() const noexcept;
     };
 }

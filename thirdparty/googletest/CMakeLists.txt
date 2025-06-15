@@ -5,6 +5,7 @@ include(FetchContent)
 
 set(FETCHCONTENT_BASE_DIR ${CMAKE_BINARY_DIR}/_deps)
 
+set(GTEST_HAS_ABSL OFF)
 fetchcontent_declare(
     googletest
     GIT_REPOSITORY    https://github.com/google/googletest

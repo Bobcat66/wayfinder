@@ -10,22 +10,20 @@
 
 // A CSCore-based implementation of FrameProvider, which pulls frames from a USB camera 
 namespace wf {
-    class UsbCameraCS : FrameProvider {
+    class UsbCameraSinkCS : FrameProvider {
         public:
-        UsbCameraCS(
-            const std::string& name, 
-            const std::string& devPath,
-            FrameFormat format_
-        );
-        ~UsbCameraCS() override = default;
+        UsbCameraSinkCS(const std::string& name, const std::string& devPath);
+        ~UsbCameraSinkCS() override = default;
         Frame getFrame() noexcept override;
         const std::string& getName() const noexcept override;
         const std::string& getDevPath() const noexcept;
-        FrameFormat getFormat() const noexcept;
+        StreamFormat getFormat() const noexcept;
         private:
-        const FrameFormat format; // The format of the frames returned by this FrameProvider
         cs::CvSink appSink;
         std::string devPath;
         std::string name;
+        std::shared_ptr<cs::UsbCamera> camera;
     };
+
+    bool setUsbCameraFormat(const std::string& devPath, FrameFormat format);
 }
