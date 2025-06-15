@@ -42,7 +42,7 @@ namespace wf {
         std::unordered_map<std::string, std::shared_ptr<spdlog::logger>> loggers_;
         std::mutex mutex_;
         LoggerManager();
-        ~LoggerManager();
+        ~LoggerManager() = default;
 
         // Prevent copying and moving
         LoggerManager(const LoggerManager&) = delete;

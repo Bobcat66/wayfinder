@@ -22,7 +22,7 @@ namespace wf {
     };
 
     class InferenceEngine {
-    public:
+        public:
         virtual ~InferenceEngine() = default;
         virtual bool loadModel(const std::string& modelPath) = 0;
         [[nodiscard]] 

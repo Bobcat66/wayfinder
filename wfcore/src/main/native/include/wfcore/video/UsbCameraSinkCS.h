@@ -10,14 +10,14 @@
 
 // A CSCore-based implementation of FrameProvider, which pulls frames from a USB camera 
 namespace wf {
-    class UsbCameraSinkCS : FrameProvider {
+    class UsbCameraSinkCS : public FrameProvider {
         public:
         UsbCameraSinkCS(const std::string& name, const std::string& devPath);
         ~UsbCameraSinkCS() override = default;
         Frame getFrame() noexcept override;
         const std::string& getName() const noexcept override;
         const std::string& getDevPath() const noexcept;
-        StreamFormat getFormat() const noexcept;
+        StreamFormat getStreamFormat() const noexcept;
         private:
         cs::CvSink appSink;
         std::string devPath;

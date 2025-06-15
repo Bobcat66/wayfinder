@@ -103,7 +103,7 @@ namespace wf {
         return devPath;
     }
 
-    StreamFormat UsbCameraSinkCS::getFormat() const noexcept {
+    StreamFormat UsbCameraSinkCS::getStreamFormat() const noexcept {
         return impl::getUsbCameraStreamFormat(*camera);
     }
 

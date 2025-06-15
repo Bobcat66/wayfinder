@@ -9,10 +9,11 @@
 namespace wf {
     class CPUInferenceEngine : public InferenceEngine {
         public:
-            CPUInferenceEngine();
-            std::string modelFormat() const override {return "onnx";}
-            bool loadModel(const std::string& modelPath) override;
-            [[nodiscard]] std::vector<ObjectDetection> infer(const Frame& input) noexcept override;
+        CPUInferenceEngine();
+        std::string modelFormat() const override {return "onnx";}
+        bool loadModel(const std::string& modelPath) override;
+        [[nodiscard]] 
+        std::vector<ObjectDetection> infer(const Frame& input) noexcept override;
         private:
 
     }
