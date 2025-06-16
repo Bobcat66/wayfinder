@@ -34,8 +34,8 @@ TEST(processTests, ThreadPoolTest){
         std::cout << "Printed after eight seconds" << std::endl;
         return std::chrono::steady_clock::now();
     });
-    EXPECT_NEAR(((std::chrono::duration<double>)(message1time.get()-start)).count(),2.0,0.1);
-    EXPECT_NEAR(((std::chrono::duration<double>)(message2time.get()-start)).count(),4.0,0.1);
-    EXPECT_NEAR(((std::chrono::duration<double>)(message3time.get()-start)).count(),6.0,0.1);
-    EXPECT_NEAR(((std::chrono::duration<double>)(message4time.get()-start)).count(),8.0,0.1);
+    EXPECT_NEAR((std::chrono::duration<double>(message1time.get()-start)).count(),2.0,0.1);
+    EXPECT_NEAR((std::chrono::duration<double>(message2time.get()-start)).count(),4.0,0.1);
+    EXPECT_NEAR((std::chrono::duration<double>(message3time.get()-start)).count(),6.0,0.1);
+    EXPECT_NEAR((std::chrono::duration<double>(message4time.get()-start)).count(),8.0,0.1);
 }
