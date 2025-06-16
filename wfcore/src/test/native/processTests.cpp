@@ -32,7 +32,7 @@ TEST(processTests, ThreadPoolTest){
     auto message4time = pool.enqueue([] {
         std::this_thread::sleep_for(std::chrono::seconds(8));
         std::cout << "Printed after eight seconds" << std::endl;
-        return std::chrono::steady_clock::now();
+        return clock::now();
     });
     EXPECT_NEAR((std::chrono::duration<double>(message1time.get()-start)).count(),2.0,0.1);
     EXPECT_NEAR((std::chrono::duration<double>(message2time.get()-start)).count(),4.0,0.1);
