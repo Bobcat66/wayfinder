@@ -43,16 +43,31 @@ set(ALLOWED_AI_BACKENDS
     "qnn" # QNN acceleration
 )
 
+set(ALLOWED_TARGETS
+    "daemon"
+    "client"
+)
+
 set(WF_IMG_BACKEND "cpu" CACHE STRING "Backend for hardware-accelerated image processing")
 set_property(CACHE WF_IMG_BACKEND PROPERTY STRINGS ${ALLOWED_IMG_BACKENDS})
 
 set(WF_AI_BACKEND "cpu" CACHE STRING "Backend for hardware-accelerated AI inference")
 set_property(CACHE WF_AI_BACKEND PROPERTY STRINGS ${ALLOWED_AI_BACKENDS})
 
+set(WF_TARGET "daemon" CACHE STRING "The target type for the build (daemon runs on coprocessors, client runs on DS)")
+set_property(CACHE WF_TARGET PROPERTY STRINGS ${ALLOWED_TARGETS})
+
 option(WF_CV_OPENCL "Enable OpenCL acceleration in OpenCV" ON)
 option(WF_CV_CUDA "Enable CUDA acceleration in OpenCV" OFF)
+option(WF_USE_ONNX "Enable ONNX runtime inference engine" ON)
+option(WF_USE_GSTREAMER "Enable Gstreamer video capture" OFF)
+option(WF_USE_VIDEOLAN_CODECS "Enable support for VideoLAN x264 and x265 codecs" OFF)
+option(WF_BUILD_DAEMON "Builds a Wayfinder daemon meant to run on a coprocessor" ON)
+option(WF_BUILD_CLIENT "Builds a Wayfinder desktop client, meant to both provide an interface to wayfinder, and to act as a SLAM server" OFF)
 
-option(WF_USE_ONNX "Use ONNX runtime inference engine" ON)
+if(NOT WF_USE_GSTREAMER)
+    set(WF_USE_VIDEOLAN_CODECS OFF CACHE BOOL "Enable support for VideoLAN x264 and x265 codecs" FORCE)
+endif()
 
 if(WF_CV_OPENCL AND WF_CV_CUDA)
     message(FATAL_ERROR "WF_CV_OPENCL and WF_CV_CUDA are mutually exclusive. Please enable only one.")
@@ -69,8 +84,9 @@ function(validate_backend option_name option_value allowed_values)
     endif()
 endfunction()
 
-validate_backend("IMG_BACKEND" "${WF_IMG_BACKEND}" "ALLOWED_IMG_BACKENDS")
-validate_backend("AI_BACKEND" "${WF_AI_BACKEND}" "ALLOWED_AI_BACKENDS")
+validate_backend("WF_IMG_BACKEND" "${WF_IMG_BACKEND}" "ALLOWED_IMG_BACKENDS")
+validate_backend("WF_AI_BACKEND" "${WF_AI_BACKEND}" "ALLOWED_AI_BACKENDS")
+validate_backend("WF_TARGET" "${WF_TARGET}" "ALLOWED_TARGETS")
 
 find_package(GTest REQUIRED)
 
@@ -79,6 +95,5 @@ add_subdirectory(thirdparty/apriltag)
 add_subdirectory(thirdparty/wpilib)
 add_subdirectory(thirdparty/gtsam)
 add_subdirectory(thirdparty/spdlog)
-add_subdirectory(wfvtk)
-add_subdirectory(wfcore)
+add_subdirectory(core)
 

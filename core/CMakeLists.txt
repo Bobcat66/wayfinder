@@ -12,11 +12,17 @@ file(GLOB_RECURSE CORESOURCES
 add_library(wfcore ${CORESOURCES})
 
 if(WF_CV_OPENCL)
-    add_compile_definitions(__USE_CV_OPENCL)
+    add_compile_definitions(WF_CV_OPENCL)
 elseif(WF_CV_CUDA)
-    add_compile_definitions(__USE_CV_CUDA)
+    add_compile_definitions(WF_CV_CUDA)
 endif()
 
+if(WF_USE_GSTREAMER)
+    add_compile_definitions(WF_GSTREAMER)
+    if(WF_USE_VIDEOLAN_CODECS)
+        add_compile_definitions(WF_VIDEOLAN)
+    endif()
+endif()
 # TODO: Figure out the library interface
 target_link_libraries(wfcore 
     PUBLIC
@@ -27,7 +33,6 @@ target_link_libraries(wfcore
     ntcore
     cscore
     apriltag
-    wfvtk
 ) # In deployment builds, this will link statically, and there will be a cmake build type variable set in the top-level CMake file. I'll put that in eventually. For now, this is nowhere near deployment
 
 target_include_directories(wfcore 
@@ -35,6 +40,25 @@ target_include_directories(wfcore
     ${CMAKE_CURRENT_SOURCE_DIR}/src/main/native/include
     ${OpenCV_INCLUDE_DIRS}
 )
+
+if(WF_USE_GSTREAMER)
+    find_package(PkgConfig REQUIRED)
+
+    pkg_check_modules(GSTREAMER REQUIRED gstreamer-1.0)
+    pkg_check_modules(GSTREAMER_BASE REQUIRED gstreamer-base-1.0)
+
+    target_link_libraries(wfcore
+        PRIVATE
+        ${GSTREAMER_LIBRARIES}
+        ${GSTREAMER_BASE_LIBRARIES}
+    )
+    target_include_directories(wfcore
+        PRIVATE
+        ${GSTREAMER_INCLUDE_DIRS}
+        ${GSTREAMER_BASE_INCLUDE_DIRS}
+    )
+    
+endif()
 
 enable_testing()
 

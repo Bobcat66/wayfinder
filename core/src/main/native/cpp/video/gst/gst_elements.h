@@ -3,6 +3,8 @@
 
 #pragma once
 
+#ifdef WF_GSTREAMER
+
 #include <string>
 #include <unordered_map>
 
@@ -63,3 +65,4 @@ namespace impl {
         {"vulkanColor","vulkancolorconvert"}, // Vulkan color space conversion
     };  
 }
+#endif // WF_GSTREAMER
