@@ -107,4 +107,11 @@ namespace wf {
         return impl::getUsbCameraStreamFormat(*camera);
     }
 
+    bool setUsbCameraFormat(const std::string& devPath, StreamFormat sformat) {
+        return impl::applyStreamFormatToUsbCamera(
+            impl::getUsbCamera(devPath),
+            sformat
+        );
+    }
+
 }

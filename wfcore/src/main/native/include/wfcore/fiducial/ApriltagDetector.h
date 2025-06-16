@@ -36,31 +36,29 @@ namespace wf {
     };
 
     class ApriltagDetector {
-
-        public:
-            ApriltagDetector();
-            ~ApriltagDetector();
-            [[nodiscard]] std::vector<ApriltagDetection> detect(int width, int height, int stride, uint8_t* buf) const noexcept;
-            inline std::vector<ApriltagDetection> detect(int width, int height, uint8_t* buf) const noexcept {
-                return detect(width,height,width,buf);
-            }
-            inline std::vector<ApriltagDetection> detect(const cv::Mat& im) const noexcept {
-                assert(im.type() == CV_8UC1); // Asserts that the matrix contains an 8 bit grayscale image
-                return detect(im.rows,im.cols,im.step[0],im.data);
-            };
-            // Returns a copy of the QTPs
-            QuadThresholdParams getQuadThresholdParams() const;
-            // Returns a copy of the configs
-            ApriltagDetectorConfig getConfig() const;
-            void setQuadThresholdParams(const QuadThresholdParams params);
-            void setConfig(const ApriltagDetectorConfig config);
-            void addFamily(const std::string& familyName);
-            void removeFamily(const std::string& familyName);
-            void clearFamilies();
-        
-        private:
-            std::unordered_map<std::string,void*> families;
-            void* cdetector;
+    public:
+        ApriltagDetector();
+        ~ApriltagDetector();
+        [[nodiscard]] std::vector<ApriltagDetection> detect(int width, int height, int stride, uint8_t* buf) const noexcept;
+        inline std::vector<ApriltagDetection> detect(int width, int height, uint8_t* buf) const noexcept {
+            return detect(width,height,width,buf);
+        }
+        inline std::vector<ApriltagDetection> detect(const cv::Mat& im) const noexcept {
+            assert(im.type() == CV_8UC1); // Asserts that the matrix contains an 8 bit grayscale image
+            return detect(im.rows,im.cols,im.step[0],im.data);
+        };
+        // Returns a copy of the QTPs
+        QuadThresholdParams getQuadThresholdParams() const;
+        // Returns a copy of the configs
+        ApriltagDetectorConfig getConfig() const;
+        void setQuadThresholdParams(const QuadThresholdParams params);
+        void setConfig(const ApriltagDetectorConfig config);
+        void addFamily(const std::string& familyName);
+        void removeFamily(const std::string& familyName);
+        void clearFamilies();
+    private:
+        std::unordered_map<std::string,void*> families;
+        void* cdetector;
     };
 
 

@@ -26,7 +26,7 @@ namespace wf {
     } // TODO: tune these logging levels
 
     class LoggerManager {
-        public:
+    public:
         static LoggerManager& getInstance() {
             static LoggerManager instance;
             return instance;
@@ -36,7 +36,7 @@ namespace wf {
         
         loggerPtr getLogger(const std::string& name);
 
-        private:
+    private:
         static LoggerManager* instancePtr;
         std::vector<spdlog::sink_ptr> sinks_; // All loggers output to the same sinks for simplicity
         std::unordered_map<std::string, std::shared_ptr<spdlog::logger>> loggers_;

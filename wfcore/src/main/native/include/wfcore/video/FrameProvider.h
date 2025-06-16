@@ -9,7 +9,7 @@
 
 namespace wf {
     class FrameProvider {
-        public:
+    public:
         virtual Frame getFrame() noexcept = 0;
         virtual ~FrameProvider() noexcept = default;
         virtual const std::string& getName() const noexcept = 0;

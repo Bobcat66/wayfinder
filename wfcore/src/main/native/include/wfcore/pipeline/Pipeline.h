@@ -71,7 +71,7 @@ namespace wf {
     };
 
     class Pipeline {
-        public:
+    public:
         [[nodiscard]] 
         virtual PipelineResult process(const Frame& frame) const noexcept = 0;
         virtual ~Pipeline() = default;
