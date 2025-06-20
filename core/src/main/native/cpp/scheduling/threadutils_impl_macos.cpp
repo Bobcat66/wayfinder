@@ -10,10 +10,5 @@ namespace wf {
     // Sets thread priority of a thread
     int setThreadPriority(const std::thread& thread, int priority);
 
-    // Sets the scheduling policy of a thread
-    int setThreadPolicy(const std::thread& thread, int policy);
-
-    // Sets the scheduling policy of the process (Windows only)
-    int setProcessPolicyNT(int policy);
 }
 #endif //defined(__APPLE__) && defined(__MACH__)

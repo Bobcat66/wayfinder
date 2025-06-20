@@ -16,8 +16,8 @@ namespace wf {
     class VisionWorker {
     public:
         VisionWorker(
-            Pipeline pipeline_, 
-            FrameProvider frameProvider_, 
+            Pipeline& pipeline_, 
+            FrameProvider& frameProvider_, 
             ResultConsumer resultConsumer_
         );
         void start();
@@ -28,8 +28,8 @@ namespace wf {
         cv::Mat outputBuffer;
         std::thread thread;
         std::atomic_bool running;
-        Pipeline pipeline;
-        FrameProvider frameProvider;
-        ResultConsumer resultConsumer
+        Pipeline& pipeline;
+        FrameProvider& frameProvider;
+        ResultConsumer resultConsumer;
     };
 }

@@ -3,15 +3,14 @@
 
 namespace wf {
     VisionWorker::VisionWorker(
-        Pipeline pipeline_, 
-        FrameProvider frameProvider_, 
+        Pipeline& pipeline_, 
+        FrameProvider& frameProvider_, 
         ResultConsumer resultConsumer_
     )
-    : pipeline(std::move(pipeline_))
-    , frameProvider(std::move(frameProvider_))
+    : pipeline(pipeline_)
+    , frameProvider(frameProvider_)
     , resultConsumer(std::move(resultConsumer_)) {
         inputBuffer = generateEmptyFrameBuf(frameProvider.getStreamFormat().frameFormat);
         running = false;
-        
     }
 }
