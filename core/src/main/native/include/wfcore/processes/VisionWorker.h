@@ -4,14 +4,22 @@
 
 #include <thread>
 #include <atomic>
+#include <functional>
 
 #include "wfcore/pipeline/Pipeline.h"
 #include "wfcore/video/FrameProvider.h"
 
 namespace wf {
-    class VisionProcess {
+
+    typedef std::function<void(const PipelineResult&)> ResultConsumer;
+
+    class VisionWorker {
     public:
-        VisionProcess()
+        VisionWorker(
+            Pipeline pipeline_, 
+            FrameProvider frameProvider_, 
+            ResultConsumer resultConsumer_
+        );
         void start();
         void stop();
         private:
@@ -22,6 +30,6 @@ namespace wf {
         std::atomic_bool running;
         Pipeline pipeline;
         FrameProvider frameProvider;
-        void (*resultConsumer)(PipelineResult result)
+        ResultConsumer resultConsumer
     };
 }

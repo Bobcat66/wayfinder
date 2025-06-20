@@ -34,6 +34,8 @@
 // Linux specific macros
 #ifdef __linux__
 
+// Compiler-agnostic macros
+
 // For linux native builds
 #ifdef __GNUC__
 #define WF_DLLEXPORT
