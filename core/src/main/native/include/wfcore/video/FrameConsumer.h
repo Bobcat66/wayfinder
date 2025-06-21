@@ -19,26 +19,18 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "wfcore/processes/VisionWorker.h"
-#include "wfcore/video/video_utils.h"
+#pragma once
+
+#include "wfcore/video/video_types.h"
+
+#include <string>
 
 namespace wf {
-    VisionWorker::VisionWorker(
-        Pipeline& pipeline_, 
-        FrameProvider& frameProvider_, 
-        ResultConsumer resultConsumer_
-    )
-    : pipeline(pipeline_)
-    , frameProvider(frameProvider_)
-    , resultConsumer(std::move(resultConsumer_)) {
-        running = false;
-    }
-
-    void VisionWorker::run() noexcept {
-        while (running) {
-            auto frame = frameProvider.getFrame();
-            auto res = pipeline.process(frame);
-            resultConsumer(res);
-        }
-    }
+    class FrameConsumer {
+    public:
+        virtual void acceptFrame(Frame& frame) noexcept = 0;
+        virtual ~FrameConsumer() noexcept = default;
+        virtual const std::string& getName() const noexcept = 0;
+        virtual StreamFormat getStreamFormat() const noexcept = 0;
+    };
 }
