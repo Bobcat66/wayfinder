@@ -34,6 +34,18 @@ namespace wf {
         running = false;
     }
 
+    void VisionWorker::start() {
+        running = true;
+        thread = std::thread(&VisionWorker::run,this);
+    }
+
+    void VisionWorker::stop() {
+        if(running){
+            running = false;
+            thread.join();
+        }
+    }
+
     void VisionWorker::run() noexcept {
         while (running) {
             auto frame = frameProvider.getFrame();

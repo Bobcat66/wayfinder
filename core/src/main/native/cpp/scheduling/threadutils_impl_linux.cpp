@@ -22,7 +22,10 @@
 // Linux threadutils implementation. When built for windows or mac, this file compiles to nothing
 #ifdef __linux__
 
+#ifndef _GNU_SOURCE
 #define _GNU_SOURCE
+#endif // _GNU_SOURCE
+
 #include "wfcore/scheduling/threadutils.h"
 #include <pthread.h>
 #include <sched.h>

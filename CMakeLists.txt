@@ -88,6 +88,12 @@ validate_backend("WF_IMG_BACKEND" "${WF_IMG_BACKEND}" "ALLOWED_IMG_BACKENDS")
 validate_backend("WF_AI_BACKEND" "${WF_AI_BACKEND}" "ALLOWED_AI_BACKENDS")
 validate_backend("WF_TARGET" "${WF_TARGET}" "ALLOWED_TARGETS")
 
+configure_file(
+    ${CMAKE_CURRENT_SOURCE_DIR}/version.h.in
+    ${CMAKE_CURRENT_BINARY_DIR}/meta/version.h
+    @ONLY
+)
+
 find_package(GTest REQUIRED)
 
 add_subdirectory(thirdparty/googletest)
@@ -95,5 +101,7 @@ add_subdirectory(thirdparty/apriltag)
 add_subdirectory(thirdparty/wpilib)
 add_subdirectory(thirdparty/gtsam)
 add_subdirectory(thirdparty/spdlog)
+add_subdirectory(thirdparty/nlohmann_json)
 add_subdirectory(core)
+add_subdirectory(daemon)
 
