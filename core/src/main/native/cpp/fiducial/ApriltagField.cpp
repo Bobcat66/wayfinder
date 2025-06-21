@@ -21,6 +21,9 @@
 
 #include "wfcore/fiducial/ApriltagField.h"
 #include <nlohmann/json.hpp>
+#include <fstream>
+#include <format>
+#include <stdexcept>
 
 using json = nlohmann::json;
 
@@ -45,7 +48,8 @@ namespace impl {
         );
     }
 
-    static wf::ApriltagField getFieldFromJson(const json& j) {
+    static wf::ApriltagField makeFieldFromJSON(const json& j) {
+        // TODO: add json schema validation
         std::unordered_map<int,wf::Apriltag> apriltags;
         for (json tagJSON : j["tags"]) {
             apriltags.insert({
@@ -56,7 +60,7 @@ namespace impl {
         double width = j["field"]["width"].get<double>();
         double length = j["field"]["length"].get<double>();
 
-        return wf::ApriltagField()
+        return wf::ApriltagField(apriltags,length,width);
         
     }
 }
@@ -71,9 +75,30 @@ namespace wf {
     }
 
     ApriltagField ApriltagField::loadFromJSONFile(const std::string& filepath) {
+        std::ifstream file(filepath);
+        if (!file.is_open()) {
+            // TODO: Make this a logger
+            throw std::runtime_error("Failed to open file");
+        }
 
+        json jsonData;
+        try {
+            file >> jsonData;
+        } catch (const json::parse_error& e) {
+            // TODO: Logger
+            throw std::runtime_error(std::format("Parse error: {}", e.what()));
+        }
+        return impl::makeFieldFromJSON(jsonData);
     }
-    ApriltagField ApriltagField::loadFromJSONString(const std::string& json) {
+    ApriltagField ApriltagField::loadFromJSONString(const std::string& jsonstr) {
+        json jsonData;
+        try {
+            jsonData = json::parse(jsonstr);
+        } catch (const json::parse_error& e) {
+            // TODO: Logger
+            throw std::runtime_error(std::format("Parse error: {}", e.what()));
+        }
 
+        return impl::makeFieldFromJSON(jsonData);
     }
 }

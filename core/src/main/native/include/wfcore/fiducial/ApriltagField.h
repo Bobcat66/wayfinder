@@ -50,7 +50,7 @@ namespace wf {
         std::string dumpJSON() const;
 
         static ApriltagField loadFromJSONFile(const std::string& filepath);
-        static ApriltagField loadFromJSONString(const std::string& json);
+        static ApriltagField loadFromJSONString(const std::string& jsonstr);
     };
 
 }
