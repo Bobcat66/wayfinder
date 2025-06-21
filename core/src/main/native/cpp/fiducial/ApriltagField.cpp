@@ -20,6 +20,46 @@
  */
 
 #include "wfcore/fiducial/ApriltagField.h"
+#include <nlohmann/json.hpp>
+
+using json = nlohmann::json;
+
+namespace impl {
+
+    static wf::Apriltag makeApriltagFromJSON(const nlohmann::json& tagJSON) {
+        return wf::Apriltag(
+            tagJSON["ID"].get<int>(),
+            gtsam::Pose3(
+                gtsam::Rot3(
+                    tagJSON["rotation"]["quaternion"]["W"].get<double>(),
+                    tagJSON["rotation"]["quaternion"]["X"].get<double>(),
+                    tagJSON["rotation"]["quaternion"]["Y"].get<double>(),
+                    tagJSON["rotation"]["quaternion"]["Z"].get<double>()
+                ),
+                gtsam::Point3(
+                    tagJSON["translation"]["x"].get<double>(),
+                    tagJSON["translation"]["y"].get<double>(),
+                    tagJSON["translation"]["z"].get<double>()
+                )
+            )
+        );
+    }
+
+    static wf::ApriltagField getFieldFromJson(const json& j) {
+        std::unordered_map<int,wf::Apriltag> apriltags;
+        for (json tagJSON : j["tags"]) {
+            apriltags.insert({
+                tagJSON["ID"].get<int>(),
+                makeApriltagFromJSON(tagJSON)
+            });
+        }
+        double width = j["field"]["width"].get<double>();
+        double length = j["field"]["length"].get<double>();
+
+        return wf::ApriltagField()
+        
+    }
+}
 
 namespace wf {
     const Apriltag* ApriltagField::getTag(int id) const noexcept {
@@ -28,5 +68,12 @@ namespace wf {
             return &it->second;
         }
         return nullptr; // Not found
+    }
+
+    ApriltagField ApriltagField::loadFromJSONFile(const std::string& filepath) {
+
+    }
+    ApriltagField ApriltagField::loadFromJSONString(const std::string& json) {
+
     }
 }

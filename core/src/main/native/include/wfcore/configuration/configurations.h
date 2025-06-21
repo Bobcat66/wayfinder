@@ -21,10 +21,11 @@
 
 #pragma once
 
-#include "wfcore/fiducial/ApriltagDetector.h"
 #include <unordered_set>
+#include <string>
 
 namespace wf {
+
 
     struct ObjectDetectPipelineConfiguration {
         std::string model;
@@ -38,7 +39,6 @@ namespace wf {
 
     struct CameraConfiguration {
         int id;
-        CameraIntrinsics intrinsics;
-        
+        CameraIntrinsics intrinsics; 
     };
 }

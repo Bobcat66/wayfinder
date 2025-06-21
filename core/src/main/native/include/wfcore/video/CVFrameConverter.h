@@ -24,11 +24,11 @@
 #include "wfcore/video/video_types.h"
 
 namespace wf {
-    class CVFormatConverter {
+    class CVFrameConverter {
     public:
-        CVFormatConverter(FrameFormat in, FrameFormat out);
-        ~CVFormatConverter() = default;
-        void convert(cv::Mat& in, cv::Mat& out) noexcept; // This method mutates a cv matrix in-place
+        CVFrameConverter(FrameFormat in, FrameFormat out);
+        ~CVFrameConverter() = default;
+        Frame convert(const Frame& in) noexcept; // This method mutates a cv matrix in-place
         const FrameFormat& getInputFormat() const {return inFormat;}
         const FrameFormat& getOutputFormat() const {return outFormat;}
     private:

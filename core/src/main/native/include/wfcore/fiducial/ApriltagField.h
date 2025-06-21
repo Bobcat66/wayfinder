@@ -33,17 +33,17 @@ namespace wf {
     struct Apriltag {
         int id;
         gtsam::Pose3 pose;
-
+        Apriltag(int id_, gtsam::Pose3 pose_) : id(id_), pose(std::move(pose)) {}
         std::string dumpJSON() const;
     };
 
     // Apriltag Layout for an FRC Field
     struct ApriltagField {
         std::unordered_map<int, Apriltag> aprilTags;
-        std::string tagFamily;
-        double tagSize;
-        ApriltagField(std::unordered_map<int, Apriltag> aprilTags_, std::string tagFamily_, double tagSize_)
-        : aprilTags(std::move(aprilTags_)), tagFamily(std::move(tagFamily_)), tagSize(tagSize_) {}
+        double length;
+        double width;
+        ApriltagField(std::unordered_map<int, Apriltag> aprilTags_, double length_, double width_)
+        : aprilTags(std::move(aprilTags_)), length(length_), width(width_) {}
         const Apriltag* getTag(int id) const noexcept;
 
         // dumps JSON string

@@ -25,6 +25,8 @@
 #include "wfcore/utils/coordinates.h"
 #include "wfcore/utils/geometry.h"
 
+#include "wfcore/configuration/ApriltagConfiguration.h"
+
 #include <opencv2/calib3d.hpp>
 #include <gtsam/geometry/Pose3.h>
 #include <array>
@@ -33,7 +35,7 @@ namespace wf {
 
     std::optional<ApriltagRelativePoseObservation> solvePNPApriltagRelative(
         const ApriltagDetection& detection,
-        const ApriltagField& fieldLayout,
+        const ApriltagConfiguration& tagConfig,
         const CameraIntrinsics& cameraIntrinsics
     ) noexcept {
         std::vector<cv::Mat> rvecs, tvecs;
@@ -44,23 +46,23 @@ namespace wf {
             imagePoints.push_back(corner);
         }
         objectPoints.emplace_back(
-            -fieldLayout.tagSize / 2.0,
-            fieldLayout.tagSize / 2.0, 
+            -tagConfig.tagSize / 2.0,
+            tagConfig.tagSize / 2.0, 
             0.0
         );
         objectPoints.emplace_back(
-            fieldLayout.tagSize / 2.0, 
-            fieldLayout.tagSize / 2.0,
+            tagConfig.tagSize / 2.0, 
+            tagConfig.tagSize / 2.0,
             0.0
         );
         objectPoints.emplace_back(
-            fieldLayout.tagSize / 2.0, 
-            -fieldLayout.tagSize / 2.0,
+            tagConfig.tagSize / 2.0, 
+            -tagConfig.tagSize / 2.0,
             0.0
         );
         objectPoints.emplace_back(
-            -fieldLayout.tagSize / 2.0, 
-            -fieldLayout.tagSize / 2.0,
+            -tagConfig.tagSize / 2.0, 
+            -tagConfig.tagSize / 2.0,
             0.0
         );
         bool success = cv::solvePnPGeneric(
@@ -93,7 +95,7 @@ namespace wf {
 
     std::optional<ApriltagFieldPoseObservation> solvePNPApriltag(
         const std::vector<ApriltagDetection>& detections,
-        const ApriltagField& fieldLayout,
+        const ApriltagConfiguration& tagConfig,
         const CameraIntrinsics& cameraIntrinsics,
         const std::unordered_set<int>& ignoreList
     ) noexcept {
@@ -116,7 +118,7 @@ namespace wf {
             if (std::find(ignoreList.begin(), ignoreList.end(), det.id) != ignoreList.end()) {
                 continue; // Skip ignored tags
             }
-            const wf::Apriltag* tag = fieldLayout.getTag(det.id);
+            const wf::Apriltag* tag = tagConfig.map.getTag(det.id);
             if (!tag) {
                 continue; // Skip tags without a pose
             }
@@ -133,26 +135,26 @@ namespace wf {
             // These are in OpenCV coordinates
             cornerPoses[0] = translatePoseFrame(
                 tagPose_c, 
-                -fieldLayout.tagSize / 2.0,
-                -fieldLayout.tagSize / 2.0, 
+                -tagConfig.tagSize / 2.0,
+                -tagConfig.tagSize / 2.0, 
                 0.0 
             );
             cornerPoses[1] = translatePoseFrame(
                 tagPose_c, 
-                fieldLayout.tagSize / 2.0, 
-                -fieldLayout.tagSize / 2.0,
+                tagConfig.tagSize / 2.0, 
+                -tagConfig.tagSize / 2.0,
                 0.0
             );
             cornerPoses[2] = translatePoseFrame(
                 tagPose_c, 
-                fieldLayout.tagSize / 2.0, 
-                fieldLayout.tagSize / 2.0,
+                tagConfig.tagSize / 2.0, 
+                tagConfig.tagSize / 2.0,
                 0.0
             );
             cornerPoses[3] = translatePoseFrame(
                 tagPose_c,
-                -fieldLayout.tagSize / 2.0, 
-                fieldLayout.tagSize / 2.0,
+                -tagConfig.tagSize / 2.0, 
+                tagConfig.tagSize / 2.0,
                 0.0
             );
             for (const auto& cornerPose : cornerPoses) {
@@ -167,23 +169,23 @@ namespace wf {
             std::vector<double> reprojectionErrors;
             objectPoints.clear();
             objectPoints.emplace_back(
-                -fieldLayout.tagSize / 2.0,
-                fieldLayout.tagSize / 2.0, 
+                -tagConfig.tagSize / 2.0,
+                tagConfig.tagSize / 2.0, 
                 0.0
             );
             objectPoints.emplace_back(
-                fieldLayout.tagSize / 2.0, 
-                fieldLayout.tagSize / 2.0,
+                tagConfig.tagSize / 2.0, 
+                tagConfig.tagSize / 2.0,
                 0.0
             );
             objectPoints.emplace_back(
-                fieldLayout.tagSize / 2.0, 
-                -fieldLayout.tagSize / 2.0,
+                tagConfig.tagSize / 2.0, 
+                -tagConfig.tagSize / 2.0,
                 0.0
             );
             objectPoints.emplace_back(
-                -fieldLayout.tagSize / 2.0, 
-                -fieldLayout.tagSize / 2.0,
+                -tagConfig.tagSize / 2.0, 
+                -tagConfig.tagSize / 2.0,
                 0.0
             );
             bool success = cv::solvePnPGeneric(

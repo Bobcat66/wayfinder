@@ -19,7 +19,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "wfcore/video/CVFormatConverter.h"
+#include "wfcore/video/CVFrameConverter.h"
 
 #include <opencv2/imgproc.hpp>
 
@@ -28,7 +28,7 @@
 #include "wfcore/video/video_utils.h"
 
 namespace wf {
-    CVFormatConverter::CVFormatConverter(FrameFormat in, FrameFormat out)
+    CVFrameConverter::CVFrameConverter(FrameFormat in, FrameFormat out)
     : inFormat(std::move(in)), outFormat(std::move(out))
     , tmpFormat(inFormat.colorspace, outFormat.rows, outFormat.cols) {
         xscalefactor = out.cols / in.cols;
@@ -111,13 +111,15 @@ namespace wf {
         buffer = generateEmptyFrameBuf(tmpFormat);
     }
 
-    void CVFormatConverter::convert(cv::Mat& in, cv::Mat& out) noexcept {
-        if (in.size() != cv::Size(outFormat.cols, outFormat.rows)){
-            cv::resize(in, buffer, cv::Size(outFormat.cols, outFormat.rows));
+    Frame CVFrameConverter::convert(const Frame& in) noexcept {
+        if (in.data.size() != cv::Size(outFormat.cols, outFormat.rows)){
+            cv::resize(in.data, buffer, cv::Size(outFormat.cols, outFormat.rows));
         } else {
-            in.copyTo(buffer); // shallow copy if size matches
+            in.data.copyTo(buffer); // shallow copy if size matches
         }
-        colorConverter(buffer,out);
+        auto outmat = generateEmptyFrameBuf(outFormat);
+        colorConverter(buffer,outmat);
+        return Frame(in.captimeMicros,outFormat,outmat);
     }
 
 }
