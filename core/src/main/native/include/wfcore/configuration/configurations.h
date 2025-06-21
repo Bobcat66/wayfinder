@@ -21,6 +21,7 @@
 
 #pragma once
 
+#include <opencv2/core.hpp>
 #include <unordered_set>
 #include <string>
 

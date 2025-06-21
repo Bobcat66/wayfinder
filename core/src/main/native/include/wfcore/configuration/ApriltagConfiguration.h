@@ -5,8 +5,8 @@
 
 namespace wf {
     struct ApriltagConfiguration {
-        ApriltagField map,
+        ApriltagField map;
         std::string tagFamily;
         double tagSize;
-    }
+    };
 }

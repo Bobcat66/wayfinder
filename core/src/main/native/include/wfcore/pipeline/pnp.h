@@ -22,6 +22,8 @@
 #pragma once
 
 #include "wfcore/configuration/configurations.h"
+
+#include "wfcore/configuration/ApriltagConfiguration.h"
 #include "wfcore/fiducial/ApriltagField.h"
 #include "wfcore/fiducial/ApriltagDetection.h"
 
@@ -82,14 +84,14 @@ namespace wf {
 
     std::optional<ApriltagFieldPoseObservation> solvePNPApriltag(
         const std::vector<ApriltagDetection>& observations,
-        const ApriltagField& fieldLayout,
+        const ApriltagConfiguration& tagConfig,
         const CameraIntrinsics& cameraIntrinsics,
         const std::unordered_set<int>& ignoreList
     ) noexcept;
 
     std::optional<ApriltagRelativePoseObservation> solvePNPApriltagRelative(
         const ApriltagDetection& observation,
-        const ApriltagField& fieldLayout,
+        const ApriltagConfiguration& tagConfig,
         const CameraIntrinsics& cameraIntrinsics
     ) noexcept;
 

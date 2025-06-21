@@ -25,11 +25,11 @@
 #include <wfcore/pipeline/pnp.h>
 
 namespace wf {
-    ApriltagPipeline::ApriltagPipeline(ApriltagPipelineConfiguration config_, CameraIntrinsics intrinsics_, ApriltagField field_)
-    : config(std::move(config_)), intrinsics(std::move(intrinsics_)), field(field_) {
+    ApriltagPipeline::ApriltagPipeline(ApriltagPipelineConfiguration config_, CameraIntrinsics intrinsics_, ApriltagConfiguration tagConfig_)
+    : config(std::move(config_)), intrinsics(std::move(intrinsics_)), tagConfig(tagConfig_) {
         detector.setQuadThresholdParams(config.detQTPs);
         detector.setConfig(config.detConfig);
-        detector.addFamily(field.tagFamily);
+        detector.addFamily(tagConfig.tagFamily);
     }
 
     PipelineResult ApriltagPipeline::process(const Frame& frame) const noexcept {
@@ -42,7 +42,7 @@ namespace wf {
             for (auto detection : detections) {
                 auto atagPose = solvePNPApriltagRelative(
                     detection,
-                    field,
+                    tagConfig,
                     intrinsics
                 );
                 if (atagPose.has_value()) {
@@ -52,7 +52,7 @@ namespace wf {
         }
         auto fieldPose = solvePNPApriltag(
             detections,
-            field,
+            tagConfig,
             intrinsics,
             config.SolvePNPExcludes
         );

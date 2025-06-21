@@ -24,6 +24,7 @@
 #include "wfcore/pipeline/Pipeline.h"
 #include "wfcore/fiducial/ApriltagDetector.h"
 #include "wfcore/fiducial/ApriltagField.h"
+#include "wfcore/configuration/ApriltagConfiguration.h"
 
 namespace wf {
 
@@ -37,14 +38,14 @@ namespace wf {
 
     class ApriltagPipeline : public Pipeline {
     public:
-        ApriltagPipeline(ApriltagPipelineConfiguration config_, CameraIntrinsics intrinsics_, ApriltagField field_);
+        ApriltagPipeline(ApriltagPipelineConfiguration config_, CameraIntrinsics intrinsics_, ApriltagConfiguration tagConfig_);
         [[nodiscard]] 
         PipelineResult process(const Frame& frame) const noexcept override; // TODO, make this override explicit when an implementation exists
         ~ApriltagPipeline() override = default;
     private:
         ApriltagPipelineConfiguration config;
         CameraIntrinsics intrinsics;
-        ApriltagField field;
+        ApriltagConfiguration tagConfig;
         ApriltagDetector detector;
     };
 }
