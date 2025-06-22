@@ -15,13 +15,13 @@ jobs:
           - name: Checkout code
             uses: actions/checkout@v4
 
-          - name: Cache build artifacts
+          - name: Cache dependencies
             uses: actions/cache@v4
             with:
-                path: build/
-                key: ${{ runner.os }}-build-${{ hashFiles('**/*.cpp', '**/*.h', '**/CMakeLists.txt') }}
+                path: build/_deps
+                key: ${{ runner.os }}-deps-${{ hashFiles('**/CMakeLists.txt', '**/*.cmake') }}
                 restore-keys: |
-                    ${{ runner.os }}-build-
+                    ${{ runner.os }}-deps-
 
           - name: Install Ninja
             run: sudo apt update && sudo apt install -y ninja-build
@@ -46,6 +46,8 @@ jobs:
     test-core:
         name: "Wayfinder - Test Core"
         runs-on: ubuntu-latest
+        needs: build-core
+
         steps:
 
           - name: Checkout code
@@ -56,7 +58,7 @@ jobs:
             with:
                 name: build-artifacts
                 path: build
-                
+
           - name: Test
             run: ctest --test-dir build --output-on-failure
 
