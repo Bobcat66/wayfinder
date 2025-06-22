@@ -14,6 +14,7 @@ set(WITH_WPILIB OFF)
 set(WITH_TESTS OFF)
 set(WITH_GUI OFF)
 set(WITH_SIMULATION_MODULES OFF)
+set(WITH_PROTOBUF OFF)
 fetchcontent_declare(
     allwpilib
     GIT_REPOSITORY    https://github.com/wpilibsuite/allwpilib.git
