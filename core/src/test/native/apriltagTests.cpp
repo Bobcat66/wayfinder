@@ -86,6 +86,7 @@ TEST(apriltagTests,detectorConfigurationTest) {
         .numThreads = 4
     };
     wf::QuadThresholdParams newQTPs{
+        .minClusterPixels = 5,
         .deglitch = true
     };
     detector.setConfig(newConfig);
