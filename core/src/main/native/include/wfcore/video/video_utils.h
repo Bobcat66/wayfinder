@@ -23,7 +23,25 @@
 
 #include "wfcore/video/video_types.h"
 
-
 namespace wf {
     cv::Mat generateEmptyFrameBuf(FrameFormat format);
+
+    template <CVImage T>
+    FrameFormat getFormat(const T& cvimg) {
+        ColorSpace cspace;
+        switch (cvimg.type()) {
+            case CV_8UC3:
+                cspace = ColorSpace::COLOR;
+                break;
+            case CV_8UC1:
+                cspace = ColorSpace::GRAY;
+                break;
+            case CV_16UC1:
+                cspace = ColorSpace::DEPTH;
+                break;
+            default:
+                cspace = ColorSpace::UNKNOWN;
+        }
+        return {cspace,cvimg.rows,cvimg.cols};
+    }
 }

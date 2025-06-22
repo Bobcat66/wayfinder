@@ -39,10 +39,14 @@ namespace wf {
     class ApriltagPipeline : public Pipeline {
     public:
         ApriltagPipeline(ApriltagPipelineConfiguration config_, CameraIntrinsics intrinsics_, ApriltagConfiguration tagConfig_);
+        void setConfig(const ApriltagPipelineConfiguration& config);
+        void setTagConfig(const ApriltagConfiguration& tagConfig);
+        void setIntrinsics(const CameraIntrinsics& intrinsics);
         [[nodiscard]] 
         PipelineResult process(const Frame& frame) const noexcept override;
         ~ApriltagPipeline() override = default;
     private:
+        void updateDetectorConfig(); // Updates the apriltag detector's configuration
         ApriltagPipelineConfiguration config;
         CameraIntrinsics intrinsics;
         ApriltagConfiguration tagConfig;

@@ -23,8 +23,12 @@
 
 #include <opencv2/core/mat.hpp>
 #include <cstdint>
+#include <concepts>
 
 namespace wf {
+
+    template <typename T>
+    concept CVImage = std::same_as<T, cv::Mat> || std::same_as<T, cv::UMat>;
 
     enum ColorSpace {
         COLOR, // CV_8UC3, cscore kBGR

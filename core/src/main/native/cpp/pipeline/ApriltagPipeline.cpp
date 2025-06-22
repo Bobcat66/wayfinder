@@ -27,8 +27,27 @@
 namespace wf {
     ApriltagPipeline::ApriltagPipeline(ApriltagPipelineConfiguration config_, CameraIntrinsics intrinsics_, ApriltagConfiguration tagConfig_)
     : config(std::move(config_)), intrinsics(std::move(intrinsics_)), tagConfig(tagConfig_) {
+        updateDetectorConfig();
+    }
+
+    void ApriltagPipeline::setConfig(const ApriltagPipelineConfiguration& config) {
+        this->config = config;
+        updateDetectorConfig();
+    }
+    
+    void ApriltagPipeline::setTagConfig(const ApriltagConfiguration& tagConfig) {
+        this->tagConfig = tagConfig;
+        updateDetectorConfig();
+    }
+
+    void ApriltagPipeline::setIntrinsics(const CameraIntrinsics& intrinsics) {
+        this->intrinsics = intrinsics;
+    }
+
+    void ApriltagPipeline::updateDetectorConfig() {
         detector.setQuadThresholdParams(config.detQTPs);
         detector.setConfig(config.detConfig);
+        detector.clearFamilies();
         detector.addFamily(tagConfig.tagFamily);
     }
 
