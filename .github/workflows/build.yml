@@ -58,6 +58,9 @@ jobs:
             with:
                 name: build-artifacts
                 path: build
+            
+          - name: Set permissions for test executables
+            run: find build -name '*_tests' -exec chmod +x {} +
 
           - name: Test
             run: ctest --test-dir build --output-on-failure
