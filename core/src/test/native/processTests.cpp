@@ -21,7 +21,7 @@
 
 #include <iostream>
 
-#include "wfcore/scheduling/ThreadPool.h"
+#include "wfcore/common/scheduling/ThreadPool.h"
 #include <thread>
 #include <chrono>
 

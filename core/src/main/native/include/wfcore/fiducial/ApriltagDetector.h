@@ -32,6 +32,7 @@
 #include <vector>
 #include <cmath>
 #include <cstdint>
+#include <string>
 
 namespace wf {
 
@@ -42,7 +43,11 @@ namespace wf {
         bool refineEdges = true;
         double decodeSharpening = 0.25;
         bool debug = false;
+        std::string string() const;
+        bool operator==(const ApriltagDetectorConfig&) const = default;
     };
+
+    std::ostream& operator<<(std::ostream& os, const ApriltagDetectorConfig& config);
 
     struct QuadThresholdParams {
         int minClusterPixels = 300;
@@ -51,7 +56,11 @@ namespace wf {
         float maxLineFitMSE = 10.0f;
         int minWhiteBlackDiff = 5;
         bool deglitch = false;
+        std::string string() const;
+        bool operator==(const QuadThresholdParams&) const = default;
     };
+
+    std::ostream& operator<<(std::ostream& os, const ApriltagDetectorConfig& qtps);
 
     class ApriltagDetector {
     public:
@@ -63,16 +72,16 @@ namespace wf {
         }
         inline std::vector<ApriltagDetection> detect(const cv::Mat& im) const noexcept {
             assert(im.type() == CV_8UC1); // Asserts that the matrix contains an 8 bit grayscale image
-            return detect(im.rows,im.cols,im.step[0],im.data);
+            return detect(im.cols,im.rows,im.step[0],im.data);
         };
         // Returns a copy of the QTPs
         QuadThresholdParams getQuadThresholdParams() const;
         // Returns a copy of the configs
         ApriltagDetectorConfig getConfig() const;
-        void setQuadThresholdParams(const QuadThresholdParams params);
-        void setConfig(const ApriltagDetectorConfig config);
-        void addFamily(const std::string& familyName);
-        void removeFamily(const std::string& familyName);
+        void setQuadThresholdParams(const QuadThresholdParams& params);
+        void setConfig(const ApriltagDetectorConfig& config);
+        int addFamily(const std::string& familyName);
+        int removeFamily(const std::string& familyName);
         void clearFamilies();
     private:
         std::unordered_map<std::string,void*> families;

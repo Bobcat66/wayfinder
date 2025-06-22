@@ -19,7 +19,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "wfcore/scheduling/ThreadPool.h"
+#include "wfcore/common/scheduling/ThreadPool.h"
 
 namespace wf {
 

@@ -20,7 +20,7 @@
  */
 
 #include "wfcore/fiducial/ApriltagDetector.h"
-#include "wfcore/logging/LoggerManager.h"
+#include "wfcore/common/logging/LoggerManager.h"
 
 #include <apriltag.h>
 #include <tag36h11.h>
@@ -35,6 +35,7 @@
 
 #include <map>
 #include <unordered_map>
+#include <format>
 
 #define C_FAMILY(x) static_cast<apriltag_family_t*>(x)
 #define C_DETECTOR static_cast<apriltag_detector_t*>(cdetector)
@@ -70,9 +71,46 @@ namespace wf {
         {"tagStandard52h13",tagStandard52h13_destroy}
     };
 
+    std::string ApriltagDetectorConfig::string() const {
+        return std::format(
+            "ApriltagDetectorConfig{{{}, {}, {}, {}, {}, {}}}",
+            numThreads,
+            quadDecimate,
+            quadSigma,
+            refineEdges,
+            decodeSharpening,
+            debug
+        );
+    }
+
+    std::ostream& operator<<(std::ostream& os, const ApriltagDetectorConfig& config) {
+        os << config.string();
+        return os;
+    }
+
+    std::string QuadThresholdParams::string() const {
+        return std::format(
+            "QuadThresholdParams{{{}, {}, {}, {}, {}, {}}}",
+            minClusterPixels,
+            maxNumMaxima,
+            criticalAngleRads,
+            maxLineFitMSE,
+            minWhiteBlackDiff,
+            deglitch
+        );
+    }
+
+    std::ostream& operator<<(std::ostream& os, const QuadThresholdParams& qtps) {
+        os << qtps.string();
+        return os;
+    }
+
+
 
     ApriltagDetector::ApriltagDetector() {
         cdetector = apriltag_detector_create();
+        QuadThresholdParams qtps;
+        this->setQuadThresholdParams(qtps);
     }
 
     ApriltagDetector::~ApriltagDetector() {
@@ -85,16 +123,15 @@ namespace wf {
         }
     }
 
-    std::vector<ApriltagDetection> ApriltagDetector::detect(int height, int width, int stride, uint8_t* buf) const noexcept {
-        image_u8_t im = {height,width,stride,buf};
+    std::vector<ApriltagDetection> ApriltagDetector::detect(int width, int height, int stride, uint8_t* buf) const noexcept {
+        image_u8_t im = {width,height,stride,buf};
 
         // Perform detection, returns a zarray of results
         auto rawDetections = apriltag_detector_detect(C_DETECTOR,&im);
-
         // Create output vector, preallocate memory to avoid reallocation costs
         std::vector<wf::ApriltagDetection> detections;
         detections.reserve(zarray_size(rawDetections));
-
+        logger->debug("{} detections in zarray",zarray_size(rawDetections));
         // Destructively converts rawDetections into a vector of wf::ApriltagDetections
         for (int i = 0; i < zarray_size(rawDetections); i++) {
             apriltag_detection_t* det;
@@ -141,7 +178,7 @@ namespace wf {
         };
     }
 
-    void ApriltagDetector::setQuadThresholdParams(const QuadThresholdParams params) {
+    void ApriltagDetector::setQuadThresholdParams(const QuadThresholdParams& params) {
         auto& qtp = C_DETECTOR->qtp;
         qtp.min_cluster_pixels = params.minClusterPixels;
         qtp.max_nmaxima = params.maxNumMaxima;
@@ -152,7 +189,7 @@ namespace wf {
         qtp.deglitch = params.deglitch;
     }
 
-    void ApriltagDetector::setConfig(const ApriltagDetectorConfig config) {
+    void ApriltagDetector::setConfig(const ApriltagDetectorConfig& config) {
         C_DETECTOR->nthreads = config.numThreads;
         C_DETECTOR->quad_decimate = config.quadDecimate;
         C_DETECTOR->quad_sigma = config.quadSigma;
@@ -161,10 +198,10 @@ namespace wf {
         C_DETECTOR->debug = config.debug;
     }
 
-    void ApriltagDetector::removeFamily(const std::string& familyName) {
+    int ApriltagDetector::removeFamily(const std::string& familyName) {
         auto it = families.find(familyName);
         if (it == families.end()) {
-            return;
+            return 1;
         }
         apriltag_detector_remove_family(
             C_DETECTOR,
@@ -172,20 +209,22 @@ namespace wf {
         );
         family_destructors.at(familyName)(C_FAMILY(it->second));
         families.erase(it);
+        return 0;
     }
 
-    void ApriltagDetector::addFamily(const std::string& familyName){
+    int ApriltagDetector::addFamily(const std::string& familyName){
         if (families.find(familyName) != families.end()){
-            return;
+            return 1;
         }
         auto it = family_creators.find(familyName);
         if (it == family_creators.end()) {
             logger->warn("{} is not a valid apriltag family",familyName);
-            return;
+            return 2;
         }
         auto family = (it->second)();
         families[familyName] = family;
         apriltag_detector_add_family(C_DETECTOR,C_FAMILY(family));
+        return 0;
     }
 
     void ApriltagDetector::clearFamilies() {

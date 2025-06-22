@@ -26,7 +26,7 @@
 #define _GNU_SOURCE
 #endif // _GNU_SOURCE
 
-#include "wfcore/scheduling/threadutils.h"
+#include "wfcore/common/scheduling/threadutils.h"
 #include <pthread.h>
 #include <sched.h>
 #include <unordered_set>

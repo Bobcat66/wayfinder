@@ -19,17 +19,20 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-// MacOS threadutils implementation. When built for windows or linux, this file compiles to nothing
-#if defined(__APPLE__) && defined(__MACH__)
+// Windows NT threadutils implementation. When built for a POSIX system, this file compiles to nothing
+#ifdef _WIN32
 
-#include "wfcore/scheduling/threadutils.h"
+#include "wfcore/common/scheduling/threadutils.h"
 
 namespace wf {
     // Pins a thread to only run on certain CPU cores
-    int setCPUAffinity(const std::thread& thread, const std::vector<int>& cores);
+    int setCPUAffinity(const std::thread& thread, const std::vector<int>& cores) {
+        return 0; // Placeholder
+    }
 
     // Sets thread priority of a thread
-    int setThreadPriority(const std::thread& thread, int priority);
-
+    int setThreadPriority(const std::thread& thread, int priority) {
+        return 0; // Placeholder
+    }
 }
-#endif //defined(__APPLE__) && defined(__MACH__)
+#endif // _WIN32

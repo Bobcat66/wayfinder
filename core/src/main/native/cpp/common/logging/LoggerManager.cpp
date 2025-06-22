@@ -19,7 +19,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "wfcore/logging/LoggerManager.h"
+#include "wfcore/common/logging/LoggerManager.h"
 
 #include <spdlog/sinks/stdout_color_sinks.h>
 
