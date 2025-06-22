@@ -69,7 +69,6 @@
         }                                                                                                       \
         std::filesystem::path tempDir                                                                           \
             = std::filesystem::temp_directory_path()                                                            \
-            / "wfcore-test-output"                                                                              \
             / TO_STRING(testname) "_output.jpg";                                                                \
         logger->info("{} output written to: {}",TO_STRING(testname), tempDir.string());                         \
         bool out = cv::imwrite(tempDir,image);                                                                  \
