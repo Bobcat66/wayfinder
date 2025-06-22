@@ -19,25 +19,4 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#pragma once
-
-#include "wfcore/video/video_types.h"
-
-namespace wf {
-    class CVFrameConverter {
-    public:
-        CVFrameConverter(FrameFormat in, FrameFormat out);
-        ~CVFrameConverter() = default;
-        Frame convert(const Frame& in) noexcept; // This method mutates a cv matrix in-place
-        const FrameFormat& getInputFormat() const {return inFormat;}
-        const FrameFormat& getOutputFormat() const {return outFormat;}
-    private:
-        FrameFormat inFormat;
-        FrameFormat outFormat;
-        FrameFormat tmpFormat;
-        double xscalefactor;
-        double yscalefactor;
-        cv::Mat buffer;
-        void (*colorConverter)(cv::Mat& in,cv::Mat& out);
-    };
-}
+#include <gtest/gtest.h>

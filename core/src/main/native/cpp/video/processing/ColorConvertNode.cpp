@@ -6,7 +6,7 @@
 
 namespace wf {
     template <CVImage T>
-    ColorConvertNode<T>::ColorConvertNode(const T& inpad, ColorSpace inspace, ColorSpace outspace) : CVProcessNode<T>(inpad) {
+    ColorConvertNode<T>::ColorConvertNode(ColorSpace inspace, ColorSpace outspace) {
         switch (inspace) {
             case COLOR:
                 switch (outspace) {
@@ -83,7 +83,6 @@ namespace wf {
                 throw std::invalid_argument("Attempted to convert from unknown colorspace");
         };
 
-        int outcvformat;
         switch (outspace) {
             case COLOR:
                 outcvformat = CV_8UC3;
@@ -97,12 +96,17 @@ namespace wf {
             default:
                 throw std::invalid_argument("Attempted to convert from unknown colorspace");
         }
-        this->outpad = T(inpad.rows,inpad.cols,outcvformat);
+    }
+
+    template <CVImage T>
+    void ColorConvertNode<T>::setInpad(const T& inpad) {
+        this->inpad = &inpad;
+        this->outpad = T(this->inpad->rows,this->inpad->cols,this->outcvformat);
     }
 
     template <CVImage T>
     void ColorConvertNode<T>::process() noexcept {
-        colorConverter(this->inpad,this->outpad);
+        colorConverter(*(this->inpad),this->outpad);
     }
 
     template class ColorConvertNode<cv::Mat>;

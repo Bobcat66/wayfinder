@@ -7,9 +7,11 @@ namespace wf {
     template <CVImage T>
     class ColorConvertNode : CVProcessNode<T> {
     public:
-        ColorConvertNode(const T& inpad, ColorSpace inspace, ColorSpace outspace);
+        ColorConvertNode(ColorSpace inspace, ColorSpace outspace);
+        void setInpad(const T& inpad) override;
         void process() noexcept override;
     private:
         void (*colorConverter)(const T& in,T& out);
+        int outcvformat;
     };
 }

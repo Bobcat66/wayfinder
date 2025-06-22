@@ -8,7 +8,8 @@ namespace wf {
     template <CVImage T>
     class ResizeNode : CVProcessNode<T> {
     public:
-        ResizeNode(const T& inpad_, int interpolater_, int outWidth_, int outHeight_);
+        ResizeNode(int interpolater_, int outWidth_, int outHeight_);
+        void setInpad(const T& inpad) override;
         void process() noexcept override;
     private:
         int interpolater;
