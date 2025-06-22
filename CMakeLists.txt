@@ -13,6 +13,7 @@ enable_testing()
 # Also worried this stuff might break the ODR rule
 # Ideally none of the dependencies would bundle any dependencies that are used by other dependencies, and everything
 # would rely on a shared set of libraries bundled with this project
+# Additionally, build OpenCV from source instead of relying on system installs
 
 # Allowed values for IMG_BACKEND
 set(ALLOWED_IMG_BACKENDS
