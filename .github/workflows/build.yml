@@ -15,13 +15,19 @@ jobs:
           - name: Checkout code
             uses: actions/checkout@v4
 
-          - name: Cache dependencies
+          - name: Cache build
             uses: actions/cache@v4
             with:
-                path: build/_deps
+                path: build
                 key: ${{ runner.os }}-deps-${{ hashFiles('**/CMakeLists.txt', '**/*.cmake') }}
                 restore-keys: |
                     ${{ runner.os }}-deps-
+        
+          - name: Mark restored deps as built
+            run: |
+                touch build/_deps/*-build/stamp/*-build-done
+                touch build/_deps/*-build/stamp/*-configure-done
+                touch build/_deps/*-build/stamp/*-install-done
 
           - name: Install Ninja
             run: sudo apt update && sudo apt install -y ninja-build
@@ -52,6 +58,9 @@ jobs:
 
           - name: Checkout code
             uses: actions/checkout@v4
+
+          - name: Install OpenCV
+            run: sudo apt install libopencv-dev
 
           - name: Download build artifacts
             uses: actions/download-artifact@v4
