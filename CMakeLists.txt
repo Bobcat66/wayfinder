@@ -5,6 +5,8 @@ set(CMAKE_CXX_STANDARD 20)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
+enable_testing()
+
 # TODO: Fix dependency hierarchy. Right now the dependencies are a mess, eventually 
 # I should configure the build system to make sure dependencies are imported once and only once
 # Particular points i've identified as needing improvement are fmt and Eigen
@@ -54,6 +56,7 @@ set_property(CACHE WF_IMG_BACKEND PROPERTY STRINGS ${ALLOWED_IMG_BACKENDS})
 set(WF_AI_BACKEND "cpu" CACHE STRING "Backend for hardware-accelerated AI inference")
 set_property(CACHE WF_AI_BACKEND PROPERTY STRINGS ${ALLOWED_AI_BACKENDS})
 
+# Remove this? I think the client will have a separate build system
 set(WF_TARGET "daemon" CACHE STRING "The target type for the build (daemon runs on coprocessors, client runs on DS)")
 set_property(CACHE WF_TARGET PROPERTY STRINGS ${ALLOWED_TARGETS})
 
@@ -93,8 +96,6 @@ configure_file(
     ${CMAKE_CURRENT_BINARY_DIR}/meta/version.h
     @ONLY
 )
-
-find_package(GTest REQUIRED)
 
 add_subdirectory(thirdparty/googletest)
 add_subdirectory(thirdparty/apriltag)

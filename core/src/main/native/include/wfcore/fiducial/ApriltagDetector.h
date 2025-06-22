@@ -50,9 +50,9 @@ namespace wf {
     std::ostream& operator<<(std::ostream& os, const ApriltagDetectorConfig& config);
 
     struct QuadThresholdParams {
-        int minClusterPixels = 300;
+        int minClusterPixels = 5;
         int maxNumMaxima = 10;
-        float criticalAngleRads = degreesToRadians(45.0f);
+        float criticalAngleRads = 0.0f;
         float maxLineFitMSE = 10.0f;
         int minWhiteBlackDiff = 5;
         bool deglitch = false;

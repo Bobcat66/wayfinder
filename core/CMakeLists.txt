@@ -63,20 +63,21 @@ if(WF_USE_GSTREAMER)
     
 endif()
 
-enable_testing()
-
 file(GLOB_RECURSE TESTSOURCES 
     CONFIGURE_DEPENDS 
     "${CMAKE_CURRENT_SOURCE_DIR}/src/test/native/*.cpp"
 )
-add_executable(run_tests ${TESTSOURCES})
+add_executable(wfcore_tests ${TESTSOURCES})
 
-target_link_libraries(run_tests 
+target_link_libraries(wfcore_tests 
     PRIVATE
     GTest::gtest
     GTest::gtest_main
     wfcore
 )
+
+include(GoogleTest)
+gtest_discover_tests(wfcore_tests)
 
 
 

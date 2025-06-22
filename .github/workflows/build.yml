@@ -1,0 +1,41 @@
+name: Build
+
+on:
+    push:
+        branches: [ main ]
+    pull_request:
+        branches: [ main ]
+
+jobs:
+    build-daemon:
+        name: "Wayfinder - Build Daemon"
+        runs-on: ubuntu-latest
+        steps:
+
+          - name: Checkout Code
+            uses: actions/checkout@v4
+
+          - name: Cache
+            uses: actions/cache@v4
+            with:
+                path: build/
+                key: ${{ runner.os }}-build-${{ hashFiles('**/*.cpp', '**/*.h', '**/CMakeLists.txt') }}
+                restore-keys: |
+                    ${{ runner.os }}-build-
+
+          - name: Install Ninja
+            run: sudo apt update && sudo apt install -y ninja-build
+
+          - name: Configure CMake
+            run: cmake -S . -B build -G Ninja
+        
+          - name: Build
+            run: cmake --build build
+
+          - name: Test
+            run: ctest --test-dir build --output-on-failure
+
+
+
+
+            

@@ -12,5 +12,6 @@ fetchcontent_declare(
     GIT_TAG           v1.17.0
 )
 
+set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 set(INSTALL_GTEST OFF CACHE BOOL "" FORCE)
 fetchcontent_makeavailable(googletest)

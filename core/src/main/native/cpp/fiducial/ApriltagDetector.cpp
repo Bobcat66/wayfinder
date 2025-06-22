@@ -109,7 +109,6 @@ namespace wf {
 
     ApriltagDetector::ApriltagDetector() {
         cdetector = apriltag_detector_create();
-        std::cout << this->getQuadThresholdParams();
         QuadThresholdParams qtps;
         this->setQuadThresholdParams(qtps);
     }
