@@ -19,9 +19,9 @@ jobs:
             uses: actions/cache@v4
             with:
                 path: build
-                key: ${{ runner.os }}-deps-${{ hashFiles('**/CMakeLists.txt', '**/*.cmake') }}
+                key: ${{ runner.os }}-build-${{ hashFiles('**/CMakeLists.txt', '**/*.cmake') }}
                 restore-keys: |
-                    ${{ runner.os }}-deps-
+                    ${{ runner.os }}-build-
 
           - name: Install Ninja
             run: sudo apt update && sudo apt install -y ninja-build
