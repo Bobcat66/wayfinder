@@ -22,9 +22,10 @@ namespace wf {
 
         [[nodiscard]]
         inline Frame processFrame(const Frame& in) noexcept {
+            Frame out(in.captimeMicros,this->outformat,{});
             unwrap(in,inpad);
             process();
-            return wrap(outpad);
+            return out;
         }
 
     private:
@@ -32,9 +33,9 @@ namespace wf {
         std::vector<CVProcessNode<T>> nodes;
         FrameFormat informat;
         FrameFormat outformat;
-        const T inpad;
+        T inpad;
         T outpad;
         void (*unwrap)(const Frame& in,T& out); // Unwraps a frame
-        Frame (*wrap)(const T& in); // Wraps a buffer into a frame
+        void (*wrap)(const T& in,Frame& out); // Wraps a buffer into a frame
     };
 }

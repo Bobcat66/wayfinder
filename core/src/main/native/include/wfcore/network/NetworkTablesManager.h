@@ -23,6 +23,9 @@
 
 #include "wfcore/common/scheduling/ThreadPool.h"
 
+#include <string>
 namespace wf {
-    
+    class NetworkTablesManager {
+        NetworkTablesManager(const std::string& devicename,unsigned int teamNumber);
+    }
 }
