@@ -22,6 +22,7 @@
 #pragma once
 
 #include "wfcore/common/scheduling/ThreadPool.h"
+#include "wfcore/network/NTDataPublisher.h"
 
 #include <networktables/NetworkTableInstance.h>
 #include <networktables/NetworkTable.h>
@@ -33,11 +34,17 @@
 namespace wf {
     class NetworkTablesManager {
     public:
-        NetworkTablesManager(const std::string& devicename,unsigned int teamNumber);
-        const nt::NetworkTable& getTable() const {return devRootTable;} 
+        static NetworkTablesManager& getInstance() {
+            static NetworkTablesManager instance;  // Thread-safe in C++11 and newer
+            return instance;
+        }
+        const nt::NetworkTable& getRootTable() const {return devRootTable;} 
     private:
+        NetworkTablesManager(); 
+        ~NetworkTablesManager() = default;
+        NetworkTablesManager(const NetworkTablesManager&) = delete;
+        NetworkTablesManager& operator=(const NetworkTablesManager&) = delete;
         nt::NetworkTableInstance inst;
         nt::NetworkTable devRootTable;
-        nt::NetworkTable wfRootTable;
     };
 }
