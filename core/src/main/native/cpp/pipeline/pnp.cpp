@@ -87,8 +87,8 @@ namespace wf {
                 detection.corners,
                 detection.decisionMargin,
                 detection.hammingDistance,
-                rvecs[0], tvecs[0], reprojectionErrors[0],
-                rvecs[1], tvecs[1], reprojectionErrors[1]
+                cvPoseVecsToWPILibPose3(rvecs[0], tvecs[0]), reprojectionErrors[0],
+                cvPoseVecsToWPILibPose3(rvecs[1], tvecs[1]), reprojectionErrors[1]
             };
         }
     }

@@ -33,11 +33,11 @@
 namespace wf {
 
     struct PipelineResult {
+        uint64_t captimeMicros;
         PipelineType type;
         std::vector<ApriltagRelativePoseObservation> aprilTagPoses;
         std::optional<ApriltagFieldPoseObservation> cameraPose;
         std::vector<ObjectDetection> objectDetections;
-        Frame frame;
 
         PipelineResult() = default;
         PipelineResult(PipelineResult&&) = default;
@@ -46,27 +46,26 @@ namespace wf {
         PipelineResult& operator=(const PipelineResult&) = default;
 
         PipelineResult(
+            uint64_t captime_,
             PipelineType type_,
             std::vector<ApriltagRelativePoseObservation> aprilTagPoses_,
             std::optional<ApriltagFieldPoseObservation> cameraPose_,
-            std::vector<ObjectDetection> objectDetections_,
-            Frame frame_
+            std::vector<ObjectDetection> objectDetections_
         ) 
-        : type(type_), aprilTagPoses(std::move(aprilTagPoses_))
-        , cameraPose(std::move(cameraPose_)), objectDetections(std::move(objectDetections_))
-        , frame(std::move(frame_)) {}
+        : captimeMicros(captime_), type(type_), aprilTagPoses(std::move(aprilTagPoses_))
+        , cameraPose(std::move(cameraPose_)), objectDetections(std::move(objectDetections_)) {}
         
         static PipelineResult ApriltagPipelineResult(
+            uint64_t captimeMicros,
             std::vector<ApriltagRelativePoseObservation> aprilTagPoses_,
-            std::optional<ApriltagFieldPoseObservation> cameraPose_,
-            Frame frame_
+            std::optional<ApriltagFieldPoseObservation> cameraPose_
         ) {
             return PipelineResult(
+                captimeMicros,
                 PipelineType::Apriltag,
                 std::move(aprilTagPoses_),
                 std::move(cameraPose_),
-                {},
-                std::move(frame_)
+                {}
             );
         }
     };

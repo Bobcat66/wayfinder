@@ -27,12 +27,14 @@ namespace wf {
         FrameProvider& frameProvider_,
         CVProcessPipe<cv::Mat>& preprocesser_, 
         Pipeline& pipeline_,
-        ResultConsumer resultConsumer_
+        ResultConsumer resultConsumer_,
+        FrameConsumer frameConsumer_
     )
     : preprocesser(preprocesser_)
     , frameProvider(frameProvider_)
     , pipeline(pipeline_)
-    , resultConsumer(std::move(resultConsumer_)) {
+    , resultConsumer(std::move(resultConsumer_)) 
+    , frameConsumer(std::move(frameConsumer_)) {
         running = false;
     }
 

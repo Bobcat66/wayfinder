@@ -23,9 +23,21 @@
 
 #include "wfcore/common/scheduling/ThreadPool.h"
 
+#include <networktables/NetworkTableInstance.h>
+#include <networktables/NetworkTable.h>
+
 #include <string>
+#include <vector>
+
+
 namespace wf {
     class NetworkTablesManager {
+    public:
         NetworkTablesManager(const std::string& devicename,unsigned int teamNumber);
-    }
+        const nt::NetworkTable& getTable() const {return devRootTable;} 
+    private:
+        nt::NetworkTableInstance inst;
+        nt::NetworkTable devRootTable;
+        nt::NetworkTable wfRootTable;
+    };
 }

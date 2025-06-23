@@ -76,9 +76,9 @@ namespace wf {
             config.SolvePNPExcludes
         );
         return PipelineResult::ApriltagPipelineResult(
+            frame.captimeMicros,
             atagPoses,
-            fieldPose,
-            frame
+            fieldPose
         );
     }
 

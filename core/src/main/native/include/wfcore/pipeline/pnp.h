@@ -40,23 +40,21 @@ namespace wf {
         std::vector<cv::Point2d> corners;
         double decisionMargin;
         double hammingDistance;
-        cv::Mat rvec0;
-        cv::Mat tvec0;
+        gtsam::Pose3 camPose0;
         double error0;
-        cv::Mat rvec1;
-        cv::Mat tvec1;
+        gtsam::Pose3 camPose1;
         double error1;
         ApriltagRelativePoseObservation(
             int id_,
             const std::vector<cv::Point2d> corners_,
             double decisionMargin_, double hammingDistance_,
-            cv::Mat rvec0_, cv::Mat tvec0_, double error0_,
-            cv::Mat rvec1_, cv::Mat tvec1_, double error1_
+            gtsam::Pose3 camPose0_, double error0_,
+            gtsam::Pose3 camPose1_, double error1_
         ) : id(id_), 
             corners(std::move(corners_)), 
             decisionMargin(decisionMargin_), hammingDistance(hammingDistance_),
-            rvec0(std::move(rvec0_)), tvec0(std::move(tvec0_)), error0(error0_), 
-            rvec1(std::move(rvec1_)), tvec1(std::move(tvec1_)), error1(error1_) {}
+            camPose0(std::move(camPose0_)), error0(error0_), 
+            camPose1(std::move(camPose1_)), error1(error1_) {}
     };
     // Observation of a single Apriltag's pose relative to the camera
 
