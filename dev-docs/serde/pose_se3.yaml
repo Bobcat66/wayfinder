@@ -1,0 +1,27 @@
+# represents a pose in SE(3). 
+# Encodes a point in R^3 as a 3-vector
+# and a rotation in SO(3) as a quaternion.
+# in WPILib, this would be represented as a Pose3d
+---
+- name: pose_se3
+  fields:
+  - name: x
+    type: float64
+
+  - name: y
+    type: float64
+
+  - name: z
+    type: float64
+
+  - name: wq
+    type: float64
+
+  - name: xq
+    type: float64
+
+  - name: yq
+    type: float64
+    
+  - name: zq
+    type: float64

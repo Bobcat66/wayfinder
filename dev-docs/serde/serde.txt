@@ -1,0 +1,17 @@
+Wayfinder Serde
+
+Wayfinder has a quick and dirty Serialization/Deserialization (serde) system for
+internal use. It is designed for speed and not much else, and as such 
+is only used for time-critical tasks, such as pipeline data. For less time-sensitive
+applications, Protobufs is the preferred serde system. The specifics of
+wayfinder's serde system are documented here.
+
+Eventually I want to replace this system with WIPS, 
+so these docs will be written in YAML so they can easily
+be turned into machine-readable schema files
+
+if a field is marked "VLA", that means it is a variable-length array, and there is a uint32
+directly before it that marks how long it is
+
+if a field is marked "optional", that means the value is optional, and there is a bool
+directly before it that marks how long it is

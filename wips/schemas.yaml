@@ -1,0 +1,120 @@
+---
+# represents a pose in SE(3). 
+# Encodes a point in R^3 as a 3-vector
+# and a rotation in SO(3) as a quaternion.
+# in WPILib, this would be represented as a Pose3d
+  name: pose3
+  fields:
+  - name: x
+    type: fp64
+
+  - name: y
+    type: fp64
+
+  - name: z
+    type: fp64
+
+  - name: wq
+    type: fp64
+
+  - name: xq
+    type: fp64
+
+  - name: yq
+    type: fp64
+    
+  - name: zq
+    type: fp64
+---
+# Encodes an apriltag pose observation
+# computed either with SQPnP (in the multi tag case)
+# or with IPPE Square (in the single tag case)
+  name: apriltag_field_pose_observation
+  fields:
+  - name: tags_used
+    type: i32
+    vla: True
+
+  - name: field_pose_0
+    type: pose3
+
+  - name: error_0
+    type: fp64
+
+  - name: field_pose_1
+    type: pose3
+    optional: True
+
+  - name: error_1
+    type: fp64
+    optional: True
+---
+# Encodes the pose of an apriltag relative to the camera
+# Computed with the SQPnP algorithm
+  name: apriltag_relative_pose_observation
+  fields:
+  - name: fiducial_id
+    type: i32
+
+  - name: corner0_x
+    type: fp64
+
+  - name: corner0_y
+    type: fp64
+
+  - name: corner1_x
+    type: fp64
+
+  - name: corner1_y
+    type: fp64
+
+  - name: corner2_x
+    type: fp64
+
+  - name: corner2_y
+    type: fp64
+
+  - name: corner3_x
+    type: fp64
+
+  - name: corner3_y
+    type: fp64
+  
+  - name: decision_margin
+    type: fp64
+  
+  - name: hamming_distance
+    type: fp64
+
+  - name: cam_pose_0
+    type: pose3
+  
+  - name: error_0
+    type: fp64
+  
+  - name: cam_pose_1
+    type: pose3
+  
+  - name: error_1
+    type: fp64
+---
+# Represents the result of a vision pipeline
+  name: pipeline_result
+  fields:
+  - name: timestamp
+    type: u64
+  
+  - name: pipeline_type
+    type: u8
+
+  - name: tag_poses
+    type: apriltag_relative_pose_observation
+    vla: True
+  
+  - name: field_pose
+    type: apriltag_field_pose_observation
+    optional: True
+  
+#  - name: object_detections
+#    type: TBA
+#    vla: True
