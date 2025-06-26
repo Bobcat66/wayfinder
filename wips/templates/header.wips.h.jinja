@@ -39,11 +39,11 @@ extern "C" {
 #endif
 
 #include "wips_runtime.h"
-{% for dependency in dependencies -%}
-#include "{{ dependency.name }}.wips.h"
-{% endfor -%}
 
-// {{ name }} declarations
+{%- for dependency in dependencies %}
+#include "{{ dependency.name }}.wips.h"
+{%- endfor %}
+
 typedef struct wips_{{ name }} {
     {%- for field in fields %}
     {%- if field.vla == True %}

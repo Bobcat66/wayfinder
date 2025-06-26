@@ -40,7 +40,7 @@ extern "C" {
 
 #include "wips_runtime.h"
 #include "pose3.wips.h"
-// apriltag_relative_pose_observation declarations
+
 typedef struct wips_apriltag_relative_pose_observation {
     wips_i32_t fiducial_id;
     wips_fp64_t corner0_x;

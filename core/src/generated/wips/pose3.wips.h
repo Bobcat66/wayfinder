@@ -39,7 +39,7 @@ extern "C" {
 #endif
 
 #include "wips_runtime.h"
-// pose3 declarations
+
 typedef struct wips_pose3 {
     wips_fp64_t x;
     wips_fp64_t y;

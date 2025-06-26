@@ -41,8 +41,6 @@ extern "C" {
 #include <stdint.h>
 #include <stddef.h>
 
-#include <stdint.h>
-
 typedef uint8_t wips_u8_t;
 typedef int8_t wips_i8_t;
 

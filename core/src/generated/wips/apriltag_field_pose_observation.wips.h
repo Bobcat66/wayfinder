@@ -40,7 +40,7 @@ extern "C" {
 
 #include "wips_runtime.h"
 #include "pose3.wips.h"
-// apriltag_field_pose_observation declarations
+
 typedef struct wips_apriltag_field_pose_observation {
     wips_u32_t DETAILvlasize__tags_used;
     wips_i32_t* tags_used;

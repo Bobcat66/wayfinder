@@ -39,9 +39,9 @@ extern "C" {
 #endif
 
 #include "wips_runtime.h"
-#include "apriltag_relative_pose_observation.wips.h"
 #include "apriltag_field_pose_observation.wips.h"
-// pipeline_result declarations
+#include "apriltag_relative_pose_observation.wips.h"
+
 typedef struct wips_pipeline_result {
     wips_u64_t timestamp;
     wips_u8_t pipeline_type;
