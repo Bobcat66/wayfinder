@@ -1,4 +1,6 @@
 /*
+ * SPDX-License-Identifier: BSD-3-Clause
+ *
  * Copyright (c) 2025 Jesse Kane
  *
  * Redistribution and use in source and binary forms, with or without

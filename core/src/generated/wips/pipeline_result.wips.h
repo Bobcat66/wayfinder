@@ -1,4 +1,6 @@
 /*
+ * SPDX-License-Identifier: BSD-3-Clause
+ *
  * Copyright (c) 2025 Jesse Kane
  *
  * Redistribution and use in source and binary forms, with or without
@@ -37,8 +39,8 @@ extern "C" {
 #endif
 
 #include "wips_runtime.h"
-#include "apriltag_field_pose_observation.wips.h"
 #include "apriltag_relative_pose_observation.wips.h"
+#include "apriltag_field_pose_observation.wips.h"
 // pipeline_result declarations
 typedef struct wips_pipeline_result {
     wips_u64_t timestamp;

@@ -9,7 +9,11 @@ file(GLOB_RECURSE CORESOURCES
     CONFIGURE_DEPENDS 
     "${CMAKE_CURRENT_SOURCE_DIR}/src/main/native/cpp/*.cpp"
 )
-add_library(wfcore ${CORESOURCES})
+file(GLOB_RECURSE WIPSSOURCES 
+    CONFIGURE_DEPENDS 
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/generated/wips/*.c"
+)
+add_library(wfcore ${CORESOURCES} ${WIPSSOURCES})
 
 if(WF_CV_OPENCL)
     add_compile_definitions(WF_CV_OPENCL)
@@ -39,6 +43,7 @@ target_link_libraries(wfcore
 target_include_directories(wfcore 
     PUBLIC 
     ${CMAKE_CURRENT_SOURCE_DIR}/src/main/native/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/generated/wips
     ${OpenCV_INCLUDE_DIRS}
     PRIVATE 
     ${CMAKE_CURRENT_BINARY_DIR}/../meta

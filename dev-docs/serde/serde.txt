@@ -6,9 +6,7 @@ is only used for time-critical tasks, such as pipeline data. For less time-sensi
 applications, Protobufs is the preferred serde system. The specifics of
 wayfinder's serde system are documented here.
 
-Eventually I want to replace this system with WIPS, 
-so these docs will be written in YAML so they can easily
-be turned into machine-readable schema files
+UPDATE: Wayfinder's serde system is being replaced with WIPS
 
 if a field is marked "VLA", that means it is a variable-length array, and there is a uint32
 directly before it that marks how long it is

@@ -1,8 +1,6 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-or-later
  *
- * This file is part of Wayfinder.
- *
  * Copyright (C) 2025 Jesse Kane
  *
  * This program is free software: you can redistribute it and/or modify
