@@ -57,6 +57,5 @@ namespace wf {
         std::vector<byte>::const_iterator cit
     ) noexcept {
         double timestamp = unpackTrivial<double>(data,cit);
-        
     }
 }
