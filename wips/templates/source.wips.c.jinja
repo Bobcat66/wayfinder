@@ -36,6 +36,43 @@
 #include "wips_detail.h"
 #include "wips_runtime.h"
 #include "{{ name }}.wips.h"
+
+wips_{{ name }}_t* wips_{{ name }}_create(){
+    wips_{{ name }}_t* struct_ptr = calloc(1,GET_SIZE({{ name }}));
+    if (!struct_ptr) {return NULL;}
+    return struct_ptr;
+}
+void wips_{{ name }}_destroy(wips_{{ name }}_t* struct_ptr) {
+{%- for field in fields %}
+{%- if field.vla == True%}
+    free(struct_ptr->{{ field.name }});
+{%- endif %}
+{%- endfor%}
+    free(struct_ptr);
+}
+
+{%- for field in fields %}
+{% if field.vla == True %}
+{{ field | get_ctype_name }} wips_{{ name }}_get_{{ field.name }}_element(wips_{{ name }}_t* struct_ptr, wips_u32_t index) {
+    return *(struct_ptr->{{ field.name }} + index);
+}
+{{ field | get_ctype_name }}* wips_{{ name }}_get_{{ field.name }}(wips_{{ name }}_t* struct_ptr) {
+    return struct_ptr->{{ field.name }};
+}
+void wips_{{ name }}_set_{{ field.name }}(wips_{{ name }}_t* struct_ptr, {{ field | get_ctype_name }}* new, wips_u32_t size) {
+    struct_ptr->{{ field.name }} = new;
+    struct_ptr->GET_DETAIL({{ field.name }},vlasize) = size;
+}
+{% else %}
+{{ field | get_ctype_name }} wips_{{ name }}_get_{{ field.name }}(wips_{{name}}_t* struct_ptr) {
+    return struct_ptr->{{ field.name }};
+}
+void wips_{{ name }}_set_{{ field.name }}(wips_{{ name }}_t* struct_ptr, {{ field | get_ctype_name }} new) {
+    struct_ptr->{{ field.name }} = new;
+}
+{% endif %}
+{%- endfor %}
+
 {% if trivial == True %}
 DEFINE_TRIVIAL_ENCODE({{ name }})
 DEFINE_TRIVIAL_DECODE({{ name }})

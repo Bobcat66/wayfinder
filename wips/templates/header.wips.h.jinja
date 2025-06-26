@@ -54,6 +54,20 @@ typedef struct wips_{{ name }} {
     {%- endfor %}
 } wips_{{ name }}_t;
 
+wips_{{ name }}_t* wips_{{ name }}_create();
+void wips_{{ name }}_destroy(wips_{{ name }}_t* struct_ptr);
+
+{%- for field in fields %}
+{% if field.vla == True %}
+{{ field | get_ctype_name }} wips_{{ name }}_get_{{ field.name }}_element(wips_{{ name }}_t* struct_ptr, wips_u32_t index)
+{{ field | get_ctype_name }}* wips_{{ name }}_get_{{ field.name }}(wips_{{name}}_t* struct_ptr);
+void wips_{{ name }}_set_{{ field.name }}(wips_{{name}}_t* struct_ptr, {{ field | get_ctype_name }}* new, wips_u32_t size);
+{% else %}
+{{ field | get_ctype_name }} wips_{{ name }}_get_{{ field.name }}(wips_{{name}}_t* struct_ptr);
+void wips_{{ name }}_set_{{ field.name }}(wips_{{name}}_t* struct_ptr, {{ field | get_ctype_name }} new);
+{% endif %}
+{%- endfor %}
+
 size_t wips_encode_{{ name }}(wips_bin_t* data, wips_{{ name }}_t* in);
 size_t wips_decode_{{ name }}(wips_{{ name }}_t* out, wips_bin_t* data);
 

@@ -37,6 +37,81 @@
 #include "wips_runtime.h"
 #include "apriltag_field_pose_observation.wips.h"
 
+wips_apriltag_field_pose_observation_t* wips_apriltag_field_pose_observation_create(){
+    wips_apriltag_field_pose_observation_t* struct_ptr = calloc(1,GET_SIZE(apriltag_field_pose_observation));
+    if (!struct_ptr) {return NULL;}
+}
+void wips_apriltag_field_pose_observation_destroy(wips_apriltag_field_pose_observation_t* struct_ptr) {
+    free(struct_ptr->tags_used);
+    free(struct_ptr);
+}
+
+wips_u32_t wips_apriltag_field_pose_observation_get_DETAILvlasize__tags_used(wips_apriltag_field_pose_observation_t* struct_ptr) {
+    return struct_ptr->DETAILvlasize__tags_used;
+}
+void wips_apriltag_field_pose_observation_set_DETAILvlasize__tags_used(wips_apriltag_field_pose_observation_t* struct_ptr, wips_u32_t new) {
+    struct_ptr->DETAILvlasize__tags_used = new;
+}
+
+
+wips_i32_t* wips_apriltag_field_pose_observation_get_tags_used(wips_apriltag_field_pose_observation_t* struct_ptr) {
+    return struct_ptr->tags_used;
+}
+void wips_apriltag_field_pose_observation_set_tags_used(wips_apriltag_field_pose_observation_t* struct_ptr, wips_i32_t* new, wips_u32_t size) {
+    struct_ptr->tags_used = new;
+    struct_ptr->GET_DETAIL(tags_used,vlasize) = size;
+}
+
+
+wips_pose3_t wips_apriltag_field_pose_observation_get_field_pose_0(wips_apriltag_field_pose_observation_t* struct_ptr) {
+    return struct_ptr->field_pose_0;
+}
+void wips_apriltag_field_pose_observation_set_field_pose_0(wips_apriltag_field_pose_observation_t* struct_ptr, wips_pose3_t new) {
+    struct_ptr->field_pose_0 = new;
+}
+
+
+wips_fp64_t wips_apriltag_field_pose_observation_get_error_0(wips_apriltag_field_pose_observation_t* struct_ptr) {
+    return struct_ptr->error_0;
+}
+void wips_apriltag_field_pose_observation_set_error_0(wips_apriltag_field_pose_observation_t* struct_ptr, wips_fp64_t new) {
+    struct_ptr->error_0 = new;
+}
+
+
+wips_u8_t wips_apriltag_field_pose_observation_get_DETAILoptpresent__field_pose_1(wips_apriltag_field_pose_observation_t* struct_ptr) {
+    return struct_ptr->DETAILoptpresent__field_pose_1;
+}
+void wips_apriltag_field_pose_observation_set_DETAILoptpresent__field_pose_1(wips_apriltag_field_pose_observation_t* struct_ptr, wips_u8_t new) {
+    struct_ptr->DETAILoptpresent__field_pose_1 = new;
+}
+
+
+wips_pose3_t wips_apriltag_field_pose_observation_get_field_pose_1(wips_apriltag_field_pose_observation_t* struct_ptr) {
+    return struct_ptr->field_pose_1;
+}
+void wips_apriltag_field_pose_observation_set_field_pose_1(wips_apriltag_field_pose_observation_t* struct_ptr, wips_pose3_t new) {
+    struct_ptr->field_pose_1 = new;
+}
+
+
+wips_u8_t wips_apriltag_field_pose_observation_get_DETAILoptpresent__error_1(wips_apriltag_field_pose_observation_t* struct_ptr) {
+    return struct_ptr->DETAILoptpresent__error_1;
+}
+void wips_apriltag_field_pose_observation_set_DETAILoptpresent__error_1(wips_apriltag_field_pose_observation_t* struct_ptr, wips_u8_t new) {
+    struct_ptr->DETAILoptpresent__error_1 = new;
+}
+
+
+wips_fp64_t wips_apriltag_field_pose_observation_get_error_1(wips_apriltag_field_pose_observation_t* struct_ptr) {
+    return struct_ptr->error_1;
+}
+void wips_apriltag_field_pose_observation_set_error_1(wips_apriltag_field_pose_observation_t* struct_ptr, wips_fp64_t new) {
+    struct_ptr->error_1 = new;
+}
+
+
+
 size_t wips_encode_apriltag_field_pose_observation(wips_bin_t* data, wips_apriltag_field_pose_observation_t* in) {
     size_t bytesEncoded = 0;
     bytesEncoded += wips_encode_u32(data, &(in->DETAILvlasize__tags_used));

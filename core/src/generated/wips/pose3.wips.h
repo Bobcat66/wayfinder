@@ -50,6 +50,37 @@ typedef struct wips_pose3 {
     wips_fp64_t zq;
 } wips_pose3_t;
 
+wips_pose3_t* wips_pose3_create();
+void wips_pose3_destroy(wips_pose3_t* struct_ptr);
+
+wips_fp64_t wips_pose3_get_x(wips_pose3_t* struct_ptr);
+void wips_pose3_set_x(wips_pose3_t* struct_ptr, wips_fp64_t new);
+
+
+wips_fp64_t wips_pose3_get_y(wips_pose3_t* struct_ptr);
+void wips_pose3_set_y(wips_pose3_t* struct_ptr, wips_fp64_t new);
+
+
+wips_fp64_t wips_pose3_get_z(wips_pose3_t* struct_ptr);
+void wips_pose3_set_z(wips_pose3_t* struct_ptr, wips_fp64_t new);
+
+
+wips_fp64_t wips_pose3_get_wq(wips_pose3_t* struct_ptr);
+void wips_pose3_set_wq(wips_pose3_t* struct_ptr, wips_fp64_t new);
+
+
+wips_fp64_t wips_pose3_get_xq(wips_pose3_t* struct_ptr);
+void wips_pose3_set_xq(wips_pose3_t* struct_ptr, wips_fp64_t new);
+
+
+wips_fp64_t wips_pose3_get_yq(wips_pose3_t* struct_ptr);
+void wips_pose3_set_yq(wips_pose3_t* struct_ptr, wips_fp64_t new);
+
+
+wips_fp64_t wips_pose3_get_zq(wips_pose3_t* struct_ptr);
+void wips_pose3_set_zq(wips_pose3_t* struct_ptr, wips_fp64_t new);
+
+
 size_t wips_encode_pose3(wips_bin_t* data, wips_pose3_t* in);
 size_t wips_decode_pose3(wips_pose3_t* out, wips_bin_t* data);
 

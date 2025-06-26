@@ -62,6 +62,12 @@ typedef struct wips_bin {
     size_t allocated; // The amount of memory allocated
 } wips_bin_t;
 
+wips_bin_t* wips_bin_create(size_t size);
+
+wips_bin_t* wips_bin_wrap(unsigned char* base, size_t size);
+
+void wips_bin_destroy(wips_bin_t* bin);
+
 size_t wips_encode_u8(wips_bin_t* data, wips_u8_t* in);
 size_t wips_decode_u8(wips_u8_t* out, wips_bin_t* data);
 

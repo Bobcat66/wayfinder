@@ -39,8 +39,8 @@ extern "C" {
 #endif
 
 #include "wips_runtime.h"
-#include "apriltag_field_pose_observation.wips.h"
 #include "apriltag_relative_pose_observation.wips.h"
+#include "apriltag_field_pose_observation.wips.h"
 
 typedef struct wips_pipeline_result {
     wips_u64_t timestamp;
@@ -50,6 +50,33 @@ typedef struct wips_pipeline_result {
     wips_u8_t DETAILoptpresent__field_pose;
     wips_apriltag_field_pose_observation_t field_pose;
 } wips_pipeline_result_t;
+
+wips_pipeline_result_t* wips_pipeline_result_create();
+void wips_pipeline_result_destroy(wips_pipeline_result_t* struct_ptr);
+
+wips_u64_t wips_pipeline_result_get_timestamp(wips_pipeline_result_t* struct_ptr);
+void wips_pipeline_result_set_timestamp(wips_pipeline_result_t* struct_ptr, wips_u64_t new);
+
+
+wips_u8_t wips_pipeline_result_get_pipeline_type(wips_pipeline_result_t* struct_ptr);
+void wips_pipeline_result_set_pipeline_type(wips_pipeline_result_t* struct_ptr, wips_u8_t new);
+
+
+wips_u32_t wips_pipeline_result_get_DETAILvlasize__tag_poses(wips_pipeline_result_t* struct_ptr);
+void wips_pipeline_result_set_DETAILvlasize__tag_poses(wips_pipeline_result_t* struct_ptr, wips_u32_t new);
+
+
+wips_apriltag_relative_pose_observation_t* wips_pipeline_result_get_tag_poses(wips_pipeline_result_t* struct_ptr);
+void wips_pipeline_result_set_tag_poses(wips_pipeline_result_t* struct_ptr, wips_apriltag_relative_pose_observation_t* new, wips_u32_t size);
+
+
+wips_u8_t wips_pipeline_result_get_DETAILoptpresent__field_pose(wips_pipeline_result_t* struct_ptr);
+void wips_pipeline_result_set_DETAILoptpresent__field_pose(wips_pipeline_result_t* struct_ptr, wips_u8_t new);
+
+
+wips_apriltag_field_pose_observation_t wips_pipeline_result_get_field_pose(wips_pipeline_result_t* struct_ptr);
+void wips_pipeline_result_set_field_pose(wips_pipeline_result_t* struct_ptr, wips_apriltag_field_pose_observation_t new);
+
 
 size_t wips_encode_pipeline_result(wips_bin_t* data, wips_pipeline_result_t* in);
 size_t wips_decode_pipeline_result(wips_pipeline_result_t* out, wips_bin_t* data);

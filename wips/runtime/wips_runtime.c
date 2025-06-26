@@ -35,6 +35,33 @@
 #include "wips_runtime.h"
 #include "wips_detail.h"
 
+wips_bin_t* wips_bin_create(size_t size) {
+    wips_bin_t* newbin = calloc(1, sizeof(wips_bin_t)); 
+    if (!newbin) return NULL;
+    
+    newbin->base = malloc(size);  // Buffer uninitialized for performance
+    if (!newbin->base) {
+        free(newbin);
+        return NULL;
+    }
+    
+    newbin->allocated = size;
+    newbin->offset = 0;
+    return newbin;
+}
+
+wips_bin_t* wips_bin_wrap(unsigned char* base, size_t size) {
+    wips_bin_t* newbin = malloc(sizeof(wips_bin_t));
+    newbin->base = base;
+    newbin->offset = 0;
+    newbin->allocated = size;
+}
+
+void wips_bin_destroy(wips_bin_t* bin) {
+    free(bin->base);
+    free(bin);
+}
+
 DEFINE_TRIVIAL_ENCODE(u8)
 DEFINE_TRIVIAL_DECODE(u8)
 
