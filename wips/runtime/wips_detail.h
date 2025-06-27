@@ -52,30 +52,30 @@ extern "C" {
 #define GET_DETAIL_IMPL(field,detail) DETAIL ## detail ## __ ## field
 #define GET_DETAIL(field,detail) GET_DETAIL_IMPL(field,detail)
 
-#define DEFINE_TRIVIAL_ENCODE(wips_typename)                                                            \
-    size_t wips_encode_##wips_typename(wips_bin_t* data, GET_CTYPE(wips_typename)* in){                 \
-        size_t newOffset = data->offset + GET_SIZE(wips_typename);                                      \
-        if (newOffset > data->allocated) {                                                              \
-            size_t new_allocated = data->allocated * 2 >= newOffset                                     \
-                ? data->allocated * 2                                                                   \
-                : newOffset;                                                                            \
-            unsigned char* newBase = realloc(data->base, new_allocated);                                \
-            if (!newBase) {return 0;}                                                                   \
-            data->allocated = new_allocated;                                                            \
-            data->base = newBase;                                                                       \
-        }                                                                                               \
-        memcpy(data->base+data->offset,in, GET_SIZE(wips_typename));                                    \
-        data->offset = newOffset;                                                                       \
-        return GET_SIZE(wips_typename);                                                                 \
+#define DEFINE_TRIVIAL_ENCODE(wips_typename)                                                                    \
+    size_t wips_encode_##wips_typename(wips_bin_t* data, GET_CTYPE(wips_typename)* in){                         \
+        size_t newOffset = data->offset + GET_SIZE(wips_typename);                                              \
+        if (newOffset > data->allocated) {                                                                      \
+            size_t new_allocated = data->allocated * 2 >= newOffset                                             \
+                ? data->allocated * 2                                                                           \
+                : newOffset;                                                                                    \
+            unsigned char* newBase = realloc(data->base, new_allocated);                                        \
+            if (!newBase) {return 0;}                                                                           \
+            data->allocated = new_allocated;                                                                    \
+            data->base = newBase;                                                                               \
+        }                                                                                                       \
+        memcpy(data->base+data->offset,in, GET_SIZE(wips_typename));                                            \
+        data->offset = newOffset;                                                                               \
+        return GET_SIZE(wips_typename);                                                                         \
     }
     
-#define DEFINE_TRIVIAL_DECODE(wips_typename)                                                            \
-    size_t wips_decode_##wips_typename(GET_CTYPE(wips_typename)* out, wips_bin_t* data){                \
-        size_t newOffset = data->offset + GET_SIZE(wips_typename);                                      \
-        assert(newOffset <= data->allocated);                                                           \
-        memcpy(out,data->base+data->offset, GET_SIZE(wips_typename));                                   \
-        data->offset = newOffset;                                                                       \
-        return GET_SIZE(wips_typename);                                                                 \
+#define DEFINE_TRIVIAL_DECODE(wips_typename)                                                                    \
+    size_t wips_decode_##wips_typename(GET_CTYPE(wips_typename)* out, wips_bin_t* data){                        \
+        size_t newOffset = data->offset + GET_SIZE(wips_typename);                                              \
+        assert(newOffset <= data->allocated);                                                                   \
+        memcpy(out,data->base+data->offset, GET_SIZE(wips_typename));                                           \
+        data->offset = newOffset;                                                                               \
+        return GET_SIZE(wips_typename);                                                                         \
     }
 
 #ifdef __cplusplus

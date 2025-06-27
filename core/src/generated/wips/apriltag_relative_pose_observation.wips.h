@@ -59,68 +59,12 @@ typedef struct wips_apriltag_relative_pose_observation {
     wips_fp64_t error_1;
 } wips_apriltag_relative_pose_observation_t;
 
+// Recursive function to free all memory allocated by the struct and its members. Does NOT free the struct itself if it was dynamically allocated.
+// Warning: Calling this function on a struct that has not been written to from a WIPS binary will result in undefined behavior.
+// This function is intended to be used when the struct is no longer needed, to prevent memory leaks.
+void wips_apriltag_relative_pose_observation_free_resources(wips_apriltag_relative_pose_observation_t* struct_ptr);
 wips_apriltag_relative_pose_observation_t* wips_apriltag_relative_pose_observation_create();
 void wips_apriltag_relative_pose_observation_destroy(wips_apriltag_relative_pose_observation_t* struct_ptr);
-
-wips_i32_t wips_apriltag_relative_pose_observation_get_fiducial_id(wips_apriltag_relative_pose_observation_t* struct_ptr);
-void wips_apriltag_relative_pose_observation_set_fiducial_id(wips_apriltag_relative_pose_observation_t* struct_ptr, wips_i32_t new);
-
-
-wips_fp64_t wips_apriltag_relative_pose_observation_get_corner0_x(wips_apriltag_relative_pose_observation_t* struct_ptr);
-void wips_apriltag_relative_pose_observation_set_corner0_x(wips_apriltag_relative_pose_observation_t* struct_ptr, wips_fp64_t new);
-
-
-wips_fp64_t wips_apriltag_relative_pose_observation_get_corner0_y(wips_apriltag_relative_pose_observation_t* struct_ptr);
-void wips_apriltag_relative_pose_observation_set_corner0_y(wips_apriltag_relative_pose_observation_t* struct_ptr, wips_fp64_t new);
-
-
-wips_fp64_t wips_apriltag_relative_pose_observation_get_corner1_x(wips_apriltag_relative_pose_observation_t* struct_ptr);
-void wips_apriltag_relative_pose_observation_set_corner1_x(wips_apriltag_relative_pose_observation_t* struct_ptr, wips_fp64_t new);
-
-
-wips_fp64_t wips_apriltag_relative_pose_observation_get_corner1_y(wips_apriltag_relative_pose_observation_t* struct_ptr);
-void wips_apriltag_relative_pose_observation_set_corner1_y(wips_apriltag_relative_pose_observation_t* struct_ptr, wips_fp64_t new);
-
-
-wips_fp64_t wips_apriltag_relative_pose_observation_get_corner2_x(wips_apriltag_relative_pose_observation_t* struct_ptr);
-void wips_apriltag_relative_pose_observation_set_corner2_x(wips_apriltag_relative_pose_observation_t* struct_ptr, wips_fp64_t new);
-
-
-wips_fp64_t wips_apriltag_relative_pose_observation_get_corner2_y(wips_apriltag_relative_pose_observation_t* struct_ptr);
-void wips_apriltag_relative_pose_observation_set_corner2_y(wips_apriltag_relative_pose_observation_t* struct_ptr, wips_fp64_t new);
-
-
-wips_fp64_t wips_apriltag_relative_pose_observation_get_corner3_x(wips_apriltag_relative_pose_observation_t* struct_ptr);
-void wips_apriltag_relative_pose_observation_set_corner3_x(wips_apriltag_relative_pose_observation_t* struct_ptr, wips_fp64_t new);
-
-
-wips_fp64_t wips_apriltag_relative_pose_observation_get_corner3_y(wips_apriltag_relative_pose_observation_t* struct_ptr);
-void wips_apriltag_relative_pose_observation_set_corner3_y(wips_apriltag_relative_pose_observation_t* struct_ptr, wips_fp64_t new);
-
-
-wips_fp64_t wips_apriltag_relative_pose_observation_get_decision_margin(wips_apriltag_relative_pose_observation_t* struct_ptr);
-void wips_apriltag_relative_pose_observation_set_decision_margin(wips_apriltag_relative_pose_observation_t* struct_ptr, wips_fp64_t new);
-
-
-wips_fp64_t wips_apriltag_relative_pose_observation_get_hamming_distance(wips_apriltag_relative_pose_observation_t* struct_ptr);
-void wips_apriltag_relative_pose_observation_set_hamming_distance(wips_apriltag_relative_pose_observation_t* struct_ptr, wips_fp64_t new);
-
-
-wips_pose3_t wips_apriltag_relative_pose_observation_get_cam_pose_0(wips_apriltag_relative_pose_observation_t* struct_ptr);
-void wips_apriltag_relative_pose_observation_set_cam_pose_0(wips_apriltag_relative_pose_observation_t* struct_ptr, wips_pose3_t new);
-
-
-wips_fp64_t wips_apriltag_relative_pose_observation_get_error_0(wips_apriltag_relative_pose_observation_t* struct_ptr);
-void wips_apriltag_relative_pose_observation_set_error_0(wips_apriltag_relative_pose_observation_t* struct_ptr, wips_fp64_t new);
-
-
-wips_pose3_t wips_apriltag_relative_pose_observation_get_cam_pose_1(wips_apriltag_relative_pose_observation_t* struct_ptr);
-void wips_apriltag_relative_pose_observation_set_cam_pose_1(wips_apriltag_relative_pose_observation_t* struct_ptr, wips_pose3_t new);
-
-
-wips_fp64_t wips_apriltag_relative_pose_observation_get_error_1(wips_apriltag_relative_pose_observation_t* struct_ptr);
-void wips_apriltag_relative_pose_observation_set_error_1(wips_apriltag_relative_pose_observation_t* struct_ptr, wips_fp64_t new);
-
 
 size_t wips_encode_apriltag_relative_pose_observation(wips_bin_t* data, wips_apriltag_relative_pose_observation_t* in);
 size_t wips_decode_apriltag_relative_pose_observation(wips_apriltag_relative_pose_observation_t* out, wips_bin_t* data);

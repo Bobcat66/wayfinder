@@ -42,36 +42,33 @@ wips_{{ name }}_t* wips_{{ name }}_create(){
     if (!struct_ptr) {return NULL;}
     return struct_ptr;
 }
-void wips_{{ name }}_destroy(wips_{{ name }}_t* struct_ptr) {
+void wips_{{ name }}_free_resources(wips_{{ name }}_t* struct_ptr) {
+{%- if trivial == True %}
+{%- else %}
 {%- for field in fields %}
-{%- if field.vla == True%}
-    free(struct_ptr->{{ field.name }});
+{%- if field.vla == True %}
+    if (struct_ptr->{{ field.name }}) {
+        for (wips_u32_t i = 0; i < GET_WIPS_DETAIL(struct_ptr,{{ field.name }},vlasize); i++) {
+            wips_{{ field.type }}_free_resources(struct_ptr->{{ field.name }} + i);
+        }
+        free(struct_ptr->{{ field.name }});
+    }
+{%- elif field.trivial == True %}
+{%- else %}
+    wips_{{ field.type }}_free_resources(&(struct_ptr->{{ field.name }}));
 {%- endif %}
-{%- endfor%}
+{%- endfor %}
+{%- endif %}
+}
+// Function to destroy the struct and free all resources
+void wips_{{ name }}_destroy(wips_{{ name }}_t* struct_ptr) {
+    if (!struct_ptr) { return; }
+    // Free resources allocated by the struct
+    wips_{{ name }}_free_resources(struct_ptr);
+    
+    // Free the struct itself
     free(struct_ptr);
 }
-
-{%- for field in fields %}
-{% if field.vla == True %}
-{{ field | get_ctype_name }} wips_{{ name }}_get_{{ field.name }}_element(wips_{{ name }}_t* struct_ptr, wips_u32_t index) {
-    return *(struct_ptr->{{ field.name }} + index);
-}
-{{ field | get_ctype_name }}* wips_{{ name }}_get_{{ field.name }}(wips_{{ name }}_t* struct_ptr) {
-    return struct_ptr->{{ field.name }};
-}
-void wips_{{ name }}_set_{{ field.name }}(wips_{{ name }}_t* struct_ptr, {{ field | get_ctype_name }}* new, wips_u32_t size) {
-    struct_ptr->{{ field.name }} = new;
-    struct_ptr->GET_DETAIL({{ field.name }},vlasize) = size;
-}
-{% else %}
-{{ field | get_ctype_name }} wips_{{ name }}_get_{{ field.name }}(wips_{{name}}_t* struct_ptr) {
-    return struct_ptr->{{ field.name }};
-}
-void wips_{{ name }}_set_{{ field.name }}(wips_{{ name }}_t* struct_ptr, {{ field | get_ctype_name }} new) {
-    struct_ptr->{{ field.name }} = new;
-}
-{% endif %}
-{%- endfor %}
 
 {% if trivial == True %}
 DEFINE_TRIVIAL_ENCODE({{ name }})

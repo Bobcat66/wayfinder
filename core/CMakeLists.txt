@@ -43,7 +43,7 @@ target_link_libraries(wfcore
 target_include_directories(wfcore 
     PUBLIC 
     ${CMAKE_CURRENT_SOURCE_DIR}/src/main/native/include
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/generated/wips
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/generated
     ${OpenCV_INCLUDE_DIRS}
     PRIVATE 
     ${CMAKE_CURRENT_BINARY_DIR}/../meta

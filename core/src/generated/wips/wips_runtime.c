@@ -91,3 +91,14 @@ DEFINE_TRIVIAL_DECODE(fp32)
 
 DEFINE_TRIVIAL_ENCODE(fp64)
 DEFINE_TRIVIAL_DECODE(fp64)
+
+void wips_u8_free_resources(wips_u8_t* data) {}
+void wips_i8_free_resources(wips_i8_t* data) {}
+void wips_u16_free_resources(wips_u16_t* data) {}
+void wips_i16_free_resources(wips_i16_t* data) {}
+void wips_u32_free_resources(wips_u32_t* data) {}
+void wips_i32_free_resources(wips_i32_t* data) {}
+void wips_u64_free_resources(wips_u64_t* data) {}
+void wips_i64_free_resources(wips_i64_t* data) {}
+void wips_fp32_free_resources(wips_fp32_t* data) {}
+void wips_fp64_free_resources(wips_fp64_t* data) {}

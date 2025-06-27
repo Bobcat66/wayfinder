@@ -18,7 +18,7 @@
  */
 
 #include "wfcore/network/NTDataPublisher.h"
-#include "wfcore/common/serde/serde.h"
+#include "wfcore/common/serde.h"
 #include <networktables/RawTopic.h>
 
 namespace wf {
@@ -27,8 +27,9 @@ namespace wf {
     , pipelineResultPub(table->GetRawTopic("pipeline_result").Publish("application/octet-stream")) {}
 
     void NTDataPublisher::publishPipelineResult(const PipelineResult& result) {
-        std::vector<byte> pipelineResultBin;
-        packPipelineResult(pipelineResultBin,result);
-        pipelineResultPub.Set(pipelineResultBin);
+        // WIP
+        //std::vector<byte> pipelineResultBin;
+        //packPipelineResult(pipelineResultBin,result);
+        //pipelineResultPub.Set(pipelineResultBin);
     }
 }

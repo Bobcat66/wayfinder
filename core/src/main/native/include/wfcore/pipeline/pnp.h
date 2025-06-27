@@ -77,6 +77,13 @@ namespace wf {
         ) : tagsUsed(std::move(tagsUsed_)), 
             fieldPose0(std::move(fieldPose0_)), error0(error0_), 
             fieldPose1(std::make_optional(std::move(fieldPose1_))), error1(std::make_optional(error1_)) {}
+        ApriltagFieldPoseObservation(
+            std::vector<int> tagsUsed_, 
+            gtsam::Pose3 fieldPose0_, double error0_,
+            std::optional<gtsam::Pose3> fieldPose1_, std::optional<double> error1_
+        ) : tagsUsed(std::move(tagsUsed_)), 
+            fieldPose0(std::move(fieldPose0_)), error0(error0_), 
+            fieldPose1(std::move(fieldPose1_)), error1(std::move(error1_)) {}
     };
 
     std::optional<ApriltagFieldPoseObservation> solvePNPApriltag(

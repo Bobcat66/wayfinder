@@ -40,60 +40,26 @@
 wips_pipeline_result_t* wips_pipeline_result_create(){
     wips_pipeline_result_t* struct_ptr = calloc(1,GET_SIZE(pipeline_result));
     if (!struct_ptr) {return NULL;}
+    return struct_ptr;
 }
+void wips_pipeline_result_free_resources(wips_pipeline_result_t* struct_ptr) {
+    if (struct_ptr->tag_poses) {
+        for (wips_u32_t i = 0; i < GET_WIPS_DETAIL(struct_ptr,tag_poses,vlasize); i++) {
+            wips_apriltag_relative_pose_observation_free_resources(struct_ptr->tag_poses + i);
+        }
+        free(struct_ptr->tag_poses);
+    }
+    wips_apriltag_field_pose_observation_free_resources(&(struct_ptr->field_pose));
+}
+// Function to destroy the struct and free all resources
 void wips_pipeline_result_destroy(wips_pipeline_result_t* struct_ptr) {
-    free(struct_ptr->tag_poses);
+    if (!struct_ptr) { return; }
+    // Free resources allocated by the struct
+    wips_pipeline_result_free_resources(struct_ptr);
+    
+    // Free the struct itself
     free(struct_ptr);
 }
-
-wips_u64_t wips_pipeline_result_get_timestamp(wips_pipeline_result_t* struct_ptr) {
-    return struct_ptr->timestamp;
-}
-void wips_pipeline_result_set_timestamp(wips_pipeline_result_t* struct_ptr, wips_u64_t new) {
-    struct_ptr->timestamp = new;
-}
-
-
-wips_u8_t wips_pipeline_result_get_pipeline_type(wips_pipeline_result_t* struct_ptr) {
-    return struct_ptr->pipeline_type;
-}
-void wips_pipeline_result_set_pipeline_type(wips_pipeline_result_t* struct_ptr, wips_u8_t new) {
-    struct_ptr->pipeline_type = new;
-}
-
-
-wips_u32_t wips_pipeline_result_get_DETAILvlasize__tag_poses(wips_pipeline_result_t* struct_ptr) {
-    return struct_ptr->DETAILvlasize__tag_poses;
-}
-void wips_pipeline_result_set_DETAILvlasize__tag_poses(wips_pipeline_result_t* struct_ptr, wips_u32_t new) {
-    struct_ptr->DETAILvlasize__tag_poses = new;
-}
-
-
-wips_apriltag_relative_pose_observation_t* wips_pipeline_result_get_tag_poses(wips_pipeline_result_t* struct_ptr) {
-    return struct_ptr->tag_poses;
-}
-void wips_pipeline_result_set_tag_poses(wips_pipeline_result_t* struct_ptr, wips_apriltag_relative_pose_observation_t* new, wips_u32_t size) {
-    struct_ptr->tag_poses = new;
-    struct_ptr->GET_DETAIL(tag_poses,vlasize) = size;
-}
-
-
-wips_u8_t wips_pipeline_result_get_DETAILoptpresent__field_pose(wips_pipeline_result_t* struct_ptr) {
-    return struct_ptr->DETAILoptpresent__field_pose;
-}
-void wips_pipeline_result_set_DETAILoptpresent__field_pose(wips_pipeline_result_t* struct_ptr, wips_u8_t new) {
-    struct_ptr->DETAILoptpresent__field_pose = new;
-}
-
-
-wips_apriltag_field_pose_observation_t wips_pipeline_result_get_field_pose(wips_pipeline_result_t* struct_ptr) {
-    return struct_ptr->field_pose;
-}
-void wips_pipeline_result_set_field_pose(wips_pipeline_result_t* struct_ptr, wips_apriltag_field_pose_observation_t new) {
-    struct_ptr->field_pose = new;
-}
-
 
 
 size_t wips_encode_pipeline_result(wips_bin_t* data, wips_pipeline_result_t* in) {

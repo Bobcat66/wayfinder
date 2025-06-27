@@ -41,6 +41,10 @@ extern "C" {
 #include <stdint.h>
 #include <stddef.h>
 
+// More user-friendly macro for accessing WIPS details than the ones used internally.
+#define GET_WIPS_DETAIL_IMPL(field,detail) DETAIL ## detail ## __ ## field
+#define GET_WIPS_DETAIL(wips_struct,field,detail) wips_struct->GET_WIPS_DETAIL_IMPL(field,detail)
+
 typedef uint8_t wips_u8_t;
 typedef int8_t wips_i8_t;
 
@@ -97,6 +101,17 @@ size_t wips_decode_fp32(wips_fp32_t* out, wips_bin_t* data);
 
 size_t wips_encode_fp64(wips_bin_t* data, wips_fp64_t* in);
 size_t wips_decode_fp64(wips_fp64_t* out, wips_bin_t* data);
+
+void wips_u8_free_resources(wips_u8_t* data);
+void wips_i8_free_resources(wips_i8_t* data);
+void wips_u16_free_resources(wips_u16_t* data);
+void wips_i16_free_resources(wips_i16_t* data);
+void wips_u32_free_resources(wips_u32_t* data);
+void wips_i32_free_resources(wips_i32_t* data);
+void wips_u64_free_resources(wips_u64_t* data);
+void wips_i64_free_resources(wips_i64_t* data);
+void wips_fp32_free_resources(wips_fp32_t* data);
+void wips_fp64_free_resources(wips_fp64_t* data);
 
 #ifdef __cplusplus
 }

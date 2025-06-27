@@ -56,10 +56,10 @@ class wips_schema:
         detail_fields: Dict[int,Dict] = {}
         for index, field in enumerate(self.fields):
             if field.get("optional"):
-                detail_fields[index] = {"name":f"DETAILoptpresent__{field["name"]}","type":"u8"}
+                detail_fields[index] = {"name":f"DETAILoptpresent__{field["name"]}","type":"u8","trivial":True}
                 self.trivial = False
             elif field.get("vla"):
-                detail_fields[index] = {"name":f"DETAILvlasize__{field["name"]}","type":"u32"}
+                detail_fields[index] = {"name":f"DETAILvlasize__{field["name"]}","type":"u32","trivial":True}
                 self.trivial = False
             else:
                 continue
@@ -81,7 +81,10 @@ def build_schemas(yaml_schemas: List[Dict]):
         dependency_names: Set[str] = set()
         for field in yaml_schema["fields"]:
             if field["type"] in primitives:
+                field["trivial"] = True
                 continue
+            elif field["type"] in schemas:
+                field["trivial"] = schemas[field["type"]].trivial
             dependency_names.add(field["type"])
         dependencies: List[wips_schema] = []
         for dependency_name in dependency_names:

@@ -51,32 +51,12 @@ typedef struct wips_pipeline_result {
     wips_apriltag_field_pose_observation_t field_pose;
 } wips_pipeline_result_t;
 
+// Recursive function to free all memory allocated by the struct and its members. Does NOT free the struct itself if it was dynamically allocated.
+// Warning: Calling this function on a struct that has not been written to from a WIPS binary will result in undefined behavior.
+// This function is intended to be used when the struct is no longer needed, to prevent memory leaks.
+void wips_pipeline_result_free_resources(wips_pipeline_result_t* struct_ptr);
 wips_pipeline_result_t* wips_pipeline_result_create();
 void wips_pipeline_result_destroy(wips_pipeline_result_t* struct_ptr);
-
-wips_u64_t wips_pipeline_result_get_timestamp(wips_pipeline_result_t* struct_ptr);
-void wips_pipeline_result_set_timestamp(wips_pipeline_result_t* struct_ptr, wips_u64_t new);
-
-
-wips_u8_t wips_pipeline_result_get_pipeline_type(wips_pipeline_result_t* struct_ptr);
-void wips_pipeline_result_set_pipeline_type(wips_pipeline_result_t* struct_ptr, wips_u8_t new);
-
-
-wips_u32_t wips_pipeline_result_get_DETAILvlasize__tag_poses(wips_pipeline_result_t* struct_ptr);
-void wips_pipeline_result_set_DETAILvlasize__tag_poses(wips_pipeline_result_t* struct_ptr, wips_u32_t new);
-
-
-wips_apriltag_relative_pose_observation_t* wips_pipeline_result_get_tag_poses(wips_pipeline_result_t* struct_ptr);
-void wips_pipeline_result_set_tag_poses(wips_pipeline_result_t* struct_ptr, wips_apriltag_relative_pose_observation_t* new, wips_u32_t size);
-
-
-wips_u8_t wips_pipeline_result_get_DETAILoptpresent__field_pose(wips_pipeline_result_t* struct_ptr);
-void wips_pipeline_result_set_DETAILoptpresent__field_pose(wips_pipeline_result_t* struct_ptr, wips_u8_t new);
-
-
-wips_apriltag_field_pose_observation_t wips_pipeline_result_get_field_pose(wips_pipeline_result_t* struct_ptr);
-void wips_pipeline_result_set_field_pose(wips_pipeline_result_t* struct_ptr, wips_apriltag_field_pose_observation_t new);
-
 
 size_t wips_encode_pipeline_result(wips_bin_t* data, wips_pipeline_result_t* in);
 size_t wips_decode_pipeline_result(wips_pipeline_result_t* out, wips_bin_t* data);
