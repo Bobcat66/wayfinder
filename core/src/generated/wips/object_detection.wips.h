@@ -39,30 +39,38 @@ extern "C" {
 #endif
 
 #include "wips_runtime.h"
-#include "object_detection.wips.h"
-#include "apriltag_relative_pose_observation.wips.h"
-#include "apriltag_field_pose_observation.wips.h"
 
-typedef struct wips_pipeline_result {
-    wips_u64_t timestamp;
-    wips_u8_t pipeline_type;
-    wips_u32_t DETAILvlasize__tag_poses;
-    wips_apriltag_relative_pose_observation_t* tag_poses;
-    wips_u8_t DETAILoptpresent__field_pose;
-    wips_apriltag_field_pose_observation_t field_pose;
-    wips_u32_t DETAILvlasize__object_detections;
-    wips_object_detection_t* object_detections;
-} wips_pipeline_result_t;
+typedef struct wips_object_detection {
+    wips_i32_t object_class;
+    wips_fp64_t confidence;
+    wips_fp64_t percent_area;
+    wips_fp64_t corner0_x_pixels;
+    wips_fp64_t corner0_y_pixels;
+    wips_fp64_t corner1_x_pixels;
+    wips_fp64_t corner1_y_pixels;
+    wips_fp64_t corner2_x_pixels;
+    wips_fp64_t corner2_y_pixels;
+    wips_fp64_t corner3_x_pixels;
+    wips_fp64_t corner3_y_pixels;
+    wips_fp64_t corner0_x_angles;
+    wips_fp64_t corner0_y_angles;
+    wips_fp64_t corner1_x_angles;
+    wips_fp64_t corner1_y_angles;
+    wips_fp64_t corner2_x_angles;
+    wips_fp64_t corner2_y_angles;
+    wips_fp64_t corner3_x_angles;
+    wips_fp64_t corner3_y_angles;
+} wips_object_detection_t;
 
 // Recursive function to free all memory allocated by the struct and its members. Does NOT free the struct itself if it was dynamically allocated.
 // Warning: Calling this function on a struct that has not been written to from a WIPS binary will result in undefined behavior.
 // This function is intended to be used when the struct is no longer needed, to prevent memory leaks.
-void wips_pipeline_result_free_resources(wips_pipeline_result_t* struct_ptr);
-wips_pipeline_result_t* wips_pipeline_result_create();
-void wips_pipeline_result_destroy(wips_pipeline_result_t* struct_ptr);
+void wips_object_detection_free_resources(wips_object_detection_t* struct_ptr);
+wips_object_detection_t* wips_object_detection_create();
+void wips_object_detection_destroy(wips_object_detection_t* struct_ptr);
 
-size_t wips_encode_pipeline_result(wips_bin_t* data, wips_pipeline_result_t* in);
-size_t wips_decode_pipeline_result(wips_pipeline_result_t* out, wips_bin_t* data);
+size_t wips_encode_object_detection(wips_bin_t* data, wips_object_detection_t* in);
+size_t wips_decode_object_detection(wips_object_detection_t* out, wips_bin_t* data);
 
 #ifdef __cplusplus
 }

@@ -26,6 +26,66 @@
   - name: zq
     type: fp64
 ---
+# Represents an object detection
+  name: object_detection
+  fields:
+  - name: object_class
+    type: i32
+
+  - name: confidence
+    type: fp64
+  
+  - name: percent_area
+    type: fp64
+
+  - name: corner0_x_pixels
+    type: fp64
+
+  - name: corner0_y_pixels
+    type: fp64
+
+  - name: corner1_x_pixels
+    type: fp64
+
+  - name: corner1_y_pixels
+    type: fp64
+
+  - name: corner2_x_pixels
+    type: fp64
+
+  - name: corner2_y_pixels
+    type: fp64
+
+  - name: corner3_x_pixels
+    type: fp64
+
+  - name: corner3_y_pixels
+    type: fp64
+
+  - name: corner0_x_angles
+    type: fp64
+
+  - name: corner0_y_angles
+    type: fp64
+
+  - name: corner1_x_angles
+    type: fp64
+
+  - name: corner1_y_angles
+    type: fp64
+
+  - name: corner2_x_angles
+    type: fp64
+
+  - name: corner2_y_angles
+    type: fp64
+
+  - name: corner3_x_angles
+    type: fp64
+
+  - name: corner3_y_angles
+    type: fp64
+---
 # Encodes an apriltag pose observation
 # computed either with SQPnP (in the multi tag case)
 # or with IPPE Square (in the single tag case)
@@ -115,6 +175,6 @@
     type: apriltag_field_pose_observation
     optional: True
   
-#  - name: object_detections
-#    type: TBA
-#    vla: True
+  - name: object_detections
+    type: object_detection
+    vla: True

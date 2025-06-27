@@ -43,7 +43,7 @@ extern "C" {
 
 // More user-friendly macro for accessing WIPS details than the ones used internally.
 #define GET_WIPS_DETAIL_IMPL(field,detail) DETAIL ## detail ## __ ## field
-#define GET_WIPS_DETAIL(wips_struct,field,detail) wips_struct->GET_WIPS_DETAIL_IMPL(field,detail)
+#define GET_WIPS_DETAIL(wips_struct,field,detail) (wips_struct)->GET_WIPS_DETAIL_IMPL(field,detail)
 
 typedef uint8_t wips_u8_t;
 typedef int8_t wips_i8_t;

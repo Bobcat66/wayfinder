@@ -47,9 +47,9 @@
         wf::QuadThresholdParams testQTPs = qtps;                                                                \
         wf::ApriltagDetector detector;                                                                          \
         detector.setConfig(testConfig);                                                                         \
-        logger->info("Detector config set to: {}",detector.getConfig().string());                              \
+        logger->info("Detector config set to: {}",detector.getConfig().string());                               \
         detector.setQuadThresholdParams(testQTPs);                                                              \
-        logger->info("Detector QTPs set to: {}",detector.getQuadThresholdParams().string());                   \
+        logger->info("Detector QTPs set to: {}",detector.getQuadThresholdParams().string());                    \
         logger->info("Adding tag family {}", tagfamily);                                                        \
         int err = detector.addFamily(tagfamily);                                                                \
         logger->info("Add family op returned {}",err);                                                          \

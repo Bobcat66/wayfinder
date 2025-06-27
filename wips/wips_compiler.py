@@ -155,7 +155,7 @@ def compile(schemas_path: Path, output_dir: Path):
     end = time.perf_counter()
     print(f"Compilation finished in {end-start} seconds")
     
-
+# python3 wips_compiler.py schemas.yaml --out=../core/src/generated/wips
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="WIPS Compiler")

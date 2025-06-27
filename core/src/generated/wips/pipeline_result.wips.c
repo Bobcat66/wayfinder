@@ -50,6 +50,12 @@ void wips_pipeline_result_free_resources(wips_pipeline_result_t* struct_ptr) {
         free(struct_ptr->tag_poses);
     }
     wips_apriltag_field_pose_observation_free_resources(&(struct_ptr->field_pose));
+    if (struct_ptr->object_detections) {
+        for (wips_u32_t i = 0; i < GET_WIPS_DETAIL(struct_ptr,object_detections,vlasize); i++) {
+            wips_object_detection_free_resources(struct_ptr->object_detections + i);
+        }
+        free(struct_ptr->object_detections);
+    }
 }
 // Function to destroy the struct and free all resources
 void wips_pipeline_result_destroy(wips_pipeline_result_t* struct_ptr) {
@@ -74,6 +80,10 @@ size_t wips_encode_pipeline_result(wips_bin_t* data, wips_pipeline_result_t* in)
     if (in->GET_DETAIL(field_pose,optpresent)) {
         bytesEncoded += wips_encode_apriltag_field_pose_observation(data, &(in->field_pose));
     }
+    bytesEncoded += wips_encode_u32(data, &(in->DETAILvlasize__object_detections));
+    for (wips_u32_t i = 0; i < in->GET_DETAIL(object_detections,vlasize); i++) {
+        bytesEncoded += wips_encode_object_detection(data, in->object_detections + i);
+    }
     return bytesEncoded;
 }
 size_t wips_decode_pipeline_result(wips_pipeline_result_t* out, wips_bin_t* data) {
@@ -88,6 +98,11 @@ size_t wips_decode_pipeline_result(wips_pipeline_result_t* out, wips_bin_t* data
     bytesDecoded += wips_decode_u8(&(out->DETAILoptpresent__field_pose), data);
     if (out->GET_DETAIL(field_pose,optpresent)) {
         bytesDecoded += wips_decode_apriltag_field_pose_observation(&(out->field_pose), data);
+    }
+    bytesDecoded += wips_decode_u32(&(out->DETAILvlasize__object_detections), data);
+    out->object_detections = malloc(out->GET_DETAIL(object_detections,vlasize) * GET_SIZE(object_detection));
+    for (wips_u32_t i = 0; i < out->GET_DETAIL(object_detections,vlasize); i++) {
+        bytesDecoded += wips_decode_object_detection(out->object_detections + i, data);
     }
     return bytesDecoded;
 }

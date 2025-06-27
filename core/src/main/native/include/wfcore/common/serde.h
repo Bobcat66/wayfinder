@@ -22,6 +22,7 @@
 #include "wips/wips_runtime.h"
 #include "wfcore/pipeline/pnp.h"
 #include "wfcore/pipeline/Pipeline.h"
+#include "wfcore/inference/InferenceEngine.h"
 #include <gtsam/geometry/Pose3.h>
 #include <vector>
 
@@ -35,6 +36,9 @@ namespace wf {
     wips_bin_t* packApriltagFieldPoseObservation(const ApriltagFieldPoseObservation& poseObservation);
     ApriltagFieldPoseObservation unpackApriltagFieldPoseObservation(wips_bin_t* data);
 
-    //std::vector<unsigned char> packPipelineResult(const PipelineResult& pipelineResult);
-    //PipelineResult unpackPipelineResult(const std::vector<unsigned char>& data);
+    wips_bin_t* packObjectDetection(const ObjectDetection& detection);
+    ObjectDetection unpackObjectDetection(wips_bin_t* data);
+
+    wips_bin_t* packPipelineResult(const PipelineResult& pipelineResult);
+    PipelineResult unpackPipelineResult(wips_bin_t* data);
 }
