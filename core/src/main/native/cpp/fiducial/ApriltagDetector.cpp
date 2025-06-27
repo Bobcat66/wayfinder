@@ -72,7 +72,7 @@ namespace wf {
 
     std::string ApriltagDetectorConfig::string() const {
         return std::format(
-            "ApriltagDetectorConfig{{{}, {}, {}, {}, {}, {}}}",
+            "{{{}, {}, {}, {}, {}, {}}}",
             numThreads,
             quadDecimate,
             quadSigma,
@@ -89,7 +89,7 @@ namespace wf {
 
     std::string QuadThresholdParams::string() const {
         return std::format(
-            "QuadThresholdParams{{{}, {}, {}, {}, {}, {}}}",
+            "{{{}, {}, {}, {}, {}, {}}}",
             minClusterPixels,
             maxNumMaxima,
             criticalAngleRads,

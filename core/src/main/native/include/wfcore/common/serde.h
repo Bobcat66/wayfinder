@@ -27,7 +27,7 @@
 
 namespace wf {
     wips_bin_t* packPose3(const gtsam::Pose3& pose);
-    gtsam::Pose3 unpackPose3(wips_bin_t& data);
+    gtsam::Pose3 unpackPose3(wips_bin_t* data);
 
     wips_bin_t* packApriltagRelativePoseObservation(const ApriltagRelativePoseObservation& poseObservation);
     ApriltagRelativePoseObservation unpackApriltagRelativePoseObservation(wips_bin_t* data);
