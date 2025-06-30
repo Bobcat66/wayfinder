@@ -18,6 +18,7 @@
  */
 
 #include "wfcore/inference/CPUInferenceEngineYOLO.h"
+#include "wfcore/inference/inference_utils.h"
 #include <opencv2/dnn.hpp>
 #include <opencv2/opencv.hpp>
 #include <cassert>
@@ -62,33 +63,21 @@ namespace wf {
             corners_buffer.clear();
             norm_corners_buffer.clear();
             float* data = output.ptr<float>(i);
-            float objectness = data[4];
-            cv::Mat scores(1, num_classes, CV_32FC1, data + 5);
-            cv::Point classIdPoint;
-            double maxClassScore;
-            double xcenter = data[0];
-            double ycenter = data[1];
             double width = data[2];
             double height = data[3];
-            corners_buffer.assign(
-                {
-                    {xcenter - (width/2),ycenter - (height/2)},
-                    {xcenter + (width/2),ycenter - (height/2)},
-                    {xcenter + (width/2),ycenter + (height/2)},
-                    {xcenter - (width/2),ycenter + (height/2)}
-                }
-            );
+            auto corners = getCornersYOLO(data);
+            corners_buffer.assign(corners.begin(),corners.end());
             cv::undistortPoints(
                 corners_buffer,
                 norm_corners_buffer,
                 intrinsics.cameraMatrix,
                 intrinsics.distCoeffs
             );
-            cv::minMaxLoc(scores, 0, &maxClassScore, 0, &classIdPoint);
-            int objectClass = classIdPoint.x;
+            int objectClass = getClassYOLO(data,num_classes);
+            double confidence = getConfidenceYOLO(data,objectClass);
             detections.emplace_back(
                 objectClass,
-                maxClassScore * objectness,
+                confidence,
                 (width * height) / (input.format.rows * input.format.cols),
                 std::array<cv::Point2d, 4>{
                     corners_buffer[0],

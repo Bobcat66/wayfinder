@@ -15,10 +15,32 @@ file(GLOB_RECURSE WIPSSOURCES
 )
 add_library(wfcore ${CORESOURCES} ${WIPSSOURCES})
 
-if(WF_CV_OPENCL)
-    add_compile_definitions(WF_CV_OPENCL)
-elseif(WF_CV_CUDA)
-    add_compile_definitions(WF_CV_CUDA)
+if(WF_USE_EDGETPU)
+    add_compile_definitions(WF_USE_EDGETPU)
+endif()
+
+if(WF_USE_CUDA)
+    add_compile_definitions(WF_USE_CUDA)
+endif()
+
+if(WF_USE_HAILO)
+    add_compile_definitions(WF_USE_HAILO)
+endif()
+
+if(WF_USE_ROCM)
+    add_compile_definitions(WF_USE_ROCM)
+endif()
+
+if(WF_USE_RKNN)
+    add_compile_definitions(WF_USE_RKNN)
+endif()
+
+if(WF_USE_COREML)
+    add_compile_definitions(WF_USE_COREML)
+endif()
+
+if(WF_USE_OPENVINO)
+    add_compile_definitions(WF_USE_OPENVINO)
 endif()
 
 if(WF_USE_GSTREAMER)
