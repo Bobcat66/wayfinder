@@ -83,9 +83,6 @@ namespace wf {
             return std::optional<ApriltagRelativePoseObservation>{
                 std::in_place,
                 detection.id,
-                detection.corners,
-                detection.decisionMargin,
-                detection.hammingDistance,
                 cvPoseVecsToWPILibPose3(rvecs[0], tvecs[0]), reprojectionErrors[0],
                 cvPoseVecsToWPILibPose3(rvecs[1], tvecs[1]), reprojectionErrors[1]
             };

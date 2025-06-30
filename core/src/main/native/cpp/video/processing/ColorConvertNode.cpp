@@ -47,6 +47,11 @@ namespace wf {
                             tmp.convertTo(out,CV_16UC1, 256.0);
                         };
                         break;
+                    case RGB:
+                        colorConverter = [](const T& in,T& out){
+                            cv::cvtColor(in,out,cv::COLOR_BGR2RGB);
+                        };
+                        break;
                     default:
                         throw std::invalid_argument("Attempted to convert from unknown colorspace");
                 }
@@ -66,6 +71,11 @@ namespace wf {
                     case DEPTH:
                         colorConverter = [](const T& in,T& out){
                             in.convertTo(out,CV_16UC1, 256.0);
+                        };
+                        break;
+                    case RGB:
+                        colorConverter = [](const T& in,T& out){
+                            cv::cvtColor(in,out,cv::COLOR_GRAY2RGB);
                         };
                         break;
                     default:
@@ -94,6 +104,44 @@ namespace wf {
                             out = in;
                         };
                         break;
+                    case RGB:
+                        // Expensive, don't use in the hot path
+                        colorConverter = [](const T& in,T& out){
+                            T tmp;
+                            cv::normalize(in, tmp, 0, 255, cv::NORM_MINMAX);
+                            tmp.convertTo(tmp, CV_8UC1);
+                            cv::cvtColor(tmp,out,cv::COLOR_GRAY2RGB);
+                        };
+                        break;
+                    default:
+                        throw std::invalid_argument("Attempted to convert from unknown colorspace");
+                }
+                break;
+            case RGB:
+                switch (outspace) {
+                    case COLOR:
+                        colorConverter = [](const T& in,T& out){
+                            cv::cvtColor(in,out,cv::COLOR_RGB2BGR);
+                        };
+                        break;
+                    case GRAY:
+                        colorConverter = [](const T& in,T& out){
+                            cv::cvtColor(in,out,cv::COLOR_RGB2GRAY);
+                        };
+                        break;
+                    case DEPTH:
+                        // Expensive, don't use in the hot path
+                        colorConverter = [](const T& in,T& out){
+                            T tmp;
+                            cv::cvtColor(in,tmp,cv::COLOR_RGB2GRAY);
+                            tmp.convertTo(out,CV_16UC1, 256.0);
+                        };
+                        break;
+                    case RGB:
+                        colorConverter = [](const T& in,T& out){
+                            out = in;
+                        };
+                        break;
                     default:
                         throw std::invalid_argument("Attempted to convert from unknown colorspace");
                 }
@@ -111,6 +159,9 @@ namespace wf {
                 break;
             case DEPTH:
                 outcvformat = CV_16UC1;
+                break;
+            case RGB:
+                outcvformat = CV_8UC3;
                 break;
             default:
                 throw std::invalid_argument("Attempted to convert from unknown colorspace");

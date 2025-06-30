@@ -101,7 +101,7 @@ def copyfile(src: Path, dest: Path):
     with open(dest,'w') as f_dest:
         f_dest.write(content)
 
-def compile(schemas_path: Path, output_dir: Path):
+def compile(schemas_path: Path, output_dir: Path, py: bool = False, jvm: bool = False) -> None:
     start = time.perf_counter()
     print(f"Compiling {schemas_path}...")
     # Parse YAML
@@ -156,12 +156,18 @@ def compile(schemas_path: Path, output_dir: Path):
     print(f"Compilation finished in {end-start} seconds")
     
 # python3 wips_compiler.py schemas.yaml --out=../core/src/generated/wips
+# python3 wips_compiler.py schemas.yaml --py --out=../client/src/generated/wips
+# python3 wips_compiler.py schemas.yaml --jvm --out=../wayfinderlib/src/generated/wips
 
+
+# Python and Java bindings generation is not implemented yet, but the flags are here for future use.
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="WIPS Compiler")
     parser.add_argument("schemas", type=Path, help="path to YAML schema file")
     parser.add_argument("--out", type=Path, default=".", help='Output directory')
+    parser.add_argument("--py", action="store_true", help="Generate python bindings for the C code")
+    parser.add_argument("--jvm", action="store_true", help="Generate Java bindings for the C code")
     args = parser.parse_args()
     args.out.mkdir(parents=True, exist_ok=True)
-    compile(args.schemas,args.out)
+    compile(args.schemas,args.out,args.py,args.jvm)
 

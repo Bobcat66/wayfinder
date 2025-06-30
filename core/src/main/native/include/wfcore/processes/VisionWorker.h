@@ -25,6 +25,7 @@
 #include <thread>
 #include <atomic>
 #include <functional>
+#include <string>
 
 #include "wfcore/pipeline/Pipeline.h"
 #include "wfcore/video/FrameProvider.h"
@@ -38,6 +39,7 @@ namespace wf {
     class VisionWorker {
     public:
         VisionWorker(
+            std::string name_,
             FrameProvider& frameProvider_, 
             CVProcessPipe<cv::Mat>& preprocessor_,
             Pipeline& pipeline_, 
@@ -46,8 +48,11 @@ namespace wf {
         );
         void start();
         void stop();
+        const std::string& getName() const noexcept { return name; }
+        const bool isRunning() const noexcept { return running.load(); }
         private:
         void run() noexcept;
+        std::string name;
         std::thread thread;
         std::atomic_bool running;
         CVProcessPipe<cv::Mat>& preprocesser;

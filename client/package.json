@@ -1,0 +1,26 @@
+{
+    "name": "wayfinder-client",
+    "version": "0.0.1",
+    "description": "Wayfinder desktop client application",
+    "main": "index.ts",
+    "scripts": {
+        "start": "electron .",
+        "build": "electron-builder"
+    },
+    "devDependencies": {
+        "electron": "^25.3.0",
+        "electron-builder": "^24.4.0",
+        "typescript": "^5.5.4",
+        "ts-loader": "^9.4.2",
+        "webpack": "^5.88.1",
+        "webpack-cli": "^5.1.4"
+    },
+    "dependencies": {
+        "axios": "^1.4.0",
+        "react": "^18.2.0",
+        "react-dom": "^18.2.0",
+        "react-router-dom": "^6.6.0",
+        "redux": "^4.2.1",
+        "react-redux": "^8.0.5"
+    }
+}

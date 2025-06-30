@@ -25,20 +25,4 @@
 #include <string>
 
 namespace wf {
-
-
-    struct ObjectDetectPipelineConfiguration {
-        std::string model;
-        double confidence_threshold;
-    };
-
-    struct CameraIntrinsics {
-        cv::Mat cameraMatrix;
-        cv::Mat distCoeffs;
-    };
-
-    struct CameraConfiguration {
-        int id;
-        CameraIntrinsics intrinsics; 
-    };
 }

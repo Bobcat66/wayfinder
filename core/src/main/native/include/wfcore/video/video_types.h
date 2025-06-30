@@ -33,6 +33,7 @@ namespace wf {
         COLOR, // CV_8UC3, cscore kBGR
         GRAY, // CV_8UC1, cscore kGray
         DEPTH, // CV_16UC1, cscore kY16
+        RGB, // CV_8UC3, cscore kRGB
         UNKNOWN
     };
 

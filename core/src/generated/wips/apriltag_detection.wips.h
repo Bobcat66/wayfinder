@@ -39,25 +39,31 @@ extern "C" {
 #endif
 
 #include "wips_runtime.h"
-#include "pose3.wips.h"
 
-typedef struct wips_apriltag_relative_pose_observation {
+typedef struct wips_apriltag_detection {
     wips_i32_t fiducial_id;
-    wips_pose3_t cam_pose_0;
-    wips_fp64_t error_0;
-    wips_pose3_t cam_pose_1;
-    wips_fp64_t error_1;
-} wips_apriltag_relative_pose_observation_t;
+    wips_fp64_t corner0_x;
+    wips_fp64_t corner0_y;
+    wips_fp64_t corner1_x;
+    wips_fp64_t corner1_y;
+    wips_fp64_t corner2_x;
+    wips_fp64_t corner2_y;
+    wips_fp64_t corner3_x;
+    wips_fp64_t corner3_y;
+    wips_fp64_t decision_margin;
+    wips_fp64_t hamming_distance;
+    wips_u8_t tag_family_id;
+} wips_apriltag_detection_t;
 
 // Recursive function to free all memory allocated by the struct and its members. Does NOT free the struct itself if it was dynamically allocated.
 // Warning: Calling this function on a struct that has not been written to from a WIPS binary will result in undefined behavior.
 // This function is intended to be used when the struct is no longer needed, to prevent memory leaks.
-void wips_apriltag_relative_pose_observation_free_resources(wips_apriltag_relative_pose_observation_t* struct_ptr);
-wips_apriltag_relative_pose_observation_t* wips_apriltag_relative_pose_observation_create();
-void wips_apriltag_relative_pose_observation_destroy(wips_apriltag_relative_pose_observation_t* struct_ptr);
+void wips_apriltag_detection_free_resources(wips_apriltag_detection_t* struct_ptr);
+wips_apriltag_detection_t* wips_apriltag_detection_create();
+void wips_apriltag_detection_destroy(wips_apriltag_detection_t* struct_ptr);
 
-size_t wips_encode_apriltag_relative_pose_observation(wips_bin_t* data, wips_apriltag_relative_pose_observation_t* in);
-size_t wips_decode_apriltag_relative_pose_observation(wips_apriltag_relative_pose_observation_t* out, wips_bin_t* data);
+size_t wips_encode_apriltag_detection(wips_bin_t* data, wips_apriltag_detection_t* in);
+size_t wips_decode_apriltag_detection(wips_apriltag_detection_t* out, wips_bin_t* data);
 
 #ifdef __cplusplus
 }

@@ -1,2 +1,5 @@
-PySide6==6.9.1
 pyntcore==2025.3.2.3
+flask==3.1.1
+websockets=15.0.1
+opencv-python-headless==4.11.0.86
+pyzmq==27.0.0

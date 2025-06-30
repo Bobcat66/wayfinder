@@ -22,13 +22,15 @@
 
 namespace wf {
     VisionWorker::VisionWorker(
+        std::string name_,
         FrameProvider& frameProvider_,
         CVProcessPipe<cv::Mat>& preprocesser_, 
         Pipeline& pipeline_,
         ResultConsumer resultConsumer_,
         FrameConsumer frameConsumer_
     )
-    : preprocesser(preprocesser_)
+    : name(std::move(name_))
+    , preprocesser(preprocesser_)
     , frameProvider(frameProvider_)
     , pipeline(pipeline_)
     , resultConsumer(std::move(resultConsumer_)) 
@@ -49,7 +51,7 @@ namespace wf {
     }
 
     void VisionWorker::run() noexcept {
-        while (running) {
+        while (running.load()) {
             auto frame = frameProvider.getFrame();
             auto ppframe = preprocesser.processFrame(frame);
             auto res = pipeline.process(ppframe);

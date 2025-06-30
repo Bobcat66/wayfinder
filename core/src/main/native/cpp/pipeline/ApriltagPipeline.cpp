@@ -19,7 +19,7 @@
 
 
 #include "wfcore/pipeline/ApriltagPipeline.h"
-#include "wfcore/configuration/configurations.h"
+#include "wfcore/configuration/CameraConfiguration.h"
 #include <algorithm>
 #include <wfcore/pipeline/pnp.h>
 
@@ -76,6 +76,7 @@ namespace wf {
         );
         return PipelineResult::ApriltagPipelineResult(
             frame.captimeMicros,
+            detections,
             atagPoses,
             fieldPose
         );

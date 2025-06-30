@@ -104,8 +104,6 @@ namespace wf {
         return os;
     }
 
-
-
     ApriltagDetector::ApriltagDetector() {
         cdetector = apriltag_detector_create();
         QuadThresholdParams qtps;
@@ -137,11 +135,11 @@ namespace wf {
             zarray_get(rawDetections, i, &det);
             detections.emplace_back(
                 det->id,
-                std::vector<cv::Point2d>{
-                    {det->p[0][0],det->p[0][1]},
-                    {det->p[1][0],det->p[1][1]},
-                    {det->p[2][0],det->p[2][1]},
-                    {det->p[3][0],det->p[3][1]}
+                std::array<cv::Point2d, 4>{
+                    cv::Point2d{det->p[0][0],det->p[0][1]},
+                    cv::Point2d{det->p[1][0],det->p[1][1]},
+                    cv::Point2d{det->p[2][0],det->p[2][1]},
+                    cv::Point2d{det->p[3][0],det->p[3][1]}
                 },
                 det->decision_margin,
                 det->hamming,

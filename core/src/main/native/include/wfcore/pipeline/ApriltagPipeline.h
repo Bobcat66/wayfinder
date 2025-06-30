@@ -24,6 +24,7 @@
 #include "wfcore/fiducial/ApriltagDetector.h"
 #include "wfcore/fiducial/ApriltagField.h"
 #include "wfcore/configuration/ApriltagConfiguration.h"
+#include "wfcore/configuration/CameraConfiguration.h"
 
 namespace wf {
 

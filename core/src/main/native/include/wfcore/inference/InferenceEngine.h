@@ -25,8 +25,11 @@
 
 #include <opencv2/core.hpp>
 #include "wfcore/video/video_types.h"
+#include "wfcore/inference/Tensorizer.h"
+#include <optional>
 
 namespace wf {
+
     struct ObjectDetection {
         int objectClass;
         double confidence;
@@ -44,9 +47,14 @@ namespace wf {
     class InferenceEngine {
     public:
         virtual ~InferenceEngine() = default;
+        virtual bool setTensorParameters(const TensorParameters& params) = 0;
+        virtual bool setCameraIntrinsics(const CameraIntrinsics& intrinsics) = 0;
         virtual bool loadModel(const std::string& modelPath) = 0;
         [[nodiscard]] 
         virtual std::vector<ObjectDetection> infer(const Frame& input) noexcept = 0;
         virtual std::string modelFormat() const = 0; // the model file extension expected by this inference engine
+    protected:
+        Tensorizer tensorizer;
+        CameraIntrinsics intrinsics;
     };
 }

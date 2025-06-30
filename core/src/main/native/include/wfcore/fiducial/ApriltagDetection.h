@@ -24,18 +24,19 @@
 
 #include <vector>
 #include <string>
+#include <array>
 
 namespace wf {
 
     struct ApriltagDetection {
         int id;
-        std::vector<cv::Point2d> corners;
+        std::array<cv::Point2d, 4> corners;
         double decisionMargin;
         double hammingDistance;
         std::string family;
         ApriltagDetection(
             int id_, 
-            std::vector<cv::Point2d> corners_, 
+            std::array<cv::Point2d, 4> corners_, 
             double decisionMargin_, double hammingDistance_,
             std::string family_
         ) : id(id_), 

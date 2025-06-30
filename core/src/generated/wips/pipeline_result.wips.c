@@ -43,6 +43,12 @@ wips_pipeline_result_t* wips_pipeline_result_create(){
     return struct_ptr;
 }
 void wips_pipeline_result_free_resources(wips_pipeline_result_t* struct_ptr) {
+    if (struct_ptr->tag_detections) {
+        for (wips_u32_t i = 0; i < GET_WIPS_DETAIL(struct_ptr,tag_detections,vlasize); i++) {
+            wips_apriltag_detection_free_resources(struct_ptr->tag_detections + i);
+        }
+        free(struct_ptr->tag_detections);
+    }
     if (struct_ptr->tag_poses) {
         for (wips_u32_t i = 0; i < GET_WIPS_DETAIL(struct_ptr,tag_poses,vlasize); i++) {
             wips_apriltag_relative_pose_observation_free_resources(struct_ptr->tag_poses + i);
@@ -72,6 +78,10 @@ size_t wips_encode_pipeline_result(wips_bin_t* data, wips_pipeline_result_t* in)
     size_t bytesEncoded = 0;
     bytesEncoded += wips_encode_u64(data, &(in->timestamp));
     bytesEncoded += wips_encode_u8(data, &(in->pipeline_type));
+    bytesEncoded += wips_encode_u32(data, &(in->DETAILvlasize__tag_detections));
+    for (wips_u32_t i = 0; i < in->GET_DETAIL(tag_detections,vlasize); i++) {
+        bytesEncoded += wips_encode_apriltag_detection(data, in->tag_detections + i);
+    }
     bytesEncoded += wips_encode_u32(data, &(in->DETAILvlasize__tag_poses));
     for (wips_u32_t i = 0; i < in->GET_DETAIL(tag_poses,vlasize); i++) {
         bytesEncoded += wips_encode_apriltag_relative_pose_observation(data, in->tag_poses + i);
@@ -90,6 +100,11 @@ size_t wips_decode_pipeline_result(wips_pipeline_result_t* out, wips_bin_t* data
     size_t bytesDecoded = 0;
     bytesDecoded += wips_decode_u64(&(out->timestamp), data);
     bytesDecoded += wips_decode_u8(&(out->pipeline_type), data);
+    bytesDecoded += wips_decode_u32(&(out->DETAILvlasize__tag_detections), data);
+    out->tag_detections = malloc(out->GET_DETAIL(tag_detections,vlasize) * GET_SIZE(apriltag_detection));
+    for (wips_u32_t i = 0; i < out->GET_DETAIL(tag_detections,vlasize); i++) {
+        bytesDecoded += wips_decode_apriltag_detection(out->tag_detections + i, data);
+    }
     bytesDecoded += wips_decode_u32(&(out->DETAILvlasize__tag_poses), data);
     out->tag_poses = malloc(out->GET_DETAIL(tag_poses,vlasize) * GET_SIZE(apriltag_relative_pose_observation));
     for (wips_u32_t i = 0; i < out->GET_DETAIL(tag_poses,vlasize); i++) {

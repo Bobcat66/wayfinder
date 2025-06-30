@@ -27,8 +27,33 @@
 #include <gtsam/geometry/Point3.h>
 #include <gtsam/geometry/Rot3.h>
 #include <unordered_map>
+#include <opencv2/core.hpp>
 
 namespace impl {
+
+    static std::unordered_map<std::string, wips_u8_t> tagFamilyIDs = {
+        {"tag36h11", 0},
+        {"tag36h10", 1},
+        {"tag25h9", 2},
+        {"tag16h5", 3},
+        {"tagCircle21h7", 4},
+        {"tagCircle49h12", 5},
+        {"tagCustom48h12", 6},
+        {"tagStandard41h12", 7},
+        {"tagStandard52h13", 8}
+    };
+
+    static std::unordered_map<wips_u8_t, std::string> tagFamilyNames = {
+        {0, "tag36h11"},
+        {1, "tag36h10"},
+        {2, "tag25h9"},
+        {3, "tag16h5"},
+        {4, "tagCircle21h7"},
+        {5, "tagCircle49h12"},
+        {6, "tagCustom48h12"},
+        {7, "tagStandard41h12"},
+        {8, "tagStandard52h13"}
+    };
 
     static wips_u8_t getPipelineTypeID(wf::PipelineType type) {
         switch (type) {
@@ -76,17 +101,37 @@ namespace impl {
         };
     }
 
+    static wips_apriltag_detection_t wfcore2wips_atd_shim(const wf::ApriltagDetection& detection) {
+        return {
+            detection.id,
+            detection.corners[0].x,detection.corners[0].y,
+            detection.corners[1].x,detection.corners[1].y,
+            detection.corners[2].x,detection.corners[2].y,
+            detection.corners[3].x,detection.corners[3].y,
+            detection.decisionMargin,
+            detection.hammingDistance,
+            tagFamilyIDs.at(detection.family)
+        };
+    }
+
+    static wf::ApriltagDetection wips2wfcore_atd_shim(const wips_apriltag_detection_t& detection) {
+        return {
+            detection.fiducial_id,
+            {
+                cv::Point2d{detection.corner0_x, detection.corner0_y},
+                cv::Point2d{detection.corner1_x, detection.corner1_y},
+                cv::Point2d{detection.corner2_x, detection.corner2_y},
+                cv::Point2d{detection.corner3_x, detection.corner3_y}
+            },
+            detection.decision_margin,
+            detection.hamming_distance,
+            tagFamilyNames.at(detection.tag_family_id)
+        };
+    }
+
     static wips_apriltag_relative_pose_observation_t wfcore2wips_rpo_shim(const wf::ApriltagRelativePoseObservation observation) {
         return {
             observation.id,
-
-            observation.corners[0].x,observation.corners[0].y,
-            observation.corners[1].x,observation.corners[1].y,
-            observation.corners[2].x,observation.corners[2].y,
-            observation.corners[3].x,observation.corners[3].y,
-
-            observation.decisionMargin,
-            observation.hammingDistance,
             wfcore2wips_pose3_shim(observation.camPose0),
             observation.error0,
             wfcore2wips_pose3_shim(observation.camPose1),
@@ -97,14 +142,6 @@ namespace impl {
     static wf::ApriltagRelativePoseObservation wips2wfcore_rpo_shim(const wips_apriltag_relative_pose_observation_t& observation) {
         return {
             observation.fiducial_id,
-            {
-                {observation.corner0_x, observation.corner0_y},
-                {observation.corner1_x, observation.corner1_y},
-                {observation.corner2_x, observation.corner2_y},
-                {observation.corner3_x, observation.corner3_y}
-            },
-            observation.decision_margin,
-            observation.hamming_distance,
             wips2wfcore_pose3_shim(observation.cam_pose_0),
             observation.error_0,
             wips2wfcore_pose3_shim(observation.cam_pose_1),
@@ -182,6 +219,10 @@ namespace impl {
     }
 
     static wips_pipeline_result_t wfcore2wips_pipeline_result_shim(const wf::PipelineResult& pipelineResult) {
+        wips_apriltag_detection_t* detections_data 
+            = static_cast<wips_apriltag_detection_t*>(
+                malloc(pipelineResult.aprilTagDetections.size() * sizeof(wips_apriltag_detection_t))
+            );
         wips_apriltag_relative_pose_observation_t* tag_poses_data 
             = static_cast<wips_apriltag_relative_pose_observation_t*>(
                 malloc(pipelineResult.aprilTagPoses.size() * sizeof(wips_apriltag_relative_pose_observation_t))
@@ -190,6 +231,10 @@ namespace impl {
             = static_cast<wips_object_detection_t*>(
                 malloc(pipelineResult.objectDetections.size() * sizeof(wips_object_detection_t))
             );
+
+        for (size_t i = 0; i < pipelineResult.aprilTagDetections.size(); ++i) {
+            detections_data[i] = wfcore2wips_atd_shim(pipelineResult.aprilTagDetections[i]);
+        }
 
         for (size_t i = 0; i < pipelineResult.aprilTagPoses.size(); ++i) {
             tag_poses_data[i] = wfcore2wips_rpo_shim(pipelineResult.aprilTagPoses[i]);
@@ -201,6 +246,8 @@ namespace impl {
         return {
             pipelineResult.captimeMicros,
             impl::getPipelineTypeID(pipelineResult.type),
+            static_cast<wips_u32_t>(pipelineResult.aprilTagDetections.size()),
+            detections_data,
             static_cast<wips_u32_t>(pipelineResult.aprilTagPoses.size()),
             tag_poses_data,
             static_cast<wips_u8_t>(pipelineResult.cameraPose.has_value()),
@@ -209,6 +256,36 @@ namespace impl {
                 : wips_apriltag_field_pose_observation_t{},
             static_cast<wips_u32_t>(pipelineResult.objectDetections.size()),
             object_detections_data
+        };
+    }
+
+    static wf::PipelineResult wips2wfcore_pipeline_result_shim(const wips_pipeline_result_t& pipelineResult) {
+        std::vector<wf::ApriltagDetection> detections;
+        detections.reserve(GET_WIPS_DETAIL(&pipelineResult,tag_detections,vlasize));
+        for (size_t i = 0; i < GET_WIPS_DETAIL(&pipelineResult,tag_detections,vlasize); ++i) {
+            detections.push_back(wips2wfcore_atd_shim(pipelineResult.tag_detections[i]));
+        }
+        
+        std::vector<wf::ApriltagRelativePoseObservation> tagPoses;
+        tagPoses.reserve(GET_WIPS_DETAIL(&pipelineResult,tag_poses,vlasize));
+        for (size_t i = 0; i < GET_WIPS_DETAIL(&pipelineResult,tag_poses,vlasize); ++i) {
+            tagPoses.push_back(wips2wfcore_rpo_shim(pipelineResult.tag_poses[i]));
+        }
+
+        std::vector<wf::ObjectDetection> objectDetections;
+        for (size_t i = 0; i < GET_WIPS_DETAIL(&pipelineResult,object_detections,vlasize); ++i) {
+            objectDetections.push_back(wips2wfcore_object_detection_shim(pipelineResult.object_detections[i]));
+        }
+
+        return {
+            pipelineResult.timestamp,
+            impl::getPipelineType(pipelineResult.pipeline_type),
+            std::move(detections),
+            std::move(tagPoses),
+            GET_WIPS_DETAIL(&pipelineResult,field_pose,optpresent)
+                ? std::make_optional(wips2wfcore_fpo_shim(pipelineResult.field_pose))
+                : std::nullopt,
+            std::move(objectDetections)
         };
     }
 }
@@ -222,12 +299,26 @@ namespace wf {
         wips_pose3_free_resources(&wipspose);
         return bin;
     }
-
     gtsam::Pose3 unpackPose3(wips_bin_t* data) {
         wips_pose3_t wipspose;
         wips_decode_pose3(&wipspose,data);
         auto out = impl::wips2wfcore_pose3_shim(wipspose);
         wips_pose3_free_resources(&wipspose);
+        return out;
+    }
+
+    wips_bin_t* packApriltagDetection(const ApriltagDetection& detection) {
+        wips_apriltag_detection_t wipsdetection = impl::wfcore2wips_atd_shim(detection);
+        wips_bin_t* bin = wips_bin_create(sizeof(wips_apriltag_detection_t));
+        wips_encode_apriltag_detection(bin, &wipsdetection);
+        wips_apriltag_detection_free_resources(&wipsdetection);
+        return bin;
+    }
+    ApriltagDetection unpackApriltagDetection(wips_bin_t* data) {
+        wips_apriltag_detection_t wipsdetection;
+        wips_decode_apriltag_detection(&wipsdetection, data);
+        auto out = impl::wips2wfcore_atd_shim(wipsdetection);
+        wips_apriltag_detection_free_resources(&wipsdetection);
         return out;
     }
 
@@ -286,27 +377,7 @@ namespace wf {
     PipelineResult unpackPipelineResult(wips_bin_t* data) {
         wips_pipeline_result_t wipspipelineresult;
         wips_decode_pipeline_result(&wipspipelineresult, data);
-        std::vector<ApriltagRelativePoseObservation> tagPoses;
-        for (size_t i = 0; i < GET_WIPS_DETAIL(&wipspipelineresult,tag_poses,vlasize); ++i) {
-            tagPoses.push_back(impl::wips2wfcore_rpo_shim(wipspipelineresult.tag_poses[i]));
-        }
-        tagPoses.reserve(GET_WIPS_DETAIL(&wipspipelineresult,tag_poses,vlasize));
-        std::vector<ObjectDetection> objectDetections;
-        objectDetections.reserve(GET_WIPS_DETAIL(&wipspipelineresult,object_detections,vlasize));
-        for (size_t i = 0; i < GET_WIPS_DETAIL(&wipspipelineresult,object_detections,vlasize); ++i) {
-            objectDetections.push_back(
-                impl::wips2wfcore_object_detection_shim(wipspipelineresult.object_detections[i])
-            );
-        }
-        auto out = PipelineResult(
-            wipspipelineresult.timestamp,
-            impl::getPipelineType(wipspipelineresult.pipeline_type),
-            tagPoses,
-            GET_WIPS_DETAIL(&wipspipelineresult,field_pose,optpresent) ? 
-                std::make_optional(impl::wips2wfcore_fpo_shim(wipspipelineresult.field_pose)) : 
-                std::nullopt,
-            objectDetections
-        );
+        auto out = impl::wips2wfcore_pipeline_result_shim(wipspipelineresult);
         wips_pipeline_result_free_resources(&wipspipelineresult);
         return out;
     }

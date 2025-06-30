@@ -20,7 +20,7 @@
 
 #pragma once
 
-#include "wfcore/configuration/configurations.h"
+#include "wfcore/configuration/CameraConfiguration.h"
 
 #include "wfcore/configuration/ApriltagConfiguration.h"
 #include "wfcore/fiducial/ApriltagField.h"
@@ -35,23 +35,16 @@
 namespace wf {
 
     struct ApriltagRelativePoseObservation {
-        int id;
-        std::vector<cv::Point2d> corners;
-        double decisionMargin;
-        double hammingDistance;
+        int id; // Apriltag ID
         gtsam::Pose3 camPose0;
         double error0;
         gtsam::Pose3 camPose1;
         double error1;
         ApriltagRelativePoseObservation(
             int id_,
-            const std::vector<cv::Point2d> corners_,
-            double decisionMargin_, double hammingDistance_,
             gtsam::Pose3 camPose0_, double error0_,
             gtsam::Pose3 camPose1_, double error1_
         ) : id(id_), 
-            corners(std::move(corners_)), 
-            decisionMargin(decisionMargin_), hammingDistance(hammingDistance_),
             camPose0(std::move(camPose0_)), error0(error0_), 
             camPose1(std::move(camPose1_)), error1(error1_) {}
     };

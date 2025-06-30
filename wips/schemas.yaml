@@ -86,32 +86,11 @@
   - name: corner3_y_angles
     type: fp64
 ---
-# Encodes an apriltag pose observation
-# computed either with SQPnP (in the multi tag case)
-# or with IPPE Square (in the single tag case)
-  name: apriltag_field_pose_observation
-  fields:
-  - name: tags_used
-    type: i32
-    vla: True
-
-  - name: field_pose_0
-    type: pose3
-
-  - name: error_0
-    type: fp64
-
-  - name: field_pose_1
-    type: pose3
-    optional: True
-
-  - name: error_1
-    type: fp64
-    optional: True
----
-# Encodes the pose of an apriltag relative to the camera
-# Computed with the SQPnP algorithm
-  name: apriltag_relative_pose_observation
+# Represents an apriltag detection
+# Encodes the fiducial ID, the corners of the tag in pixels,
+# the corners of the tag in angles, the decision margin,
+# and the hamming distance.
+  name: apriltag_detection
   fields:
   - name: fiducial_id
     type: i32
@@ -145,6 +124,39 @@
   
   - name: hamming_distance
     type: fp64
+  
+  - name: tag_family_id
+    type: u8
+---
+# Encodes an apriltag pose observation
+# computed either with SQPnP (in the multi tag case)
+# or with IPPE Square (in the single tag case)
+  name: apriltag_field_pose_observation
+  fields:
+  - name: tags_used
+    type: i32
+    vla: True
+
+  - name: field_pose_0
+    type: pose3
+
+  - name: error_0
+    type: fp64
+
+  - name: field_pose_1
+    type: pose3
+    optional: True
+
+  - name: error_1
+    type: fp64
+    optional: True
+---
+# Encodes the pose of an apriltag relative to the camera
+# Computed with the SQPnP algorithm
+  name: apriltag_relative_pose_observation
+  fields:
+  - name: fiducial_id
+    type: i32
 
   - name: cam_pose_0
     type: pose3
@@ -166,6 +178,10 @@
   
   - name: pipeline_type
     type: u8
+  
+  - name: tag_detections
+    type: apriltag_detection
+    vla: True
 
   - name: tag_poses
     type: apriltag_relative_pose_observation

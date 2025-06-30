@@ -24,16 +24,30 @@
 #include "wfcore/video/video_types.h"
 #include "wfcore/fiducial/ApriltagDetector.h"
 #include "wfcore/pipeline/pnp.h"
-#include "wfcore/pipeline/PipelineConfiguration.h"
 #include "wfcore/inference/InferenceEngine.h"
 #include <vector>
 #include <optional>
 
 namespace wf {
 
+    /* 
+     * Potential pipeline types to add:
+     * Keypoint (pose estimation based on keypoints)
+     * OptimizedApriltag (apriltag pose estimation based on a dynamic field optimized with a TagSLAM algorithm, requires a SLAM server somewhere on the network)
+     * Depth (for depth cameras)
+     * MonoSFM (local single camera Structure from Motion)
+     * MonoSLAM (local single camera Simultaneous Mapping And Localization)
+     */
+    enum class PipelineType {
+        Apriltag,
+        ApriltagDetect, // This is for a pipeline that only detects apriltags, without solving PnP
+        ObjDetect
+    };
+
     struct PipelineResult {
         uint64_t captimeMicros;
         PipelineType type;
+        std::vector<ApriltagDetection> aprilTagDetections;
         std::vector<ApriltagRelativePoseObservation> aprilTagPoses;
         std::optional<ApriltagFieldPoseObservation> cameraPose;
         std::vector<ObjectDetection> objectDetections;
@@ -47,21 +61,25 @@ namespace wf {
         PipelineResult(
             uint64_t captime_,
             PipelineType type_,
+            std::vector<ApriltagDetection> aprilTagDetections_,
             std::vector<ApriltagRelativePoseObservation> aprilTagPoses_,
             std::optional<ApriltagFieldPoseObservation> cameraPose_,
             std::vector<ObjectDetection> objectDetections_
         ) 
-        : captimeMicros(captime_), type(type_), aprilTagPoses(std::move(aprilTagPoses_))
+        : captimeMicros(captime_), type(type_)
+        , aprilTagDetections(std::move(aprilTagDetections_)), aprilTagPoses(std::move(aprilTagPoses_))
         , cameraPose(std::move(cameraPose_)), objectDetections(std::move(objectDetections_)) {}
         
         static PipelineResult ApriltagPipelineResult(
             uint64_t captimeMicros,
+            std::vector<ApriltagDetection> aprilTagDetections_,
             std::vector<ApriltagRelativePoseObservation> aprilTagPoses_,
             std::optional<ApriltagFieldPoseObservation> cameraPose_
         ) {
             return PipelineResult(
                 captimeMicros,
                 PipelineType::Apriltag,
+                std::move(aprilTagDetections_),
                 std::move(aprilTagPoses_),
                 std::move(cameraPose_),
                 {}
