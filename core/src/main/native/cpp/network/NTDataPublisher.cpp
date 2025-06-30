@@ -17,19 +17,20 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include "wips/wips_runtime.h"
 #include "wfcore/network/NTDataPublisher.h"
 #include "wfcore/common/serde.h"
 #include <networktables/RawTopic.h>
-
+#include <span>
 namespace wf {
     NTDataPublisher::NTDataPublisher(const nt::NetworkTable& devRootTable, const std::string& name) 
     : table(devRootTable.GetSubTable(name))
     , pipelineResultPub(table->GetRawTopic("pipeline_result").Publish("application/octet-stream")) {}
 
     void NTDataPublisher::publishPipelineResult(const PipelineResult& result) {
-        // WIP
-        //std::vector<byte> pipelineResultBin;
-        //packPipelineResult(pipelineResultBin,result);
-        //pipelineResultPub.Set(pipelineResultBin);
+        // WIP, test
+        auto bin = packPipelineResult(result);
+        pipelineResultPub.Set(std::span<const uint8_t>(bin->base,bin->offset));
+        wips_bin_destroy(bin);
     }
 }
