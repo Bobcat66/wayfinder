@@ -5,9 +5,6 @@
 
 namespace wf {
     void Tensorizer::setTensorParameters(const TensorParameters& params) {
-        if (params.channels != params.stds.size() || params.channels != params.means.size()) {
-            throw std::invalid_argument("TensorParameters: Number of channels must match the size of stds and means.");
-        }
         this->params = params;
         temp.create(params.height, params.width, CV_32FC(params.channels));
         channels.clear();
@@ -17,7 +14,7 @@ namespace wf {
         }
     }
     void Tensorizer::tensorize(const cv::Mat& input, float* output) const noexcept {
-        input.convertTo(temp, CV_32FC, params.scale);
+        input.convertTo(temp, CV_32F, params.scale);
         cv::divide(temp, params.stds, temp);
         cv::subtract(temp, params.means, temp);
         

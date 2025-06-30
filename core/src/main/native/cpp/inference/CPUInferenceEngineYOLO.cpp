@@ -21,8 +21,14 @@
 #include <opencv2/dnn.hpp>
 #include <opencv2/opencv.hpp>
 #include <cassert>
+#include <opencv2/calib3d.hpp>
+#include <cmath>
 
 namespace wf {
+    CPUInferenceEngineYOLO::CPUInferenceEngineYOLO(){
+        corners_buffer.reserve(4);
+        norm_corners_buffer.reserve(4);
+    }
     bool CPUInferenceEngineYOLO::setTensorParameters(const TensorParameters& params) {
         this->tensorizer.setTensorParameters(params);
         int dims[] = {
@@ -51,37 +57,53 @@ namespace wf {
         int numDetections = output.rows;
         std::vector<ObjectDetection> detections;
         detections.reserve(numDetections);
-        for (int i = 0; i < numDetections; ++i) {
+        int num_classes = output.cols - 5;
+        for (int i = 0; i < output.rows; ++i) {
+            corners_buffer.clear();
+            norm_corners_buffer.clear();
             float* data = output.ptr<float>(i);
-            int classId = static_cast<int>(data[0]);
-            float confidence = data[1];
-            float x1 = data[2];
-            float y1 = data[3];
-            float x2 = data[4];
-            float y2 = data[5];
-        }
-    }
-
-    std::vector<ObjectDetection> CPUInferenceEngineYOLO::postprocess(const cv::Mat& detmat) {
-        int num_classes = detmat.cols - 5;
-        std::vector<ObjectDetection> results;
-        results.reserve(detmat.rows);
-        for (int i = 0; i < detmat.rows ++i) {
-            float* data = detnat.ptr<float>(i);
             float objectness = data[4];
             cv::Mat scores(1, num_classes, CV_32FC1, data + 5);
-            cv::Point2f classIdPoint;
+            cv::Point classIdPoint;
             double maxClassScore;
-            double xcenter = 
-            cv::minMaxLoc(scores, 0, &maxClassScore, 0, &classIdPoint);
-            int objectClass = (int)classIdPoint.x;
-            results.emplace_back(
-                classIdPoint.x,
-                maxClassScore * objectness,
+            double xcenter = data[0];
+            double ycenter = data[1];
+            double width = data[2];
+            double height = data[3];
+            corners_buffer.assign(
                 {
-                    {}
+                    {xcenter - (width/2),ycenter - (height/2)},
+                    {xcenter + (width/2),ycenter - (height/2)},
+                    {xcenter + (width/2),ycenter + (height/2)},
+                    {xcenter - (width/2),ycenter + (height/2)}
                 }
-            )
+            );
+            cv::undistortPoints(
+                corners_buffer,
+                norm_corners_buffer,
+                intrinsics.cameraMatrix,
+                intrinsics.distCoeffs
+            );
+            cv::minMaxLoc(scores, 0, &maxClassScore, 0, &classIdPoint);
+            int objectClass = classIdPoint.x;
+            detections.emplace_back(
+                objectClass,
+                maxClassScore * objectness,
+                (width * height) / (input.format.rows * input.format.cols),
+                std::array<cv::Point2d, 4>{
+                    corners_buffer[0],
+                    corners_buffer[1],
+                    corners_buffer[2],
+                    corners_buffer[3]
+                },
+                std::array<cv::Point2d, 4>{
+                    cv::Point2d{std::atan(norm_corners_buffer[0].x),std::atan(norm_corners_buffer[0].y)},
+                    cv::Point2d{std::atan(norm_corners_buffer[1].x),std::atan(norm_corners_buffer[1].y)},
+                    cv::Point2d{std::atan(norm_corners_buffer[2].x),std::atan(norm_corners_buffer[2].y)},
+                    cv::Point2d{std::atan(norm_corners_buffer[3].x),std::atan(norm_corners_buffer[3].y)},
+                }
+            );
         }
+        return detections;
     }
 }

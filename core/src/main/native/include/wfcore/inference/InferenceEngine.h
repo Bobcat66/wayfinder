@@ -27,6 +27,7 @@
 #include "wfcore/video/video_types.h"
 #include "wfcore/inference/Tensorizer.h"
 #include <optional>
+#include <array>
 
 namespace wf {
 
@@ -34,12 +35,12 @@ namespace wf {
         int objectClass;
         double confidence;
         double percentArea;
-        std::vector<cv::Point2d> cornerPixels;
-        std::vector<cv::Point2d> cornerAngles;
+        std::array<cv::Point2d, 4> cornerPixels;
+        std::array<cv::Point2d, 4> cornerAngles;
         ObjectDetection(
             int objectClass_, double confidence_, double percentArea_,
-            std::vector<cv::Point2d> cornerPixels_,
-            std::vector<cv::Point2d> cornerAngles_
+            std::array<cv::Point2d, 4> cornerPixels_,
+            std::array<cv::Point2d, 4> cornerAngles_
         ) : objectClass(objectClass_), confidence(confidence_), percentArea(percentArea_),
             cornerPixels(std::move(cornerPixels_)), cornerAngles(std::move(cornerAngles_)) {}
     };

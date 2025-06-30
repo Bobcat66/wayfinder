@@ -204,16 +204,16 @@ namespace impl {
             detection.confidence,
             detection.percent_area,
             {
-                {detection.corner0_x_pixels, detection.corner0_y_pixels},
-                {detection.corner1_x_pixels, detection.corner1_y_pixels},
-                {detection.corner2_x_pixels, detection.corner2_y_pixels},
-                {detection.corner3_x_pixels, detection.corner3_y_pixels}
+                cv::Point2d{detection.corner0_x_pixels, detection.corner0_y_pixels},
+                cv::Point2d{detection.corner1_x_pixels, detection.corner1_y_pixels},
+                cv::Point2d{detection.corner2_x_pixels, detection.corner2_y_pixels},
+                cv::Point2d{detection.corner3_x_pixels, detection.corner3_y_pixels}
             },
             {
-                {detection.corner0_x_angles, detection.corner0_y_angles},
-                {detection.corner1_x_angles, detection.corner1_y_angles},
-                {detection.corner2_x_angles, detection.corner2_y_angles},
-                {detection.corner3_x_angles, detection.corner3_y_angles}
+                cv::Point2d{detection.corner0_x_angles, detection.corner0_y_angles},
+                cv::Point2d{detection.corner1_x_angles, detection.corner1_y_angles},
+                cv::Point2d{detection.corner2_x_angles, detection.corner2_y_angles},
+                cv::Point2d{detection.corner3_x_angles, detection.corner3_y_angles}
             }
         };
     }

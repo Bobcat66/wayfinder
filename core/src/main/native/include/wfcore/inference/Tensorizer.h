@@ -29,5 +29,5 @@ namespace wf {
         TensorParameters params; // Parameters for how the input frame should be tensorized
         cv::Mat temp; // Temporary buffer to hold input frame
         std::vector<cv::Mat> channels; // Temporary buffer to hold channels of the input frame. This is used as tensors store image data in planar format, where each channel is stored contiguously in memory, while OpenCV mats are stored in interleaved format, where each pixel contains all channels. This is used to convert the input frame into the correct tensor format
-    }
+    };
 }

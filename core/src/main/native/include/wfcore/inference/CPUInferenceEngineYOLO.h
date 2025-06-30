@@ -34,14 +34,15 @@ namespace wf {
     public:
         CPUInferenceEngineYOLO();
         std::string modelFormat() const override { return "onnx"; }
-        bool setCameraIntrinsics(const CameraIntrinsics& intrinsics) override { this->intrinsics = intrinsics; }
+        bool setCameraIntrinsics(const CameraIntrinsics& intrinsics) override { this->intrinsics = intrinsics; return true; }
         bool setTensorParameters(const TensorParameters& params) override;
         bool loadModel(const std::string& modelPath) override;
         [[nodiscard]] 
         std::vector<ObjectDetection> infer(const Frame& input) noexcept override;
     private:
-        std::vector<ObjectDetection> postprocess(const cv::Mat& detmat);
         cv::dnn::Net model; // OpenCV DNN network
         cv::Mat blob; // Blob for input data
+        std::vector<cv::Point2d> corners_buffer;
+        std::vector<cv::Point2d> norm_corners_buffer;
     };
 }
