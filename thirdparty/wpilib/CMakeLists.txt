@@ -22,6 +22,4 @@ fetchcontent_declare(
 )
 FetchContent_MakeAvailable(allwpilib)
 
-add_dependencies(cscore opencv)
-
 

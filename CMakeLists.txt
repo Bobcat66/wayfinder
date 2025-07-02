@@ -15,6 +15,9 @@ enable_testing()
 # would rely on a shared set of libraries bundled with this project
 # Additionally, build OpenCV from source instead of relying on system installs
 
+# This will build wayfinder's dependencies, but not wayfinder itself.
+# The build system must be bootstrapped AT LEAST ONCE before building. Subsequent builds can be run without bootstrapping
+option(WF_BOOTSTRAP "Enable bootstrap build" OFF)
 option(WF_USE_GSTREAMER "Enable Gstreamer video capture" OFF) #WIP, low priority
 option(WF_USE_VIDEOLAN_CODECS "Enable support for VideoLAN x264 and x265 codecs" OFF) #WIP, low priority
 option(WF_BUILD_DAEMON "Builds a Wayfinder daemon meant to run on a coprocessor" ON)
@@ -34,13 +37,17 @@ configure_file(
     @ONLY
 )
 
-add_subdirectory(thirdparty/opencv)
-add_subdirectory(thirdparty/googletest)
-add_subdirectory(thirdparty/apriltag)
-add_subdirectory(thirdparty/wpilib)
-add_subdirectory(thirdparty/gtsam)
-add_subdirectory(thirdparty/spdlog)
-add_subdirectory(thirdparty/nlohmann_json)
-add_subdirectory(core)
-add_subdirectory(daemon)
+if (WF_BOOTSTRAP)
+    add_subdirectory(thirdparty/opencv)
+else()
+    add_subdirectory(thirdparty/opencv)
+    add_subdirectory(thirdparty/googletest)
+    add_subdirectory(thirdparty/apriltag)
+    add_subdirectory(thirdparty/wpilib)
+    add_subdirectory(thirdparty/gtsam)
+    add_subdirectory(thirdparty/spdlog)
+    add_subdirectory(thirdparty/nlohmann_json)
+    add_subdirectory(core)
+    add_subdirectory(daemon)
+endif()
 
