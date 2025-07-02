@@ -1,0 +1,82 @@
+{
+    "version": 5,
+    "configurePresets": [
+        {
+            "name": "bootstrap",
+            "generator": "Ninja",
+            "binaryDir": "${sourceDir}/build/extern_deps",
+            "cacheVariables": {
+                "WF_BOOTSTRAP": "ON",
+                "CMAKE_BUILD_TYPE": "RelWithDebInfo"
+            }
+        },
+        {
+            "name": "debug",
+            "generator": "Ninja",
+            "binaryDir": "${sourceDir}/build/debug",
+            "cacheVariables": {
+                "WF_BOOTSTRAP": "OFF",
+                "CMAKE_BUILD_TYPE": "Debug"
+            }
+        },
+        {
+            "name": "release",
+            "generator": "Ninja",
+            "binaryDir": "${sourceDir}/build/release",
+            "cacheVariables": {
+                "WF_BOOTSTRAP": "OFF",
+                "CMAKE_BUILD_TYPE": "Release"
+            }
+        },
+        {
+            "name": "relWithDebInfo",
+            "generator": "Ninja",
+            "binaryDir": "${sourceDir}/build/relWithDebInfo",
+            "cacheVariables": {
+                "WF_BOOTSTRAP": "OFF",
+                "CMAKE_BUILD_TYPE": "RelWithDebInfo"
+            }
+        },
+        {
+            "name": "minSizeRel",
+            "generator": "Ninja",
+            "binaryDir": "${sourceDir}/build/minSizeRel",
+            "cacheVariables": {
+                "WF_BOOTSTRAP": "OFF",
+                "CMAKE_BUILD_TYPE": "MinSizeRel"
+            }
+        }
+    ],
+    "buildPresets": [
+        {
+            "name": "relWithDebInfo",
+            "configurePreset": "relWithDebInfo",
+            "description": "Build with optimizations and debug symbols",
+            "verbose": false
+        },
+        {
+            "name": "debug",
+            "configurePreset": "debug",
+            "description": "Build with debug symbols",
+            "verbose": true
+        },
+        {
+            "name": "release",
+            "configurePreset": "release",
+            "description": "Build with optimizations",
+            "verbose": false
+        },
+        {
+            "name": "minSizeRel",
+            "configurePreset": "minSizeRel",
+            "description": "Optimize for minimum binary size",
+            "verbose": false
+        },
+        {
+            "name": "bootstrap",
+            "configurePreset": "bootstrap",
+            "description": "Build out-of-tree dependencies",
+            "verbose": false
+        }
+    ]
+}

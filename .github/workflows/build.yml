@@ -23,12 +23,8 @@ jobs:
                 restore-keys: |
                     ${{ runner.os }}-build-
           
-
-          - name: Configure CMake
-            run: cmake -S . -B build -G Ninja
-        
-          - name: Build
-            run: cmake --build build
+          - name: Build wayfinder and dependencies
+            run: source superbuild.sh -DCMAKE_BUILD_TYPE=Release
 
           - name: Upload build artifacts
             uses: actions/upload-artifact@v4

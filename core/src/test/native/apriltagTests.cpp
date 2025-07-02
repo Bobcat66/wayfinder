@@ -29,8 +29,8 @@
 #include <filesystem>
 #include <gtest/gtest.h>
 
-// This is for development environments only
-#define RESOURCE_PATH "../../test-resources"
+// This is for development environments only. Tests will NOT work once installed
+#define RESOURCE_PATH "../../../test-resources"
 
 #define STRINGIZE_IMPL(x) #x
 #define TO_STRING(x) STRINGIZE_IMPL(x)
