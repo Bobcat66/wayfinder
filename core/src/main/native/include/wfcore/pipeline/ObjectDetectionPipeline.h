@@ -20,13 +20,14 @@
 #pragma once
 
 #include "wfcore/pipeline/Pipeline.h"
-#include "wfcore/fiducial/InferenceEngine.h
+#include "wfcore/inference/InferenceEngine.h
 #include "wfcore/video/video_types.h"
 
 #include <string>
 
 namespace wf {
 
+    // All AI stuff is designed to work with YOLO models
     enum class InferenceEngineType {
         CV_CPU, // OpenCV DNN-based inference engine
         CV_OPENCL, // OpenCV-based inference engine with OpenCL acceleration (not implemented yet)
@@ -38,14 +39,32 @@ namespace wf {
         ROCm, // AMD MIVisionX-based inference engine, uses ROCm terminology for better brand recognition (not implemented yet),
         EdgeTPU, // Google Edge TPU-based inference engine (not implemented yet)
         HailoRT, // Hailo RT-based inference engine (not implemented yet)
-    }
+    };
+
+    enum class ModelArch {
+        YOLO,
+        SSD, // Not implemented
+        RETINA_NET, // Not implemented
+        RCNN // Not implemented
+    };
 
     struct ObjectDetectionPipelineConfiguration {
         std::string modelPath; // Path to the model file
         InferenceEngineType engineType; // Type of inference engine to use
         FrameFormat modelInputFormat; // Input format of the model
         std::vector<double> means; // Mean values to subtract from the input image. If the image is in BGR format, these should be in BGR order, likewise for RGB. If grayscale, this should have only one value
-        double confidenceThreshold = 0.5; // Minimum confidence threshold for detections
-        double nmsThreshold = 0.4; // Non-maximum suppression threshold
-    }
+        float confidenceThreshold = 0.5; // Minimum confidence threshold for detections
+        float nmsThreshold = 0.4; // Non-maximum suppression threshold
+    };
+
+    class ObjectDetectionPipeline : public Pipeline {
+    public:
+        ObjectDetectionPipeline(ObjectDetectionPipelineConfiguration config_, CameraIntrinsics intrinsics_);
+        [[nodiscard]] 
+        PipelineResult process(const Frame& frame) const noexcept override;
+    private:
+        InferenceEngine engine;
+        CameraIntrinsics intrinsics;
+        ObjectDetectionPipelineConfiguration config;
+    };
 }

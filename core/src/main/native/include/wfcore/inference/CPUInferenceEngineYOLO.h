@@ -33,6 +33,7 @@ namespace wf {
     public:
         CPUInferenceEngineYOLO();
         std::string modelFormat() const override { return "onnx"; }
+        bool setFilteringParameters(const IEFilteringParams& params) override { this->filterParams = params; return true; }
         bool setCameraIntrinsics(const CameraIntrinsics& intrinsics) override { this->intrinsics = intrinsics; return true; }
         bool setTensorParameters(const TensorParameters& params) override;
         bool loadModel(const std::string& modelPath) override;
@@ -41,7 +42,11 @@ namespace wf {
     private:
         cv::dnn::Net model; // OpenCV DNN network
         cv::Mat blob; // Blob for input data
-        std::vector<cv::Point2d> corners_buffer;
-        std::vector<cv::Point2d> norm_corners_buffer;
+        std::vector<cv::Point2f> corners_buffer;
+        std::vector<cv::Point2f> norm_corners_buffer;
+        std::vector<int> index_buffer;
+        std::vector<cv::Rect2d> bboxd_buffer;
+        std::vector<float> confidence_buffer;
+        std::vector<int> objclass_buffer;
     };
 }

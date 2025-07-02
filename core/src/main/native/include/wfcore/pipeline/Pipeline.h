@@ -85,6 +85,20 @@ namespace wf {
                 {}
             );
         }
+
+        static PipelineResult ObjectDetectionPipelineResult(
+            uint64_t captimeMicros,
+            std::vector<ObjectDetection> detections_
+        ) {
+            return PipelineResult(
+                captimeMicros,
+                PipelineType::ObjDetect,
+                {},
+                {},
+                {},
+                std::move(detections_)
+            );
+        }
     };
 
     class Pipeline {

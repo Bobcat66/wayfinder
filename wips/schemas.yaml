@@ -33,58 +33,58 @@
     type: i32
 
   - name: confidence
-    type: fp64
+    type: fp32
   
   - name: percent_area
-    type: fp64
+    type: fp32
 
   - name: corner0_x_pixels
-    type: fp64
+    type: fp32
 
   - name: corner0_y_pixels
-    type: fp64
+    type: fp32
 
   - name: corner1_x_pixels
-    type: fp64
+    type: fp32
 
   - name: corner1_y_pixels
-    type: fp64
+    type: fp32
 
   - name: corner2_x_pixels
-    type: fp64
+    type: fp32
 
   - name: corner2_y_pixels
-    type: fp64
+    type: fp32
 
   - name: corner3_x_pixels
-    type: fp64
+    type: fp32
 
   - name: corner3_y_pixels
-    type: fp64
+    type: fp32
 
   - name: corner0_x_angles
-    type: fp64
+    type: fp32
 
   - name: corner0_y_angles
-    type: fp64
+    type: fp32
 
   - name: corner1_x_angles
-    type: fp64
+    type: fp32
 
   - name: corner1_y_angles
-    type: fp64
+    type: fp32
 
   - name: corner2_x_angles
-    type: fp64
+    type: fp32
 
   - name: corner2_y_angles
-    type: fp64
+    type: fp32
 
   - name: corner3_x_angles
-    type: fp64
+    type: fp32
 
   - name: corner3_y_angles
-    type: fp64
+    type: fp32
 ---
 # Represents an apriltag detection
 # Encodes the fiducial ID, the corners of the tag in pixels,

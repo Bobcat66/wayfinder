@@ -47,49 +47,69 @@ namespace wf {
         model.setPreferableBackend(cv::dnn::DNN_BACKEND_OPENCV);
         model.setPreferableTarget(cv::dnn::DNN_TARGET_CPU);
         return !model.empty();
-        return true; // TODO: Check if model is loaded correctly
     }
     [[nodiscard]] 
     std::vector<ObjectDetection> CPUInferenceEngineYOLO::infer(const Frame& input) noexcept {
         this->tensorizer.tensorize(input.data, reinterpret_cast<float*>(blob.data));
         model.setInput(blob);
         cv::Mat output = model.forward();
-
+        // Output Shape: [1, number of detections, 5 + number of classes]
         int numDetections = output.rows;
         std::vector<ObjectDetection> detections;
         detections.reserve(numDetections);
         int num_classes = output.cols - 5;
+        objclass_buffer.clear();
+        index_buffer.clear();
+        bboxd_buffer.clear();
+        confidence_buffer.clear();
         for (int i = 0; i < output.rows; ++i) {
+            // Detection format: [x center, y center, width, height, objectness, class_confidences...]
+            float* data = output.ptr<float>(i);
+            int objectClass = getClassYOLO(data,num_classes); // Returns the class with the highest confidence score
+            float confidence = getConfidenceYOLO(data,objectClass); // Class confidence score * objectness
+            float width = data[2];
+            float height = data[3];
+            float topleft_x = data[0] - (width/2.0f);
+            float topleft_y = data[1] - (height/2.0f);
+            bboxd_buffer.emplace_back(
+                static_cast<double>(topleft_x),
+                static_cast<double>(topleft_y),
+                static_cast<double>(width),
+                static_cast<double>(height)
+            );
+            confidence_buffer.push_back(confidence);
+            objclass_buffer.push_back(objectClass);
+        }
+        cv::dnn::NMSBoxes(
+            bboxd_buffer,
+            confidence_buffer,
+            this->filterParams.confidenceThreshold,
+            this->filterParams.nmsThreshold,
+            index_buffer
+        );
+        for (int index : index_buffer) {
+            auto bboxd = bboxd_buffer[index];
             corners_buffer.clear();
             norm_corners_buffer.clear();
-            float* data = output.ptr<float>(i);
-            double width = data[2];
-            double height = data[3];
-            auto corners = getCornersYOLO(data);
+            auto corners = std::move(getCornersBboxd(bboxd));
             corners_buffer.assign(corners.begin(),corners.end());
             cv::undistortPoints(
                 corners_buffer,
                 norm_corners_buffer,
-                intrinsics.cameraMatrix,
-                intrinsics.distCoeffs
+                this->intrinsics.cameraMatrix,
+                this->intrinsics.distCoeffs
             );
-            int objectClass = getClassYOLO(data,num_classes);
-            double confidence = getConfidenceYOLO(data,objectClass);
             detections.emplace_back(
-                objectClass,
-                confidence,
-                (width * height) / (input.format.rows * input.format.cols),
-                std::array<cv::Point2d, 4>{
-                    corners_buffer[0],
-                    corners_buffer[1],
-                    corners_buffer[2],
-                    corners_buffer[3]
-                },
-                std::array<cv::Point2d, 4>{
-                    cv::Point2d{std::atan(norm_corners_buffer[0].x),std::atan(norm_corners_buffer[0].y)},
-                    cv::Point2d{std::atan(norm_corners_buffer[1].x),std::atan(norm_corners_buffer[1].y)},
-                    cv::Point2d{std::atan(norm_corners_buffer[2].x),std::atan(norm_corners_buffer[2].y)},
-                    cv::Point2d{std::atan(norm_corners_buffer[3].x),std::atan(norm_corners_buffer[3].y)},
+                objclass_buffer[index],
+                confidence_buffer[index],
+                static_cast<float>(bboxd.width * bboxd.height) 
+                    / (input.format.rows * input.format.cols),
+                std::move(corners),
+                std::array<cv::Point2f, 4>{
+                    cv::Point2f{std::atan(norm_corners_buffer[0].x),std::atan(norm_corners_buffer[0].y)},
+                    cv::Point2f{std::atan(norm_corners_buffer[1].x),std::atan(norm_corners_buffer[1].y)},
+                    cv::Point2f{std::atan(norm_corners_buffer[2].x),std::atan(norm_corners_buffer[2].y)},
+                    cv::Point2f{std::atan(norm_corners_buffer[3].x),std::atan(norm_corners_buffer[3].y)},
                 }
             );
         }

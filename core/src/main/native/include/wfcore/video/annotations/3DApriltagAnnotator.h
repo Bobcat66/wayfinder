@@ -19,14 +19,10 @@
 
 #pragma once
 
-#include <opencv2/opencv.hpp>
-#include <vector>
-#include <array>
+#include "wfcore/video/annotations/Annotator.h"
 
 namespace wf {
-    std::array<cv::Point2d, 4> getCornersYOLO(float* yolo_result);
-    std::array<cv::Point2f, 4> getCornersBboxd(const cv::Rect2d& bbox);
-    std::array<cv::Point2f, 4> getCornersBboxf(const cv::Rect2f& bbox);
-    double getConfidenceYOLO(float* yolo_result, int obj_class);
-    int getClassYOLO(float* yolo_result, int num_classes);
+    class 3DApriltagAnnotator : public Annotator {
+        
+    };
 }

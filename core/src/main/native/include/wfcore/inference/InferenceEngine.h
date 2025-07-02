@@ -31,16 +31,21 @@
 
 namespace wf {
 
+    struct IEFilteringParams {
+        float nmsThreshold;
+        float confidenceThreshold;
+    };
+
     struct ObjectDetection {
         int objectClass;
-        double confidence;
-        double percentArea;
-        std::array<cv::Point2d, 4> cornerPixels;
-        std::array<cv::Point2d, 4> cornerAngles;
+        float confidence;
+        float percentArea;
+        std::array<cv::Point2f, 4> cornerPixels;
+        std::array<cv::Point2f, 4> cornerAngles;
         ObjectDetection(
-            int objectClass_, double confidence_, double percentArea_,
-            std::array<cv::Point2d, 4> cornerPixels_,
-            std::array<cv::Point2d, 4> cornerAngles_
+            int objectClass_, float confidence_, float percentArea_,
+            std::array<cv::Point2f, 4> cornerPixels_,
+            std::array<cv::Point2f, 4> cornerAngles_
         ) : objectClass(objectClass_), confidence(confidence_), percentArea(percentArea_),
             cornerPixels(std::move(cornerPixels_)), cornerAngles(std::move(cornerAngles_)) {}
     };
@@ -48,6 +53,7 @@ namespace wf {
     class InferenceEngine {
     public:
         virtual ~InferenceEngine() = default;
+        virtual bool setFilteringParameters(const IEFilteringParams& params) = 0;
         virtual bool setTensorParameters(const TensorParameters& params) = 0;
         virtual bool setCameraIntrinsics(const CameraIntrinsics& intrinsics) = 0;
         virtual bool loadModel(const std::string& modelPath) = 0;
@@ -57,5 +63,6 @@ namespace wf {
     protected:
         Tensorizer tensorizer;
         CameraIntrinsics intrinsics;
+        IEFilteringParams filterParams;
     };
 }

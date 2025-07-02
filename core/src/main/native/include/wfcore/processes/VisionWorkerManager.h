@@ -16,3 +16,33 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+#pragma once
+
+#include <vector>
+#include <string>
+
+#include "wfcore/processes/VisionWorkerConfig.h"
+#include "wfcore/processes/VisionWorker.h"
+
+namespace wf {
+    class VisionWorkerManager {
+    public:
+        VisionWorkerManager(const VisionWorkerManager&) = delete;
+        VisionWorkerManager& operator=(const VisionWorkerManager&) = delete;
+        static VisionWorkerManager& getInstance() {
+            static VisionWorkerManager instance;
+            return instance;
+        }
+        VisionWorker& buildVisionWorker(const VisionWorkerConfig& config);
+        VisionWorker& getVisionWorker(const std::string& name);
+        int startVisionWorker(const std::string& name);
+        int stopVisionWorker(const std::string& name);
+        int destroyVisionWorker(const std::string& name);
+        int startAllWorkers();
+        int stopAllWorkers();
+        int destroyAllWorkers();
+    private:
+        std::vector<VisionWorker> workers;
+        VisionWorkerManager();
+    };
+}

@@ -34,7 +34,7 @@ namespace wf {
         int height; // Height of the tensor, in pixels. This is to correctly allocate buffers for the tensorization process, images are expected to already be in this size. Improperly sized images will result in undefined behavior
         int width; // Width of the tensor, in pixels. This is to correctly allocate buffers for the tensorization process, images are expected to already be in this size. Improperly sized images will result in undefined behavior
         int channels;
-        double scale = 1.0; // Scale factor to multiply each pixel value by. Set to 1.0 to disable normalization
+        float scale = 1.0; // Scale factor to multiply each pixel value by. Set to 1.0 to disable normalization
         cv::Scalar stds = {1.0, 1.0, 1.0}; // Standard deviations to divide each channel by. Set to 1.0 for each channel to disable standardization
         cv::Scalar means = {0.0, 0.0, 0.0}; // Means to subtract from each channel. Set to 0.0 for each channel to disable mean centering
     };

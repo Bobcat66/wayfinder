@@ -31,6 +31,7 @@
 #include "wfcore/video/FrameProvider.h"
 #include "wfcore/video/processing/CVProcessPipe.h"
 
+#
 namespace wf {
 
     typedef std::function<void(const PipelineResult&)> ResultConsumer;

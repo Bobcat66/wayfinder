@@ -21,16 +21,24 @@
 #include "wfcore/inference/inference_utils.h"
 
 namespace wf {
-    std::array<cv::Point2d, 4> getCornersYOLO(float* yolo_result) {
-        double xcenter = yolo_result[0];
-        double ycenter = yolo_result[1];
-        double width = yolo_result[2];
-        double height = yolo_result[3];
+    std::array<cv::Point2f, 4> getCornersBboxd(const cv::Rect2d bbox) {
+        float bboxf_x = static_cast<float>(bbox.x);
+        float bboxf_y = static_cast<float>(bbox.y);
+        float bboxf_width = static_cast<float>(bbox.width);
+        float bboxf_height = static_cast<float>(bbox.height);
         return {
-            cv::Point2d{xcenter - (width/2),ycenter - (height/2)},
-            cv::Point2d{xcenter + (width/2),ycenter - (height/2)},
-            cv::Point2d{xcenter + (width/2),ycenter + (height/2)},
-            cv::Point2d{xcenter - (width/2),ycenter + (height/2)}
+            cv::Point2f{bboxf_x, bboxf_y},
+            cv::Point2f{bboxf_x + bboxf_width, bboxf_y},
+            cv::Point2f{bboxf_x + bboxf_width, bboxf_y + bboxf_height},
+            cv::Point2f{bboxf_x, bboxf_y + bboxf_height}
+        };
+    }
+    std::array<cv::Point2f, 4> getCornersBboxf(const cv::Rect2f& bbox) {
+        return {
+            cv::Point2f{bbox.x, bbox.y},
+            cv::Point2f{bbox.x + bbox.width, bbox.y},
+            cv::Point2f{bbox.x + bbox.width, bbox.y + bbox.height},
+            cv::Point2f{bbox.x, bbox.y + bbox.height}
         };
     }
     double getConfidenceYOLO(float* yolo_result, int obj_class) {
