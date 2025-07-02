@@ -23,4 +23,4 @@ No warranty is provided.
 # Using A Custom Model
 
 > [!IMPORTANT] 
-> Wayfinder ONLY supports Ultralytics YOLOv5, YOLOv7, and YOLOv8 models with NO postprocessing, as Wayfinder performs its own postprocessing and expects raw outputs. Attempting to use a model with postprocessing enabled will result in undefined behavior
+> Wayfinder ONLY supports Ultralytics YOLOv5, YOLOv8, and YOLOv11 models with NO postprocessing, as Wayfinder performs its own postprocessing and expects raw outputs. Attempting to use a model with postprocessing enabled will result in undefined behavior

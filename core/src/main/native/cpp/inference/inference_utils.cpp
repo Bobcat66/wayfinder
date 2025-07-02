@@ -21,7 +21,7 @@
 #include "wfcore/inference/inference_utils.h"
 
 namespace wf {
-    std::array<cv::Point2f, 4> getCornersBboxd(const cv::Rect2d bbox) {
+    std::array<cv::Point2f, 4> getCornersBboxd(const cv::Rect2d& bbox) {
         float bboxf_x = static_cast<float>(bbox.x);
         float bboxf_y = static_cast<float>(bbox.y);
         float bboxf_width = static_cast<float>(bbox.width);

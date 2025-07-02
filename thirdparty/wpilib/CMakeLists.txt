@@ -20,6 +20,8 @@ fetchcontent_declare(
     GIT_REPOSITORY    https://github.com/wpilibsuite/allwpilib.git
     GIT_TAG           v2025.3.2
 )
-fetchcontent_makeavailable(allwpilib)
+FetchContent_MakeAvailable(allwpilib)
+
+add_dependencies(cscore opencv)
 
 

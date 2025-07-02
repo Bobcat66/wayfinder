@@ -23,12 +23,6 @@ jobs:
                 restore-keys: |
                     ${{ runner.os }}-build-
 
-          - name: Install Ninja
-            run: sudo apt update && sudo apt install -y ninja-build
-        
-          - name: Install OpenCV
-            run: sudo apt install libopencv-dev
-
           - name: Configure CMake
             run: cmake -S . -B build -G Ninja
         
@@ -52,9 +46,6 @@ jobs:
 
           - name: Checkout code
             uses: actions/checkout@v4
-
-          - name: Install OpenCV
-            run: sudo apt install libopencv-dev
 
           - name: Download build artifacts
             uses: actions/download-artifact@v4

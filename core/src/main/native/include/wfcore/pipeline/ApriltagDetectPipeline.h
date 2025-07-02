@@ -7,10 +7,10 @@
 
 namespace wf {
 
-    struct ApriltagDetectPipelineConfiuration (
+    struct ApriltagDetectPipelineConfiguration {
         ApriltagDetectorConfig detConfig;
         QuadThresholdParams detQTPs;
         std::unordered_set<int> detectorExcludes;
-    );
+    };
     
 }

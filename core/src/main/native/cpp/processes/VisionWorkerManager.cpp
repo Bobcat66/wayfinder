@@ -17,6 +17,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+// Commented out so the damn thing builds
+/*
 #include "wfcore/processes/VisionWorkerManager.h"
 #include "wfcore/video/UsbCameraSinkCS.h"
 
@@ -32,3 +34,4 @@ namespace wf {
     int stopAllWorkers();
     int destroyAllWorkers();
 }
+*/

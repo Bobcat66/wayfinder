@@ -20,7 +20,7 @@
 #pragma once
 
 #include "wfcore/pipeline/Pipeline.h"
-#include "wfcore/inference/InferenceEngine.h
+#include "wfcore/inference/InferenceEngine.h"
 #include "wfcore/video/video_types.h"
 
 #include <string>
@@ -63,7 +63,7 @@ namespace wf {
         [[nodiscard]] 
         PipelineResult process(const Frame& frame) const noexcept override;
     private:
-        InferenceEngine engine;
+        InferenceEngine& engine;
         CameraIntrinsics intrinsics;
         ObjectDetectionPipelineConfiguration config;
     };

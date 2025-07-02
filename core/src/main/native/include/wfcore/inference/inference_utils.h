@@ -24,7 +24,6 @@
 #include <array>
 
 namespace wf {
-    std::array<cv::Point2d, 4> getCornersYOLO(float* yolo_result);
     std::array<cv::Point2f, 4> getCornersBboxd(const cv::Rect2d& bbox);
     std::array<cv::Point2f, 4> getCornersBboxf(const cv::Rect2f& bbox);
     double getConfidenceYOLO(float* yolo_result, int obj_class);

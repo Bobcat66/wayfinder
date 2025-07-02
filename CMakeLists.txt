@@ -34,6 +34,7 @@ configure_file(
     @ONLY
 )
 
+add_subdirectory(thirdparty/opencv)
 add_subdirectory(thirdparty/googletest)
 add_subdirectory(thirdparty/apriltag)
 add_subdirectory(thirdparty/wpilib)

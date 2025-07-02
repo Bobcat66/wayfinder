@@ -14,6 +14,7 @@ file(GLOB_RECURSE WIPSSOURCES
     "${CMAKE_CURRENT_SOURCE_DIR}/src/generated/wips/*.c"
 )
 add_library(wfcore ${CORESOURCES} ${WIPSSOURCES})
+add_dependencies(wfcore opencv)
 
 if(WF_USE_EDGETPU)
     add_compile_definitions(WF_USE_EDGETPU)
