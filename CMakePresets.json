@@ -7,7 +7,7 @@
             "binaryDir": "${sourceDir}/build/extern_deps",
             "cacheVariables": {
                 "WF_BOOTSTRAP": "ON",
-                "CMAKE_BUILD_TYPE": "RelWithDebInfo"
+                "CMAKE_BUILD_TYPE": "Release"
             }
         },
         {

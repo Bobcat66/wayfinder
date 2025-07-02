@@ -10,12 +10,14 @@
 
 # Presets SHOULD NOT BE USED when using superbuild.sh
 
-# It requires CMake (duh), and Ninja
+# It requires CMake, and Ninja
 
 # Stage 1: Bootstrapping
+echo "Bootstrapping build system..."
 cmake --preset bootstrap
 cmake --build --preset bootstrap
 
 # Stage 2: Build
-cmake -G Ninja -S . -B build/custom "$@"
-cmake --build build/custom
+echo "Building Wayfinder..."
+cmake -G Ninja -S . -B build/superbuild "$@"
+cmake --build build/superbuild
