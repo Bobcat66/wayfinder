@@ -31,6 +31,8 @@ option(WF_USE_RKNN "Enable support for RKNPU hardware-accelerated inference" OFF
 option(WF_USE_COREML "Enable support for Apple CoreML hardware-accelerated inference" OFF) #WIP, low priority
 option(WF_USE_OPENVINO "Enable support for Intel OpenVINO hardware-accelerated inference" OFF) #WIP, low priority
 
+option(WF_USE_SYSTEM_OPENCV "Use system OpenCV instead of bundled version" OFF)
+
 configure_file(
     ${CMAKE_CURRENT_SOURCE_DIR}/version.h.in
     ${CMAKE_CURRENT_BINARY_DIR}/meta/version.h
