@@ -153,7 +153,7 @@ namespace impl {
         wips_i32_t* tagsUsedData = static_cast<wips_i32_t*>(malloc(observation.tagsUsed.size() * sizeof(wips_i32_t)));
         memcpy(tagsUsedData, observation.tagsUsed.data(), observation.tagsUsed.size() * sizeof(wips_i32_t));
         return {
-            observation.tagsUsed.size(),
+            static_cast<wips_u32_t>(observation.tagsUsed.size()),
             tagsUsedData,
             wfcore2wips_pose3_shim(observation.fieldPose0),
             observation.error0,

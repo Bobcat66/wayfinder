@@ -20,6 +20,7 @@
 #pragma once
 
 #include "wfcore/fiducial/ApriltagField.h"
+#include "wfcore/common/wfdef.h"
 #include <string>
 
 namespace wf {
