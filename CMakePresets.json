@@ -50,7 +50,7 @@
                 "WF_BOOTSTRAP": "OFF",
                 "CMAKE_BUILD_TYPE": "MinSizeRel"
             }
-        },
+        }
     ],
     "buildPresets": [
         {
