@@ -30,5 +30,5 @@ else()
     # Normal project build
     # Tell CMake where to find OpenCV if installed
     set(OPENCV_INSTALL_DIR ${CMAKE_SOURCE_DIR}/build/extern_deps/opencv-install)
-    set(OpenCV_DIR ${OPENCV_INSTALL_DIR}/lib/cmake/opencv4)
+    set(OpenCV_DIR "${OPENCV_INSTALL_DIR}/lib/cmake/opencv4" PARENT_SCOPE)
 endif()
