@@ -50,6 +50,46 @@
                 "WF_BOOTSTRAP": "OFF",
                 "CMAKE_BUILD_TYPE": "MinSizeRel"
             }
+        },
+        {
+            "name": "debug-windows",
+            "generator": "Visual Studio 17 2022",
+            "binaryDir": "${sourceDir}/build/debug-win",
+            "cacheVariables": {
+                "WF_USE_SYSTEM_OPENCV": "OFF",
+                "WF_BOOTSTRAP": "OFF",
+                "CMAKE_BUILD_TYPE": "Debug"
+            }
+        },
+        {
+            "name": "release-windows",
+            "generator": "Visual Studio 17 2022",
+            "binaryDir": "${sourceDir}/build/release-win",
+            "cacheVariables": {
+                "WF_USE_SYSTEM_OPENCV": "OFF",
+                "WF_BOOTSTRAP": "OFF",
+                "CMAKE_BUILD_TYPE": "Release"
+            }
+        },
+        {
+            "name": "minSizeRel-windows",
+            "generator": "Visual Studio 17 2022",
+            "binaryDir": "${sourceDir}/build/minSizeRel-win",
+            "cacheVariables": {
+                "WF_USE_SYSTEM_OPENCV": "OFF",
+                "WF_BOOTSTRAP": "OFF",
+                "CMAKE_BUILD_TYPE": "MinSizeRel"
+            }
+        },
+        {
+            "name": "relWithDebInfo-windows",
+            "generator": "Visual Studio 17 2022",
+            "binaryDir": "${sourceDir}/build/relWithDebInfo-win",
+            "cacheVariables": {
+                "WF_USE_SYSTEM_OPENCV": "OFF",
+                "WF_BOOTSTRAP": "OFF",
+                "CMAKE_BUILD_TYPE": "RelWithDebInfo"
+            }
         }
     ],
     "buildPresets": [
@@ -81,6 +121,30 @@
             "name": "bootstrap",
             "configurePreset": "bootstrap",
             "description": "Bootstrap build system by building out-of-tree dependences",
+            "verbose": false
+        },
+        {
+            "name": "debug-windows",
+            "configurePreset": "debug-windows",
+            "description": "Build with optimizations and debug symbols, using the MSBuild build system",
+            "verbose": false
+        },
+        {
+            "name": "release-windows",
+            "configurePreset": "release-windows",
+            "description": "Build with optimizations, using the MSBuild build system",
+            "verbose": false
+        },
+        {
+            "name": "minSizeRel-windows",
+            "configurePreset": "minSizeRel-windows",
+            "description": "Build with optimizations to minimize space, using the MSBuild build system",
+            "verbose": false
+        },
+        {
+            "name": "relWithDebInfo-windows",
+            "configurePreset": "relWithDebInfo-windows",
+            "description": "Build with optimizations and debug symbols, using the MSBuild build system",
             "verbose": false
         }
     ]
