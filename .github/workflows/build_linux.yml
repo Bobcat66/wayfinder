@@ -54,7 +54,7 @@ jobs:
             run: find build -name '*_tests' -exec chmod +x {} +
 
           - name: Test
-            run: ctest --test-dir build --verbose
+            run: ctest --test-dir build/custom --verbose
 
 
 
