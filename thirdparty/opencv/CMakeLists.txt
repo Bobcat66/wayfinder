@@ -32,11 +32,6 @@ if(NOT WF_USE_SYSTEM_OPENCV)
         # Normal project build
         # Tell CMake where to find OpenCV if installed
         set(OPENCV_INSTALL_DIR ${CMAKE_SOURCE_DIR}/build/extern_deps/opencv-install)
-        if(MSVC)
-            set(OpenCV_DIR "${OPENCV_INSTALL_DIR}/x64/vc17/lib" PARENT_SCOPE)
-        else()
-            #TODO: I know this works when compiling with Ninja and GCC, test for other platforms
-            set(OpenCV_DIR "${OPENCV_INSTALL_DIR}/lib/cmake/opencv4" PARENT_SCOPE)
-        endif()
+        set(OpenCV_DIR "${OPENCV_INSTALL_DIR}/lib/cmake/opencv4" PARENT_SCOPE)
     endif()
 endif()
