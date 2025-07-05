@@ -22,39 +22,63 @@
 #include <vector>
 #include "wfcore/video/video_types.h"
 #include "wfcore/video/processing/CVProcessNode.h"
+#include "wfcore/video/video_utils.h"
 
 namespace wf {
     template <CVImage T>
     class CVProcessPipe {
     public:
-        template <std::same_as<CVProcessNode<T>>... Nodes>
-        CVProcessPipe(Nodes&... nodes);
+        template <std::derived_from<CVProcessNode<T>>... Nodes>
+        CVProcessPipe(FrameFormat inputFormat, Nodes&... nodes) {
+            inpad = generateEmptyCVImg<T>(inputFormat);
+            (this->nodes.push_back(std::ref(nodes)), ...);
+            const T* pad = &inpad;
+            for (auto& node : this->nodes) {
+                node.get().setInpad(pad);
+                pad = &(node.get().getOutpad());
+            }
+            this->outpad = pad;
+            this->outformat = getFormat(*outpad);
+        }
         /*
-        Processes an image with out any internal deep copies. NOTE: OUTPAD WILL BE CONNECTED TO INTERNAL BUFFERS AFTER THIS OPERATION!
-        DO NOT REUSE THE CVProcessPipe until you are done with any additional processing you want to do on this frame, or make a deepcopy
+        Processes an image without any internal allocations. NOTE: OUTPAD WILL BE CONNECTED TO INTERNAL BUFFERS AFTER THIS OPERATION!
+        DO NOT REUSE THE CVProcessPipe until you are done with any additional processing you want to do on this frame, or make a deepcopy.
+        in MUST be in the correct FrameFormat (height, width, channels, type). Passing a mat of the wrong FrameFormat results in UNDEFINED BEHAVIOR!!!
         */
-        void processDirect(const T& in, T& out) noexcept {
+        inline void processDirect(const T& in, T& out) noexcept {
             inpad = in;
             process();
-            out = outpad;
+            out = *outpad;
         }
+
+        void setInputFormat(FrameFormat inputFormat) {
+            inpad = generateEmptyCVImg<T>(inputFormat);
+            for (auto& node : this->nodes) {
+                node.get().updateBuffers();
+            }
+            this->outformat = getFormat(*(this->outpad));
+        }
+        inline const FrameFormat& getInputFormat() {return this->informat;}
 
         [[nodiscard]]
         inline Frame processFrame(const Frame& in) noexcept {
             Frame out(in.captimeMicros,this->outformat,{});
-            unwrap(in,inpad);
+            in.data.copyTo(inpad);
             process();
+            outpad->copyTo(out.data);
             return out;
         }
 
     private:
-        void process() noexcept;
-        std::vector<CVProcessNode<T>> nodes;
+        void process() noexcept {
+            for (auto& node : nodes) {
+                node.get().process();
+            }
+        }
+        std::vector<std::reference_wrapper<CVProcessNode<T>>> nodes;
         FrameFormat informat;
         FrameFormat outformat;
         T inpad;
-        T outpad;
-        void (*unwrap)(const Frame& in,T& out); // Unwraps a frame
-        void (*wrap)(const T& in,Frame& out); // Wraps a buffer into a frame
+        const T* outpad;
     };
 }

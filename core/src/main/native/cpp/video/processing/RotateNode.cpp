@@ -26,7 +26,16 @@ namespace wf {
     RotateNode<T>::RotateNode(int rotation_) : rotation(rotation) {}
 
     template <CVImage T>
+    void RotateNode<T>::updateBuffers() {
+        this->outpad = T(
+            this->outsize.width,
+            this->outsize.height,
+            this->inpad->type()
+        );
+    }
+
+    template <CVImage T>
     void RotateNode<T>::process() noexcept {
-        cv::rotate(*(this->inpad),this->rotation);
+        cv::rotate(*(this->inpad),this->outpad,this->rotation);
     }
 }

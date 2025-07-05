@@ -18,13 +18,18 @@
  */
 
 // Commented out so the damn thing builds
-/*
+
 #include "wfcore/processes/VisionWorkerManager.h"
 #include "wfcore/video/UsbCameraSinkCS.h"
+#include "wfcore/video/processing.h"
+#include <format>
 
 namespace wf {
     VisionWorker& buildVisionWorker(const VisionWorkerConfig& config) {
-        auto
+        UsbCameraSinkCS frameProvider(
+            std::format("{}_sink", config.name),
+            config.devpath
+        );
     }
     VisionWorker& getVisionWorker(const std::string& name);
     int startVisionWorker(const std::string& name);
@@ -34,4 +39,3 @@ namespace wf {
     int stopAllWorkers();
     int destroyAllWorkers();
 }
-*/

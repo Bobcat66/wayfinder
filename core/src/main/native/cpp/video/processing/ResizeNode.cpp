@@ -27,8 +27,7 @@ namespace wf {
     , interpolater(interpolator_) {}
 
     template <CVImage T>
-    void ResizeNode<T>::setInpad(const T& inpad) {
-        this->inpad = &inpad;
+    void ResizeNode<T>::updateBuffers() {
         this->outpad = T(
             this->outsize.width,
             this->outsize.height,

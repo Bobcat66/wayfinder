@@ -19,10 +19,8 @@
 
 #pragma once
 
-#include "wfcore/video/annotations/Annotator.h"
-
-namespace wf {
-    class 3DApriltagAnnotator : public Annotator {
-        
-    };
-}
+#include "wfcore/video/processing/ColorConvertNode.h"
+#include "wfcore/video/processing/CVProcessNode.h"
+#include "wfcore/video/processing/CVProcessPipe.h"
+#include "wfcore/video/processing/ResizeNode.h"
+#include "wfcore/video/processing/RotateNode.h"

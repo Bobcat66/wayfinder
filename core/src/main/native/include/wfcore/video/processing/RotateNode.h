@@ -23,10 +23,10 @@
 
 namespace wf {
     template <CVImage T>
-    class RotateNode : CVProcessNode<T> {
+    class RotateNode : public CVProcessNode<T> {
     public:
         RotateNode(int rotation_);
-        void setInpad(const T& inpad) override;
+        void updateBuffers() override;
         void process() noexcept override;
     private:
         int rotation;

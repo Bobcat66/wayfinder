@@ -20,6 +20,7 @@
 
 #include "wfcore/fiducial/ApriltagDetector.h"
 #include "wfcore/common/logging/LoggerManager.h"
+#include "wfcore/pipeline/annotations.h"
 
 #include <opencv2/core.hpp>
 #include <opencv2/imgcodecs.hpp>
@@ -56,16 +57,9 @@
         auto res = detector.detect(gray);                                                                       \
         logger->info("Detected {} apriltags",res.size());                                                       \
         for (auto detection : res) {                                                                            \
-            auto top_left = detection.corners[0];                                                               \
-            auto top_right = detection.corners[1];                                                              \
-            auto bottom_right = detection.corners[2];                                                           \
-            auto bottom_left = detection.corners[3];                                                            \
-            cv::Scalar green(0,255,0);                                                                          \
-            cv::line(image,top_left,top_right,green);                                                           \
-            cv::line(image,top_right,bottom_right,green);                                                       \
-            cv::line(image,bottom_right,bottom_left,green);                                                     \
-            cv::line(image,bottom_left,top_left,green);                                                         \
+            wf::drawTag(image,detection);                                                                       \
         }                                                                                                       \
+        wf::drawCamLabel(image,"TEST IMAGE");                                                                   \
         std::filesystem::path tempDir                                                                           \
             = std::filesystem::temp_directory_path()                                                            \
             / TO_STRING(testname) "_output.jpg";                                                                \
@@ -102,9 +96,7 @@ DETECTION_TEST(
     cubesDetectionTest,
     "cubes.jpg",
     "tag36h11",
-    {
-        .debug=true
-    },
+    {},
     {}
 )
 
@@ -118,4 +110,12 @@ DETECTION_TEST(
     {
         .minClusterPixels = 10
     }
+)
+
+DETECTION_TEST(
+    noTagsDetectionTest,
+    "no_tags.jpg",
+    "tag36h11",
+    {},
+    {}
 )

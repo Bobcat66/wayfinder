@@ -19,16 +19,24 @@
 
 #pragma once
 
-#include "wfcore/video/video_types.h"
-#include "wfcore/pipeline/Pipeline.h"
-#include <opencv2/opencv.hpp>
+#include <opencv2/core.hpp>
+#include <opencv2/imgproc.hpp>
+#include <gtsam/geometry/Pose3.h>
+#include "wfcore/configuration/CameraConfiguration.h"
+#include <vector>
+#include "wfcore/inference/InferenceEngine.h"
+#include "wfcore/fiducial/ApriltagDetection.h"
+#include "wfcore/pipeline/pnp.h"
 
 namespace wf {
-    class Annotator {
-    public:
-        virtual ~Annotator() = default;
-        virtual int annotateDirect(const cv::Mat& in, cv::Mat& out, const PipelineResult& data) const noexcept = 0;
-        [[nodiscard]]
-        Frame annotate(const Frame& image, const PipelineResult& data) const noexcept = 0;
-    };
+    int drawTag3D(
+        cv::Mat& image,
+        const ApriltagRelativePoseObservation& observation,
+        const CameraIntrinsics& intrinsics,
+        double tagSize
+    );
+    int drawBbox(cv::Mat& image, const ObjectDetection& detection);
+    int drawTag(cv::Mat& image, const ApriltagDetection& detection);
+    int drawCamLabel(cv::Mat& image, const std::string& camera_label);
 }
+

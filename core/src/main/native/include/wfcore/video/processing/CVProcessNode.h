@@ -26,7 +26,13 @@ namespace wf {
     class CVProcessNode {
     public:
         virtual ~CVProcessNode() = default;
-        virtual void setInpad(const T& inpad) = 0;
+        // Updates outpad and internal buffers for when the inpad changes
+        virtual void updateBuffers() = 0;
+        virtual inline void setInpad(const T* inpad) {
+            this->inpad = inpad;
+            this->updateBuffers();
+        }
+        inline const T* getInpad() const {return inpad;}
         inline const T& getOutpad() const {return outpad;}
         inline FrameFormat getOutpadFormat() const {return getFormat(outpad);};
         virtual void process() noexcept = 0;

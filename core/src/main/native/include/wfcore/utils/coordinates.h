@@ -95,8 +95,6 @@ namespace wf {
         Eigen::Vector3d t_c = WPILibToCvCoords(t_w);
 
         // Convert the rotation matrix to a rotation vector
-        cv::Mat CV_R_c;
-        cv::eigen2cv(R_c,CV_R_c);
         cv::Rodrigues(EigenMatrix3dToCV(R_c), CV_r_c);
         
         // Convert the translation vector to OpenCV format

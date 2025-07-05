@@ -33,6 +33,9 @@ option(WF_USE_OPENVINO "Enable support for Intel OpenVINO hardware-accelerated i
 
 option(WF_USE_SYSTEM_OPENCV "Use system OpenCV instead of bundled version" OFF)
 
+option(WF_BUILD_TESTS "Build unit tests" ON)
+option(WF_BUILD_DEMOS "Build demos" OFF)
+
 configure_file(
     ${CMAKE_CURRENT_SOURCE_DIR}/version.h.in
     ${CMAKE_CURRENT_BINARY_DIR}/meta/version.h
@@ -51,5 +54,8 @@ else()
     add_subdirectory(thirdparty/nlohmann_json)
     add_subdirectory(core)
     add_subdirectory(daemon)
+    if (WF_BUILD_DEMOS)
+        add_subdirectory(demos)
+    endif()
 endif()
 

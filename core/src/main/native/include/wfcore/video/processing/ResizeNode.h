@@ -25,10 +25,10 @@
 
 namespace wf {
     template <CVImage T>
-    class ResizeNode : CVProcessNode<T> {
+    class ResizeNode : public CVProcessNode<T> {
     public:
         ResizeNode(int interpolater_, int outWidth_, int outHeight_);
-        void setInpad(const T& inpad) override;
+        void updateBuffers() override;
         void process() noexcept override;
     private:
         int interpolater;

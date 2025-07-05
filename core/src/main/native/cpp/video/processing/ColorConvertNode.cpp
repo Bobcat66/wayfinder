@@ -10,11 +10,11 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ * along with this program. If not, see <https://www.gnu.org/licenses/>.
  */
 
 #include "wfcore/video/processing/ColorConvertNode.h"
@@ -22,10 +22,28 @@
 #include <opencv2/imgproc.hpp>
 
 #include <stdexcept>
+#include <cassert>
 
 namespace wf {
     template <CVImage T>
-    ColorConvertNode<T>::ColorConvertNode(ColorSpace inspace, ColorSpace outspace) {
+    ColorConvertNode<T>::ColorConvertNode(ColorSpace inspace_, ColorSpace outspace_) 
+    : inspace(inspace_), outspace(outspace_) {
+        updateColorConverter();
+    }
+
+    template <CVImage T>
+    void ColorConvertNode<T>::updateBuffers() {
+        this->outpad = T(this->inpad->rows,this->inpad->cols,this->outcvformat);
+        updateColorConverter();
+    }
+
+    template <CVImage T>
+    void ColorConvertNode<T>::process() noexcept {
+        colorConverter(*(this->inpad),this->outpad);
+    }
+
+    template <CVImage T>
+    void ColorConvertNode<T>::updateColorConverter() {
         switch (inspace) {
             case COLOR:
                 switch (outspace) {
@@ -41,8 +59,8 @@ namespace wf {
                         break;
                     case DEPTH:
                         // Expensive, don't use in the hot path
-                        colorConverter = [](const T& in,T& out){
-                            T tmp;
+                        colorConverter = [this](const T& in,T& out){
+                            static T tmp{this->getInpad()->rows,this->getInpad()->cols,CV_8UC1};
                             cv::cvtColor(in,tmp,cv::COLOR_BGR2GRAY);
                             tmp.convertTo(out,CV_16UC1, 256.0);
                         };
@@ -85,18 +103,15 @@ namespace wf {
             case DEPTH:
                 switch (outspace) {
                     case COLOR:
-                        // Expensive, don't use in the hot path
-                        colorConverter = [](const T& in,T& out){
-                            T tmp;
-                            cv::normalize(in, tmp, 0, 255, cv::NORM_MINMAX);
-                            tmp.convertTo(tmp, CV_8UC1);
+                        colorConverter = [this](const T& in,T& out){
+                            static T tmp{this->getInpad()->rows,this->getInpad()->cols,CV_8UC1};
+                            cv::normalize(in, tmp, 0, 255, cv::NORM_MINMAX,CV_8U);
                             cv::cvtColor(tmp,out,cv::COLOR_GRAY2BGR);
                         };
                         break;
                     case GRAY:
                         colorConverter = [](const T& in,T& out){
-                            cv::normalize(in, out, 0, 255, cv::NORM_MINMAX);
-                            out.convertTo(out, CV_8UC1);
+                            cv::normalize(in, out, 0, 255, cv::NORM_MINMAX, CV_8U);
                         };
                         break;
                     case DEPTH:
@@ -105,11 +120,9 @@ namespace wf {
                         };
                         break;
                     case RGB:
-                        // Expensive, don't use in the hot path
-                        colorConverter = [](const T& in,T& out){
-                            T tmp;
-                            cv::normalize(in, tmp, 0, 255, cv::NORM_MINMAX);
-                            tmp.convertTo(tmp, CV_8UC1);
+                        colorConverter = [this](const T& in,T& out){
+                            static T tmp{this->getInpad()->rows,this->getInpad()->cols,CV_8UC1};
+                            cv::normalize(in, tmp, 0, 255, cv::NORM_MINMAX, CV_8U);
                             cv::cvtColor(tmp,out,cv::COLOR_GRAY2RGB);
                         };
                         break;
@@ -130,9 +143,8 @@ namespace wf {
                         };
                         break;
                     case DEPTH:
-                        // Expensive, don't use in the hot path
-                        colorConverter = [](const T& in,T& out){
-                            T tmp;
+                        colorConverter = [this](const T& in,T& out){
+                            static T tmp{this->getInpad()->rows,this->getInpad()->cols,CV_8UC1};
                             cv::cvtColor(in,tmp,cv::COLOR_RGB2GRAY);
                             tmp.convertTo(out,CV_16UC1, 256.0);
                         };
@@ -166,17 +178,7 @@ namespace wf {
             default:
                 throw std::invalid_argument("Attempted to convert from unknown colorspace");
         }
-    }
 
-    template <CVImage T>
-    void ColorConvertNode<T>::setInpad(const T& inpad) {
-        this->inpad = &inpad;
-        this->outpad = T(this->inpad->rows,this->inpad->cols,this->outcvformat);
-    }
-
-    template <CVImage T>
-    void ColorConvertNode<T>::process() noexcept {
-        colorConverter(*(this->inpad),this->outpad);
     }
 
     template class ColorConvertNode<cv::Mat>;

@@ -21,16 +21,20 @@
 
 #include "wfcore/video/processing/CVProcessNode.h"
 #include "wfcore/video/video_types.h"
+#include <functional>
 
 namespace wf {
     template <CVImage T>
-    class ColorConvertNode : CVProcessNode<T> {
+    class ColorConvertNode : public CVProcessNode<T> {
     public:
-        ColorConvertNode(ColorSpace inspace, ColorSpace outspace);
-        void setInpad(const T& inpad) override;
+        ColorConvertNode(ColorSpace inspace_, ColorSpace outspace_);
+        void updateBuffers() override;
         void process() noexcept override;
     private:
-        void (*colorConverter)(const T& in,T& out);
+        ColorSpace inspace;
+        ColorSpace outspace;
+        std::function<void(const T& in,T& out)> colorConverter;
         int outcvformat;
+        void updateColorConverter();
     };
 }
