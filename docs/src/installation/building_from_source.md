@@ -4,7 +4,7 @@
 >Building from source is a very involved process, and is generally not recommended for most use cases.
 
 >[!IMPORTANT]
->Wayfinder is designed to be built with GCC 13 using the C++ 20 standard. Building with Clang and MSVC are not supported at the moment
+>Wayfinder is designed to be built with GCC 13 using the C++ 20 standard. Building with Clang and MSVC are not supported.
 
 >[!NOTE]
 >This guide is designed for Ubuntu 24.04.1 LTS
