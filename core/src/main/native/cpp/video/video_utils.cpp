@@ -21,6 +21,7 @@
 #include "wfcore/video/video_utils.h"
 #include <opencv2/core.hpp>
 #include <stdexcept>
+
 namespace wf {
     cv::Mat generateEmptyFrameBuf(FrameFormat format) {
         int cv_type;
@@ -39,4 +40,27 @@ namespace wf {
         }
         return cv::Mat(format.rows,format.cols,cv_type);
     };
+    ColorSpace getColorSpaceFromPixelFormat(const cs::VideoMode::PixelFormat& pixelFormat) {
+        switch (pixelFormat) {
+            case cs::VideoMode::PixelFormat::kBGR: return wf::ColorSpace::COLOR;
+            case cs::VideoMode::PixelFormat::kGray:return wf::ColorSpace::GRAY;
+            case cs::VideoMode::PixelFormat::kY16: return wf::ColorSpace::DEPTH;
+            default: return wf::ColorSpace::UNKNOWN;
+        };
+    }
+    cs::VideoMode::PixelFormat getPixelFormatFromColorSpace(const ColorSpace cspace) {
+        switch (cspace) {
+            case wf::ColorSpace::COLOR: return cs::VideoMode::PixelFormat::kBGR;
+            case wf::ColorSpace::GRAY: return cs::VideoMode::PixelFormat::kGray;
+            case wf::ColorSpace::DEPTH: return cs::VideoMode::PixelFormat::kY16;
+            default: return cs::VideoMode::PixelFormat::kUnknown;
+        }
+    }
+    Frame copyFrame(const Frame& frame) noexcept {
+        return {
+            frame.captimeMicros,
+            frame.format,
+            frame.data.clone()
+        };
+    }
 }

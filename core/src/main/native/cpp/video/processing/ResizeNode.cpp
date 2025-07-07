@@ -40,8 +40,11 @@ namespace wf {
         cv::resize(
             *(this->inpad),
             this->outpad,
-            this->size,
+            this->outsize,
             this->interpolater
         );
     }
+
+    template class ResizeNode<cv::Mat>;
+    template class ResizeNode<cv::UMat>;
 }

@@ -17,3 +17,27 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#pragma once
+
+#include "wfcore/video/FrameConsumer.h"
+#include <string>
+#include <cscore_oo.h>
+#include <cscore_cv.h>
+
+namespace wf {
+    class MJPEGVideoServerCS : public FrameConsumer {
+    public:
+        MJPEGVideoServerCS(StreamFormat format_, std::string name_, int port_);
+        void acceptFrame(Frame& frame) noexcept override;
+        const std::string& getName() const noexcept override;
+        const StreamFormat& getStreamFormat() const noexcept override;
+        int setStreamFormat(StreamFormat newformat) override;
+    private:
+        StreamFormat format;
+        cs::CvSource source;
+        cs::MjpegServer server;
+        int port;
+        std::string name;
+        cs::VideoMode::PixelFormat cs_pfmt;
+    };
+}

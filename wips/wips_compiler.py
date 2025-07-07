@@ -154,11 +154,15 @@ def compile(schemas_path: Path, output_dir: Path, py: bool = False, jvm: bool = 
     copyfile(home_path.parent/"runtime"/"wips_detail.h",output_dir/"wips_detail.h")
     end = time.perf_counter()
     print(f"Compilation finished in {end-start} seconds")
-    
-# python3 wips_compiler.py schemas.yaml --out=../core/src/generated/wips
-# python3 wips_compiler.py schemas.yaml --py --out=../client/src/generated/wips
-# python3 wips_compiler.py schemas.yaml --jvm --out=../wayfinderlib/src/generated/wips
 
+# Core:
+# python3 wips_compiler.py ../schemas/wips/messages.yaml --out=../core/src/generated/wips
+
+# Client:
+# python3 wips_compiler.py ../schemas/wips/messages.yaml --py --out=../client/src/generated/wips
+
+# Lib:
+# python3 wips_compiler.py ../schemas/wips/messages.yaml --jvm --out=../wayfinderlib/src/generated/wips
 
 # Python and Java bindings generation is not implemented yet, but the flags are here for future use.
 if __name__ == "__main__":

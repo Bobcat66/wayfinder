@@ -17,21 +17,17 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "wips/wips_runtime.h"
-#include "wfcore/network/NTDataPublisher.h"
-#include "wfcore/common/serde.h"
-#include <networktables/RawTopic.h>
-#include <span>
+
+#pragma once
+
+#include "wfcore/pipeline/Pipeline.h"
+#include "wfcore/video/video_types.h"
 
 namespace wf {
-    NTDataPublisher::NTDataPublisher(const std::shared_ptr<nt::NetworkTable> devRootTable, const std::string& name) 
-    : table(devRootTable->GetSubTable(name))
-    , pipelineResultPub(table->GetRawTopic("pipeline_result").Publish("application/octet-stream")) {}
-
-    void NTDataPublisher::publishPipelineResult(const PipelineResult& result) {
-        // WIP, test
-        auto bin = packPipelineResult(result);
-        pipelineResultPub.Set(std::span<const uint8_t>(bin->base,bin->offset));
-        wips_bin_destroy(bin);
-    }
+    class PipelineOutputConsumer {
+    public:
+        virtual ~PipelineOutputConsumer() = default;
+        virtual int accept(Frame& frame, PipelineResult& result) noexcept = 0;
+        virtual PipelineType getPipelineType() = 0;
+    };
 }

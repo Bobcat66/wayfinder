@@ -21,6 +21,6 @@
 
 #pragma once
 
-namespace wf::slam {
+namespace wf {
 
 }

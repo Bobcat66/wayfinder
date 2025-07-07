@@ -31,7 +31,8 @@
 #include "wfcore/video/FrameProvider.h"
 #include "wfcore/video/processing/CVProcessPipe.h"
 
-#
+#include <mutex>
+
 namespace wf {
 
     typedef std::function<void(const PipelineResult&)> ResultConsumer;
@@ -51,11 +52,12 @@ namespace wf {
         void stop();
         const std::string& getName() const noexcept { return name; }
         const bool isRunning() const noexcept { return running.load(); }
-        private:
+    private:
         void run() noexcept;
         std::string name;
         std::thread thread;
         std::atomic_bool running;
+        std::mutex pipeGuard;
         CVProcessPipe<cv::Mat>& preprocesser;
         Pipeline& pipeline;
         FrameProvider& frameProvider;

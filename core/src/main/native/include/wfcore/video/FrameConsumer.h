@@ -29,6 +29,7 @@ namespace wf {
         virtual void acceptFrame(Frame& frame) noexcept = 0;
         virtual ~FrameConsumer() noexcept = default;
         virtual const std::string& getName() const noexcept = 0;
-        virtual StreamFormat getStreamFormat() const noexcept = 0;
+        virtual const StreamFormat& getStreamFormat() const noexcept = 0;
+        virtual int setStreamFormat(StreamFormat newformat) = 0;
     };
 }

@@ -30,7 +30,7 @@ namespace wf {
 
     class NTDataPublisher {
     public:
-        NTDataPublisher(const nt::NetworkTable& devRootTable, const std::string& name);
+        NTDataPublisher(const std::shared_ptr<nt::NetworkTable> devRootTable, const std::string& name);
         void publishPipelineResult(const PipelineResult& result);
     private:
         std::shared_ptr<nt::NetworkTable> table;

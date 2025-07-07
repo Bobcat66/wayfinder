@@ -52,6 +52,7 @@ namespace wf {
 
     void VisionWorker::run() noexcept {
         while (running.load()) {
+            std::lock_guard<std::mutex> lock(pipeGuard);
             auto frame = frameProvider.getFrame();
             auto ppframe = preprocesser.processFrame(frame);
             auto res = pipeline.process(ppframe);

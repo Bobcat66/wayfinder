@@ -29,8 +29,12 @@ int main() {
     capture.set(cv::CAP_PROP_FRAME_HEIGHT, 720);
     cv::Mat frame;
     cv::Mat grayFrame;
-    wf::ColorConvertNode<cv::Mat> cvtNode(wf::ColorSpace::COLOR,wf::ColorSpace::GRAY);
-    wf::CVProcessPipe<cv::Mat> preprocessor(wf::FrameFormat{wf::ColorSpace::COLOR,720,1280},cvtNode);
+    std::vector<std::unique_ptr<wf::CVProcessNode<cv::Mat>>> nodes;
+    nodes.emplace_back(std::make_unique<wf::ColorConvertNode<cv::Mat>>(wf::ColorSpace::COLOR,wf::ColorSpace::GRAY));
+    wf::CVProcessPipe<cv::Mat> preprocessor(
+        wf::FrameFormat{wf::ColorSpace::COLOR,720,1280},
+        std::move(nodes)
+    );
     wf::ApriltagDetector detector;
     std::cout << "Initialized Demo" << std::endl;
     detector.addFamily("tag36h11");

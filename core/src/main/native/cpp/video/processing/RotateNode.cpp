@@ -27,15 +27,21 @@ namespace wf {
 
     template <CVImage T>
     void RotateNode<T>::updateBuffers() {
-        this->outpad = T(
-            this->outsize.width,
-            this->outsize.height,
-            this->inpad->type()
-        );
+        switch (this->rotation) {
+            case cv::ROTATE_90_CLOCKWISE:
+            case cv::ROTATE_90_COUNTERCLOCKWISE:
+                this->outpad = T(this->inpad->cols,this->inpad->rows,this->inpad->type());
+                break;
+            default:
+                this->outpad = T(this->inpad->rows,this->inpad->cols,this->inpad->type());
+        }
     }
 
     template <CVImage T>
     void RotateNode<T>::process() noexcept {
         cv::rotate(*(this->inpad),this->outpad,this->rotation);
     }
+
+    template class RotateNode<cv::Mat>;
+    template class RotateNode<cv::UMat>;
 }

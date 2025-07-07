@@ -28,22 +28,26 @@
 
 #include <string>
 #include <vector>
-
+#include <unordered_map>
+#include <memory>
 
 namespace wf {
+
     class NetworkTablesManager {
     public:
         static NetworkTablesManager& getInstance() {
-            static NetworkTablesManager instance;  // Thread-safe in C++11 and newer
+            static NetworkTablesManager instance;
             return instance;
         }
-        const nt::NetworkTable& getRootTable() const {return devRootTable;} 
+        const std::shared_ptr<nt::NetworkTable> getRootTable() const {return devRootTable;} 
+        std::weak_ptr<NTDataPublisher> getDataPublisher(const std::string& name);
     private:
         NetworkTablesManager(); 
         ~NetworkTablesManager() = default;
         NetworkTablesManager(const NetworkTablesManager&) = delete;
         NetworkTablesManager& operator=(const NetworkTablesManager&) = delete;
-        nt::NetworkTableInstance inst;
-        nt::NetworkTable devRootTable;
+        std::shared_ptr<nt::NetworkTable> devRootTable;
+
+        std::unordered_map<std::string, std::shared_ptr<NTDataPublisher>> dataPublishers;
     };
 }

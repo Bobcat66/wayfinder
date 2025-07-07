@@ -21,7 +21,7 @@
 #pragma once
 
 #include "wfcore/video/video_types.h"
-
+#include <cscore_oo.h>
 #include <opencv2/core.hpp>
 #include <stdexcept>
 
@@ -66,4 +66,10 @@ namespace wf {
         }
         return {cspace,cvimg.rows,cvimg.cols};
     }
+
+    ColorSpace getColorSpaceFromPixelFormat(const cs::VideoMode::PixelFormat& pixelFormat);
+
+    cs::VideoMode::PixelFormat getPixelFormatFromColorSpace(const ColorSpace cspace);
+
+    Frame copyFrame(const Frame& frame) noexcept;
 }

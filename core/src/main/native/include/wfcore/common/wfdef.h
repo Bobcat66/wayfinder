@@ -26,16 +26,16 @@
 #define WF_NOINLINE __attribute__((noinline))
 #endif // __GNUC__
 
-// Cross-platform MSVC macros
+// Cross-platform MSVC macros (TODO: REMOVE)
 #ifdef _MSC_VER
 #define WF_FORCEINLINE __forceinline
 #define WF_NOINLINE __declspec(noinline)
 #endif // _MSC_VER
 
-// Windows specific macros
+// Windows specific macros (TODO: REMOVE)
 #ifdef _WIN32
 
-// Macros for cross-compiling from GCC
+// Macros for cross-compiling from GCC 
 #ifdef __GNUC__
 #define WF_DLLEXPORT __attribute__((dllexport))
 #define WF_DLLIMPORT __attribute__((dllimport))

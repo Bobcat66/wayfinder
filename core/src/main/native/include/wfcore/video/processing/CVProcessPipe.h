@@ -20,6 +20,7 @@
 #pragma once
 
 #include <vector>
+#include <ranges>
 #include "wfcore/video/video_types.h"
 #include "wfcore/video/processing/CVProcessNode.h"
 #include "wfcore/video/video_utils.h"
@@ -28,14 +29,12 @@ namespace wf {
     template <CVImage T>
     class CVProcessPipe {
     public:
-        template <std::derived_from<CVProcessNode<T>>... Nodes>
-        CVProcessPipe(FrameFormat inputFormat, Nodes&... nodes) {
+        CVProcessPipe(FrameFormat inputFormat, std::vector<std::unique_ptr<CVProcessNode<T>>> nodes_) : nodes(std::move(nodes_)) {
             inpad = generateEmptyCVImg<T>(inputFormat);
-            (this->nodes.push_back(std::ref(nodes)), ...);
             const T* pad = &inpad;
             for (auto& node : this->nodes) {
-                node.get().setInpad(pad);
-                pad = &(node.get().getOutpad());
+                node->setInpad(pad);
+                pad = &(node->getOutpad());
             }
             this->outpad = pad;
             this->outformat = getFormat(*outpad);
@@ -51,10 +50,19 @@ namespace wf {
             out = *outpad;
         }
 
+        /*
+        Out can be used freely, as it is a copy of the outpad
+        */
+        inline void processSafe(const T& in, T& out) noexcept {
+            inpad = in;
+            process();
+            outpad->copyTo(out);
+        }
+
         void setInputFormat(FrameFormat inputFormat) {
             inpad = generateEmptyCVImg<T>(inputFormat);
             for (auto& node : this->nodes) {
-                node.get().updateBuffers();
+                node.updateBuffers();
             }
             this->outformat = getFormat(*(this->outpad));
         }
@@ -72,10 +80,10 @@ namespace wf {
     private:
         void process() noexcept {
             for (auto& node : nodes) {
-                node.get().process();
+                node->process();
             }
         }
-        std::vector<std::reference_wrapper<CVProcessNode<T>>> nodes;
+        std::vector<std::unique_ptr<CVProcessNode<T>>> nodes;
         FrameFormat informat;
         FrameFormat outformat;
         T inpad;
