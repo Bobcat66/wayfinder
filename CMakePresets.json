@@ -17,10 +17,10 @@
             "generator": "Ninja",
             "binaryDir": "${sourceDir}/build/debug",
             "cacheVariables": {
-                "WF_USE_SYSTEM_OPENCV": "OFF",
+                "WF_USE_SYSTEM_OPENCV": "ON",
                 "WF_BOOTSTRAP": "OFF",
                 "CMAKE_BUILD_TYPE": "Debug",
-                "WF_BUILD_DEMOS": "OFF"
+                "WF_BUILD_DEMOS": "ON"
             }
         },
         {
@@ -28,10 +28,10 @@
             "generator": "Ninja",
             "binaryDir": "${sourceDir}/build/release",
             "cacheVariables": {
-                "WF_USE_SYSTEM_OPENCV": "OFF",
+                "WF_USE_SYSTEM_OPENCV": "ON",
                 "WF_BOOTSTRAP": "OFF",
                 "CMAKE_BUILD_TYPE": "Release",
-                "WF_BUILD_DEMOS": "OFF"
+                "WF_BUILD_DEMOS": "ON"
             }
         },
         {
@@ -39,10 +39,10 @@
             "generator": "Ninja",
             "binaryDir": "${sourceDir}/build/relWithDebInfo",
             "cacheVariables": {
-                "WF_USE_SYSTEM_OPENCV": "OFF",
+                "WF_USE_SYSTEM_OPENCV": "ON",
                 "WF_BOOTSTRAP": "OFF",
                 "CMAKE_BUILD_TYPE": "RelWithDebInfo",
-                "WF_BUILD_DEMOS": "OFF"
+                "WF_BUILD_DEMOS": "ON"
             }
         },
         {
@@ -50,22 +50,10 @@
             "generator": "Ninja",
             "binaryDir": "${sourceDir}/build/minSizeRel",
             "cacheVariables": {
-                "WF_USE_SYSTEM_OPENCV": "OFF",
-                "WF_BOOTSTRAP": "OFF",
-                "CMAKE_BUILD_TYPE": "MinSizeRel",
-                "WF_BUILD_DEMOS": "OFF"
-            }
-        },
-        {
-            "name": "development",
-            "generator": "Ninja",
-            "binaryDir": "${sourceDir}/build/development",
-            "cacheVariables": {
                 "WF_USE_SYSTEM_OPENCV": "ON",
                 "WF_BOOTSTRAP": "OFF",
-                "CMAKE_BUILD_TYPE": "Debug",
-                "WF_BUILD_DEMOS": "ON",
-                "WF_BUILD_TESTS": "ON"
+                "CMAKE_BUILD_TYPE": "MinSizeRel",
+                "WF_BUILD_DEMOS": "ON"
             }
         }
     ],
@@ -98,12 +86,6 @@
             "name": "bootstrap",
             "configurePreset": "bootstrap",
             "description": "Bootstrap build system by building out-of-tree dependences",
-            "verbose": false
-        },
-        {
-            "name": "development",
-            "configurePreset": "development",
-            "description": "Development build with additional tests and demos",
             "verbose": false
         }
     ]

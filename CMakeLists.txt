@@ -7,6 +7,9 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 enable_testing()
 
+# As wayfinder is
+set(CMAKE_INSTALL_PREFIX "/opt/wayfinder" CACHE PATH "Install path" FORCE)
+
 # TODO: Fix dependency hierarchy. Right now the dependencies are a mess, eventually 
 # I should configure the build system to make sure dependencies are imported once and only once
 # Particular points i've identified as needing improvement are fmt and Eigen

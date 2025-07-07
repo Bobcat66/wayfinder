@@ -6,7 +6,7 @@ if(NOT WF_USE_SYSTEM_OPENCV)
     if(WF_BOOTSTRAP)
         #Bootstrap build, build OpenCV
         include(ExternalProject)
-        set(OPENCV_INSTALL_DIR ${CMAKE_BINARY_DIR}/opencv-install)
+        set(OPENCV_INSTALL_DIR ${CMAKE_INSTALL_PREFIX}/extern_deps/opencv)
         
         ExternalProject_Add(
             opencv
@@ -27,11 +27,13 @@ if(NOT WF_USE_SYSTEM_OPENCV)
             LOG_BUILD ON
             LOG_INSTALL ON
             BUILD_COMMAND ${CMAKE_COMMAND} --build . --verbose
+            INSTALL_COMMAND mkdir -p ${CMAKE_SOURCE_DIR}/staging
+            COMMAND ${CMAKE_COMMAND} -E env DESTDIR=${CMAKE_SOURCE_DIR}/staging ${CMAKE_COMMAND} --build . --target install
         )
     else()
         # Normal project build
         # Tell CMake where to find OpenCV if installed
-        set(OPENCV_INSTALL_DIR ${CMAKE_SOURCE_DIR}/build/extern_deps/opencv-install)
-        set(OpenCV_DIR "${OPENCV_INSTALL_DIR}/lib/cmake/opencv4" PARENT_SCOPE)
+        set(OPENCV_INSTALL_DIR ${CMAKE_INSTALL_PREFIX}/extern_deps/opencv)
+        set(OpenCV_DIR "${OPENCV_SOURCE_DIR}/staging/${OPENCV_INSTALL_DIR}/lib/cmake/opencv4" PARENT_SCOPE)
     endif()
 endif()

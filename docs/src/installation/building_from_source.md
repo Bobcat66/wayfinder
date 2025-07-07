@@ -1,4 +1,4 @@
-# Building Wayfinder from Source
+# Building and Installing Wayfinder from Source
 
 >[!WARNING]
 >Building from source is a very involved process, and is generally not recommended for most use cases.
@@ -25,3 +25,6 @@ After that, simply run
 ```
 This script will automatically run Wayfinder's two-stage build system, 
 building the artifacts in the `build` directory. CMake arguments (except for presets and source and build directory arguments) can be passed directly to `tools/build.sh`
+
+>[!NOTE]
+>The CMake presets are meant for iterative development builds, not deployment. End users should NOT use them.

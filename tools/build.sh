@@ -14,6 +14,7 @@
 # It requires CMake, and Ninja
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+STAGING_DIR="${SCRIPT_DIR}/../staging"
 
 # Stage 1: Bootstrapping
 echo "Bootstrapping build system..."
@@ -22,5 +23,5 @@ cmake --build --preset bootstrap
 
 # Stage 2: Build
 echo "Building Wayfinder..."
-cmake -G Ninja -S . -B "${SCRIPT_DIR}/../build/custom" -DWF_BOOTSTRAP=OFF "$@"
-cmake --build "${SCRIPT_DIR}/../build/custom"
+cmake -G Ninja -S . -B "${SCRIPT_DIR}/../build/main" -DWF_BOOTSTRAP=OFF "$@"
+cmake --build "${SCRIPT_DIR}/../build/main"
