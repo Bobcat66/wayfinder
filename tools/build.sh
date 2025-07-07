@@ -25,3 +25,7 @@ cmake --build --preset bootstrap
 echo "Building Wayfinder..."
 cmake -G Ninja -S . -B "${SCRIPT_DIR}/../build/main" -DWF_BOOTSTRAP=OFF "$@"
 cmake --build "${SCRIPT_DIR}/../build/main"
+
+# Stage 3: Stage
+echo "Staging Wayfinder..."
+cmake -E env DESTDIR=$STAGING_DIR cmake --install "${SCRIPT_DIR}/../build/main"

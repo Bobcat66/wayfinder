@@ -7,16 +7,19 @@ file(GLOB_RECURSE DAEMONSOURCES
     CONFIGURE_DEPENDS 
     "${CMAKE_CURRENT_SOURCE_DIR}/src/main/native/*.cpp"
 )
-add_executable(wayfinderd ${DAEMONSOURCES})
+add_executable(wayfinder ${DAEMONSOURCES})
+
+install(TARGETS wayfinder RUNTIME DESTINATION bin)
 
 # TODO: Figure out the library interface
-target_link_libraries(wayfinderd
+target_link_libraries(wayfinder
     PRIVATE
     wfcore
-) # In deployment builds, this will link statically, and there will be a cmake build type variable set in the top-level CMake file. I'll put that in eventually. For now, this is nowhere near deployment
+)
 
-target_include_directories(wayfinderd
+target_include_directories(wayfinder
     PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}/src/main/native
     ${CMAKE_CURRENT_BINARY_DIR}/../meta
 )
 

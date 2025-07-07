@@ -17,12 +17,22 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include <iostream>
+#pragma once
 
-#include "version.h"
-#include "wfcore/processes/VisionWorkerManager.h"
+#include <unordered_map>
+#include <cscore_oo.h>
+#include <cscore_cv.h>
+#include <string>
+#include "wfcore/video/video_types.h"
+#include "wfcore/video/FrameProvider.h"
+#include "wfcore/hardware/CameraHandler.h"
+#include <memory>
 
-int main() {
-    std::cout << "Starting Wayfinder v" << PROJECT_VERSION << std::endl;
-    return 0;
+namespace wf {
+    class HardwareManager {
+    public:
+        FrameProvider getCamera(const std::string& devpath);
+    private:
+        std::unordered_map<std::string,std::unique_ptr<CameraHandler>> cameras;
+    };
 }

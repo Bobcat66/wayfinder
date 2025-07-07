@@ -15,6 +15,8 @@ file(GLOB_RECURSE WIPSSOURCES
 )
 add_library(wfcore ${CORESOURCES} ${WIPSSOURCES})
 
+install(TARGETS wfcore LIBRARY DESTINATION lib)
+
 if(WF_USE_EDGETPU)
     add_compile_definitions(WF_USE_EDGETPU)
 endif()

@@ -40,7 +40,7 @@ jobs:
   test:
     name: "Wayfinder - Test"
     runs-on: ubuntu-latest
-    needs: build-core
+    needs: build
 
     steps:
 
