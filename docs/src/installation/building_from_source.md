@@ -16,3 +16,4 @@ To install the necessary prerequisites, run the following command in a terminal:
 ```
 sudo apt update && apt install -y build-essential cmake ninja-build libopencv-dev 
 ```
+(This is outdated btw)
