@@ -12,8 +12,16 @@
 ## Installing prerequisites
 
 To install the necessary prerequisites, run the following command in a terminal:
-<!-- Eventually OpenCV will be built from source. For now we rely on system installations -->
 ```
-sudo apt update && apt install -y build-essential cmake ninja-build libopencv-dev 
+sudo apt update && apt install -y build-essential cmake ninja-build
 ```
-(This is outdated btw)
+After that, clone this repository and navigate into it:
+```
+git clone https://www.github.com/Bobcat66/wayfinder.git && cd wayfinder
+```
+After that, simply run
+```
+./tools/build.sh
+```
+This script will automatically run Wayfinder's two-stage build system, 
+building the artifacts in the `build` directory. CMake arguments (except for presets and source and build directory arguments) can be passed directly to `tools/build.sh`
