@@ -54,8 +54,8 @@ endif()
 # TODO: Figure out the library interface
 target_link_libraries(wfcore 
     PUBLIC
-    gtsam
     ${OpenCV_LIBS}
+    gtsam
     spdlog::spdlog
     ntcore
     cscore

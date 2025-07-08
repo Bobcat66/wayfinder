@@ -27,14 +27,11 @@ namespace wf {
     template <CVImage T>
     class ColorConvertNode : public CVProcessNode<T> {
     public:
-        ColorConvertNode(ColorSpace inspace_, ColorSpace outspace_);
+        ColorConvertNode(ImageEncoding outcoding_);
         void updateBuffers() override;
         void process() noexcept override;
     private:
-        ColorSpace inspace;
-        ColorSpace outspace;
         std::function<void(const T& in,T& out)> colorConverter;
-        int outcvformat;
         void updateColorConverter();
     };
 }

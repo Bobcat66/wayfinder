@@ -20,8 +20,7 @@
 #pragma once
 
 #include <unordered_map>
-#include <cscore_oo.h>
-#include <cscore_cv.h>
+#include <filesystem>
 #include <string>
 #include "wfcore/video/video_types.h"
 #include "wfcore/video/FrameProvider.h"
@@ -31,8 +30,23 @@
 namespace wf {
     class HardwareManager {
     public:
-        FrameProvider getCamera(const std::string& devpath);
+        CameraBackend getBackend(const std::string& devpath) const noexcept;
+
+        FrameProvider& getFrameProvider(const std::string& devpath, const std::string& name);
+
+        int setStreamFormat(const std::string& devpath, const StreamFormat& format);
+
+        StreamFormat getStreamFormat(const std::string& devpath);
+
+        std::optional<CameraIntrinsics> getIntrinsics(const std::string& devpath);
+
+        int setControl(const std::string& devpath, CamControl control, double value, bool persist);
+
+        double getControl(const std::string& devpath, CamControl control, double value);
+        
+        const std::unordered_set<CamControl>& getControls(const std::string& devpath);
     private:
         std::unordered_map<std::string,std::unique_ptr<CameraHandler>> cameras;
+        std::unordered_map<std::string,std::filesystem::path> cameraConfigPaths; // Path to camera configuration files
     };
 }

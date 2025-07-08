@@ -20,7 +20,7 @@
 
 #pragma once
 
-#include "wfcore/configuration/CameraConfiguration.h"
+#include "wfcore/hardware/CameraConfiguration.h"
 
 #include "wfcore/configuration/ApriltagConfiguration.h"
 #include "wfcore/fiducial/ApriltagField.h"

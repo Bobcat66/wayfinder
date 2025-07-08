@@ -29,24 +29,39 @@ namespace wf {
     template <typename T>
     concept CVImage = std::same_as<T, cv::Mat> || std::same_as<T, cv::UMat>;
 
-    enum ColorSpace {
-        COLOR, // CV_8UC3, cscore kBGR
-        GRAY, // CV_8UC1, cscore kGray
-        DEPTH, // CV_16UC1, cscore kY16
-        RGB, // CV_8UC3, cscore kRGB
+    enum ImageEncoding {
+        BGR24, // Blue-Green-Red 24 bit, default color encoding
+        RGB24,
+        RGB565, 
+        Y8, // Grayscale 8 bit, default gray encoding
+        Y16, // Grayscale 16 bit, default depth & IR encoding
+        YUYV,
+        UYVY,
+        RGBA,
+        BGRA,
+        MJPEG,
         UNKNOWN
     };
 
-    // Frameformat only supports a boolean for color space because our code only ever interacts with two colorspaces: BGR for color images and GRAY8 for grayscale
     struct FrameFormat {
-        ColorSpace colorspace;
+        ImageEncoding encoding;
         int rows;
         int cols;
+
+        bool operator==(const FrameFormat& other) const {
+            return encoding == other.encoding
+                && rows == other.rows 
+                && cols == other.cols;
+        }
     };
 
     struct StreamFormat {
         int fps;
         FrameFormat frameFormat;
+        
+        bool operator==(const StreamFormat& other) const {
+            return fps == other.fps && frameFormat == other.frameFormat;
+        }
     };
 
     struct Frame {

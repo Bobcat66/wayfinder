@@ -19,18 +19,49 @@
 
 #pragma once
 
+#include "wfcore/video/video_types.h"
 #include <opencv2/core.hpp>
+#include <string>
+#include <map>
+#include <unordered_set>
+#include <unordered_map>
+#include <optional>
 
 namespace wf {
-    
+
+    enum CameraBackend {
+        CSCORE,
+        REALSENSE, //WIP
+        GSTREAMER, //WIP
+        LIBCAMERA, //WIP
+    };
+
+    enum CamControl {
+        EXPOSURE,
+        BRIGHTNESS,
+        ISO,
+        SHUTTER,
+        FOCUS,
+        ZOOM,
+        WHITE_BALANCE,
+        SHARPNESS,
+        SATURATION,
+        CONTRAST,
+        GAMMA,
+        HUE
+    };
+
     struct CameraIntrinsics {
         cv::Mat cameraMatrix;
         cv::Mat distCoeffs;
     };
 
     struct CameraConfiguration {
-        int id;
-        CameraIntrinsics intrinsics; 
+        std::string devpath;
+        CameraBackend backend;
+        StreamFormat format;
+        std::map<cv::Size,CameraIntrinsics> intrinsics; // Didn't feel like making a hash function, plus this shouldn't be accessed in the hot path anyways
+        std::unordered_map<CamControl,double> controls; 
     };
 
 }

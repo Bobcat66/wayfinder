@@ -35,6 +35,7 @@ namespace wf {
             default:
                 this->outpad = T(this->inpad->rows,this->inpad->cols,this->inpad->type());
         }
+        this->outcoding = *(this->incoding);
     }
 
     template <CVImage T>

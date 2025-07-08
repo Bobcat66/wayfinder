@@ -33,6 +33,7 @@ namespace wf {
             this->outsize.height,
             this->inpad->type()
         );
+        this->outcoding = *(this->incoding);
     }
 
     template <CVImage T>

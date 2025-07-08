@@ -29,47 +29,55 @@ namespace wf {
     [[deprecated]]
     cv::Mat generateEmptyFrameBuf(FrameFormat format);
 
+    int getCVTypeFromEncoding(ImageEncoding encoding) {
+        switch (encoding) {
+            case ImageEncoding::BGR24: return CV_8UC3;
+            case ImageEncoding::RGB24: return CV_8UC3;
+            case ImageEncoding::RGB565: return CV_8UC2;
+            case ImageEncoding::BGRA: return CV_8UC4;
+            case ImageEncoding::RGBA: return CV_8UC4;
+            case ImageEncoding::YUYV: return CV_8UC2;
+            case ImageEncoding::UYVY: return CV_8UC2;
+            case ImageEncoding::Y8: return CV_8UC1;
+            case ImageEncoding::Y16: return CV_16UC1;
+            default: return 0; // Denotes unknown value
+        }
+    }
+
+    cs::VideoMode::PixelFormat getPixelFormatFromEncoding(ImageEncoding encoding) {
+        switch (encoding) {
+            case ImageEncoding::BGR24: return cs::VideoMode::PixelFormat::kBGR;
+            case ImageEncoding::BGRA: return cs::VideoMode::PixelFormat::kBGRA;
+            case ImageEncoding::YUYV: return cs::VideoMode::PixelFormat::kYUYV;
+            case ImageEncoding::UYVY: return cs::VideoMode::PixelFormat::kUYVY;
+            case ImageEncoding::Y8: return cs::VideoMode::PixelFormat::kGray;
+            case ImageEncoding::Y16: return cs::VideoMode::PixelFormat::kY16;
+            case ImageEncoding::MJPEG: return cs::VideoMode::PixelFormat::kMJPEG;
+            default: return cs::VideoMode::PixelFormat::kUnknown;
+        };
+    }
+
+    ImageEncoding getEncodingFromPixelFormat(cs::VideoMode::PixelFormat pixelFormat) {
+        switch (pixelFormat) {
+            case cs::VideoMode::PixelFormat::kBGR: return ImageEncoding::BGR24;
+            case cs::VideoMode::PixelFormat::kBGRA: return ImageEncoding::BGRA;
+            case cs::VideoMode::PixelFormat::kYUYV: return ImageEncoding::YUYV;
+            case cs::VideoMode::PixelFormat::kUYVY: return ImageEncoding::UYVY;
+            case cs::VideoMode::PixelFormat::kGray: return ImageEncoding::Y8;
+            case cs::VideoMode::PixelFormat::kY16: return ImageEncoding::Y16;
+            case cs::VideoMode::PixelFormat::kMJPEG: return ImageEncoding::MJPEG;
+            default: return ImageEncoding::UNKNOWN;
+        };
+    }
+
     template <CVImage T>
     inline T generateEmptyCVImg(FrameFormat format) {
-        int cv_type;
-        switch (format.colorspace) {
-            case ColorSpace::COLOR:
-                cv_type = CV_8UC3;
-                break;
-            case ColorSpace::GRAY:
-                cv_type = CV_8UC1;
-                break;
-            case ColorSpace::DEPTH:
-                cv_type = CV_16UC1;
-                break;
-            default:
-                throw std::invalid_argument("unknown colorspace"); // TODO: switch to loggers once I get logging working
-        }
-        return T{format.rows,format.cols,cv_type};
+        return T{format.rows,format.cols,getCVTypeFromEncoding(format.encoding)};
     }
 
-    template <CVImage T>
-    FrameFormat getFormat(const T& cvimg) {
-        ColorSpace cspace;
-        switch (cvimg.type()) {
-            case CV_8UC3:
-                cspace = ColorSpace::COLOR;
-                break;
-            case CV_8UC1:
-                cspace = ColorSpace::GRAY;
-                break;
-            case CV_16UC1:
-                cspace = ColorSpace::DEPTH;
-                break;
-            default:
-                cspace = ColorSpace::UNKNOWN;
-        }
-        return {cspace,cvimg.rows,cvimg.cols};
-    }
+    cs::VideoMode getVideoModeFromStreamFormat(const StreamFormat& sformat);
 
-    ColorSpace getColorSpaceFromPixelFormat(const cs::VideoMode::PixelFormat& pixelFormat);
-
-    cs::VideoMode::PixelFormat getPixelFormatFromColorSpace(const ColorSpace cspace);
+    StreamFormat getStreamFormatFromVideoMode(const cs::VideoMode& videomode);
 
     Frame copyFrame(const Frame& frame) noexcept;
 }

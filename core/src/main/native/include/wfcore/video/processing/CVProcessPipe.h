@@ -29,15 +29,9 @@ namespace wf {
     template <CVImage T>
     class CVProcessPipe {
     public:
-        CVProcessPipe(FrameFormat inputFormat, std::vector<std::unique_ptr<CVProcessNode<T>>> nodes_) : nodes(std::move(nodes_)) {
+        CVProcessPipe(FrameFormat inputFormat, std::vector<std::unique_ptr<CVProcessNode<T>>> nodes_) : nodes(std::move(nodes_)), informat(inputFormat) {
             inpad = generateEmptyCVImg<T>(inputFormat);
-            const T* pad = &inpad;
-            for (auto& node : this->nodes) {
-                node->setInpad(pad);
-                pad = &(node->getOutpad());
-            }
-            this->outpad = pad;
-            this->outformat = getFormat(*outpad);
+            linkNodes();
         }
         /*
         Processes an image without any internal allocations. NOTE: OUTPAD WILL BE CONNECTED TO INTERNAL BUFFERS AFTER THIS OPERATION!
@@ -61,9 +55,8 @@ namespace wf {
 
         void setInputFormat(FrameFormat inputFormat) {
             inpad = generateEmptyCVImg<T>(inputFormat);
-            for (auto& node : this->nodes) {
-                node.updateBuffers();
-            }
+            this->informat = inputFormat;
+            linkNodes();
             this->outformat = getFormat(*(this->outpad));
         }
         inline const FrameFormat& getInputFormat() {return this->informat;}
@@ -78,6 +71,18 @@ namespace wf {
         }
 
     private:
+        void linkNodes() {
+            const T* pad = &inpad;
+            const ImageEncoding* encoding = &(informat.encoding);
+            for (auto& node : this->nodes) {
+                node->setIncoding(encoding);
+                node->setInpad(pad);
+                encoding = &(node->getOutcoding());
+                pad = &(node->getOutpad());
+            }
+            this->outpad = pad;
+            this->outformat = {*encoding,this->outpad.rows,this->outpad.cols};
+        }
         void process() noexcept {
             for (auto& node : nodes) {
                 node->process();
@@ -86,6 +91,7 @@ namespace wf {
         std::vector<std::unique_ptr<CVProcessNode<T>>> nodes;
         FrameFormat informat;
         FrameFormat outformat;
+        ImageEncoding incoding;
         T inpad;
         const T* outpad;
     };

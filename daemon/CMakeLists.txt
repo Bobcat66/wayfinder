@@ -7,17 +7,17 @@ file(GLOB_RECURSE DAEMONSOURCES
     CONFIGURE_DEPENDS 
     "${CMAKE_CURRENT_SOURCE_DIR}/src/main/native/*.cpp"
 )
-add_executable(wayfinder ${DAEMONSOURCES})
+add_executable(wayfinderd ${DAEMONSOURCES})
 
-install(TARGETS wayfinder RUNTIME DESTINATION bin)
+install(TARGETS wayfinderd RUNTIME DESTINATION bin)
 
 # TODO: Figure out the library interface
-target_link_libraries(wayfinder
+target_link_libraries(wayfinderd
     PRIVATE
     wfcore
 )
 
-target_include_directories(wayfinder
+target_include_directories(wayfinderd
     PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/src/main/native
     ${CMAKE_CURRENT_BINARY_DIR}/../meta

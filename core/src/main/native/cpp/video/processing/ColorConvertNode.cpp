@@ -26,14 +26,18 @@
 
 namespace wf {
     template <CVImage T>
-    ColorConvertNode<T>::ColorConvertNode(ColorSpace inspace_, ColorSpace outspace_) 
-    : inspace(inspace_), outspace(outspace_) {
+    ColorConvertNode<T>::ColorConvertNode(ImageEncoding outcoding_) {
+        this->outcoding = outcoding_;
         updateColorConverter();
     }
 
     template <CVImage T>
     void ColorConvertNode<T>::updateBuffers() {
-        this->outpad = T(this->inpad->rows,this->inpad->cols,this->outcvformat);
+        this->outpad = T{
+            this->inpad->format.rows,
+            this->inpad->format.cols,
+            getCVTypeFromEncoding(this->outcoding)
+        };
         updateColorConverter();
     }
 
@@ -44,118 +48,195 @@ namespace wf {
 
     template <CVImage T>
     void ColorConvertNode<T>::updateColorConverter() {
-        switch (inspace) {
-            case COLOR:
-                switch (outspace) {
-                    case COLOR:
+        switch (*(this->incoding)) {
+            case BGR24:
+                switch (this->outcoding) {
+                    case BGR24:
                         colorConverter = [](const T& in,T& out){
                             out = in;
                         };
                         break;
-                    case GRAY:
+                    case RGB24:
+                        colorConverter = [](const T& in,T& out){
+                            cv::cvtColor(in,out,cv::COLOR_BGR2RGB);
+                        };
+                        break;
+                    case RGB565:
+                        colorConverter = [](const T& in,T& out){
+                            cv::cvtColor(in,out,cv::COLOR_RGB2BGR565);
+                        };
+                        break;
+                    case Y8:
                         colorConverter = [](const T& in,T& out){
                             cv::cvtColor(in,out,cv::COLOR_BGR2GRAY);
                         };
                         break;
-                    case DEPTH:
+                    case Y16:
                         // Expensive, don't use in the hot path
-                        colorConverter = [this](const T& in,T& out){
+                        colorConverter = [](const T& in,T& out){
                             static T tmp{this->getInpad()->rows,this->getInpad()->cols,CV_8UC1};
                             cv::cvtColor(in,tmp,cv::COLOR_BGR2GRAY);
                             tmp.convertTo(out,CV_16UC1, 256.0);
                         };
                         break;
-                    case RGB:
+                    case YUYV: throw std::runtime_error("BGR24 to YUYV conversion is not supported at the moment.");
+                    case UYVY: throw std::runtime_error("BGR24 to UYVY conversion is not supported at the moment.");
+                    case RGBA:
                         colorConverter = [](const T& in,T& out){
-                            cv::cvtColor(in,out,cv::COLOR_BGR2RGB);
+                            cv::cvtColor(in,out,cv::COLOR_BGR2RGBA);
                         };
                         break;
-                    default:
-                        throw std::invalid_argument("Attempted to convert from unknown colorspace");
+                    case BGRA:
+                        colorConverter - [](const T& in, T& out){
+                            cv::cvtColor(in,out,cv::COLOR_BGR2BGRA);
+                        };
+                        break;
+                    case MJPEG: throw std::runtime_error("Gng really thought the ColorConvertNode was a JPEG codec 💔💔💔");
+                    default: throw std::runtime_error("Attempted to convert from unknown encoding");
                 }
                 break;
-            case GRAY:
-                switch (outspace) {
-                    case COLOR:
+            case RGB24:
+                switch (this->outcoding) {
+                    case BGR24:
                         colorConverter = [](const T& in,T& out){
-                            cv::cvtColor(in,out,cv::COLOR_GRAY2BGR);
+                            cv::cvtColor(in,out,cv::COLOR_RGB2BGR)l
                         };
                         break;
-                    case GRAY:
+                    case RGB24:
                         colorConverter = [](const T& in,T& out){
                             out = in;
                         };
                         break;
-                    case DEPTH:
+                    case RGB565:
                         colorConverter = [](const T& in,T& out){
-                            in.convertTo(out,CV_16UC1, 256.0);
+                            cv::cvtColor(in,out,cv::COLOR_BGR2BGR565);
                         };
                         break;
-                    case RGB:
-                        colorConverter = [](const T& in,T& out){
-                            cv::cvtColor(in,out,cv::COLOR_GRAY2RGB);
-                        };
-                        break;
-                    default:
-                        throw std::invalid_argument("Attempted to convert from unknown colorspace");
-                }
-                break;
-            case DEPTH:
-                switch (outspace) {
-                    case COLOR:
-                        colorConverter = [this](const T& in,T& out){
-                            static T tmp{this->getInpad()->rows,this->getInpad()->cols,CV_8UC1};
-                            cv::normalize(in, tmp, 0, 255, cv::NORM_MINMAX,CV_8U);
-                            cv::cvtColor(tmp,out,cv::COLOR_GRAY2BGR);
-                        };
-                        break;
-                    case GRAY:
-                        colorConverter = [](const T& in,T& out){
-                            cv::normalize(in, out, 0, 255, cv::NORM_MINMAX, CV_8U);
-                        };
-                        break;
-                    case DEPTH:
-                        colorConverter = [](const T& in,T& out){
-                            out = in;
-                        };
-                        break;
-                    case RGB:
-                        colorConverter = [this](const T& in,T& out){
-                            static T tmp{this->getInpad()->rows,this->getInpad()->cols,CV_8UC1};
-                            cv::normalize(in, tmp, 0, 255, cv::NORM_MINMAX, CV_8U);
-                            cv::cvtColor(tmp,out,cv::COLOR_GRAY2RGB);
-                        };
-                        break;
-                    default:
-                        throw std::invalid_argument("Attempted to convert from unknown colorspace");
-                }
-                break;
-            case RGB:
-                switch (outspace) {
-                    case COLOR:
-                        colorConverter = [](const T& in,T& out){
-                            cv::cvtColor(in,out,cv::COLOR_RGB2BGR);
-                        };
-                        break;
-                    case GRAY:
+                    case Y8:
                         colorConverter = [](const T& in,T& out){
                             cv::cvtColor(in,out,cv::COLOR_RGB2GRAY);
                         };
                         break;
-                    case DEPTH:
+                    case Y16:
+                        // Expensive, don't use in the hot path
                         colorConverter = [this](const T& in,T& out){
                             static T tmp{this->getInpad()->rows,this->getInpad()->cols,CV_8UC1};
                             cv::cvtColor(in,tmp,cv::COLOR_RGB2GRAY);
                             tmp.convertTo(out,CV_16UC1, 256.0);
                         };
                         break;
-                    case RGB:
+                    case YUYV: throw std::runtime_error("RGB24 to YUYV conversion is not supported at the moment.");
+                    case UYVY: throw std::runtime_error("RGB24 to UYVY conversion is not supported at the moment.");
+                    case RGBA:
                         colorConverter = [](const T& in,T& out){
-                            out = in;
+                            cv::cvtColor(in,out,cv::COLOR_RGB2RGBA);
                         };
                         break;
-                    default:
-                        throw std::invalid_argument("Attempted to convert from unknown colorspace");
+                    case BGRA:
+                        colorConverter - [](const T& in, T& out){
+                            cv::cvtColor(in,out,cv::COLOR_RGB2BGRA);
+                        };
+                        break;
+                    case MJPEG: throw std::runtime_error("Gng really thought the ColorConvertNode was a JPEG codec 💔💔💔");
+                    default: throw std::runtime_error("Attempted to convert from unknown encoding");
+                }
+                break;
+            case Y8:
+                switch (this->outcoding) {
+                    case BGR24:
+                        colorConverter = [](const T& in,T& out){
+                            cv::cvtColor(in,out,cv::COLOR_GRAY2BGR);
+                        };
+                        break;
+                    case RGB24:
+                        colorConverter = [](const T& in,T& out){
+                            cv::cvtColor(in,out,cv::COLOR_GRAY2RGB);
+                        };
+                        break;
+                    case RGB565:
+                        colorConverter = [](const T& in,T& out){
+                            cv::cvtColor(in,out,cv::COLOR_GRAY2BGR565);
+                        };
+                        break;
+                    case Y8:
+                        colorConverter = [](const T& in,T& out){
+                            out = in
+                        };
+                        break;
+                    case Y16:
+                        colorConverter = [](const T& in,T& out){
+                            in.convertTo(out,CV_16UC1, 256.0);
+                        };
+                        break;
+                    case YUYV: throw std::runtime_error("Y8 to YUYV conversion is not supported at the moment.");
+                    case UYVY: throw std::runtime_error("Y8 to UYVY conversion is not supported at the moment.");
+                    case RGBA:
+                        colorConverter = [](const T& in,T& out){
+                            cv::cvtColor(in,out,cv::COLOR_GRAY2RGBA);
+                        };
+                        break;
+                    case BGRA:
+                        colorConverter - [](const T& in, T& out){
+                            cv::cvtColor(in,out,cv::COLOR_GRAY2BGRA);
+                        };
+                        break;
+                    case MJPEG: throw std::runtime_error("Gng really thought the ColorConvertNode was a JPEG codec 💔💔💔");
+                    default: throw std::runtime_error("Attempted to convert from unknown encoding");
+                }
+                break;
+            case Y16:
+                switch (this->outcoding) {
+                    case BGR24:
+                        colorConverter = [this](const T& in,T& out){
+                            static T tmp{this->getInpad()->rows,this->getInpad()->cols,CV_8UC1};
+                            in.convertTo(tmp,CV_8UC1,1.0/256.0);
+                            cv::cvtColor(tmp,out,cv::COLOR_GRAY2BGR);
+                        };
+                        break;
+                    case RGB24:
+                        colorConverter = [this](const T& in,T& out){
+                            static T tmp{this->getInpad()->rows,this->getInpad()->cols,CV_8UC1};
+                            in.convertTo(tmp,CV_8UC1,1.0/256.0);
+                            cv::cvtColor(tmp,out,cv::COLOR_GRAY2RGB);
+                        };
+                        break;
+                    case RGB565:
+                        colorConverter = [this](const T& in,T& out){
+                            static T tmp{this->getInpad()->rows,this->getInpad()->cols,CV_8UC1};
+                            in.convertTo(tmp,CV_8UC1,1.0/256.0);
+                            cv::cvtColor(tmp,out,cv::COLOR_GRAY2BGR565);
+                        };
+                        break;
+                    case Y8:
+                        colorConverter = [this](const T& in,T& out){
+                            static T tmp{this->getInpad()->rows,this->getInpad()->cols,CV_8UC1};
+                            in.convertTo(tmp,CV_8UC1,1.0/256.0);
+                            out = tmp
+                        };
+                        break;
+                    case Y16:
+                        colorConverter = [](const T& in,T& out){
+                            out = in
+                        };
+                        break;
+                    case YUYV: throw std::runtime_error("Y16 to YUYV conversion is not supported at the moment.");
+                    case UYVY: throw std::runtime_error("Y16 to UYVY conversion is not supported at the moment.");
+                    case RGBA:
+                        colorConverter = [](const T& in,T& out){
+                            static T tmp{this->getInpad()->rows,this->getInpad()->cols,CV_8UC1};
+                            in.convertTo(tmp,CV_8UC1,1.0/256.0);
+                            cv::cvtColor(tmp,out,cv::COLOR_GRAY2RGBA);
+                        };
+                        break;
+                    case BGRA:
+                        colorConverter - [](const T& in, T& out){
+                            static T tmp{this->getInpad()->rows,this->getInpad()->cols,CV_8UC1};
+                            in.convertTo(tmp,CV_8UC1,1.0/256.0);
+                            cv::cvtColor(tmp,out,cv::COLOR_GRAY2BGRA);
+                        };
+                        break;
+                    case MJPEG: throw std::runtime_error("Gng really thought the ColorConvertNode was a JPEG codec 💔💔💔");
+                    default: throw std::runtime_error("Attempted to convert from unknown encoding");
                 }
                 break;
             default:
@@ -177,6 +258,7 @@ namespace wf {
                 break;
             default:
                 throw std::invalid_argument("Attempted to convert from unknown colorspace");
+                
         }
 
     }

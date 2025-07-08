@@ -24,43 +24,34 @@
 
 namespace wf {
     cv::Mat generateEmptyFrameBuf(FrameFormat format) {
-        int cv_type;
-        switch (format.colorspace) {
-            case ColorSpace::COLOR:
-                cv_type = CV_8UC3;
-                break;
-            case ColorSpace::GRAY:
-                cv_type = CV_8UC1;
-                break;
-            case ColorSpace::DEPTH:
-                cv_type = CV_16UC1;
-                break;
-            default:
-                throw std::invalid_argument("unknown colorspace"); // TODO: switch to loggers once I get logging working
-        }
-        return cv::Mat(format.rows,format.cols,cv_type);
+        return cv::Mat(format.rows,format.cols,getCVTypeFromEncoding(format.encoding));
     };
-    ColorSpace getColorSpaceFromPixelFormat(const cs::VideoMode::PixelFormat& pixelFormat) {
-        switch (pixelFormat) {
-            case cs::VideoMode::PixelFormat::kBGR: return wf::ColorSpace::COLOR;
-            case cs::VideoMode::PixelFormat::kGray:return wf::ColorSpace::GRAY;
-            case cs::VideoMode::PixelFormat::kY16: return wf::ColorSpace::DEPTH;
-            default: return wf::ColorSpace::UNKNOWN;
-        };
-    }
-    cs::VideoMode::PixelFormat getPixelFormatFromColorSpace(const ColorSpace cspace) {
-        switch (cspace) {
-            case wf::ColorSpace::COLOR: return cs::VideoMode::PixelFormat::kBGR;
-            case wf::ColorSpace::GRAY: return cs::VideoMode::PixelFormat::kGray;
-            case wf::ColorSpace::DEPTH: return cs::VideoMode::PixelFormat::kY16;
-            default: return cs::VideoMode::PixelFormat::kUnknown;
-        }
-    }
+
     Frame copyFrame(const Frame& frame) noexcept {
         return {
             frame.captimeMicros,
             frame.format,
             frame.data.clone()
+        };
+    }
+
+    cs::VideoMode getVideoModeFromStreamFormat(const StreamFormat& sformat) {
+        return {
+            getPixelFormatFromEncoding(sformat.frameFormat.encoding),
+            sformat.frameFormat.cols,
+            sformat.frameFormat.rows,
+            sformat.fps
+        };
+    }
+
+    StreamFormat getStreamFormatFromVideoMode(const cs::VideoMode& videomode) {
+        return {
+            videomode.fps,
+            {
+                getEncodingFromPixelFormat(videomode.pixelFormat),
+                videomode.height,
+                videomode.width
+            }
         };
     }
 }

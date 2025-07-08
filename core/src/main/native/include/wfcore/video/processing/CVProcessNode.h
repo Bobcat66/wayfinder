@@ -28,16 +28,21 @@ namespace wf {
         virtual ~CVProcessNode() = default;
         // Updates outpad and internal buffers for when the inpad changes
         virtual void updateBuffers() = 0;
-        virtual inline void setInpad(const T* inpad) {
+        virtual inline void setInpad(const T* inpad,const ImageEncoding* encoding) {
             this->inpad = inpad;
+            this->incoding = encoding;
             this->updateBuffers();
         }
+        inline const ImageEncoding* getIncoding() { return incoding; }
         inline const T* getInpad() const {return inpad;}
-        inline const T& getOutpad() const {return outpad;}
-        inline FrameFormat getOutpadFormat() const {return getFormat(outpad);};
+
+        inline const ImageEncoding& getOutcoding() { return outcoding; }
+        inline T& getOutpad() const {return outpad;}
         virtual void process() noexcept = 0;
     protected:
+        const ImageEncoding* incoding;
         const T* inpad;
+        ImageEncoding outcoding;
         T outpad;
     };
 }

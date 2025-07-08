@@ -21,43 +21,35 @@
 
 #include "wfcore/video/FrameProvider.h"
 #include "wfcore/video/video_types.h"
+#include "wfcore/hardware/CameraConfiguration.h"
 #include <memory>
 #include <vector>
+#include <unordered_set>
 #include <string>
+#include <optional>
 
 namespace wf {
-
-    enum class CameraBackend {
-        CSCORE,
-        REALSENSE, //WIP
-        GSTREAMER, //WIP
-        LIBCAMERA, //WIP
-    };
-
-    enum class CamControl {
-        EXPOSURE,
-        BRIGHTNESS,
-        ISO,
-        SHUTTER,
-        FOCUS,
-        ZOOM,
-        WHITE_BALANCE,
-        SHARPNESS,
-        SATURATION,
-        CONTRAST,
-        GAMMA,
-        HUE
-    };
 
     class CameraHandler {
     public:
         virtual ~CameraHandler() noexcept = default;
-        virtual const CameraBackend& getBackend() const noexcept = 0;
-        virtual FrameProvider& getFrameProvider() = 0;
-        virtual int setFPS(int fps) = 0;
-        virtual int setResolution(int width, int height) = 0;
-        virtual int setColorSpace(ColorSpace cspace) = 0;
+
+        virtual CameraBackend getBackend() const noexcept = 0;
+
+        virtual FrameProvider& getFrameProvider(const std::string& name) = 0;
+
+        virtual int setStreamFormat(const StreamFormat& format) = 0;
+
+        virtual StreamFormat getStreamFormat() = 0;
+
+        virtual std::optional<CameraIntrinsics> getIntrinsics() = 0;
+
         virtual int setControl(CamControl control, double value) = 0;
-        virtual std::vector<CamControl> getControls() = 0;
+
+        virtual double getControl(CamControl control, double value) = 0;
+
+        virtual const std::unordered_set<CamControl>& getSupportedControls() = 0;
+        
+        virtual const std::vector<StreamFormat>& getSupportedFormats() = 0;
     };
 }
