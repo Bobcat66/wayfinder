@@ -23,13 +23,14 @@
 #include "wfcore/video/video_types.h"
 
 #include <string>
+#include <opencv2/core.hpp>
 
 namespace wf {
     class FrameProvider {
     public:
-        virtual Frame getFrame() noexcept = 0;
+        virtual FrameMetadata getFrame(cv::Mat& mat) = 0;
         virtual ~FrameProvider() noexcept = default;
         virtual const std::string& getName() const noexcept = 0;
-        virtual StreamFormat getStreamFormat() const noexcept = 0;
+        virtual const StreamFormat& getStreamFormat() const noexcept = 0;
     };
 }

@@ -40,10 +40,10 @@ namespace wf {
 
         std::optional<CameraIntrinsics> getIntrinsics(const std::string& devpath);
 
-        int setControl(const std::string& devpath, CamControl control, double value, bool persist);
+        int setControl(const std::string& devpath, CamControl control, int value, bool persist);
 
-        double getControl(const std::string& devpath, CamControl control, double value);
-        
+        double getControl(const std::string& devpath, CamControl control);
+
         const std::unordered_set<CamControl>& getControls(const std::string& devpath);
     private:
         std::unordered_map<std::string,std::unique_ptr<CameraHandler>> cameras;

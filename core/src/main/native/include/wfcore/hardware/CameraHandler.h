@@ -40,16 +40,18 @@ namespace wf {
 
         virtual int setStreamFormat(const StreamFormat& format) = 0;
 
-        virtual StreamFormat getStreamFormat() = 0;
+        virtual const StreamFormat& getStreamFormat() = 0;
 
         virtual std::optional<CameraIntrinsics> getIntrinsics() = 0;
 
-        virtual int setControl(CamControl control, double value) = 0;
+        virtual void setControl(CamControl control, int value) = 0;
 
-        virtual double getControl(CamControl control, double value) = 0;
+        virtual int getControl(CamControl control) = 0;
 
         virtual const std::unordered_set<CamControl>& getSupportedControls() = 0;
-        
+
         virtual const std::vector<StreamFormat>& getSupportedFormats() = 0;
+
+        virtual int getError() = 0;
     };
 }

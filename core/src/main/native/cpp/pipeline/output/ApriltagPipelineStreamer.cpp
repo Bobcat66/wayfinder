@@ -48,8 +48,7 @@ namespace wf {
         }
         nodes.emplace_back(
             std::make_unique<ColorConvertNode<cv::Mat>>(
-                ColorSpace::GRAY,
-                ColorSpace::COLOR
+                ImageEncoding::BGR24
             )
         );
         prePostprocessor = std::make_unique<CVProcessPipe<cv::Mat>>(inputFormat,std::move(nodes));
@@ -57,23 +56,24 @@ namespace wf {
     }
 
     // TODO: Add error codes & error handling
-    int ApriltagPipelineStreamer::accept(Frame& frame, PipelineResult& result) noexcept {
+    int ApriltagPipelineStreamer::accept(cv::Mat& data, FrameMetadata meta, PipelineResult& result) noexcept {
         if (auto shared = ntpub.lock()) {
             shared->publishPipelineResult(result);
         }
         if (streamEnabled) {
-            // TODO: Statically allocate a reusable buffer? Characterize this code. Right now (7/6/25) everyhting is still in prototyping, so this isn't super important atm.
-            auto rframe = prePostprocessor->processFrame(frame);
-            auto pframe = copyFrame(rframe);
-            drawCamLabel(rframe.data,std::format("{} RAW",camLabel));
-            rawServer.acceptFrame(rframe);
-            drawCamLabel(pframe.data,std::format("{} PROCESSED",camLabel));
+            // TODO: characterize
+            auto rmeta = prePostprocessor->processFrame(data,pp_rawbuf,meta);
+            pp_rawbuf.copyTo(pp_procbuf);
+            drawCamLabel(pp_rawbuf,std::format("{} RAW",camLabel));
+            rawServer.acceptFrame(pp_rawbuf,rmeta);
+            drawCamLabel(pp_procbuf,std::format("{} PROCESSED",camLabel));
             for (const auto& tag : result.aprilTagDetections) {
-                drawTag(pframe.data,tag);
+                drawTag(pp_procbuf,tag);
             }
             for (const auto& tagpose: result.aprilTagPoses) {
-                drawTag3D(pframe.data,tagpose,intrinsics,tagSize);
+                drawTag3D(pp_procbuf,tagpose,intrinsics,tagSize);
             }
+            processedServer.acceptFrame(pp_procbuf,rmeta);
         }
         return 0;
     }

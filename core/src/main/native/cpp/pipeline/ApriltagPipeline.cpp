@@ -19,7 +19,7 @@
 
 
 #include "wfcore/pipeline/ApriltagPipeline.h"
-#include "wfcore/configuration/CameraConfiguration.h"
+#include "wfcore/hardware/CameraConfiguration.h"
 #include <algorithm>
 #include <wfcore/pipeline/pnp.h>
 
@@ -50,8 +50,8 @@ namespace wf {
         detector.addFamily(tagConfig.tagFamily);
     }
 
-    PipelineResult ApriltagPipeline::process(const Frame& frame) const noexcept {
-        auto detections = detector.detect(frame.data);
+    PipelineResult ApriltagPipeline::process(const cv::Mat& data, const FrameMetadata& meta) const noexcept {
+        auto detections = detector.detect(data);
         std::erase_if(detections, [this](ApriltagDetection detection) {
             return this->config.detectorExcludes.contains(detection.id);
         });
@@ -75,7 +75,7 @@ namespace wf {
             config.SolvePNPExcludes
         );
         return PipelineResult::ApriltagPipelineResult(
-            frame.captimeMicros,
+            meta.micros,
             detections,
             atagPoses,
             fieldPose

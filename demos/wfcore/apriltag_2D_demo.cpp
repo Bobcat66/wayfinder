@@ -30,9 +30,9 @@ int main() {
     cv::Mat frame;
     cv::Mat grayFrame;
     std::vector<std::unique_ptr<wf::CVProcessNode<cv::Mat>>> nodes;
-    nodes.emplace_back(std::make_unique<wf::ColorConvertNode<cv::Mat>>(wf::ColorSpace::COLOR,wf::ColorSpace::GRAY));
+    nodes.emplace_back(std::make_unique<wf::ColorConvertNode<cv::Mat>>(wf::ImageEncoding::Y8));
     wf::CVProcessPipe<cv::Mat> preprocessor(
-        wf::FrameFormat{wf::ColorSpace::COLOR,720,1280},
+        wf::FrameFormat(wf::ImageEncoding::BGR24,720,1280),
         std::move(nodes)
     );
     wf::ApriltagDetector detector;

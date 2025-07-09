@@ -78,6 +78,4 @@ namespace wf {
     cs::VideoMode getVideoModeFromStreamFormat(const StreamFormat& sformat);
 
     StreamFormat getStreamFormatFromVideoMode(const cs::VideoMode& videomode);
-
-    Frame copyFrame(const Frame& frame) noexcept;
 }

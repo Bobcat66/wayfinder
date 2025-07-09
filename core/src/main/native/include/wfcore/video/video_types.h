@@ -64,9 +64,8 @@ namespace wf {
         }
     };
 
-    struct Frame {
-        uint64_t captimeMicros;
+    struct FrameMetadata {
+        uint64_t micros;
         FrameFormat format;
-        cv::Mat data;
     };
 }

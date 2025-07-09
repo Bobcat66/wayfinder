@@ -26,7 +26,7 @@
 namespace wf {
     class FrameConsumer {
     public:
-        virtual void acceptFrame(Frame& frame) noexcept = 0;
+        virtual void acceptFrame(cv::Mat& data, FrameMetadata meta) noexcept = 0;
         virtual ~FrameConsumer() noexcept = default;
         virtual const std::string& getName() const noexcept = 0;
         virtual const StreamFormat& getStreamFormat() const noexcept = 0;

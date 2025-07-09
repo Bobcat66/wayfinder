@@ -61,7 +61,7 @@ namespace wf {
     public:
         ObjectDetectionPipeline(ObjectDetectionPipelineConfiguration config_, CameraIntrinsics intrinsics_);
         [[nodiscard]] 
-        PipelineResult process(const Frame& frame) const noexcept override;
+        PipelineResult process(const cv::Mat& data, const FrameMetadata& meta) const noexcept override;
     private:
         InferenceEngine& engine;
         CameraIntrinsics intrinsics;

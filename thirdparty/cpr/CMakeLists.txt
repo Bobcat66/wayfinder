@@ -4,7 +4,7 @@ project(thirdparty-cpr)
 include(FetchContent)
 
 set(FETCHCONTENT_BASE_DIR ${CMAKE_BINARY_DIR}/_deps)
-
+set(CPR_ENABLE_SSL OFF)
 fetchcontent_declare(
     cpr
     GIT_REPOSITORY    https://github.com/libcpr/cpr.git

@@ -20,7 +20,7 @@
 #pragma once
 
 #include "wfcore/hardware/CameraHandler.h"
-#include "wfcore/video/UsbCameraSinkCS.h"
+#include "wfcore/video/CSCameraSink.h"
 #include <unordered_set>
 #include <cscore_oo.h>
 #include <cscore_cv.h>
@@ -40,20 +40,25 @@ namespace wf {
 
         const std::vector<StreamFormat>& getSupportedFormats() override { return supportedFormats; }
 
-        StreamFormat getStreamFormat() override;
+        const StreamFormat& getStreamFormat() override;
 
         std::optional<CameraIntrinsics> getIntrinsics() override;
 
-        int setControl(CamControl control, double value) override;
+        void setControl(CamControl control, int value) override;
 
-        double getControl(CamControl control, double value) override;
+        int getControl(CamControl control) override;
+
+        int getError() override { return error; }
     private:
-        std::vector<UsbCameraSinkCS> sinks;
+        std::vector<CSCameraSink> sinks;
         cs::UsbCamera camera;
         std::string devpath;
         StreamFormat format;
         std::vector<StreamFormat> supportedFormats;
-        std::map<cv::Size,CameraIntrinsics> intrinsics;
+        std::vector<cv::Size> calibratedResolutions;
+        std::vector<CameraIntrinsics> calibrations;
         std::unordered_set<CamControl> supportedControls;
-    }
+        std::unordered_map<CamControl,std::string> controlAliases;
+        int error = 0;
+    };
 }

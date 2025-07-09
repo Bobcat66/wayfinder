@@ -25,7 +25,7 @@
 #include "wfcore/video/MJPEGVideoServerCS.h"
 #include "wfcore/video/processing.h"
 #include "wfcore/network/NTDataPublisher.h"
-#include "wfcore/configuration/CameraConfiguration.h"
+#include "wfcore/hardware/CameraConfiguration.h"
 #include <memory>
 
 namespace wf {
@@ -40,7 +40,7 @@ namespace wf {
             StreamFormat streamFormat,
             double tagSize_
         );
-        int accept(Frame& frame, PipelineResult& result) noexcept override;
+        int accept(cv::Mat& data, FrameMetadata meta, PipelineResult& result) noexcept override;
         PipelineType getPipelineType() override { return PipelineType::Apriltag; }
         void enableStream(bool streamEnabled) { this->streamEnabled = streamEnabled; }
         bool isStreaming() { return this->streamEnabled; }
@@ -55,5 +55,7 @@ namespace wf {
         std::string pipelineName;
         std::string camLabel;
         std::unique_ptr<CVProcessPipe<cv::Mat>> prePostprocessor;
+        cv::Mat pp_rawbuf;
+        cv::Mat pp_procbuf;
     };
 }

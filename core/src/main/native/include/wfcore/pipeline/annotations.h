@@ -22,7 +22,7 @@
 #include <opencv2/core.hpp>
 #include <opencv2/imgproc.hpp>
 #include <gtsam/geometry/Pose3.h>
-#include "wfcore/configuration/CameraConfiguration.h"
+#include "wfcore/hardware/CameraConfiguration.h"
 #include <vector>
 #include "wfcore/inference/InferenceEngine.h"
 #include "wfcore/fiducial/ApriltagDetection.h"

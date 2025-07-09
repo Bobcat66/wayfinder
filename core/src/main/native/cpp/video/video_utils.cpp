@@ -27,14 +27,6 @@ namespace wf {
         return cv::Mat(format.rows,format.cols,getCVTypeFromEncoding(format.encoding));
     };
 
-    Frame copyFrame(const Frame& frame) noexcept {
-        return {
-            frame.captimeMicros,
-            frame.format,
-            frame.data.clone()
-        };
-    }
-
     cs::VideoMode getVideoModeFromStreamFormat(const StreamFormat& sformat) {
         return {
             getPixelFormatFromEncoding(sformat.frameFormat.encoding),
@@ -48,7 +40,9 @@ namespace wf {
         return {
             videomode.fps,
             {
-                getEncodingFromPixelFormat(videomode.pixelFormat),
+                getEncodingFromPixelFormat(
+                    static_cast<cs::VideoMode::PixelFormat>(videomode.pixelFormat)
+                ),
                 videomode.height,
                 videomode.width
             }

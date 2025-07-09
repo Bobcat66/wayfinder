@@ -24,6 +24,7 @@
 #include <cstring>
 
 namespace wf {
+
     void Tensorizer::setTensorParameters(const TensorParameters& params) {
         this->params = params;
         temp.create(params.height, params.width, CV_32FC(params.channels));
@@ -33,6 +34,7 @@ namespace wf {
             channels.emplace_back(params.height, params.width, CV_32FC1);
         }
     }
+
     void Tensorizer::tensorize(const cv::Mat& input, float* output) const noexcept {
         input.convertTo(temp, CV_32F, params.scale);
         cv::divide(temp, params.stds, temp);
@@ -55,4 +57,5 @@ namespace wf {
             }
         }
     }
+    
 }

@@ -49,8 +49,8 @@ namespace wf {
         return !model.empty();
     }
     [[nodiscard]] 
-    std::vector<ObjectDetection> CPUInferenceEngineYOLO::infer(const Frame& input) noexcept {
-        this->tensorizer.tensorize(input.data, reinterpret_cast<float*>(blob.data));
+    std::vector<ObjectDetection> CPUInferenceEngineYOLO::infer(const cv::Mat& data, const FrameMetadata& meta) noexcept {
+        this->tensorizer.tensorize(data, reinterpret_cast<float*>(blob.data));
         model.setInput(blob);
         cv::Mat output = model.forward();
         // Output Shape: [1, number of detections, 5 + number of classes]
@@ -103,7 +103,7 @@ namespace wf {
                 objclass_buffer[index],
                 confidence_buffer[index],
                 static_cast<float>(bboxd.width * bboxd.height) 
-                    / (input.format.rows * input.format.cols),
+                    / (meta.format.rows * meta.format.cols),
                 std::move(corners),
                 std::array<cv::Point2f, 4>{
                     cv::Point2f{std::atan(norm_corners_buffer[0].x),std::atan(norm_corners_buffer[0].y)},

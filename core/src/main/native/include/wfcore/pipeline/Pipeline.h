@@ -104,7 +104,7 @@ namespace wf {
     class Pipeline {
     public:
         [[nodiscard]] 
-        virtual PipelineResult process(const Frame& frame) const noexcept = 0;
+        virtual PipelineResult process(const cv::Mat& data, const FrameMetadata& meta) const noexcept = 0;
         virtual ~Pipeline() = default;
     };
 }

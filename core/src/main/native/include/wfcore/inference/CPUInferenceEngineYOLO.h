@@ -19,7 +19,7 @@
 
 #pragma once
 
-#include "wfcore/configuration/CameraConfiguration.h"
+#include "wfcore/hardware/CameraConfiguration.h"
 #include "wfcore/inference/InferenceEngine.h"
 
 #include <opencv2/core.hpp>
@@ -38,7 +38,7 @@ namespace wf {
         bool setTensorParameters(const TensorParameters& params) override;
         bool loadModel(const std::string& modelPath) override;
         [[nodiscard]] 
-        std::vector<ObjectDetection> infer(const Frame& input) noexcept override;
+        std::vector<ObjectDetection> infer(const cv::Mat& data, const FrameMetadata& meta) noexcept override;
     private:
         cv::dnn::Net model; // OpenCV DNN network
         cv::Mat blob; // Blob for input data

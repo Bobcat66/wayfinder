@@ -35,18 +35,13 @@
 
 namespace wf {
 
-    typedef std::function<void(const PipelineResult&)> ResultConsumer;
-    typedef std::function<void(const Frame&)> FrameConsumer;
-
     class VisionWorker {
     public:
         VisionWorker(
             std::string name_,
             FrameProvider& frameProvider_, 
             CVProcessPipe<cv::Mat>& preprocessor_,
-            Pipeline& pipeline_, 
-            ResultConsumer resultConsumer_,
-            FrameConsumer frameConsumer_
+            Pipeline& pipeline_
         );
         void start();
         void stop();
@@ -61,7 +56,7 @@ namespace wf {
         CVProcessPipe<cv::Mat>& preprocesser;
         Pipeline& pipeline;
         FrameProvider& frameProvider;
-        ResultConsumer resultConsumer;
-        FrameConsumer frameConsumer;
+        cv::Mat rawFrameBuffer;
+        cv::Mat ppFrameBuffer;
     };
 }

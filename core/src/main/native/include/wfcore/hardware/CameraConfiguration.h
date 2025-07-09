@@ -33,17 +33,20 @@ namespace wf {
         CSCORE,
         REALSENSE, //WIP
         GSTREAMER, //WIP
-        LIBCAMERA, //WIP
+        LIBCAMERA //WIP
     };
 
+    // TODO: Enumerate more controls. That is for after 1.0, though
     enum CamControl {
         EXPOSURE,
+        AUTO_EXPOSURE,
         BRIGHTNESS,
         ISO,
         SHUTTER,
         FOCUS,
         ZOOM,
         WHITE_BALANCE,
+        AUTO_WHITE_BALANCE,
         SHARPNESS,
         SATURATION,
         CONTRAST,
@@ -60,7 +63,12 @@ namespace wf {
         std::string devpath;
         CameraBackend backend;
         StreamFormat format;
-        std::map<cv::Size,CameraIntrinsics> intrinsics; // Didn't feel like making a hash function, plus this shouldn't be accessed in the hot path anyways
+        std::unordered_map<CamControl,std::string> controlAliases; // Aliases for camera controls
+        
+        // TODO: Replace this with a map
+        std::vector<cv::Size> calibratedResolutions;
+        std::vector<CameraIntrinsics> calibrations;
+
         std::unordered_map<CamControl,double> controls; 
     };
 

@@ -28,7 +28,7 @@ namespace wf {
     class MJPEGVideoServerCS : public FrameConsumer {
     public:
         MJPEGVideoServerCS(StreamFormat format_, std::string name_, int port_);
-        void acceptFrame(Frame& frame) noexcept override;
+        void acceptFrame(cv::Mat& data, FrameMetadata meta) noexcept override;
         const std::string& getName() const noexcept override;
         const StreamFormat& getStreamFormat() const noexcept override;
         int setStreamFormat(StreamFormat newformat) override;

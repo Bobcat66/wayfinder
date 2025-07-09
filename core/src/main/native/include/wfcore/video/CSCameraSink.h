@@ -24,23 +24,26 @@
 #include <cscore_oo.h>
 #include <cscore_cv.h>
 #include <memory>
+#include <mutex>
 
 // A CSCore-based implementation of FrameProvider, which pulls frames from a USB camera 
 namespace wf {
-    class UsbCameraSinkCS : public FrameProvider {
+    class CSCameraHandler;
+
+    class CSCameraSink : public FrameProvider {
+        friend class CSCameraHandler;
     public:
-        UsbCameraSinkCS(const std::string& name, const std::string& devPath);
-        ~UsbCameraSinkCS() override = default;
-        Frame getFrame() noexcept override;
-        const std::string& getName() const noexcept override;
-        const std::string& getDevPath() const noexcept;
-        StreamFormat getStreamFormat() const noexcept;
+        CSCameraSink(std::string name_,std::string devPath_, cs::CvSink appSink_, StreamFormat format_);
+        FrameMetadata getFrame(cv::Mat& data) noexcept override;
+        const std::string& getName() const noexcept override { return name; }
+        const std::string& getDevPath() const noexcept { return devPath; }
+        const StreamFormat& getStreamFormat() const noexcept override;
     private:
+        void setStreamFormat(StreamFormat format);
+        mutable std::mutex camera_guard;
         cs::CvSink appSink;
         std::string devPath;
         std::string name;
-        std::shared_ptr<cs::UsbCamera> camera;
+        StreamFormat format;
     };
-
-    bool setUsbCameraFormat(const std::string& devPath, StreamFormat format);
 }

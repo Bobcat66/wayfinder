@@ -43,7 +43,7 @@ namespace wf {
         void setTagConfig(const ApriltagConfiguration& tagConfig);
         void setIntrinsics(const CameraIntrinsics& intrinsics);
         [[nodiscard]] 
-        PipelineResult process(const Frame& frame) const noexcept override;
+        PipelineResult process(const cv::Mat& data, const FrameMetadata& meta) const noexcept override;
         ~ApriltagPipeline() override = default;
     private:
         void updateDetectorConfig(); // Updates the apriltag detector's configuration

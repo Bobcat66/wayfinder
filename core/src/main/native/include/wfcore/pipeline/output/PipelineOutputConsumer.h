@@ -27,7 +27,7 @@ namespace wf {
     class PipelineOutputConsumer {
     public:
         virtual ~PipelineOutputConsumer() = default;
-        virtual int accept(Frame& frame, PipelineResult& result) noexcept = 0;
+        virtual int accept(cv::Mat& data, FrameMetadata meta, PipelineResult& result) noexcept = 0;
         virtual PipelineType getPipelineType() = 0;
     };
 }

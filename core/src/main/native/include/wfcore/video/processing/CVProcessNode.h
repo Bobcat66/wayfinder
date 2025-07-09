@@ -37,7 +37,7 @@ namespace wf {
         inline const T* getInpad() const {return inpad;}
 
         inline const ImageEncoding& getOutcoding() { return outcoding; }
-        inline T& getOutpad() const {return outpad;}
+        inline T& getOutpad() { return outpad; }
         virtual void process() noexcept = 0;
     protected:
         const ImageEncoding* incoding;

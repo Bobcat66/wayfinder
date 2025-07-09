@@ -62,26 +62,31 @@ namespace wf {
         inline const FrameFormat& getInputFormat() {return this->informat;}
 
         [[nodiscard]]
-        inline Frame processFrame(const Frame& in) noexcept {
-            Frame out(in.captimeMicros,this->outformat,{});
-            in.data.copyTo(inpad);
+        inline FrameMetadata processFrame(const cv::Mat& in, cv::Mat& out, FrameMetadata meta) noexcept {
+            FrameMetadata outmeta(meta.micros,this->outformat);
+            inpad = in;
             process();
-            outpad->copyTo(out.data);
-            return out;
+            out = *outpad;
+            return outmeta;
         }
+
+        const FrameFormat& getOutformat() { return outformat; }
 
     private:
         void linkNodes() {
             const T* pad = &inpad;
             const ImageEncoding* encoding = &(informat.encoding);
             for (auto& node : this->nodes) {
-                node->setIncoding(encoding);
-                node->setInpad(pad);
+                node->setInpad(pad,encoding);
                 encoding = &(node->getOutcoding());
                 pad = &(node->getOutpad());
             }
             this->outpad = pad;
-            this->outformat = {*encoding,this->outpad.rows,this->outpad.cols};
+            this->outformat = FrameFormat(
+                *encoding,
+                this->outpad->rows,
+                this->outpad->cols
+            );
         }
         void process() noexcept {
             for (auto& node : nodes) {

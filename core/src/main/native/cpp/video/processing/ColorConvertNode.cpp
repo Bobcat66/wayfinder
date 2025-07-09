@@ -28,14 +28,13 @@ namespace wf {
     template <CVImage T>
     ColorConvertNode<T>::ColorConvertNode(ImageEncoding outcoding_) {
         this->outcoding = outcoding_;
-        updateColorConverter();
     }
 
     template <CVImage T>
     void ColorConvertNode<T>::updateBuffers() {
         this->outpad = T{
-            this->inpad->format.rows,
-            this->inpad->format.cols,
+            this->inpad->rows,
+            this->inpad->cols,
             getCVTypeFromEncoding(this->outcoding)
         };
         updateColorConverter();
@@ -73,7 +72,7 @@ namespace wf {
                         break;
                     case Y16:
                         // Expensive, don't use in the hot path
-                        colorConverter = [](const T& in,T& out){
+                        colorConverter = [this](const T& in,T& out){
                             static T tmp{this->getInpad()->rows,this->getInpad()->cols,CV_8UC1};
                             cv::cvtColor(in,tmp,cv::COLOR_BGR2GRAY);
                             tmp.convertTo(out,CV_16UC1, 256.0);
@@ -87,7 +86,7 @@ namespace wf {
                         };
                         break;
                     case BGRA:
-                        colorConverter - [](const T& in, T& out){
+                        colorConverter = [](const T& in, T& out){
                             cv::cvtColor(in,out,cv::COLOR_BGR2BGRA);
                         };
                         break;
@@ -99,7 +98,7 @@ namespace wf {
                 switch (this->outcoding) {
                     case BGR24:
                         colorConverter = [](const T& in,T& out){
-                            cv::cvtColor(in,out,cv::COLOR_RGB2BGR)l
+                            cv::cvtColor(in,out,cv::COLOR_RGB2BGR);
                         };
                         break;
                     case RGB24:
@@ -133,7 +132,7 @@ namespace wf {
                         };
                         break;
                     case BGRA:
-                        colorConverter - [](const T& in, T& out){
+                        colorConverter = [](const T& in, T& out){
                             cv::cvtColor(in,out,cv::COLOR_RGB2BGRA);
                         };
                         break;
@@ -155,7 +154,7 @@ namespace wf {
                         break;
                     case RGB565:
                         colorConverter = [](const T& in,T& out){
-                            out = in
+                            out = in;
                         };
                         break;
                     case Y8:
@@ -178,7 +177,7 @@ namespace wf {
                         };
                         break;
                     case BGRA:
-                        colorConverter - [](const T& in, T& out){
+                        colorConverter = [](const T& in, T& out){
                             cv::cvtColor(in,out,cv::COLOR_BGR5652RGBA);
                         };
                         break;
@@ -205,7 +204,7 @@ namespace wf {
                         break;
                     case Y8:
                         colorConverter = [](const T& in,T& out){
-                            out = in
+                            out = in;
                         };
                         break;
                     case Y16:
@@ -221,7 +220,7 @@ namespace wf {
                         };
                         break;
                     case BGRA:
-                        colorConverter - [](const T& in, T& out){
+                        colorConverter = [](const T& in, T& out){
                             cv::cvtColor(in,out,cv::COLOR_GRAY2BGRA);
                         };
                         break;
@@ -259,7 +258,7 @@ namespace wf {
                         break;
                     case Y16:
                         colorConverter = [](const T& in,T& out){
-                            out = in
+                            out = in;
                         };
                         break;
                     case YUYV: throw std::runtime_error("Y16 to YUYV conversion is not supported at the moment.");
@@ -272,7 +271,7 @@ namespace wf {
                         };
                         break;
                     case BGRA:
-                        colorConverter - [this](const T& in, T& out){
+                        colorConverter = [this](const T& in, T& out){
                             static T tmp{this->getInpad()->rows,this->getInpad()->cols,CV_8UC1};
                             in.convertTo(tmp,CV_8UC1,1.0/256.0);
                             cv::cvtColor(tmp,out,cv::COLOR_GRAY2BGRA);
@@ -323,7 +322,7 @@ namespace wf {
                         };
                         break;
                     case BGRA:
-                        colorConverter - [](const T& in, T& out){
+                        colorConverter = [](const T& in, T& out){
                             cv::cvtColor(in,out,cv::COLOR_YUV2BGRA_YUYV);
                         };
                         break;
@@ -372,7 +371,7 @@ namespace wf {
                         };
                         break;
                     case BGRA:
-                        colorConverter - [](const T& in, T& out){
+                        colorConverter = [](const T& in, T& out){
                             cv::cvtColor(in,out,cv::COLOR_YUV2BGRA_UYVY);
                         };
                         break;
@@ -417,7 +416,7 @@ namespace wf {
                         };
                         break;
                     case BGRA:
-                        colorConverter - [](const T& in, T& out){
+                        colorConverter = [](const T& in, T& out){
                             cv::cvtColor(in,out,cv::COLOR_RGBA2BGRA);
                         };
                         break;
@@ -462,7 +461,7 @@ namespace wf {
                         };
                         break;
                     case BGRA:
-                        colorConverter - [](const T& in, T& out){
+                        colorConverter = [](const T& in, T& out){
                             out = in;
                         };
                         break;

@@ -58,7 +58,7 @@ namespace wf {
         virtual bool setCameraIntrinsics(const CameraIntrinsics& intrinsics) = 0;
         virtual bool loadModel(const std::string& modelPath) = 0;
         [[nodiscard]] 
-        virtual std::vector<ObjectDetection> infer(const Frame& input) noexcept = 0;
+        virtual std::vector<ObjectDetection> infer(const cv::Mat& data, const FrameMetadata& meta) noexcept = 0;
         virtual std::string modelFormat() const = 0; // the model file extension expected by this inference engine
     protected:
         Tensorizer tensorizer;

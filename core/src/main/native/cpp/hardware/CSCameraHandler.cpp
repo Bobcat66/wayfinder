@@ -27,35 +27,82 @@ namespace wf {
     CSCameraHandler::CSCameraHandler(const CameraConfiguration& config) 
     : devpath(config.devpath)
     , format(config.format)
-    , intrinsics(config.intrinsics) 
-    , supportedControls(config.supportedControls) {
-        camera(std::format("{}_source",devpath),devpath);
+    , calibratedResolutions(config.calibratedResolutions)
+    , calibrations(config.calibrations)
+    , controlAliases(config.controlAliases)
+    , camera(std::format("{}_source",devpath),devpath) {
         auto videomodes = camera.EnumerateVideoModes();
         for (const auto& videomode : videomodes) {
-            supportedFormats.push_back(
-                getStreamFormatFromVideoMode()
-            )
+            supportedFormats.push_back(getStreamFormatFromVideoMode(videomode));
         }
-        if (!camera.SetVideoMode(getVideoModeFromSformat(format))) {
-            throw std::runtime_error("Camera configuration specifies an invalid stream format!");
+        for (const auto& entry : config.controlAliases) {
+            supportedControls.insert(entry.first);
+        }
+        if (!camera.SetVideoMode(getVideoModeFromStreamFormat(format))) {
+            this->error = 3; // 3 denotes invalid format
         }
     }
-    FrameProvider& getFrameProvider(const std::string& name){
+
+    FrameProvider& CSCameraHandler::getFrameProvider(const std::string& name){
 
     }
-    int setStreamFormat(const StreamFormat& format) {
 
+    int CSCameraHandler::setStreamFormat(const StreamFormat& format) {
+        this->format = format;
+        for (auto& sink : this->sinks) {
+            sink.setStreamFormat(this->format);
+        }
     }
-    StreamFormat getStreamFormat() {
 
+    const StreamFormat& CSCameraHandler::getStreamFormat() {
+        return this->format;
     }
-    std::optional<CameraIntrinsics> getIntrinsics() {
 
+    std::optional<CameraIntrinsics> CSCameraHandler::getIntrinsics() {
+        cv::Size res(
+            this->format.frameFormat.cols,
+            this->format.frameFormat.rows
+        );
+        for (int i = 0 ; i < calibratedResolutions.size() ; ++i) {
+            if (calibratedResolutions[i] == res) {
+                return std::make_optional(calibrations[i]);
+            }
+        }
+        return std::nullopt;
     }
-    int setControl(CamControl control, double value) {
-
+    
+    void CSCameraHandler::setControl(CamControl control, int value) {
+        auto it = controlAliases.find(control);
+        if (it == controlAliases.end()) {
+            // Control has no alias, give up
+            this->error = 1;
+            return; // Invalid control
+        }
+        auto property = camera.GetProperty(it->second);
+        if (property.GetKind() == cs::VideoProperty::Kind::kNone) {
+            // No property with the aliased name exists, give up
+            this->error = 1;
+            return;
+        }
+        property.Set(value);
+        // Check that the operation was successful
+        if (property.Get() != value) this->error = 2; // 2 denotes unknown error
+        return;
     }
-    double getControl(CamControl control, double value) {
 
+    int CSCameraHandler::getControl(CamControl control) {
+        auto it = controlAliases.find(control);
+        if (it == controlAliases.end()) {
+            // Control has no alias, give up
+            this->error = 1;
+            return 0; // Invalid control
+        }
+        auto property = camera.GetProperty(it->second);
+        if (property.GetKind() == cs::VideoProperty::Kind::kNone) {
+            // No property with the aliased name exists, give up
+            this->error = 1;
+            return 0;
+        }
+        return property.Get();
     }
 }
