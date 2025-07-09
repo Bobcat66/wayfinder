@@ -50,7 +50,7 @@ namespace wf {
 
         int getError() override { return error; }
     private:
-        std::vector<CSCameraSink> sinks;
+        std::unordered_map<std::string,CSCameraSink> sinks;
         cs::UsbCamera camera;
         std::string devpath;
         StreamFormat format;

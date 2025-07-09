@@ -17,8 +17,16 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+
+#pragma once
+
+#include "wfcore/processes/VisionWorkerManager.h"
 #include "wfcore/hardware/HardwareManager.h"
+#include "wfcore/network/NetworkTablesManager.h"
 
 namespace wf {
-    HardwareManager::registerCamera(const camer)
+    class Application {
+    public:
+    private:
+    }
 }

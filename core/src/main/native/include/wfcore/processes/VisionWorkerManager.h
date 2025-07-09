@@ -27,12 +27,7 @@
 namespace wf {
     class VisionWorkerManager {
     public:
-        VisionWorkerManager(const VisionWorkerManager&) = delete;
-        VisionWorkerManager& operator=(const VisionWorkerManager&) = delete;
-        static VisionWorkerManager& getInstance() {
-            static VisionWorkerManager instance;
-            return instance;
-        }
+        VisionWorkerManager(NetworkTablesManager& ntManager_, HardwareManager& hardwareManager_);
         VisionWorker& buildVisionWorker(const VisionWorkerConfig& config);
         VisionWorker& getVisionWorker(const std::string& name);
         int startVisionWorker(const std::string& name);
@@ -43,6 +38,7 @@ namespace wf {
         int destroyAllWorkers();
     private:
         std::vector<VisionWorker> workers;
-        VisionWorkerManager();
+        NetworkTablesManager& ntManager;
+        HardwareManager& hardwareManager;
     };
 }

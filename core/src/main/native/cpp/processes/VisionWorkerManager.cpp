@@ -21,10 +21,16 @@
 
 #include "wfcore/processes/VisionWorkerManager.h"
 #include "wfcore/video/processing.h"
+#include "wfcore/hardware/HardwareManager.h"
+#include "wfcore/network/NetworkTablesManager.h"
 #include <format>
 
 namespace wf {
-    VisionWorker& buildVisionWorker(const VisionWorkerConfig& config) {}
+    VisionWorkerManager::VisionWorkerManager(NetworkTablesManager& ntManager_, HardwareManager& hardwareManager_)
+    : ntManager(ntManager_), hardwareManager(hardwareManager_) {}
+    VisionWorker& buildVisionWorker(const VisionWorkerConfig& config,NetworkTablesManager& ntManager, HardwareManager& hardwareManager) {
+        
+    }
     VisionWorker& getVisionWorker(const std::string& name);
     int startVisionWorker(const std::string& name);
     int stopVisionWorker(const std::string& name);

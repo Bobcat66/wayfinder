@@ -23,7 +23,7 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-build-
           
-    - name: Download OpenCV
+    - name: Install OpenCV
       run: sudo apt install -y libopencv-dev
           
     - name: Configure & Build wayfinder
@@ -60,7 +60,7 @@ jobs:
       run: find build -name '*_tests' -exec chmod +x {} +
 
     - name: Test
-      run: ctest --test-dir build/custom --verbose
+      run: ctest --test-dir build/release --verbose
 
 
 

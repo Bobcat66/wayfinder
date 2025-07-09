@@ -44,14 +44,23 @@ namespace wf {
     }
 
     FrameProvider& CSCameraHandler::getFrameProvider(const std::string& name){
-
+        auto it = sinks.find(name);
+        if (it != sinks.end()) {
+            return it->second;
+        }
+        cs::CvSink appsink;
+        appsink.SetSource(camera);
+        auto emplaced = sinks.emplace(name,CSCameraSink{name,devpath,std::move(appsink),format});
+        // TODO: Check if operation was successful
+        return emplaced.first->second;
     }
 
     int CSCameraHandler::setStreamFormat(const StreamFormat& format) {
         this->format = format;
-        for (auto& sink : this->sinks) {
-            sink.setStreamFormat(this->format);
+        for (auto& pair : this->sinks) {
+            pair.second.setStreamFormat(this->format);
         }
+        return 0;
     }
 
     const StreamFormat& CSCameraHandler::getStreamFormat() {

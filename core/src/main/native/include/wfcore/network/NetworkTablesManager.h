@@ -35,19 +35,11 @@ namespace wf {
 
     class NetworkTablesManager {
     public:
-        static NetworkTablesManager& getInstance() {
-            static NetworkTablesManager instance;
-            return instance;
-        }
+        NetworkTablesManager(const std::string device_name,int team,bool server);
         const std::shared_ptr<nt::NetworkTable> getRootTable() const {return devRootTable;} 
         std::weak_ptr<NTDataPublisher> getDataPublisher(const std::string& name);
     private:
-        NetworkTablesManager(); 
-        ~NetworkTablesManager() = default;
-        NetworkTablesManager(const NetworkTablesManager&) = delete;
-        NetworkTablesManager& operator=(const NetworkTablesManager&) = delete;
         std::shared_ptr<nt::NetworkTable> devRootTable;
-
         std::unordered_map<std::string, std::shared_ptr<NTDataPublisher>> dataPublishers;
     };
 }

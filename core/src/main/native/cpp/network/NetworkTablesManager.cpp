@@ -39,28 +39,14 @@ namespace wf {
         return ptr;
     }
 
-    NetworkTablesManager::NetworkTablesManager() {
-        const char* devname = std::getenv("DEVICE_NAME");
-        const char* team = std::getenv("TEAM");
-        int teamnum;
-        if (team) {
-            teamnum = std::atoi(team);
-        } else {
-            logger->warn("Team number is not set!");
-            teamnum = 1234;
-        }
-        if (devname) {
-            std::string devname_str(devname);
+    NetworkTablesManager::NetworkTablesManager(const std::string& device_name,int team,bool server) {
+        if (!server) {
             auto inst = nt::NetworkTableInstance::GetDefault();
-            inst.StartClient4(devname_str);
-            inst.SetServerTeam(teamnum);
-            this->devRootTable = inst.GetTable(std::format("wayfinder/{}",devname_str));
+            inst.StartClient4(device_name);
+            inst.SetServerTeam(team);
+            this->devRootTable = inst.GetTable(std::format("wayfinder/{}",device_name));
         } else {
-            logger->info("Device name not set. Defaulting to 'wayfinder'");
-            auto inst = nt::NetworkTableInstance::GetDefault();
-            inst.StartClient4("wayfinder");
-            inst.SetServerTeam(teamnum);
-            this->devRootTable = inst.GetTable("wayfinder/wayfinder");
+            //Not implemented
         }
     }
 }

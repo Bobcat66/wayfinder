@@ -29,7 +29,7 @@ namespace wf {
     [[deprecated]]
     cv::Mat generateEmptyFrameBuf(FrameFormat format);
 
-    int getCVTypeFromEncoding(ImageEncoding encoding) {
+    inline int getCVTypeFromEncoding(ImageEncoding encoding) {
         switch (encoding) {
             case ImageEncoding::BGR24: return CV_8UC3;
             case ImageEncoding::RGB24: return CV_8UC3;
@@ -44,7 +44,7 @@ namespace wf {
         }
     }
 
-    cs::VideoMode::PixelFormat getPixelFormatFromEncoding(ImageEncoding encoding) {
+    inline cs::VideoMode::PixelFormat getPixelFormatFromEncoding(ImageEncoding encoding) {
         switch (encoding) {
             case ImageEncoding::BGR24: return cs::VideoMode::PixelFormat::kBGR;
             case ImageEncoding::BGRA: return cs::VideoMode::PixelFormat::kBGRA;
@@ -57,7 +57,7 @@ namespace wf {
         };
     }
 
-    ImageEncoding getEncodingFromPixelFormat(cs::VideoMode::PixelFormat pixelFormat) {
+    inline ImageEncoding getEncodingFromPixelFormat(cs::VideoMode::PixelFormat pixelFormat) {
         switch (pixelFormat) {
             case cs::VideoMode::PixelFormat::kBGR: return ImageEncoding::BGR24;
             case cs::VideoMode::PixelFormat::kBGRA: return ImageEncoding::BGRA;

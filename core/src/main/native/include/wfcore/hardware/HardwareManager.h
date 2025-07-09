@@ -30,6 +30,9 @@
 namespace wf {
     class HardwareManager {
     public:
+        // TODO: Refactor instantiation exception handling
+        int registerCamera(const CameraConfiguration& config);
+
         CameraBackend getBackend(const std::string& devpath) const noexcept;
 
         FrameProvider& getFrameProvider(const std::string& devpath, const std::string& name);
@@ -47,6 +50,6 @@ namespace wf {
         const std::unordered_set<CamControl>& getControls(const std::string& devpath);
     private:
         std::unordered_map<std::string,std::unique_ptr<CameraHandler>> cameras;
-        std::unordered_map<std::string,std::filesystem::path> cameraConfigPaths; // Path to camera configuration files
+        std::unordered_map<std::string,std::filesystem::path> cameraConfigs; // Path to camera configurations. These can be written
     };
 }

@@ -1,0 +1,10 @@
+{
+    "path" : "/dev/video0",
+    "backend" : "CSCORE",
+    "format" : {
+        "encoding" : "YUYV",
+        "height" : 720,
+        "width" : 1280,
+        "fps" : 30
+    }
+}
