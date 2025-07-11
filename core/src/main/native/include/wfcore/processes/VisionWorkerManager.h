@@ -23,6 +23,8 @@
 
 #include "wfcore/processes/VisionWorkerConfig.h"
 #include "wfcore/processes/VisionWorker.h"
+#include "wfcore/hardware/HardwareManager.h"
+#include "wfcore/network/NetworkTablesManager.h"
 
 namespace wf {
     class VisionWorkerManager {

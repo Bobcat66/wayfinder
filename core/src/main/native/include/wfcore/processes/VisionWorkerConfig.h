@@ -1,7 +1,7 @@
 #pragma once
 
 #include <string>
-#include <optional>
+#include <variant>
 #include "wfcore/pipeline/Pipeline.h"
 #include "wfcore/pipeline/ApriltagPipeline.h"
 #include "wfcore/pipeline/ObjectDetectionPipeline.h"
@@ -16,8 +16,11 @@ namespace wf {
         bool stream;
         int raw_port;
         int processed_port;
-        std::optional<ApriltagPipelineConfiguration> apriltagPipelineConfig;
-        std::optional<ObjectDetectionPipelineConfiguration> objectDetectionPipelineConfig;
-        std::optional<ApriltagDetectPipelineConfiguration> apriltagDetectPipelineConfig;
+        PipelineType pipelineType;
+        std::variant<
+            ApriltagPipelineConfiguration,
+            ObjectDetectionPipelineConfiguration,
+            ApriltagDetectPipelineConfiguration
+        > pipelineConfig;
     };
 }

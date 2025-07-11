@@ -38,7 +38,7 @@ namespace wf {
             CameraIntrinsics intrinsics_, FrameFormat inputFormat_,
             int rawPort, int processedPort, 
             StreamFormat streamFormat,
-            double tagSize_
+            double tagSize_, std::weak_ptr<NTDataPublisher> ntpub_
         );
         int accept(cv::Mat& data, FrameMetadata meta, PipelineResult& result) noexcept override;
         PipelineType getPipelineType() override { return PipelineType::Apriltag; }

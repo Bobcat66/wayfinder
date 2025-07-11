@@ -35,7 +35,7 @@ namespace wf {
 
     class NetworkTablesManager {
     public:
-        NetworkTablesManager(const std::string device_name,int team,bool server);
+        NetworkTablesManager(const std::string& device_name,int team,bool server);
         const std::shared_ptr<nt::NetworkTable> getRootTable() const {return devRootTable;} 
         std::weak_ptr<NTDataPublisher> getDataPublisher(const std::string& name);
     private:

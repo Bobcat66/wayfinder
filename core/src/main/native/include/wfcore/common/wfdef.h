@@ -24,12 +24,14 @@
 #ifdef __GNUC__
 #define WF_FORCEINLINE __attribute__((always_inline))
 #define WF_NOINLINE __attribute__((noinline))
+#define WF_UNREACHABLE __builtin_unreachable()
 #endif // __GNUC__
 
 // Cross-platform MSVC macros (TODO: REMOVE)
 #ifdef _MSC_VER
 #define WF_FORCEINLINE __forceinline
 #define WF_NOINLINE __declspec(noinline)
+#define WF_UNREACHABLE __assume(false)
 #endif // _MSC_VER
 
 // Windows specific macros (TODO: REMOVE)

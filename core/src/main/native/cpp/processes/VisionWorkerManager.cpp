@@ -23,13 +23,28 @@
 #include "wfcore/video/processing.h"
 #include "wfcore/hardware/HardwareManager.h"
 #include "wfcore/network/NetworkTablesManager.h"
+#include "wfcore/common/logging/LoggerManager.h"
 #include <format>
+#include <stdexcept>
 
 namespace wf {
+    static auto logger = LoggerManager::getInstance().getLogger("VisionWorkerManager",LogGroup::General);
     VisionWorkerManager::VisionWorkerManager(NetworkTablesManager& ntManager_, HardwareManager& hardwareManager_)
     : ntManager(ntManager_), hardwareManager(hardwareManager_) {}
-    VisionWorker& buildVisionWorker(const VisionWorkerConfig& config,NetworkTablesManager& ntManager, HardwareManager& hardwareManager) {
-        
+    VisionWorker& VisionWorkerManager::buildVisionWorker(const VisionWorkerConfig& config) {
+        switch (config.pipelineType) {
+            case PipelineType::Apriltag:
+                if (!hardwareManager.cameraRegistered(config.devpath)) {
+                    logger->warn("Camera {} not found",config.devpath);
+                }
+                if (!config.pipeline)
+            case PipelineType::ObjDetect:
+                throw std::runtime_error("Object Detection not implemented"); // TODO: remove this once implemented
+            case PipelineType::ApriltagDetect:
+                throw std::runtime_error("Apriltag Detection not implemented");
+            default:
+                throw std::runtime_error("How did you do this like actually. It should literally be impossible to get this error");
+        }
     }
     VisionWorker& getVisionWorker(const std::string& name);
     int startVisionWorker(const std::string& name);

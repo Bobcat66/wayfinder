@@ -56,11 +56,14 @@ namespace wf {
     }
 
     int CSCameraHandler::setStreamFormat(const StreamFormat& format) {
-        this->format = format;
-        for (auto& pair : this->sinks) {
-            pair.second.setStreamFormat(this->format);
+        if (camera.SetVideoMode(getVideoModeFromStreamFormat(format))) {
+            this->format = format;
+            for (auto& pair : this->sinks) {
+                pair.second.setStreamFormat(this->format);
+            }
+            return 0;
         }
-        return 0;
+        return 1;
     }
 
     const StreamFormat& CSCameraHandler::getStreamFormat() {

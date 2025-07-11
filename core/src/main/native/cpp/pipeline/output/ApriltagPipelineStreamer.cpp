@@ -29,13 +29,15 @@ namespace wf {
         std::string pipelineName_, std::string camLabel_, 
         CameraIntrinsics intrinsics_, FrameFormat inputFormat_,
         int rawPort, int processedPort, 
-        StreamFormat streamFormat, double tagSize_
+        StreamFormat streamFormat, double tagSize_,
+        std::weak_ptr<NTDataPublisher> ntpub_
     )
     : pipelineName(std::move(pipelineName_)), camLabel(std::move(camLabel_))
     , intrinsics(std::move(intrinsics_)), inputFormat(inputFormat_)
     , rawServer(streamFormat,std::format("{}_raw",pipelineName),rawPort)
     , processedServer(streamFormat,std::format("{}_processed",pipelineName),processedPort)
-    , tagSize(tagSize_) {
+    , tagSize(tagSize_)
+    , ntpub(std::move(ntpub_)) {
         std::vector<std::unique_ptr<CVProcessNode<cv::Mat>>> nodes;
         if (streamFormat.frameFormat.cols != inputFormat.cols || streamFormat.frameFormat.rows != inputFormat.rows) {
             nodes.emplace_back(
@@ -52,7 +54,6 @@ namespace wf {
             )
         );
         prePostprocessor = std::make_unique<CVProcessPipe<cv::Mat>>(inputFormat,std::move(nodes));
-        ntpub = NetworkTablesManager::getInstance().getDataPublisher(pipelineName);
     }
 
     // TODO: Add error codes & error handling

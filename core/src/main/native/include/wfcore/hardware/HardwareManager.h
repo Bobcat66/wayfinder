@@ -26,30 +26,37 @@
 #include "wfcore/video/FrameProvider.h"
 #include "wfcore/hardware/CameraHandler.h"
 #include <memory>
+#include <optional>
 
 namespace wf {
     class HardwareManager {
     public:
-        // TODO: Refactor instantiation exception handling
+        // TODO: Refactor exception handling
         int registerCamera(const CameraConfiguration& config);
 
-        CameraBackend getBackend(const std::string& devpath) const noexcept;
+        bool cameraRegistered(const std::string& devpath) const noexcept;
+
+        CameraBackend getBackend(const std::string& devpath) const;
 
         FrameProvider& getFrameProvider(const std::string& devpath, const std::string& name);
 
-        int setStreamFormat(const std::string& devpath, const StreamFormat& format);
+        void setStreamFormat(const std::string& devpath, const StreamFormat& format);
 
         StreamFormat getStreamFormat(const std::string& devpath);
 
         std::optional<CameraIntrinsics> getIntrinsics(const std::string& devpath);
 
-        int setControl(const std::string& devpath, CamControl control, int value, bool persist);
+        void setControl(const std::string& devpath, CamControl control, int value);
 
-        double getControl(const std::string& devpath, CamControl control);
+        int getControl(const std::string& devpath, CamControl control);
 
-        const std::unordered_set<CamControl>& getControls(const std::string& devpath);
+        const std::unordered_set<CamControl>& getSupportedControls(const std::string& devpath);
+
+        // TODO: Add method to query supported stream formats
+
     private:
+        const std::unique_ptr<CameraHandler>& getCCamera(const std::string& devpath) const;
+        std::unique_ptr<CameraHandler>& getCamera(const std::string& devpath);
         std::unordered_map<std::string,std::unique_ptr<CameraHandler>> cameras;
-        std::unordered_map<std::string,std::filesystem::path> cameraConfigs; // Path to camera configurations. These can be written
     };
 }
