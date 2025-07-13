@@ -23,27 +23,40 @@
 #include "wfcore/video/processing.h"
 #include "wfcore/hardware/HardwareManager.h"
 #include "wfcore/network/NetworkTablesManager.h"
-#include "wfcore/common/logging/LoggerManager.h"
+#include "wfcore/common/logging.h"
+#include "wfcore/pipeline/output/ApriltagPipelineConsumer.h"
+#include "wfcore/common/wfexcept.h"
 #include <format>
 #include <stdexcept>
 
 namespace wf {
     static auto logger = LoggerManager::getInstance().getLogger("VisionWorkerManager",LogGroup::General);
+
     VisionWorkerManager::VisionWorkerManager(NetworkTablesManager& ntManager_, HardwareManager& hardwareManager_,ApriltagConfiguration& atagConfig_)
     : ntManager(ntManager_), hardwareManager(hardwareManager_), atagConfig(atagConfig_) {}
+
     VisionWorker& VisionWorkerManager::buildVisionWorker(const VisionWorkerConfig& config) {
+        logger->info("Building worker {}",config.name);
         switch (config.pipelineType) {
             case PipelineType::Apriltag:
                 {
+                    // Check to make sure the configuration passed is valid
                     if (!hardwareManager.cameraRegistered(config.devpath)) {
-                        throw std::runtime_error(std::format("Camera {} not found",config.devpath));
+                        throw camera_not_found(std::format("Camera {} not found",config.devpath));
                     }
                     if (!std::holds_alternative<ApriltagPipelineConfiguration>(config.pipelineConfig)) {
-                        throw std::runtime_error(std::format("Pipeline {} is declared as Apriltag Pipeline yet specifies an incompatible configuration!",config.name));
+                        throw invalid_pipeline_configuration(std::format("Pipeline {} is declared as Apriltag Pipeline yet specifies an incompatible configuration!",config.name));
                     }
-                    std::vector<std::unique_ptr<CVProcessNode<cv::Mat>>> nodes;
+                    if (!hardwareManager.getIntrinsics(config.devpath).has_value()) {
+                        throw intrinsics_not_found(std::format("Attempted to create apriltag PnP pipeline, but no camera intrinsics were specified for camera {} at the given resolution!",config.devpath));
+                    }
+
+                    // Fetch frame provider from the hardware manager
                     FrameProvider& frameProvider = hardwareManager.getFrameProvider(config.devpath,std::format("{}_frameprovider",config.name));
                     StreamFormat hardwareFormat = hardwareManager.getStreamFormat(config.devpath);
+
+                    // Build preprocesser
+                    std::vector<std::unique_ptr<CVProcessNode<cv::Mat>>> nodes;
                     if (config.inputFormat.frameFormat == hardwareFormat.frameFormat) {
                         nodes.emplace_back(std::move(std::make_unique<IdentityNode<cv::Mat>>()));
                     } else {
@@ -64,9 +77,36 @@ namespace wf {
                         }
                     }
                     CVProcessPipe preprocesser(hardwareFormat.frameFormat,std::move(nodes));
-                    ApriltagPipeline pipeline(
+                    auto pipeline = std::make_unique<ApriltagPipeline>(
                         std::get<ApriltagPipelineConfiguration>(config.pipelineConfig),
-                        hardwareManager.get);
+                        hardwareManager.getIntrinsics(config.devpath).value(),
+                        atagConfig
+                    );
+
+                    // Build output consumer
+                    auto outputConsumer = std::make_unique<ApriltagPipelineConsumer>(
+                        config.name, config.devpath,
+                        hardwareManager.getIntrinsics(config.devpath).value(), 
+                        config.inputFormat.frameFormat, 
+                        config.raw_port, config.processed_port,
+                        config.outputFormat,
+                        atagConfig.tagSize,
+                        ntManager.getDataPublisher(config.name)
+                    );
+                    outputConsumer->enableStream(config.stream);
+
+                    // Build worker
+                    workers.emplace(
+                        std::piecewise_construct,
+                        std::forward_as_tuple(config.name),
+                        std::forward_as_tuple(
+                            config.name,
+                            frameProvider,
+                            std::move(preprocesser),
+                            std::move(pipeline),
+                            std::move(outputConsumer)
+                        )
+                    );
                 }
             case PipelineType::ObjDetect:
                 throw std::runtime_error("Object Detection not implemented"); // TODO: remove this once implemented
@@ -76,11 +116,89 @@ namespace wf {
                 throw std::runtime_error("How did you do this like actually. It should literally be impossible to get this error");
         }
     }
-    VisionWorker& getVisionWorker(const std::string& name);
-    int startVisionWorker(const std::string& name);
-    int stopVisionWorker(const std::string& name);
-    int destroyVisionWorker(const std::string& name);
-    int startAllWorkers();
-    int stopAllWorkers();
-    int destroyAllWorkers();
+
+    bool VisionWorkerManager::workerExists(const std::string& name) const {
+        WF_DEBUGLOG(logger,"Checking if worker {} exists",name);
+        auto it = workers.find(name);
+        return (it != workers.end());
+    }
+
+    VisionWorker& VisionWorkerManager::getWorker(const std::string& name) {
+        WF_DEBUGLOG(logger,"Getting worker {}",name);
+        auto it = workers.find(name);
+        if (it == workers.end()) {
+            throw vision_worker_not_found(std::format("Vision worker {} not found",name));
+        }
+        return it->second;
+    }
+
+    void VisionWorkerManager::startWorker(const std::string& name) {
+        logger->info("Starting worker {}",name);
+        auto it = workers.find(name);
+        if (it == workers.end()) {
+            logger->warn("Vision worker {} not found",name);
+            return;
+        }
+        it->second.start();
+    }
+
+    void VisionWorkerManager::stopWorker(const std::string& name) {
+        logger->info("Stopping worker {}",name);
+        auto it = workers.find(name);
+        if (it == workers.end()) {
+            logger->warn("Worker {} not found",name);
+            return;
+        }
+        if (!(it->second.isRunning())) {
+            WF_DEBUGLOG(logger,"Worker {} already stopped",name);
+            return;
+        }
+        it->second.stop();
+    }
+
+    void VisionWorkerManager::destroyWorker(const std::string& name) {
+        logger->info("Destroying worker {}",name);
+        auto it = workers.find(name);
+        if (it == workers.end()) {
+            logger->warn("Worker {} not found",name);
+            return;
+        }
+        WF_DEBUGLOG(logger,"Stopping worker {}",it->first);
+        it->second.stop();
+        workers.erase(it);
+    }
+
+    void VisionWorkerManager::startAllWorkers() {
+        logger->info("Starting all workers");
+        for (auto& [name,worker] : workers) {
+            logger->info("Starting worker {}",name);
+            if (worker.isRunning()) { 
+                WF_DEBUGLOG(logger,"Worker {} already started",name);
+                continue;
+            }
+            worker.start();
+        }
+    }
+
+    void VisionWorkerManager::stopAllWorkers() {
+        logger->info("Stopping all workers");
+        for (auto& [name,worker] : workers) {
+            logger->info("Stopping worker {}",name);
+            if (!worker.isRunning()) {
+                WF_DEBUGLOG(logger,"Worker {} already stopped",name);
+                continue;
+            }
+            worker.stop();
+        }
+    }
+
+    void VisionWorkerManager::destroyAllWorkers() {
+        logger->info("Destroying all workers");
+        for (auto it = workers.begin(); it != workers.end(); ) {
+            logger->info("Destroying worker {}",it->first);
+            WF_DEBUGLOG(logger,"Stopping worker {}",it->first);
+            it->second.stop();
+            it = workers.erase(it);
+        }
+    }
 }

@@ -24,13 +24,15 @@ namespace wf {
     VisionWorker::VisionWorker(
         std::string name_,
         FrameProvider& frameProvider_,
-        CVProcessPipe<cv::Mat>& preprocesser_, 
-        Pipeline& pipeline_
+        CVProcessPipe<cv::Mat> preprocesser_, 
+        std::unique_ptr<Pipeline> pipeline_,
+        std::unique_ptr<PipelineOutputConsumer> outputConsumer_
     )
     : name(std::move(name_))
-    , preprocesser(preprocesser_)
+    , preprocesser(std::move(preprocesser_))
     , frameProvider(frameProvider_)
-    , pipeline(pipeline_) {
+    , pipeline(std::move(pipeline_))
+    , outputConsumer(std::move(outputConsumer_)) {
         auto& rawformat = frameProvider.getStreamFormat().frameFormat;
         rawFrameBuffer.create(
             rawformat.cols,
@@ -59,8 +61,8 @@ namespace wf {
             std::lock_guard<std::mutex> lock(pipeGuard);
             auto rawmeta = frameProvider.getFrame(rawFrameBuffer);
             auto ppmeta = preprocesser.processFrame(rawFrameBuffer,ppFrameBuffer,rawmeta);
-            auto res = pipeline.process(ppFrameBuffer,ppmeta);
-            // TODO: Add Pipeline output consumer
+            auto res = pipeline->process(ppFrameBuffer,ppmeta);
+            outputConsumer->accept(ppFrameBuffer,ppmeta,res);
         }
     }
 }

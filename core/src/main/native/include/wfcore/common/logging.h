@@ -17,20 +17,12 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "wfcore/video/processing/IdentityNode.h"
+#pragma once
 
-namespace wf {
-    template <CVImage T>
-    void IdentityNode<T>::updateBuffers() {
-        this->outpad = *(this->inpad);
-        this->outcoding = *(this->incoding);
-    }
+#include "wfcore/common/logging/LoggerManager.h"
 
-    template <CVImage T>
-    void IdentityNode<T>::process() noexcept {
-        this->outpad = *(this->inpad);
-    }
-
-    template class IdentityNode<cv::Mat>;
-    template class IdentityNode<cv::UMat>;
-}
+#ifndef NDEBUG
+    #define WF_DEBUGLOG(logger, fmt, ...) logger->debug(fmt __VA_OPT__(,) __VA_ARGS__)
+#else
+    #define WF_DEBUGLOG(logger, fmt, ...) 
+#endif

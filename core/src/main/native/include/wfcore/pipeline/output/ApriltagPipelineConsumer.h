@@ -31,9 +31,9 @@
 namespace wf {
 
     // An apriltag pipeline output consumer that posts to networktables and streams video to HTTP
-    class ApriltagPipelineStreamer : public PipelineOutputConsumer {
+    class ApriltagPipelineConsumer : public PipelineOutputConsumer {
     public:
-        ApriltagPipelineStreamer(
+        ApriltagPipelineConsumer(
             std::string pipelineName_, std::string camLabel_, 
             CameraIntrinsics intrinsics_, FrameFormat inputFormat_,
             int rawPort, int processedPort, 

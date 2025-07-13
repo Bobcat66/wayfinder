@@ -17,7 +17,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "wfcore/pipeline/output/ApriltagPipelineStreamer.h"
+#include "wfcore/pipeline/output/ApriltagPipelineConsumer.h"
 #include <format>
 #include <opencv2/imgproc.hpp>
 #include "wfcore/network/NetworkTablesManager.h"
@@ -25,7 +25,7 @@
 #include "wfcore/video/video_utils.h"
 
 namespace wf {
-    ApriltagPipelineStreamer::ApriltagPipelineStreamer(
+    ApriltagPipelineConsumer::ApriltagPipelineConsumer(
         std::string pipelineName_, std::string camLabel_, 
         CameraIntrinsics intrinsics_, FrameFormat inputFormat_,
         int rawPort, int processedPort, 
@@ -57,7 +57,7 @@ namespace wf {
     }
 
     // TODO: Add error codes & error handling
-    int ApriltagPipelineStreamer::accept(cv::Mat& data, FrameMetadata meta, PipelineResult& result) noexcept {
+    int ApriltagPipelineConsumer::accept(cv::Mat& data, FrameMetadata meta, PipelineResult& result) noexcept {
         if (auto shared = ntpub.lock()) {
             shared->publishPipelineResult(result);
         }

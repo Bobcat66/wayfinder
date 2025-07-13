@@ -32,15 +32,16 @@ namespace wf {
     public:
         VisionWorkerManager(NetworkTablesManager& ntManager_, HardwareManager& hardwareManager_, ApriltagConfiguration& atagConfig_);
         VisionWorker& buildVisionWorker(const VisionWorkerConfig& config);
-        VisionWorker& getVisionWorker(const std::string& name);
-        int startVisionWorker(const std::string& name);
-        int stopVisionWorker(const std::string& name);
-        int destroyVisionWorker(const std::string& name);
-        int startAllWorkers();
-        int stopAllWorkers();
-        int destroyAllWorkers();
+        bool workerExists(const std::string& name) const;
+        VisionWorker& getWorker(const std::string& name);
+        void startWorker(const std::string& name);
+        void stopWorker(const std::string& name);
+        void destroyWorker(const std::string& name);
+        void startAllWorkers();
+        void stopAllWorkers();
+        void destroyAllWorkers();
     private:
-        std::vector<VisionWorker> workers;
+        std::unordered_map<std::string,VisionWorker> workers;
         ApriltagConfiguration& atagConfig;
         NetworkTablesManager& ntManager;
         HardwareManager& hardwareManager;

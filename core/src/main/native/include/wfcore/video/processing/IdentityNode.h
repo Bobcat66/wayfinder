@@ -25,10 +25,10 @@
 
 namespace wf {
     template <CVImage T>
-    class IdentityNode : public CVProcessNode {
+    class IdentityNode : public CVProcessNode<T> {
     public:
         IdentityNode() = default;
         void updateBuffers();
         void process() noexcept override;
-    }
+    };
 }

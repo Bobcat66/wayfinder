@@ -28,6 +28,7 @@
 #include <string>
 
 #include "wfcore/pipeline/Pipeline.h"
+#include "wfcore/pipeline/output/PipelineOutputConsumer.h"
 #include "wfcore/video/FrameProvider.h"
 #include "wfcore/video/processing/CVProcessPipe.h"
 
@@ -40,8 +41,9 @@ namespace wf {
         VisionWorker(
             std::string name_,
             FrameProvider& frameProvider_, 
-            CVProcessPipe<cv::Mat>& preprocessor_,
-            Pipeline& pipeline_
+            CVProcessPipe<cv::Mat> preprocessor_,
+            std::unique_ptr<Pipeline> pipeline_,
+            std::unique_ptr<PipelineOutputConsumer> outputConsumer_
         );
         void start();
         void stop();
@@ -53,8 +55,9 @@ namespace wf {
         std::thread thread;
         std::atomic_bool running;
         std::mutex pipeGuard;
-        CVProcessPipe<cv::Mat>& preprocesser;
-        Pipeline& pipeline;
+        CVProcessPipe<cv::Mat> preprocesser;
+        std::unique_ptr<Pipeline> pipeline;
+        std::unique_ptr<PipelineOutputConsumer> outputConsumer;
         FrameProvider& frameProvider;
         cv::Mat rawFrameBuffer;
         cv::Mat ppFrameBuffer;

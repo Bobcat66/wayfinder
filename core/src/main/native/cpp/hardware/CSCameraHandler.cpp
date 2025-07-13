@@ -50,7 +50,7 @@ namespace wf {
         }
         cs::CvSink appsink;
         appsink.SetSource(camera);
-        auto emplaced = sinks.emplace(name,CSCameraSink{name,devpath,std::move(appsink),format});
+        auto emplaced = sinks.try_emplace(name, name, devpath, std::move(appsink), format);
         // TODO: Check if operation was successful
         return emplaced.first->second;
     }
