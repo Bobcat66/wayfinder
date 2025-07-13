@@ -22,9 +22,14 @@
 namespace wf {
 
     template <CVImage T>
-    ResizeNode<T>::ResizeNode(int interpolator_, int outX_, int outY_) 
-    : outsize(outX_,outY_)
+    ResizeNode<T>::ResizeNode(int interpolator_, int outWidth_, int outHeight_) 
+    : outsize(outWidth_,outHeight_)
     , interpolater(interpolator_) {}
+
+    template <CVImage T>
+    ResizeNode<T>::ResizeNode(int outWidth_, int outHeight_) {
+        this(cv::INTER_LINEAR,outWidth_,outHeight_);
+    }
 
     template <CVImage T>
     void ResizeNode<T>::updateBuffers() {

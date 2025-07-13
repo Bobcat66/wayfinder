@@ -44,6 +44,7 @@ namespace wf {
         return it->second;
     }
 
+    // TODO: Move error handling to exceptions for consistency
     int HardwareManager::registerCamera(const CameraConfiguration& config) {
         switch (config.backend) {
             case CameraBackend::CSCORE:

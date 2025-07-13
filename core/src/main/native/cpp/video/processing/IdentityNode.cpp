@@ -17,22 +17,20 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#pragma once
-
-#include "wfcore/video/processing/CVProcessNode.h"
-#include "wfcore/video/video_types.h"
-#include <opencv2/core.hpp>
+#include "wfcore/video/processing/IdentityNode.h"
 
 namespace wf {
     template <CVImage T>
-    class ResizeNode : public CVProcessNode<T> {
-    public:
-        ResizeNode(int interpolater_, int outWidth_, int outHeight_);
-        ResizeNode(int outWidth_, int outHeight_);
-        void updateBuffers() override;
-        void process() noexcept override;
-    private:
-        int interpolater;
-        cv::Size outsize;
-    };
+    void IdentityNode<T>::updateBuffers() {
+        this->outpad = *(this->inpad);
+        this->outcoding = *(this->incoding);
+    }
+
+    template <CVImage T>
+    void IdentityNode<T>::process() noexcept override {
+        this->outpad = *(this->inpad);
+    }
+
+    template class IdentityNode<cv::Mat>;
+    template class IdentityNode<cv::UMat>;
 }

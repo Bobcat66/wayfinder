@@ -31,6 +31,7 @@
 
 namespace impl {
 
+    // TODO: Figure out a better way to do this
     static std::unordered_map<std::string, wips_u8_t> tagFamilyIDs = {
         {"tag36h11", 0},
         {"tag36h10", 1},
@@ -55,6 +56,7 @@ namespace impl {
         {8, "tagStandard52h13"}
     };
 
+    // TODO: This is suboptimal, consider switching to regular C-style enum?
     static wips_u8_t getPipelineTypeID(wf::PipelineType type) {
         switch (type) {
             case wf::PipelineType::Apriltag: return 0;

@@ -25,11 +25,12 @@
 #include "wfcore/processes/VisionWorker.h"
 #include "wfcore/hardware/HardwareManager.h"
 #include "wfcore/network/NetworkTablesManager.h"
+#include "wfcore/configuration/ApriltagConfiguration.h"
 
 namespace wf {
     class VisionWorkerManager {
     public:
-        VisionWorkerManager(NetworkTablesManager& ntManager_, HardwareManager& hardwareManager_);
+        VisionWorkerManager(NetworkTablesManager& ntManager_, HardwareManager& hardwareManager_, ApriltagConfiguration& atagConfig_);
         VisionWorker& buildVisionWorker(const VisionWorkerConfig& config);
         VisionWorker& getVisionWorker(const std::string& name);
         int startVisionWorker(const std::string& name);
@@ -40,6 +41,7 @@ namespace wf {
         int destroyAllWorkers();
     private:
         std::vector<VisionWorker> workers;
+        ApriltagConfiguration& atagConfig;
         NetworkTablesManager& ntManager;
         HardwareManager& hardwareManager;
     };

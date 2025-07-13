@@ -29,15 +29,45 @@
 
 namespace wf {
     static auto logger = LoggerManager::getInstance().getLogger("VisionWorkerManager",LogGroup::General);
-    VisionWorkerManager::VisionWorkerManager(NetworkTablesManager& ntManager_, HardwareManager& hardwareManager_)
-    : ntManager(ntManager_), hardwareManager(hardwareManager_) {}
+    VisionWorkerManager::VisionWorkerManager(NetworkTablesManager& ntManager_, HardwareManager& hardwareManager_,ApriltagConfiguration& atagConfig_)
+    : ntManager(ntManager_), hardwareManager(hardwareManager_), atagConfig(atagConfig_) {}
     VisionWorker& VisionWorkerManager::buildVisionWorker(const VisionWorkerConfig& config) {
         switch (config.pipelineType) {
             case PipelineType::Apriltag:
-                if (!hardwareManager.cameraRegistered(config.devpath)) {
-                    logger->warn("Camera {} not found",config.devpath);
+                {
+                    if (!hardwareManager.cameraRegistered(config.devpath)) {
+                        throw std::runtime_error(std::format("Camera {} not found",config.devpath));
+                    }
+                    if (!std::holds_alternative<ApriltagPipelineConfiguration>(config.pipelineConfig)) {
+                        throw std::runtime_error(std::format("Pipeline {} is declared as Apriltag Pipeline yet specifies an incompatible configuration!",config.name));
+                    }
+                    std::vector<std::unique_ptr<CVProcessNode<cv::Mat>>> nodes;
+                    FrameProvider& frameProvider = hardwareManager.getFrameProvider(config.devpath,std::format("{}_frameprovider",config.name));
+                    StreamFormat hardwareFormat = hardwareManager.getStreamFormat(config.devpath);
+                    if (config.inputFormat.frameFormat == hardwareFormat.frameFormat) {
+                        nodes.emplace_back(std::move(std::make_unique<IdentityNode<cv::Mat>>()));
+                    } else {
+                        if (
+                            config.inputFormat.frameFormat.rows != hardwareFormat.frameFormat.rows
+                            || config.inputFormat.frameFormat.cols != hardwareFormat.frameFormat.cols
+                        ) {
+                            logger->warn("Resolution for pipeline {} differs from native resolution for camera {}. This could cause issues with calibration",config.name,config.devpath);
+                            nodes.push_back(std::move(std::make_unique<ResizeNode<cv::Mat>>(
+                                config.inputFormat.frameFormat.cols,
+                                config.inputFormat.frameFormat.rows
+                            )));
+                        }
+                        if (config.inputFormat.frameFormat.encoding != hardwareFormat.frameFormat.encoding) {
+                            nodes.push_back(std::move(std::make_unique<ColorConvertNode<cv::Mat>>(
+                                config.inputFormat.frameFormat.encoding
+                            )));
+                        }
+                    }
+                    CVProcessPipe preprocesser(hardwareFormat.frameFormat,std::move(nodes));
+                    ApriltagPipeline pipeline(
+                        std::get<ApriltagPipelineConfiguration>(config.pipelineConfig),
+                        hardwareManager.get);
                 }
-                if (!config.pipeline)
             case PipelineType::ObjDetect:
                 throw std::runtime_error("Object Detection not implemented"); // TODO: remove this once implemented
             case PipelineType::ApriltagDetect:

@@ -24,7 +24,7 @@
 #include <wfcore/pipeline/pnp.h>
 
 namespace wf {
-    ApriltagPipeline::ApriltagPipeline(ApriltagPipelineConfiguration config_, CameraIntrinsics intrinsics_, ApriltagConfiguration tagConfig_)
+    ApriltagPipeline::ApriltagPipeline(ApriltagPipelineConfiguration config_, CameraIntrinsics intrinsics_, ApriltagConfiguration& tagConfig_)
     : config(std::move(config_)), intrinsics(std::move(intrinsics_)), tagConfig(tagConfig_) {
         updateDetectorConfig();
     }

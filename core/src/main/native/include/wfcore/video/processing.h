@@ -24,3 +24,4 @@
 #include "wfcore/video/processing/CVProcessPipe.h"
 #include "wfcore/video/processing/ResizeNode.h"
 #include "wfcore/video/processing/RotateNode.h"
+#include "wfcore/video/processing/IdentityNode.h"

@@ -20,19 +20,15 @@
 #pragma once
 
 #include "wfcore/video/processing/CVProcessNode.h"
-#include "wfcore/video/video_types.h"
-#include <opencv2/core.hpp>
+
+// A process node that does nothing
 
 namespace wf {
     template <CVImage T>
-    class ResizeNode : public CVProcessNode<T> {
+    class IdentityNode : public CVProcessNode {
     public:
-        ResizeNode(int interpolater_, int outWidth_, int outHeight_);
-        ResizeNode(int outWidth_, int outHeight_);
-        void updateBuffers() override;
+        IdentityNode() = default;
+        void updateBuffers();
         void process() noexcept override;
-    private:
-        int interpolater;
-        cv::Size outsize;
-    };
+    }
 }
