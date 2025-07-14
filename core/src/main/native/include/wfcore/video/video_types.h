@@ -67,5 +67,7 @@ namespace wf {
     struct FrameMetadata {
         uint64_t micros;
         FrameFormat format;
+
+        constexpr bool err() const { return !(static_cast<bool>(micros)); }
     };
 }

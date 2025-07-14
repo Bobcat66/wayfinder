@@ -40,6 +40,7 @@ namespace wf {
             logger = std::make_shared<spdlog::logger>(name, sinks_.begin(), sinks_.end());
             spdlog::register_logger(logger);
         }
+        logger->set_level(LogGroup::General);
         return logger;
     }
 

@@ -53,7 +53,7 @@ namespace wf {
 
                     // Fetch frame provider from the hardware manager
                     FrameProvider& frameProvider = hardwareManager.getFrameProvider(config.devpath,std::format("{}_frameprovider",config.name));
-                    StreamFormat hardwareFormat = hardwareManager.getStreamFormat(config.devpath);
+                    StreamFormat hardwareFormat = frameProvider.getStreamFormat();
 
                     // Build preprocesser
                     std::vector<std::unique_ptr<CVProcessNode<cv::Mat>>> nodes;

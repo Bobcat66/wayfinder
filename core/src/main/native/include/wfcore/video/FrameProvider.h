@@ -32,5 +32,8 @@ namespace wf {
         virtual ~FrameProvider() noexcept = default;
         virtual const std::string& getName() const noexcept = 0;
         virtual const StreamFormat& getStreamFormat() const noexcept = 0;
+
+        // Returns human-readable string describing error
+        virtual std::string getError() noexcept = 0;
     };
 }

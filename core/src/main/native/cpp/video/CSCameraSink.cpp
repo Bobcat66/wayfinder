@@ -19,18 +19,24 @@
 
 
 #include "wfcore/video/CSCameraSink.h"
+#include "wfcore/common/logging.h"
 #include <format>
 #include <unordered_map>
 
 namespace wf {
+    static loggerPtr logger = LoggerManager::getInstance().getLogger("CSCameraSink");
 
     CSCameraSink::CSCameraSink(std::string name_,std::string devPath_, cs::CvSink appSink_, StreamFormat format_)
-    : appSink(appSink_), devPath(devPath_), name(name_), format(format_) {}
+    : appSink(appSink_), devPath(devPath_), name(name_)
+    , format(format_.fps,{ImageEncoding::BGR24,format_.frameFormat.rows,format_.frameFormat.cols}) {}
 
     FrameMetadata CSCameraSink::getFrame(cv::Mat& data) noexcept {
+        WF_DEBUGLOG(logger,"Acquiring mutex");
         std::lock_guard<std::mutex> lock(camera_guard);
+        WF_DEBUGLOG(logger,"Grabbing frame from CSCore");
         uint64_t captimeMicros = appSink.GrabFrame(data);
-        return {captimeMicros,getStreamFormat().frameFormat};
+        WF_DEBUGLOG(logger,"Grabbed frame from CSCore at time {}",captimeMicros);
+        return {captimeMicros,format.frameFormat};
     }
 
     const StreamFormat& CSCameraSink::getStreamFormat() const noexcept {
@@ -38,11 +44,17 @@ namespace wf {
         return format;
     }
 
+    // Lowkey the stream format code for CS sinks is really scuffed but whatever.
+    // CSCore CVSinks does preprocessing to convert frames to BGR24. Eventually I want to refactor this to use VideoSinks directly, as I have my own preprocessing infrastructure
+    // TODO: Test if CvSink converts grayscale images to Y8 and not BGR. Also test depth cameras to see if they output Y16
     void CSCameraSink::setStreamFormat(StreamFormat format) {
         std::lock_guard<std::mutex> lock(camera_guard);
-        this->format = format;
+        this->format = StreamFormat(format.fps,{ImageEncoding::BGR24,format.frameFormat.rows,format.frameFormat.cols});
     }
 
-    
+    std::string CSCameraSink::getError() noexcept {
+        std::lock_guard<std::mutex> lock(camera_guard);
+        return std::move(appSink.GetError());
+    } 
 
 }

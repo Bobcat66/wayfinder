@@ -38,6 +38,7 @@ namespace wf {
         const std::string& getName() const noexcept override { return name; }
         const std::string& getDevPath() const noexcept { return devPath; }
         const StreamFormat& getStreamFormat() const noexcept override;
+        std::string getError() noexcept override;
     private:
         void setStreamFormat(StreamFormat format);
         mutable std::mutex camera_guard;
