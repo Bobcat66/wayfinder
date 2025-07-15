@@ -22,7 +22,7 @@
 
 #include "wfcore/hardware/CameraConfiguration.h"
 
-#include "wfcore/configuration/ApriltagConfiguration.h"
+#include "wfcore/fiducial/ApriltagConfiguration.h"
 #include "wfcore/fiducial/ApriltagField.h"
 #include "wfcore/fiducial/ApriltagDetection.h"
 

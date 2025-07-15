@@ -19,7 +19,7 @@
 
 
 #include "wfcore/fiducial/ApriltagDetector.h"
-#include "wfcore/common/logging/LoggerManager.h"
+#include "wfcore/common/logging.h"
 
 #include <apriltag.h>
 #include <tag36h11.h>
@@ -128,7 +128,7 @@ namespace wf {
         // Create output vector, preallocate memory to avoid reallocation costs
         std::vector<wf::ApriltagDetection> detections;
         detections.reserve(zarray_size(rawDetections));
-        logger->debug("{} detections in zarray",zarray_size(rawDetections));
+        WF_DEBUGLOG(logger,"{} detections in zarray",zarray_size(rawDetections));
         // Destructively converts rawDetections into a vector of wf::ApriltagDetections
         for (int i = 0; i < zarray_size(rawDetections); i++) {
             apriltag_detection_t* det;
@@ -147,6 +147,7 @@ namespace wf {
             );
             apriltag_detection_destroy(det);
         }
+        WF_DEBUGLOG(logger,"Destroying zarray");
         zarray_destroy(rawDetections);
 
         return detections;

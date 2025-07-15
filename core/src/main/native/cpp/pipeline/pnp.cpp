@@ -24,8 +24,6 @@
 #include "wfcore/utils/coordinates.h"
 #include "wfcore/utils/geometry.h"
 
-#include "wfcore/configuration/ApriltagConfiguration.h"
-
 #include <opencv2/calib3d.hpp>
 #include <gtsam/geometry/Pose3.h>
 #include <array>

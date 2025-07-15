@@ -25,7 +25,7 @@
 #include "wfcore/processes/VisionWorker.h"
 #include "wfcore/hardware/HardwareManager.h"
 #include "wfcore/network/NetworkTablesManager.h"
-#include "wfcore/configuration/ApriltagConfiguration.h"
+#include "wfcore/fiducial/ApriltagConfiguration.h"
 
 namespace wf {
     class VisionWorkerManager {

@@ -22,7 +22,7 @@
 #include "wfcore/pipeline/Pipeline.h"
 #include "wfcore/fiducial/ApriltagDetector.h"
 #include "wfcore/fiducial/ApriltagField.h"
-#include "wfcore/configuration/ApriltagConfiguration.h"
+#include "wfcore/fiducial/ApriltagConfiguration.h"
 
 namespace wf {
 

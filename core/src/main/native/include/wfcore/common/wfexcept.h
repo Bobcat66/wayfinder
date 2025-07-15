@@ -20,24 +20,33 @@
 
 #pragma once
 
-#include <stdexcept>
+#include <exception>
 #include <string>
+#include <format>
 
-// Macro that automatically defines a subclass of std::runtime_error
-#define DEF_RUNEXCEPT(exceptionName,defaultMsg)                 \
-    class exceptionName : public std::runtime_error {       \
-    public:                                                 \
-        exceptionName()                                     \
-        : std::runtime_error(defaultMsg) {}                 \
-        explicit exceptionName(const std::string& msg)      \
-        : std::runtime_error(msg) {}                        \
+// Macro that automatically defines a subclass of std::exception
+#define DEFEXCEPT(exceptionName,defaultMsg)                                                     \
+    class exceptionName : public std::exception {                                               \
+    public:                                                                                     \
+        exceptionName() : msg(defaultMsg) {}                                                    \
+        template <typename... Args>                                                             \
+        exceptionName(std::string_view fmt, Args&&... args)                                     \
+        : msg(std::vformat(fmt,std::make_format_args(std::forward<Args>(args)...))) {}          \
+        const char* what() const noexcept override {                                            \
+            return msg.c_str();                                                                 \
+        }                                                                                       \
+    private:                                                                                    \
+        std::string msg;                                                                        \
     };
 
 namespace wf {
-    DEF_RUNEXCEPT(invalid_pipeline_configuration,"Invalid pipeline configuration")
-    DEF_RUNEXCEPT(camera_not_found,"Camera Not Found")
-    DEF_RUNEXCEPT(intrinsics_not_found,"Intrinsics not found for camera at specified resolution")
-    DEF_RUNEXCEPT(vision_worker_not_found,"Vision Worker not found")
+    DEFEXCEPT(invalid_pipeline_configuration,"Invalid pipeline configuration")
+    DEFEXCEPT(camera_not_found,"Camera Not Found")
+    DEFEXCEPT(intrinsics_not_found,"Intrinsics not found for camera at specified resolution")
+    DEFEXCEPT(vision_worker_not_found,"Vision Worker not found")
+    DEFEXCEPT(invalid_camera_control,"Invalid camera control")
+    DEFEXCEPT(invalid_stream_format,"Invalid stream format")
+    DEFEXCEPT(unknown_exception,"Unknown")
 }
 
-#undef DEF_RTERR
+#undef DEFEXCEPT

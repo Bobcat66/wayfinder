@@ -55,7 +55,6 @@ namespace wf {
         std::string devpath;
         StreamFormat format;
         std::vector<StreamFormat> supportedFormats;
-        std::vector<cv::Size> calibratedResolutions;
         std::vector<CameraIntrinsics> calibrations;
         std::unordered_set<CamControl> supportedControls;
         std::unordered_map<CamControl,std::string> controlAliases;

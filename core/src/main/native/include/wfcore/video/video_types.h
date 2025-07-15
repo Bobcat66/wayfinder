@@ -43,6 +43,7 @@ namespace wf {
         UNKNOWN
     };
 
+    // TODO: Change order to be (width,height,encoding)
     struct FrameFormat {
         ImageEncoding encoding;
         int rows;

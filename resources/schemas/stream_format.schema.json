@@ -1,0 +1,16 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "title": "stream_format",
+    "type": "object",
+    "properties": {
+        "fps" : { "type": "number" },
+        "frameFormat" : {
+            "$ref": "frame_format.schema.json"
+        }
+    },
+    "required": [
+        "fps",
+        "frameFormat"
+    ],
+    "additionalProperties": false
+}

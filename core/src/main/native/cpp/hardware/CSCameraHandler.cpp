@@ -19,15 +19,14 @@
 
 #include "wfcore/hardware/CSCameraHandler.h"
 #include "wfcore/video/video_utils.h"
-#include <stdexcept>
+#include "wfcore/common/wfexcept.h"
 #include <format>
 
 namespace wf {
-    // TODO: Add verification
+    // TODO: Add verification, Refactor error handling
     CSCameraHandler::CSCameraHandler(const CameraConfiguration& config) 
     : devpath(config.devpath)
     , format(config.format)
-    , calibratedResolutions(config.calibratedResolutions)
     , calibrations(config.calibrations)
     , controlAliases(config.controlAliases)
     , camera(std::format("{}_source",devpath),devpath) {
@@ -38,8 +37,11 @@ namespace wf {
         for (const auto& entry : config.controlAliases) {
             supportedControls.insert(entry.first);
         }
+        for (const auto& [control,value] : config.controls) {
+            setControl(control,value);
+        }
         if (!camera.SetVideoMode(getVideoModeFromStreamFormat(format))) {
-            this->error = 3; // 3 denotes invalid format
+            throw invalid_stream_format("Camera {} configured with invalid stream format",config.devpath);
         }
     }
 
@@ -63,7 +65,7 @@ namespace wf {
             }
             return 0;
         }
-        return 1;
+        throw invalid_stream_format("Camera {} configured with invalid stream format",devpath);
     }
 
     const StreamFormat& CSCameraHandler::getStreamFormat() {
@@ -75,9 +77,9 @@ namespace wf {
             this->format.frameFormat.cols,
             this->format.frameFormat.rows
         );
-        for (int i = 0 ; i < calibratedResolutions.size() ; ++i) {
-            if (calibratedResolutions[i] == res) {
-                return std::make_optional(calibrations[i]);
+        for (auto calibration : calibrations) {
+            if (calibration.resolution == res) {
+                return std::make_optional(calibration);
             }
         }
         return std::nullopt;
@@ -87,14 +89,12 @@ namespace wf {
         auto it = controlAliases.find(control);
         if (it == controlAliases.end()) {
             // Control has no alias, give up
-            this->error = 1;
-            return; // Invalid control
+            throw invalid_camera_control("Attempted to change non-aliased camera control for camera {}",devpath);
         }
         auto property = camera.GetProperty(it->second);
         if (property.GetKind() == cs::VideoProperty::Kind::kNone) {
             // No property with the aliased name exists, give up
-            this->error = 1;
-            return;
+            throw invalid_camera_control("Attempted to change unsupported camera control for camera {}",devpath);
         }
         property.Set(value);
         // Check that the operation was successful
@@ -106,14 +106,12 @@ namespace wf {
         auto it = controlAliases.find(control);
         if (it == controlAliases.end()) {
             // Control has no alias, give up
-            this->error = 1;
-            return 0; // Invalid control
+            throw invalid_camera_control("Attempted to query non-aliased camera control for camera {}",devpath);
         }
         auto property = camera.GetProperty(it->second);
         if (property.GetKind() == cs::VideoProperty::Kind::kNone) {
             // No property with the aliased name exists, give up
-            this->error = 1;
-            return 0;
+            throw invalid_camera_control("Attempted to query unsupported camera control for camera {}",devpath);
         }
         return property.Get();
     }

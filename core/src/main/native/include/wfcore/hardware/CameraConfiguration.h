@@ -55,6 +55,7 @@ namespace wf {
     };
 
     struct CameraIntrinsics {
+        cv::Size resolution;
         cv::Mat cameraMatrix;
         cv::Mat distCoeffs;
     };
@@ -63,13 +64,11 @@ namespace wf {
         std::string devpath;
         CameraBackend backend;
         StreamFormat format;
-        std::unordered_map<CamControl,std::string> controlAliases; // Aliases for camera controls
+        std::unordered_map<CamControl,std::string> controlAliases; // Aliases for camera controls, for V4L2/CScore interop
         
-        // TODO: Replace this with a map
-        std::vector<cv::Size> calibratedResolutions;
         std::vector<CameraIntrinsics> calibrations;
 
-        std::unordered_map<CamControl,double> controls; 
+        std::unordered_map<CamControl,int> controls; 
     };
 
 }

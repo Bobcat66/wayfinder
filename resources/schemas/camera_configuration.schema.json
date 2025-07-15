@@ -1,0 +1,62 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "title": "camera_configuration",
+    "type": "object",
+    "$defs": {
+        "ControlName": {
+            "type": "string",
+            "enum": [
+                "EXPOSURE",
+                "AUTO_EXPOSURE",
+                "BRIGHTNESS",
+                "ISO",
+                "SHUTTER",
+                "FOCUS",
+                "ZOOM",
+                "WHITE_BALANCE",
+                "AUTO_WHITE_BALANCE",
+                "SHARPNESS",
+                "SATURATION",
+                "CONTRAST",
+                "GAMMA",
+                "HUE"
+            ]
+        }
+    },
+    "properties": {
+        "devpath": { "type": "string" },
+        "backend": { 
+            "type": "string", 
+            "enum": [
+                "CSCORE",
+                "REALSENSE",
+                "GSTREAMER",
+                "LIBCAMERA"
+            ] 
+        },
+        "format": { "$ref": "stream_format.schema.json" },
+        "controlAliases": {
+            "type": "object",
+            "propertyNames": { "$ref": "#/$defs/ControlName" },
+            "additionalProperties": { "type": "string" }
+        },
+        "calibrations": {
+            "type": "array",
+            "items": { "$ref": "camera_intrinsics.schema.json" }
+        },
+        "controls": {
+            "type": "object",
+            "propertyNames": { "$ref": "#/$defs/ControlName" },
+            "additionalProperties": { "type": "number" }
+        }
+    },
+    "required": [
+        "devpath",
+        "backend",
+        "format",
+        "controlAliases",
+        "calibrations",
+        "controls"
+    ],
+    "additionalProperties": false
+}

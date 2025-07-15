@@ -52,6 +52,7 @@ namespace wf {
 
         virtual const std::vector<StreamFormat>& getSupportedFormats() = 0;
 
+        [[ deprecated ]]
         virtual int getError() = 0;
     };
 }

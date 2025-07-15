@@ -1,0 +1,31 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "title": "frame_format",
+    "type": "object",
+    "properties": {
+        "width": { "type": "number" },
+        "height": { "type": "number" },
+        "encoding": {
+            "type": "string",
+            "enum": [
+                "BGR24",
+                "RGB24",
+                "RGB565",
+                "Y8",
+                "Y16",
+                "YUYV",
+                "UYVY",
+                "RGBA",
+                "BGRA",
+                "MJPEG",
+                "UNKNOWN"
+            ]
+        }
+    },
+    "required": [
+        "width",
+        "height",
+        "encoding"
+    ],
+    "additionalProperties": false
+}

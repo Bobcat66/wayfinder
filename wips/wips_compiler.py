@@ -156,13 +156,13 @@ def compile(schemas_path: Path, output_dir: Path, py: bool = False, jvm: bool = 
     print(f"Compilation finished in {end-start} seconds")
 
 # Core:
-# python3 wips_compiler.py ../schemas/wips/messages.yaml --out=../core/src/generated/wips
+# python3 wips_compiler.py messages.yaml --out=../core/src/generated/wips
 
 # Client:
-# python3 wips_compiler.py ../schemas/wips/messages.yaml --py --out=../client/src/generated/wips
+# python3 wips_compiler.py messages.yaml --py --out=../client/src/generated/wips
 
 # Lib:
-# python3 wips_compiler.py ../schemas/wips/messages.yaml --jvm --out=../wayfinderlib/src/generated/wips
+# python3 wips_compiler.py messages.yaml --jvm --out=../wayfinderlib/src/generated/wips
 
 # Python and Java bindings generation is not implemented yet, but the flags are here for future use.
 if __name__ == "__main__":

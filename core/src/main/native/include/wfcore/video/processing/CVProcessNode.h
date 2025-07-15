@@ -35,7 +35,6 @@ namespace wf {
         }
         inline const ImageEncoding* getIncoding() { return incoding; }
         inline const T* getInpad() const {return inpad;}
-
         inline const ImageEncoding& getOutcoding() { return outcoding; }
         inline T& getOutpad() { return outpad; }
         virtual void process() noexcept = 0;
