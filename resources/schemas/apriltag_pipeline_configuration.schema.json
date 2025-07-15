@@ -1,0 +1,45 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "title": "apriltag_pipeline_configuration",
+    "type": "object",
+    "$defs": {
+        "apriltag_detector_config": {
+            "type": "object",
+            "properties": {
+                "numThreads": { "type": "number" },
+                "quadDecimate": { "type": "number" },
+                "quadSigma": { "type": "number" },
+                "refineEdges": { "type": "boolean" },
+                "decodeSharpening": { "type": "number" },
+                "debug": { "type": "boolean" }
+            },
+            "additionalProperties": false
+        },
+        "quad_threshold_parameters": {
+            "type": "object",
+            "properties": {
+                "minClusterPixels": { "type": "number" },
+                "maxNumMaxima": { "type": "number" },
+                "criticalAngleRads": { "type": "number" },
+                "maxLineFitMSE": { "type": "number" },
+                "minWhiteBlackDiff": { "type": "number" },
+                "deglitch": { "type": "boolean" }
+            },
+            "additionalProperties": false
+        }
+    },
+    "properties": {
+        "detConfig": { "$ref": "#/$defs/apriltag_detector_config" },
+        "detQTPs": { "$ref": "#/$defs/quad_threshold_parameters"},
+        "detectorExcludes": {
+            "type": "array",
+            "items": { "type": "number" }
+        },
+        "solvePnPExcludes": {
+            "type": "array",
+            "items": { "type": "number" }
+        },
+        "solveTagRelative": { "type": "boolean" }
+    },
+    "additionalProperties": false
+}

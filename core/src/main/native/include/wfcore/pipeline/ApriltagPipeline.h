@@ -17,7 +17,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-
 #pragma once
 
 #include "wfcore/pipeline/Pipeline.h"
@@ -38,9 +37,10 @@ namespace wf {
 
     class ApriltagPipeline : public Pipeline {
     public:
-        ApriltagPipeline(ApriltagPipelineConfiguration config_, CameraIntrinsics intrinsics_, ApriltagConfiguration& tagConfig_);
+        ApriltagPipeline(ApriltagPipelineConfiguration config_, CameraIntrinsics intrinsics_, ApriltagConfiguration tagConfig_, ApriltagField& tagField_);
         void setConfig(const ApriltagPipelineConfiguration& config);
         void setTagConfig(const ApriltagConfiguration& tagConfig);
+        void setTagField(const ApriltagField& tagField);
         void setIntrinsics(const CameraIntrinsics& intrinsics);
         [[nodiscard]] 
         PipelineResult process(const cv::Mat& data, const FrameMetadata& meta) const noexcept override;
@@ -49,7 +49,8 @@ namespace wf {
         void updateDetectorConfig(); // Updates the apriltag detector's configuration
         ApriltagPipelineConfiguration config;
         CameraIntrinsics intrinsics;
-        ApriltagConfiguration& tagConfig;
+        ApriltagConfiguration tagConfig;
+        ApriltagField& tagField;
         ApriltagDetector detector;
     };
 }

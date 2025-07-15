@@ -78,4 +78,10 @@ namespace wf {
     cs::VideoMode getVideoModeFromStreamFormat(const StreamFormat& sformat);
 
     StreamFormat getStreamFormatFromVideoMode(const cs::VideoMode& videomode);
+
+    // Resizes a sparse array of points to a new resolution
+    std::vector<cv::Point2d> sparseResize(const std::vector<cv::Point2d>& input, std::vector<cv::Point2d>& output, const cv::Size2d& srcRes, const cv::Size2d& destRes);
+
+    // Resizes a sparse array of points to a new resolution
+    std::vector<cv::Point2f> sparseResize(const std::vector<cv::Point2f>& input, std::vector<cv::Point2f>& output, const cv::Size2f& srcRes, const cv::Size2f& destRes);
 }

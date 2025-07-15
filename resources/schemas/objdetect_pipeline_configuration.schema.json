@@ -1,0 +1,72 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "title": "objdetect_pipeline_configuration",
+    "type": "object",
+    "$defs": {
+        "inference_engine_type": {
+            "type": "string",
+            "enum": [
+                "CV_CPU",
+                "CV_OPENCL",
+                "CV_VULKAN",
+                "CUDA",
+                "OpenVINO",
+                "RKNN",
+                "CoreML",
+                "ROCm",
+                "EdgeTPU",
+                "HailoRT"
+            ]
+        },
+        "model_architecture": {
+            "type": "string",
+            "enum": [
+                "YOLO",
+                "SSD",
+                "RETINA_NET",
+                "RCNN"
+            ]
+        },
+        "tensor_parameters": {
+            "type": "object",
+            "parameters": {
+                "interleaved": { "type": "boolean" },
+                "height": { "type": "number" },
+                "width": { "type": "number" },
+                "channels": { "type": "number" },
+                "scale": { "type": "number" },
+                "stds": {
+                    "type": "array",
+                    "items": { "type": "number" },
+                    "minItems": 1,
+                    "maxItems": 4
+                },
+                "means": {
+                    "type": "array",
+                    "items": { "type": "number" },
+                    "minItems": 1,
+                    "maxItems": 4
+                }
+            },
+            "additionalProperties": false
+        },
+        "ie_filtering_parameters": {
+            "type": "object",
+            "parameters": {
+                "nmsThreshold": { "type": "number" },
+                "confidenceThreshold": { "type": "number" }
+            },
+            "required": ["nmsThreshold","confidenceThreshold"],
+            "additionalProperties": false
+        }
+    },
+    "properties": {
+        "modelPath": { "type": "string" },
+        "modelArch": { "$ref": "#/$defs/model_architecture" },
+        "engineType": { "$ref": "#/$defs/inference_engine_type" },
+        "tensorParams": { "$ref": "#/$defs/tensor_parameters" },
+        "modelInputFormat": { "$ref": "frame_format.schema.json" },
+        "filterParams": { "$ref": "#/$defs/ie_filtering_parameters" }
+    },
+    "additionalProperties": false
+}

@@ -22,8 +22,10 @@
 #include "wfcore/pipeline/Pipeline.h"
 #include "wfcore/inference/InferenceEngine.h"
 #include "wfcore/video/video_types.h"
+#include "wfcore/inference/Tensorizer.h"
 
 #include <string>
+#include <memory>
 
 namespace wf {
 
@@ -50,11 +52,11 @@ namespace wf {
 
     struct ObjectDetectionPipelineConfiguration {
         std::string modelPath; // Path to the model file
+        ModelArch modelArch; // Architecture of the model
         InferenceEngineType engineType; // Type of inference engine to use
+        TensorParameters tensorParams; // Parameters for the tensorizer
         FrameFormat modelInputFormat; // Input format of the model
-        std::vector<double> means; // Mean values to subtract from the input image. If the image is in BGR format, these should be in BGR order, likewise for RGB. If grayscale, this should have only one value
-        float confidenceThreshold = 0.5; // Minimum confidence threshold for detections
-        float nmsThreshold = 0.4; // Non-maximum suppression threshold
+        IEFilteringParams filterParams;
     };
 
     class ObjectDetectionPipeline : public Pipeline {
@@ -63,7 +65,7 @@ namespace wf {
         [[nodiscard]] 
         PipelineResult process(const cv::Mat& data, const FrameMetadata& meta) const noexcept override;
     private:
-        InferenceEngine& engine;
+        std::unique_ptr<InferenceEngine> engine;
         CameraIntrinsics intrinsics;
         ObjectDetectionPipelineConfiguration config;
     };

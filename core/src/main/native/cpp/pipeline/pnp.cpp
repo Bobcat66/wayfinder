@@ -30,66 +30,10 @@
 
 namespace wf {
 
-    std::optional<ApriltagRelativePoseObservation> solvePNPApriltagRelative(
-        const ApriltagDetection& detection,
-        const ApriltagConfiguration& tagConfig,
-        const CameraIntrinsics& cameraIntrinsics
-    ) noexcept {
-        std::vector<cv::Mat> rvecs, tvecs;
-        std::vector<double> reprojectionErrors;
-        std::vector<cv::Point2d> imagePoints;
-        std::vector<cv::Point3d> objectPoints;
-        for (const auto& corner : detection.corners) {
-            imagePoints.push_back(corner);
-        }
-        objectPoints.emplace_back(
-            -tagConfig.tagSize / 2.0,
-            tagConfig.tagSize / 2.0, 
-            0.0
-        );
-        objectPoints.emplace_back(
-            tagConfig.tagSize / 2.0, 
-            tagConfig.tagSize / 2.0,
-            0.0
-        );
-        objectPoints.emplace_back(
-            tagConfig.tagSize / 2.0, 
-            -tagConfig.tagSize / 2.0,
-            0.0
-        );
-        objectPoints.emplace_back(
-            -tagConfig.tagSize / 2.0, 
-            -tagConfig.tagSize / 2.0,
-            0.0
-        );
-        bool success = cv::solvePnPGeneric(
-            objectPoints,
-            imagePoints,
-            cameraIntrinsics.cameraMatrix,
-            cameraIntrinsics.distCoeffs,
-            rvecs,
-            tvecs,
-            false,
-            cv::SOLVEPNP_IPPE_SQUARE,
-            cv::noArray(),
-            cv::noArray(),
-            reprojectionErrors
-        );
-        if (!success) {
-            return std::nullopt; //PnP was not successful, give up
-        } else {
-            return std::optional<ApriltagRelativePoseObservation>{
-                std::in_place,
-                detection.id,
-                cvPoseVecsToWPILibPose3(rvecs[0], tvecs[0]), reprojectionErrors[0],
-                cvPoseVecsToWPILibPose3(rvecs[1], tvecs[1]), reprojectionErrors[1]
-            };
-        }
-    }
-
     std::optional<ApriltagFieldPoseObservation> solvePNPApriltag(
         const std::vector<ApriltagDetection>& detections,
         const ApriltagConfiguration& tagConfig,
+        const ApriltagField& tagField,
         const CameraIntrinsics& cameraIntrinsics,
         const std::unordered_set<int>& ignoreList
     ) noexcept {
@@ -112,7 +56,7 @@ namespace wf {
             if (std::find(ignoreList.begin(), ignoreList.end(), det.id) != ignoreList.end()) {
                 continue; // Skip ignored tags
             }
-            const wf::Apriltag* tag = tagConfig.map.getTag(det.id);
+            const wf::Apriltag* tag = tagField.getTag(det.id);
             if (!tag) {
                 continue; // Skip tags without a pose
             }
@@ -243,7 +187,65 @@ namespace wf {
             
             return std::nullopt; // Placeholder for multiple tags case
         }
-    };
+    }
+
+    std::optional<ApriltagRelativePoseObservation> solvePNPApriltagRelative(
+        const ApriltagDetection& detection,
+        const ApriltagConfiguration& tagConfig,
+        const CameraIntrinsics& cameraIntrinsics
+    ) noexcept {
+        std::vector<cv::Mat> rvecs, tvecs;
+        std::vector<double> reprojectionErrors;
+        std::vector<cv::Point2d> imagePoints;
+        std::vector<cv::Point3d> objectPoints;
+        for (const auto& corner : detection.corners) {
+            imagePoints.push_back(corner);
+        }
+        objectPoints.emplace_back(
+            -tagConfig.tagSize / 2.0,
+            tagConfig.tagSize / 2.0, 
+            0.0
+        );
+        objectPoints.emplace_back(
+            tagConfig.tagSize / 2.0, 
+            tagConfig.tagSize / 2.0,
+            0.0
+        );
+        objectPoints.emplace_back(
+            tagConfig.tagSize / 2.0, 
+            -tagConfig.tagSize / 2.0,
+            0.0
+        );
+        objectPoints.emplace_back(
+            -tagConfig.tagSize / 2.0, 
+            -tagConfig.tagSize / 2.0,
+            0.0
+        );
+        bool success = cv::solvePnPGeneric(
+            objectPoints,
+            imagePoints,
+            cameraIntrinsics.cameraMatrix,
+            cameraIntrinsics.distCoeffs,
+            rvecs,
+            tvecs,
+            false,
+            cv::SOLVEPNP_IPPE_SQUARE,
+            cv::noArray(),
+            cv::noArray(),
+            reprojectionErrors
+        );
+        if (!success) {
+            return std::nullopt; //PnP was not successful, give up
+        } else {
+            return std::optional<ApriltagRelativePoseObservation>{
+                std::in_place,
+                detection.id,
+                cvPoseVecsToWPILibPose3(rvecs[0], tvecs[0]), reprojectionErrors[0],
+                cvPoseVecsToWPILibPose3(rvecs[1], tvecs[1]), reprojectionErrors[1]
+            };
+        }
+    }
+
 
 }
 

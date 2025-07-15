@@ -17,7 +17,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-
 #pragma once
 
 #include "wfcore/hardware/CameraConfiguration.h"
@@ -25,6 +24,7 @@
 #include "wfcore/fiducial/ApriltagConfiguration.h"
 #include "wfcore/fiducial/ApriltagField.h"
 #include "wfcore/fiducial/ApriltagDetection.h"
+#include "wfcore/pipeline/pnpresults.h"
 
 #include <opencv2/core.hpp>
 #include <gtsam/geometry/Pose3.h>
@@ -34,54 +34,10 @@
 
 namespace wf {
 
-    struct ApriltagRelativePoseObservation {
-        int id; // Apriltag ID
-        gtsam::Pose3 camPose0;
-        double error0;
-        gtsam::Pose3 camPose1;
-        double error1;
-        ApriltagRelativePoseObservation(
-            int id_,
-            gtsam::Pose3 camPose0_, double error0_,
-            gtsam::Pose3 camPose1_, double error1_
-        ) : id(id_), 
-            camPose0(std::move(camPose0_)), error0(error0_), 
-            camPose1(std::move(camPose1_)), error1(error1_) {}
-    };
-    // Observation of a single Apriltag's pose relative to the camera
-
-    struct ApriltagFieldPoseObservation {
-        std::vector<int> tagsUsed;
-        gtsam::Pose3 fieldPose0;
-        double error0;
-        std::optional<gtsam::Pose3> fieldPose1;
-        std::optional<double> error1;
-
-        ApriltagFieldPoseObservation(
-            std::vector<int> tagsUsed_, 
-            gtsam::Pose3 fieldPose0_, double error0_
-        ) : tagsUsed(std::move(tagsUsed_)), 
-            fieldPose0(std::move(fieldPose0_)), error0(error0_), 
-            fieldPose1(std::nullopt), error1(std::nullopt) {}
-        ApriltagFieldPoseObservation(
-            std::vector<int> tagsUsed_, 
-            gtsam::Pose3 fieldPose0_, double error0_,
-            gtsam::Pose3 fieldPose1_, double error1_
-        ) : tagsUsed(std::move(tagsUsed_)), 
-            fieldPose0(std::move(fieldPose0_)), error0(error0_), 
-            fieldPose1(std::make_optional(std::move(fieldPose1_))), error1(std::make_optional(error1_)) {}
-        ApriltagFieldPoseObservation(
-            std::vector<int> tagsUsed_, 
-            gtsam::Pose3 fieldPose0_, double error0_,
-            std::optional<gtsam::Pose3> fieldPose1_, std::optional<double> error1_
-        ) : tagsUsed(std::move(tagsUsed_)), 
-            fieldPose0(std::move(fieldPose0_)), error0(error0_), 
-            fieldPose1(std::move(fieldPose1_)), error1(std::move(error1_)) {}
-    };
-
     std::optional<ApriltagFieldPoseObservation> solvePNPApriltag(
         const std::vector<ApriltagDetection>& observations,
         const ApriltagConfiguration& tagConfig,
+        const ApriltagField& tagField,
         const CameraIntrinsics& cameraIntrinsics,
         const std::unordered_set<int>& ignoreList
     ) noexcept;

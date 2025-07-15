@@ -24,8 +24,8 @@
 #include <wfcore/pipeline/pnp.h>
 
 namespace wf {
-    ApriltagPipeline::ApriltagPipeline(ApriltagPipelineConfiguration config_, CameraIntrinsics intrinsics_, ApriltagConfiguration& tagConfig_)
-    : config(std::move(config_)), intrinsics(std::move(intrinsics_)), tagConfig(tagConfig_) {
+    ApriltagPipeline::ApriltagPipeline(ApriltagPipelineConfiguration config_, CameraIntrinsics intrinsics_, ApriltagConfiguration tagConfig_, ApriltagField& tagField_)
+    : config(std::move(config_)), intrinsics(std::move(intrinsics_)), tagConfig(tagConfig_), tagField(tagField_) {
         updateDetectorConfig();
     }
 
@@ -39,10 +39,15 @@ namespace wf {
         updateDetectorConfig();
     }
 
+    void ApriltagPipeline::setTagField(const ApriltagField& tagField) {
+        this->tagField = tagField;
+    }
+
     void ApriltagPipeline::setIntrinsics(const CameraIntrinsics& intrinsics) {
         this->intrinsics = intrinsics;
     }
 
+    // TODO: Refactor this???
     void ApriltagPipeline::updateDetectorConfig() {
         detector.setQuadThresholdParams(config.detQTPs);
         detector.setConfig(config.detConfig);
@@ -71,6 +76,7 @@ namespace wf {
         auto fieldPose = solvePNPApriltag(
             detections,
             tagConfig,
+            tagField,
             intrinsics,
             config.SolvePNPExcludes
         );

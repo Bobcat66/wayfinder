@@ -38,6 +38,7 @@ namespace wf {
 
     // Apriltag Layout for an FRC Field
     struct ApriltagField {
+
         std::unordered_map<int, Apriltag> aprilTags;
         double length;
         double width;
@@ -50,6 +51,7 @@ namespace wf {
 
         static ApriltagField loadFromJSONFile(const std::string& filepath);
         static ApriltagField loadFromJSONString(const std::string& jsonstr);
+        
     };
 
 }

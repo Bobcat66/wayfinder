@@ -19,20 +19,23 @@
 
 #pragma once
 
-#include "wfcore/types.h"
-#include "wfcore/video/video_types.h"
-#include "wfcore/pipeline/PipelineType.h"
-#include "wfcore/pipeline/PipelineResult.h"
-#include <vector>
-#include <optional>
+#include <array>
+#include <opencv2/core.hpp>
 
 namespace wf {
 
-    class Pipeline {
-    public:
-        [[nodiscard]] 
-        virtual PipelineResult process(const cv::Mat& data, const FrameMetadata& meta) const noexcept = 0;
-        virtual ~Pipeline() = default;
+    struct ObjectDetection {
+        int objectClass;
+        float confidence;
+        float percentArea;
+        std::array<cv::Point2f, 4> cornerPixels;
+        std::array<cv::Point2f, 4> cornerAngles;
+        ObjectDetection(
+            int objectClass_, float confidence_, float percentArea_,
+            std::array<cv::Point2f, 4> cornerPixels_,
+            std::array<cv::Point2f, 4> cornerAngles_
+        ) : objectClass(objectClass_), confidence(confidence_), percentArea(percentArea_),
+            cornerPixels(std::move(cornerPixels_)), cornerAngles(std::move(cornerAngles_)) {}
     };
     
 }

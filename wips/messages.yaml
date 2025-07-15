@@ -223,3 +223,48 @@
   - name: object_detections
     type: object_detection
     vla: True
+---
+# Represents a 3D twist, the derivative of a 3D pose
+  name: twist3
+  fields:
+  - name: dx
+    type: fp64
+  
+  - name: dy
+    type: fp64
+  
+  - name: dz
+    type: fp64
+  
+  - name: rx
+    type: fp64
+  
+  - name: ry
+    type: fp64
+  
+  - name: rz
+    type: fp64
+---
+# Represents a 2D twist, the derivative of a 2D pose
+  name: twist2
+  fields:
+  - name: dx
+    type: fp64
+  
+  - name: dy
+    type: fp64
+  
+  - name: dtheta
+    type: fp64
+---
+# Represents an odometry reading. Each timestamp must correspond exactly to a twist, in their respective order
+# (timestamps[0] corresponds to twists[0], timestamps[1] to twists[1], etc.)
+  name: odometry_result
+  fields:
+  - name: timestamps
+    type: u64
+    vla: True
+  
+  - name: twists
+    type: twist2
+    vla: True

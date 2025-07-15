@@ -32,8 +32,8 @@
 namespace wf {
     static auto logger = LoggerManager::getInstance().getLogger("VisionWorkerManager",LogGroup::General);
 
-    VisionWorkerManager::VisionWorkerManager(NetworkTablesManager& ntManager_, HardwareManager& hardwareManager_,ApriltagConfiguration& atagConfig_)
-    : ntManager(ntManager_), hardwareManager(hardwareManager_), atagConfig(atagConfig_) {}
+    VisionWorkerManager::VisionWorkerManager(NetworkTablesManager& ntManager_, HardwareManager& hardwareManager_,ApriltagConfiguration atagConfig_,ApriltagField& atagField_)
+    : ntManager(ntManager_), hardwareManager(hardwareManager_), atagConfig(atagConfig_), atagField(atagField_) {}
 
     VisionWorker& VisionWorkerManager::buildVisionWorker(const VisionWorkerConfig& config) {
         logger->info("Building worker {}",config.name);
@@ -80,7 +80,8 @@ namespace wf {
                     auto pipeline = std::make_unique<ApriltagPipeline>(
                         std::get<ApriltagPipelineConfiguration>(config.pipelineConfig),
                         hardwareManager.getIntrinsics(config.devpath).value(),
-                        atagConfig
+                        atagConfig,
+                        atagField
                     );
 
                     // Build output consumer

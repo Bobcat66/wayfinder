@@ -3,7 +3,7 @@
     "title": "camera_configuration",
     "type": "object",
     "$defs": {
-        "ControlName": {
+        "control_name": {
             "type": "string",
             "enum": [
                 "EXPOSURE",
@@ -21,6 +21,41 @@
                 "GAMMA",
                 "HUE"
             ]
+        },
+        "camera_intrinsics": {
+            "type": "object",
+            "properties": {
+                "resolution": {
+                    "type": "object",
+                    "properties": {
+                        "width": { "type": "number" },
+                        "height": { "type": "number" }
+                    },
+                    "required": ["width","height"],
+                    "additionalProperties": false
+                },
+                "matrix": {
+                    "type": "object",
+                    "properties": {
+                        "fx": { "type": "number" },
+                        "fy": { "type": "number" },
+                        "cx": { "type": "number" },
+                        "cy": { "type": "number" }
+                    }
+                },
+                "distortion": {
+                    "type": "array",
+                    "items": { "type": "number" },
+                    "minItems": 5,
+                    "maxItems": 8
+                }
+            },
+            "required": [
+                "resolution",
+                "matrix",
+                "distortion"
+            ],
+            "additionalProperties": false
         }
     },
     "properties": {
@@ -37,16 +72,16 @@
         "format": { "$ref": "stream_format.schema.json" },
         "controlAliases": {
             "type": "object",
-            "propertyNames": { "$ref": "#/$defs/ControlName" },
+            "propertyNames": { "$ref": "#/$defs/control_name" },
             "additionalProperties": { "type": "string" }
         },
         "calibrations": {
             "type": "array",
-            "items": { "$ref": "camera_intrinsics.schema.json" }
+            "items": { "$ref": "#/$defs/camera_intrinsics" }
         },
         "controls": {
             "type": "object",
-            "propertyNames": { "$ref": "#/$defs/ControlName" },
+            "propertyNames": { "$ref": "#/$defs/control_name" },
             "additionalProperties": { "type": "number" }
         }
     },
@@ -54,9 +89,7 @@
         "devpath",
         "backend",
         "format",
-        "controlAliases",
-        "calibrations",
-        "controls"
+        "controlAliases"
     ],
     "additionalProperties": false
 }

@@ -30,7 +30,7 @@
 namespace wf {
     class VisionWorkerManager {
     public:
-        VisionWorkerManager(NetworkTablesManager& ntManager_, HardwareManager& hardwareManager_, ApriltagConfiguration& atagConfig_);
+        VisionWorkerManager(NetworkTablesManager& ntManager_, HardwareManager& hardwareManager_, ApriltagConfiguration atagConfig_, ApriltagField& atagField_);
         VisionWorker& buildVisionWorker(const VisionWorkerConfig& config);
         bool workerExists(const std::string& name) const;
         VisionWorker& getWorker(const std::string& name);
@@ -42,7 +42,8 @@ namespace wf {
         void destroyAllWorkers();
     private:
         std::unordered_map<std::string,VisionWorker> workers;
-        ApriltagConfiguration& atagConfig;
+        ApriltagConfiguration atagConfig;
+        ApriltagField& atagField;
         NetworkTablesManager& ntManager;
         HardwareManager& hardwareManager;
     };

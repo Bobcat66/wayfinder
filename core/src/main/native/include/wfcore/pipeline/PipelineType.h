@@ -18,21 +18,19 @@
  */
 
 #pragma once
-
-#include "wfcore/types.h"
-#include "wfcore/video/video_types.h"
-#include "wfcore/pipeline/PipelineType.h"
-#include "wfcore/pipeline/PipelineResult.h"
-#include <vector>
-#include <optional>
+#include <cstdint>
 
 namespace wf {
-
-    class Pipeline {
-    public:
-        [[nodiscard]] 
-        virtual PipelineResult process(const cv::Mat& data, const FrameMetadata& meta) const noexcept = 0;
-        virtual ~Pipeline() = default;
+    /* 
+     * Potential pipeline types to add:
+     * Keypoint (pose estimation based on keypoints)
+     * OptimizedApriltag (apriltag pose estimation based on a dynamic field optimized with a TagSLAM algorithm, requires a SLAM server somewhere on the network)
+     * Depth (for depth cameras)
+     * MonoSFM (local single camera Structure from Motion)
+     * MonoSLAM (local single camera Simultaneous Mapping And Localization)
+     */
+    enum class PipelineType : uint8_t {
+        Apriltag = 0,
+        ObjDetect = 1
     };
-    
 }

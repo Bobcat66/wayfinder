@@ -17,7 +17,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-
 #pragma once
 
 #include <vector>
@@ -26,28 +25,17 @@
 #include <opencv2/core.hpp>
 #include "wfcore/video/video_types.h"
 #include "wfcore/inference/Tensorizer.h"
+#include "wfcore/inference/ObjectDetection.h"
 #include <optional>
 #include <array>
 
+// TODO: Figure out resizing and letterboxing for Inference, also restructure Inference pipeline
+// Object detection postprocessing should be done in the pipeline, not the Inference Engine
 namespace wf {
 
     struct IEFilteringParams {
         float nmsThreshold;
         float confidenceThreshold;
-    };
-
-    struct ObjectDetection {
-        int objectClass;
-        float confidence;
-        float percentArea;
-        std::array<cv::Point2f, 4> cornerPixels;
-        std::array<cv::Point2f, 4> cornerAngles;
-        ObjectDetection(
-            int objectClass_, float confidence_, float percentArea_,
-            std::array<cv::Point2f, 4> cornerPixels_,
-            std::array<cv::Point2f, 4> cornerAngles_
-        ) : objectClass(objectClass_), confidence(confidence_), percentArea(percentArea_),
-            cornerPixels(std::move(cornerPixels_)), cornerAngles(std::move(cornerAngles_)) {}
     };
 
     class InferenceEngine {

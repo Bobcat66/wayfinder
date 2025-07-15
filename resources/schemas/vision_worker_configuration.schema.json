@@ -1,0 +1,32 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "title": "vision_worker_config",
+    "type": "object",
+    "$defs": {
+        "pipeline_type": {
+            "type": "string",
+            "enum": [
+                "Apriltag",
+                "ObjDetect"
+            ]
+        }
+    },
+    "properties": {
+        "devpath": { "type": "string" },
+        "name": { "type": "string" },
+        "inputFormat": { "$ref": "stream_format.schema.json" },
+        "outputFormat": { "$ref": "stream_format.schema.json" },
+        "stream": { "type": "boolean" },
+        "raw_port": { "type": "number" },
+        "processed_port": { "type": "number" },
+        "pipelineType": { "$ref": "#/$defs/pipeline_type" },
+        "pipelineConfig": {
+            "oneOf": [
+                { "$ref": "apriltag_pipeline_configuration.schema.json" },
+                { "$ref": "objdetect_pipeline_configuration.schema.json" }
+            ]
+        }
+    },
+    "required": ["devpath","name","stream","pipelineType","pipelineConfig"],
+    "additionalProperties": false
+}

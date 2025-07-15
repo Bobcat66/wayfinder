@@ -29,6 +29,8 @@
 #include <unordered_map>
 #include <opencv2/core.hpp>
 
+// This file is now DEPRECATED. Serde shim code should be rewritten with WIPSSerializable
+
 namespace impl {
 
     // TODO: Figure out a better way to do this
@@ -55,23 +57,6 @@ namespace impl {
         {7, "tagStandard41h12"},
         {8, "tagStandard52h13"}
     };
-
-    // TODO: This is suboptimal, consider switching to regular C-style enum?
-    static wips_u8_t getPipelineTypeID(wf::PipelineType type) {
-        switch (type) {
-            case wf::PipelineType::Apriltag: return 0;
-            case wf::PipelineType::ApriltagDetect: return 1;
-            case wf::PipelineType::ObjDetect: return 2;
-        }
-    }
-
-    static wf::PipelineType getPipelineType(wips_u8_t typeID) {
-        switch (typeID) {
-            case 0: return wf::PipelineType::Apriltag;
-            case 1: return wf::PipelineType::ApriltagDetect;
-            case 2: return wf::PipelineType::ObjDetect;
-        }
-    }
 
     static wips_pose3_t wfcore2wips_pose3_shim(const gtsam::Pose3& pose) {
         auto q = pose.rotation().toQuaternion();
@@ -247,7 +232,7 @@ namespace impl {
         }
         return {
             pipelineResult.captimeMicros,
-            impl::getPipelineTypeID(pipelineResult.type),
+            static_cast<wips_u8_t>(pipelineResult.type),
             static_cast<wips_u32_t>(pipelineResult.aprilTagDetections.size()),
             detections_data,
             static_cast<wips_u32_t>(pipelineResult.aprilTagPoses.size()),
@@ -281,7 +266,7 @@ namespace impl {
 
         return {
             pipelineResult.timestamp,
-            impl::getPipelineType(pipelineResult.pipeline_type),
+            static_cast<wf::PipelineType>(pipelineResult.pipeline_type),
             std::move(detections),
             std::move(tagPoses),
             GET_WIPS_DETAIL(&pipelineResult,field_pose,optpresent)

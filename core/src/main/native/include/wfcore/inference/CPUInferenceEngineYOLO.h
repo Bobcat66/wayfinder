@@ -29,6 +29,15 @@
 
 // A simple reference implementation of a CPU inference engine, using OpenCV's DNN module.
 namespace wf {
+    struct RawBbox {
+        float x; // x coordinate of the top-left corner
+        float y; // y coordinate of the top-left corner
+        float width; 
+        float height;
+        int objectClass;
+        float confidence;
+    };
+
     class CPUInferenceEngineYOLO : public InferenceEngine {
     public:
         CPUInferenceEngineYOLO();
