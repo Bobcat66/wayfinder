@@ -74,39 +74,54 @@ void wips_{{ name }}_destroy(wips_{{ name }}_t* struct_ptr) {
 DEFINE_TRIVIAL_ENCODE({{ name }})
 DEFINE_TRIVIAL_DECODE({{ name }})
 {% else %}
-size_t wips_encode_{{ name }}(wips_bin_t* data, wips_{{ name }}_t* in) {
+wips_status_t wips_encode_{{ name }}(wips_bin_t* data, wips_{{ name }}_t* in) {
     size_t bytesEncoded = 0;
+    wips_status_t status;
 {%- for field in fields -%}
 {%- if field.vla == True %}
     for (wips_u32_t i = 0; i < in->GET_DETAIL({{ field.name }},vlasize); i++) {
-        bytesEncoded += wips_encode_{{ field.type }}(data, in->{{ field.name }} + i);
+        status = wips_encode_{{ field.type }}(data, in->{{ field.name }} + i);
+        bytesEncoded += status.bytes_processed;
+        if (status.status_code != WIPS_STATUS_OK) return wips_make_status(bytesEncoded,status.status_code);
     }
 {%- elif field.optional == True %}
     if (in->GET_DETAIL({{ field.name }},optpresent)) {
-        bytesEncoded += wips_encode_{{ field.type }}(data, &(in->{{ field.name }}));
+        status = wips_encode_{{ field.type }}(data, &(in->{{ field.name }}));
+        bytesEncoded += status.bytes_processed;
+        if (status.status_code != WIPS_STATUS_OK) return wips_make_status(bytesEncoded,status.status_code);
     }
 {%- else %}
-    bytesEncoded += wips_encode_{{ field.type }}(data, &(in->{{ field.name }}));
+    status = wips_encode_{{ field.type }}(data, &(in->{{ field.name }}));
+    bytesEncoded += status.bytes_processed;
+    if (status.status_code != WIPS_STATUS_OK) return wips_make_status(bytesEncoded,status.status_code);
 {%- endif %}
 {%- endfor %}
-    return bytesEncoded;
+    return wips_make_status(bytesEncoded,WIPS_STATUS_OK);
 }
-size_t wips_decode_{{ name }}(wips_{{ name }}_t* out, wips_bin_t* data) {
+wips_status_t wips_decode_{{ name }}(wips_{{ name }}_t* out, wips_bin_t* data) {
     size_t bytesDecoded = 0;
+    wips_status_t status;
 {%- for field in fields -%}
 {%- if field.vla == True %}
     out->{{ field.name }} = malloc(out->GET_DETAIL({{ field.name }},vlasize) * GET_SIZE({{ field.type }}));
+    if (!out->{{ field.name }}) return wips_make_status(bytesDecoded,WIPS_STATUS_OOM);
     for (wips_u32_t i = 0; i < out->GET_DETAIL({{ field.name }},vlasize); i++) {
-        bytesDecoded += wips_decode_{{ field.type }}(out->{{ field.name }} + i, data);
+        status = wips_decode_{{ field.type }}(out->{{ field.name }} + i, data);
+        bytesDecoded += status.bytes_processed;
+        if (status.status_code != WIPS_STATUS_OK) return wips_make_status(bytesDecoded,status.status_code);
     }
 {%- elif field.optional == True %}
     if (out->GET_DETAIL({{ field.name }},optpresent)) {
-        bytesDecoded += wips_decode_{{ field.type }}(&(out->{{ field.name }}), data);
+        status = wips_decode_{{ field.type }}(&(out->{{ field.name }}), data);
+        bytesDecoded += status.bytes_processed;
+        if (status.status_code != WIPS_STATUS_OK) return wips_make_status(bytesDecoded,status.status_code);
     }
 {%- else %}
-    bytesDecoded += wips_decode_{{ field.type }}(&(out->{{ field.name }}), data);
+    status = wips_decode_{{ field.type }}(&(out->{{ field.name }}), data);
+    bytesDecoded += status.bytes_processed;
+    if (status.status_code != WIPS_STATUS_OK) return wips_make_status(bytesDecoded,status.status_code);
 {%- endif %}
 {%- endfor %}
-    return bytesDecoded;
+    return wips_make_status(bytesDecoded,WIPS_STATUS_OK);
 }
 {%- endif %}

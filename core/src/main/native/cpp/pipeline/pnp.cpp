@@ -196,8 +196,6 @@ namespace wf {
                     reprojectionErrors[0]
                 );
             }
-            
-            return std::nullopt; // Placeholder for multiple tags case
         }
     }
 

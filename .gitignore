@@ -8,3 +8,4 @@ __pycache__
 .env
 staging
 .gradle
+wips_output

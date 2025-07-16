@@ -45,6 +45,12 @@ extern "C" {
 #define GET_WIPS_DETAIL_IMPL(field,detail) DETAIL ## detail ## __ ## field
 #define GET_WIPS_DETAIL(wips_struct,field,detail) (wips_struct)->GET_WIPS_DETAIL_IMPL(field,detail)
 
+// Status codes
+#define WIPS_STATUS_OK 0x00 // No error
+#define WIPS_STATUS_OOM 0x01  // out of memory
+#define WIPS_STATUS_BOUNDS_ERROR 0x02 // Out-of-bounds error
+#define WIPS_STATUS_OVERFLOW 0x03
+
 typedef uint8_t wips_u8_t;
 typedef int8_t wips_i8_t;
 
@@ -66,41 +72,53 @@ typedef struct wips_bin {
     size_t allocated; // The amount of memory allocated
 } wips_bin_t;
 
+typedef struct wips_status {
+    size_t bytes_processed;
+    unsigned char status_code;
+} wips_status_t;
+
+inline wips_status_t wips_make_status(size_t bytes, unsigned char code) {
+    wips_status_t s;
+    s.bytes_processed = bytes;
+    s.status_code = code;
+    return s;
+}
+
 wips_bin_t* wips_bin_create(size_t size);
 
 wips_bin_t* wips_bin_wrap(unsigned char* base, size_t size);
 
 void wips_bin_destroy(wips_bin_t* bin);
 
-size_t wips_encode_u8(wips_bin_t* data, wips_u8_t* in);
-size_t wips_decode_u8(wips_u8_t* out, wips_bin_t* data);
+wips_status_t wips_encode_u8(wips_bin_t* data, wips_u8_t* in);
+wips_status_t wips_decode_u8(wips_u8_t* out, wips_bin_t* data);
 
-size_t wips_encode_i8(wips_bin_t* data, wips_i8_t* in);
-size_t wips_decode_i8(wips_i8_t* out, wips_bin_t* data);
+wips_status_t wips_encode_i8(wips_bin_t* data, wips_i8_t* in);
+wips_status_t wips_decode_i8(wips_i8_t* out, wips_bin_t* data);
 
-size_t wips_encode_u16(wips_bin_t* data, wips_u16_t* in);
-size_t wips_decode_u16(wips_u16_t* out, wips_bin_t* data);
+wips_status_t wips_encode_u16(wips_bin_t* data, wips_u16_t* in);
+wips_status_t wips_decode_u16(wips_u16_t* out, wips_bin_t* data);
 
-size_t wips_encode_i16(wips_bin_t* data, wips_i16_t* in);
-size_t wips_decode_i16(wips_i16_t* out, wips_bin_t* data);
+wips_status_t wips_encode_i16(wips_bin_t* data, wips_i16_t* in);
+wips_status_t wips_decode_i16(wips_i16_t* out, wips_bin_t* data);
 
-size_t wips_encode_u32(wips_bin_t* data, wips_u32_t* in);
-size_t wips_decode_u32(wips_u32_t* out, wips_bin_t* data);
+wips_status_t wips_encode_u32(wips_bin_t* data, wips_u32_t* in);
+wips_status_t wips_decode_u32(wips_u32_t* out, wips_bin_t* data);
 
-size_t wips_encode_i32(wips_bin_t* data, wips_i32_t* in);
-size_t wips_decode_i32(wips_i32_t* out, wips_bin_t* data);
+wips_status_t wips_encode_i32(wips_bin_t* data, wips_i32_t* in);
+wips_status_t wips_decode_i32(wips_i32_t* out, wips_bin_t* data);
 
-size_t wips_encode_u64(wips_bin_t* data, wips_u64_t* in);
-size_t wips_decode_u64(wips_u64_t* out, wips_bin_t* data);
+wips_status_t wips_encode_u64(wips_bin_t* data, wips_u64_t* in);
+wips_status_t wips_decode_u64(wips_u64_t* out, wips_bin_t* data);
 
-size_t wips_encode_i64(wips_bin_t* data, wips_i64_t* in);
-size_t wips_decode_i64(wips_i64_t* out, wips_bin_t* data);
+wips_status_t wips_encode_i64(wips_bin_t* data, wips_i64_t* in);
+wips_status_t wips_decode_i64(wips_i64_t* out, wips_bin_t* data);
 
-size_t wips_encode_fp32(wips_bin_t* data, wips_fp32_t* in);
-size_t wips_decode_fp32(wips_fp32_t* out, wips_bin_t* data);
+wips_status_t wips_encode_fp32(wips_bin_t* data, wips_fp32_t* in);
+wips_status_t wips_decode_fp32(wips_fp32_t* out, wips_bin_t* data);
 
-size_t wips_encode_fp64(wips_bin_t* data, wips_fp64_t* in);
-size_t wips_decode_fp64(wips_fp64_t* out, wips_bin_t* data);
+wips_status_t wips_encode_fp64(wips_bin_t* data, wips_fp64_t* in);
+wips_status_t wips_decode_fp64(wips_fp64_t* out, wips_bin_t* data);
 
 void wips_u8_free_resources(wips_u8_t* data);
 void wips_i8_free_resources(wips_i8_t* data);

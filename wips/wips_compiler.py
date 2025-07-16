@@ -164,6 +164,9 @@ def compile(schemas_path: Path, output_dir: Path, py: bool = False, jvm: bool = 
 # Lib:
 # python3 wips_compiler.py messages.yaml --jvm --out=../wayfinderlib/src/generated/wips
 
+# Testing:
+# python3 wips_compiler.py messages.yaml --out=./wips_output
+
 # Python and Java bindings generation is not implemented yet, but the flags are here for future use.
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="WIPS Compiler")
