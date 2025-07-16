@@ -40,9 +40,9 @@ extern "C" {
 
 #include "wips_runtime.h"
 #include "apriltag_relative_pose_observation.wips.h"
+#include "apriltag_detection.wips.h"
 #include "apriltag_field_pose_observation.wips.h"
 #include "object_detection.wips.h"
-#include "apriltag_detection.wips.h"
 
 typedef struct wips_pipeline_result {
     wips_u64_t timestamp;
@@ -64,8 +64,8 @@ void wips_pipeline_result_free_resources(wips_pipeline_result_t* struct_ptr);
 wips_pipeline_result_t* wips_pipeline_result_create();
 void wips_pipeline_result_destroy(wips_pipeline_result_t* struct_ptr);
 
-size_t wips_encode_pipeline_result(wips_bin_t* data, wips_pipeline_result_t* in);
-size_t wips_decode_pipeline_result(wips_pipeline_result_t* out, wips_bin_t* data);
+wips_status_t wips_encode_pipeline_result(wips_bin_t* data, wips_pipeline_result_t* in);
+wips_status_t wips_decode_pipeline_result(wips_pipeline_result_t* out, wips_bin_t* data);
 
 #ifdef __cplusplus
 }

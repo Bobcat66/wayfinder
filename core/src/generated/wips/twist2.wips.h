@@ -40,25 +40,21 @@ extern "C" {
 
 #include "wips_runtime.h"
 
-typedef struct wips_pose3 {
-    wips_fp64_t x;
-    wips_fp64_t y;
-    wips_fp64_t z;
-    wips_fp64_t wq;
-    wips_fp64_t xq;
-    wips_fp64_t yq;
-    wips_fp64_t zq;
-} wips_pose3_t;
+typedef struct wips_twist2 {
+    wips_fp64_t dx;
+    wips_fp64_t dy;
+    wips_fp64_t dtheta;
+} wips_twist2_t;
 
 // Recursive function to free all memory allocated by the struct and its members. Does NOT free the struct itself if it was dynamically allocated.
 // Warning: Calling this function on a struct that has not been written to from a WIPS binary will result in undefined behavior.
 // This function is intended to be used when the struct is no longer needed, to prevent memory leaks.
-void wips_pose3_free_resources(wips_pose3_t* struct_ptr);
-wips_pose3_t* wips_pose3_create();
-void wips_pose3_destroy(wips_pose3_t* struct_ptr);
+void wips_twist2_free_resources(wips_twist2_t* struct_ptr);
+wips_twist2_t* wips_twist2_create();
+void wips_twist2_destroy(wips_twist2_t* struct_ptr);
 
-wips_status_t wips_encode_pose3(wips_bin_t* data, wips_pose3_t* in);
-wips_status_t wips_decode_pose3(wips_pose3_t* out, wips_bin_t* data);
+wips_status_t wips_encode_twist2(wips_bin_t* data, wips_twist2_t* in);
+wips_status_t wips_decode_twist2(wips_twist2_t* out, wips_bin_t* data);
 
 #ifdef __cplusplus
 }

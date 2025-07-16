@@ -52,9 +52,11 @@ wips_bin_t* wips_bin_create(size_t size) {
 
 wips_bin_t* wips_bin_wrap(unsigned char* base, size_t size) {
     wips_bin_t* newbin = malloc(sizeof(wips_bin_t));
+    if (!newbin) return NULL;
     newbin->base = base;
     newbin->offset = 0;
     newbin->allocated = size;
+    return newbin;
 }
 
 void wips_bin_destroy(wips_bin_t* bin) {

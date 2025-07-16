@@ -61,40 +61,75 @@ void wips_apriltag_field_pose_observation_destroy(wips_apriltag_field_pose_obser
 }
 
 
-size_t wips_encode_apriltag_field_pose_observation(wips_bin_t* data, wips_apriltag_field_pose_observation_t* in) {
+wips_status_t wips_encode_apriltag_field_pose_observation(wips_bin_t* data, wips_apriltag_field_pose_observation_t* in) {
     size_t bytesEncoded = 0;
-    bytesEncoded += wips_encode_u32(data, &(in->DETAILvlasize__tags_used));
+    wips_status_t status;
+    status = wips_encode_u32(data, &(in->DETAILvlasize__tags_used));
+    bytesEncoded += status.bytes_processed;
+    if (status.status_code != WIPS_STATUS_OK) return wips_make_status(bytesEncoded,status.status_code);
     for (wips_u32_t i = 0; i < in->GET_DETAIL(tags_used,vlasize); i++) {
-        bytesEncoded += wips_encode_i32(data, in->tags_used + i);
+        status = wips_encode_i32(data, in->tags_used + i);
+        bytesEncoded += status.bytes_processed;
+        if (status.status_code != WIPS_STATUS_OK) return wips_make_status(bytesEncoded,status.status_code);
     }
-    bytesEncoded += wips_encode_pose3(data, &(in->field_pose_0));
-    bytesEncoded += wips_encode_fp64(data, &(in->error_0));
-    bytesEncoded += wips_encode_u8(data, &(in->DETAILoptpresent__field_pose_1));
+    status = wips_encode_pose3(data, &(in->field_pose_0));
+    bytesEncoded += status.bytes_processed;
+    if (status.status_code != WIPS_STATUS_OK) return wips_make_status(bytesEncoded,status.status_code);
+    status = wips_encode_fp64(data, &(in->error_0));
+    bytesEncoded += status.bytes_processed;
+    if (status.status_code != WIPS_STATUS_OK) return wips_make_status(bytesEncoded,status.status_code);
+    status = wips_encode_u8(data, &(in->DETAILoptpresent__field_pose_1));
+    bytesEncoded += status.bytes_processed;
+    if (status.status_code != WIPS_STATUS_OK) return wips_make_status(bytesEncoded,status.status_code);
     if (in->GET_DETAIL(field_pose_1,optpresent)) {
-        bytesEncoded += wips_encode_pose3(data, &(in->field_pose_1));
+        status = wips_encode_pose3(data, &(in->field_pose_1));
+        bytesEncoded += status.bytes_processed;
+        if (status.status_code != WIPS_STATUS_OK) return wips_make_status(bytesEncoded,status.status_code);
     }
-    bytesEncoded += wips_encode_u8(data, &(in->DETAILoptpresent__error_1));
+    status = wips_encode_u8(data, &(in->DETAILoptpresent__error_1));
+    bytesEncoded += status.bytes_processed;
+    if (status.status_code != WIPS_STATUS_OK) return wips_make_status(bytesEncoded,status.status_code);
     if (in->GET_DETAIL(error_1,optpresent)) {
-        bytesEncoded += wips_encode_fp64(data, &(in->error_1));
+        status = wips_encode_fp64(data, &(in->error_1));
+        bytesEncoded += status.bytes_processed;
+        if (status.status_code != WIPS_STATUS_OK) return wips_make_status(bytesEncoded,status.status_code);
     }
-    return bytesEncoded;
+    return wips_make_status(bytesEncoded,WIPS_STATUS_OK);
 }
-size_t wips_decode_apriltag_field_pose_observation(wips_apriltag_field_pose_observation_t* out, wips_bin_t* data) {
+wips_status_t wips_decode_apriltag_field_pose_observation(wips_apriltag_field_pose_observation_t* out, wips_bin_t* data) {
     size_t bytesDecoded = 0;
-    bytesDecoded += wips_decode_u32(&(out->DETAILvlasize__tags_used), data);
+    wips_status_t status;
+    status = wips_decode_u32(&(out->DETAILvlasize__tags_used), data);
+    bytesDecoded += status.bytes_processed;
+    if (status.status_code != WIPS_STATUS_OK) return wips_make_status(bytesDecoded,status.status_code);
     out->tags_used = malloc(out->GET_DETAIL(tags_used,vlasize) * GET_SIZE(i32));
+    if (!out->tags_used) return wips_make_status(bytesDecoded,WIPS_STATUS_OOM);
     for (wips_u32_t i = 0; i < out->GET_DETAIL(tags_used,vlasize); i++) {
-        bytesDecoded += wips_decode_i32(out->tags_used + i, data);
+        status = wips_decode_i32(out->tags_used + i, data);
+        bytesDecoded += status.bytes_processed;
+        if (status.status_code != WIPS_STATUS_OK) return wips_make_status(bytesDecoded,status.status_code);
     }
-    bytesDecoded += wips_decode_pose3(&(out->field_pose_0), data);
-    bytesDecoded += wips_decode_fp64(&(out->error_0), data);
-    bytesDecoded += wips_decode_u8(&(out->DETAILoptpresent__field_pose_1), data);
+    status = wips_decode_pose3(&(out->field_pose_0), data);
+    bytesDecoded += status.bytes_processed;
+    if (status.status_code != WIPS_STATUS_OK) return wips_make_status(bytesDecoded,status.status_code);
+    status = wips_decode_fp64(&(out->error_0), data);
+    bytesDecoded += status.bytes_processed;
+    if (status.status_code != WIPS_STATUS_OK) return wips_make_status(bytesDecoded,status.status_code);
+    status = wips_decode_u8(&(out->DETAILoptpresent__field_pose_1), data);
+    bytesDecoded += status.bytes_processed;
+    if (status.status_code != WIPS_STATUS_OK) return wips_make_status(bytesDecoded,status.status_code);
     if (out->GET_DETAIL(field_pose_1,optpresent)) {
-        bytesDecoded += wips_decode_pose3(&(out->field_pose_1), data);
+        status = wips_decode_pose3(&(out->field_pose_1), data);
+        bytesDecoded += status.bytes_processed;
+        if (status.status_code != WIPS_STATUS_OK) return wips_make_status(bytesDecoded,status.status_code);
     }
-    bytesDecoded += wips_decode_u8(&(out->DETAILoptpresent__error_1), data);
+    status = wips_decode_u8(&(out->DETAILoptpresent__error_1), data);
+    bytesDecoded += status.bytes_processed;
+    if (status.status_code != WIPS_STATUS_OK) return wips_make_status(bytesDecoded,status.status_code);
     if (out->GET_DETAIL(error_1,optpresent)) {
-        bytesDecoded += wips_decode_fp64(&(out->error_1), data);
+        status = wips_decode_fp64(&(out->error_1), data);
+        bytesDecoded += status.bytes_processed;
+        if (status.status_code != WIPS_STATUS_OK) return wips_make_status(bytesDecoded,status.status_code);
     }
-    return bytesDecoded;
+    return wips_make_status(bytesDecoded,WIPS_STATUS_OK);
 }

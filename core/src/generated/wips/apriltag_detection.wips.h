@@ -62,8 +62,8 @@ void wips_apriltag_detection_free_resources(wips_apriltag_detection_t* struct_pt
 wips_apriltag_detection_t* wips_apriltag_detection_create();
 void wips_apriltag_detection_destroy(wips_apriltag_detection_t* struct_ptr);
 
-size_t wips_encode_apriltag_detection(wips_bin_t* data, wips_apriltag_detection_t* in);
-size_t wips_decode_apriltag_detection(wips_apriltag_detection_t* out, wips_bin_t* data);
+wips_status_t wips_encode_apriltag_detection(wips_bin_t* data, wips_apriltag_detection_t* in);
+wips_status_t wips_decode_apriltag_detection(wips_apriltag_detection_t* out, wips_bin_t* data);
 
 #ifdef __cplusplus
 }

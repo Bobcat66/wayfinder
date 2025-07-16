@@ -56,8 +56,8 @@ void wips_apriltag_relative_pose_observation_free_resources(wips_apriltag_relati
 wips_apriltag_relative_pose_observation_t* wips_apriltag_relative_pose_observation_create();
 void wips_apriltag_relative_pose_observation_destroy(wips_apriltag_relative_pose_observation_t* struct_ptr);
 
-size_t wips_encode_apriltag_relative_pose_observation(wips_bin_t* data, wips_apriltag_relative_pose_observation_t* in);
-size_t wips_decode_apriltag_relative_pose_observation(wips_apriltag_relative_pose_observation_t* out, wips_bin_t* data);
+wips_status_t wips_encode_apriltag_relative_pose_observation(wips_bin_t* data, wips_apriltag_relative_pose_observation_t* in);
+wips_status_t wips_decode_apriltag_relative_pose_observation(wips_apriltag_relative_pose_observation_t* out, wips_bin_t* data);
 
 #ifdef __cplusplus
 }

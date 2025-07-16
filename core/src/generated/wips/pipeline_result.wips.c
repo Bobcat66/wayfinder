@@ -74,50 +74,95 @@ void wips_pipeline_result_destroy(wips_pipeline_result_t* struct_ptr) {
 }
 
 
-size_t wips_encode_pipeline_result(wips_bin_t* data, wips_pipeline_result_t* in) {
+wips_status_t wips_encode_pipeline_result(wips_bin_t* data, wips_pipeline_result_t* in) {
     size_t bytesEncoded = 0;
-    bytesEncoded += wips_encode_u64(data, &(in->timestamp));
-    bytesEncoded += wips_encode_u8(data, &(in->pipeline_type));
-    bytesEncoded += wips_encode_u32(data, &(in->DETAILvlasize__tag_detections));
+    wips_status_t status;
+    status = wips_encode_u64(data, &(in->timestamp));
+    bytesEncoded += status.bytes_processed;
+    if (status.status_code != WIPS_STATUS_OK) return wips_make_status(bytesEncoded,status.status_code);
+    status = wips_encode_u8(data, &(in->pipeline_type));
+    bytesEncoded += status.bytes_processed;
+    if (status.status_code != WIPS_STATUS_OK) return wips_make_status(bytesEncoded,status.status_code);
+    status = wips_encode_u32(data, &(in->DETAILvlasize__tag_detections));
+    bytesEncoded += status.bytes_processed;
+    if (status.status_code != WIPS_STATUS_OK) return wips_make_status(bytesEncoded,status.status_code);
     for (wips_u32_t i = 0; i < in->GET_DETAIL(tag_detections,vlasize); i++) {
-        bytesEncoded += wips_encode_apriltag_detection(data, in->tag_detections + i);
+        status = wips_encode_apriltag_detection(data, in->tag_detections + i);
+        bytesEncoded += status.bytes_processed;
+        if (status.status_code != WIPS_STATUS_OK) return wips_make_status(bytesEncoded,status.status_code);
     }
-    bytesEncoded += wips_encode_u32(data, &(in->DETAILvlasize__tag_poses));
+    status = wips_encode_u32(data, &(in->DETAILvlasize__tag_poses));
+    bytesEncoded += status.bytes_processed;
+    if (status.status_code != WIPS_STATUS_OK) return wips_make_status(bytesEncoded,status.status_code);
     for (wips_u32_t i = 0; i < in->GET_DETAIL(tag_poses,vlasize); i++) {
-        bytesEncoded += wips_encode_apriltag_relative_pose_observation(data, in->tag_poses + i);
+        status = wips_encode_apriltag_relative_pose_observation(data, in->tag_poses + i);
+        bytesEncoded += status.bytes_processed;
+        if (status.status_code != WIPS_STATUS_OK) return wips_make_status(bytesEncoded,status.status_code);
     }
-    bytesEncoded += wips_encode_u8(data, &(in->DETAILoptpresent__field_pose));
+    status = wips_encode_u8(data, &(in->DETAILoptpresent__field_pose));
+    bytesEncoded += status.bytes_processed;
+    if (status.status_code != WIPS_STATUS_OK) return wips_make_status(bytesEncoded,status.status_code);
     if (in->GET_DETAIL(field_pose,optpresent)) {
-        bytesEncoded += wips_encode_apriltag_field_pose_observation(data, &(in->field_pose));
+        status = wips_encode_apriltag_field_pose_observation(data, &(in->field_pose));
+        bytesEncoded += status.bytes_processed;
+        if (status.status_code != WIPS_STATUS_OK) return wips_make_status(bytesEncoded,status.status_code);
     }
-    bytesEncoded += wips_encode_u32(data, &(in->DETAILvlasize__object_detections));
+    status = wips_encode_u32(data, &(in->DETAILvlasize__object_detections));
+    bytesEncoded += status.bytes_processed;
+    if (status.status_code != WIPS_STATUS_OK) return wips_make_status(bytesEncoded,status.status_code);
     for (wips_u32_t i = 0; i < in->GET_DETAIL(object_detections,vlasize); i++) {
-        bytesEncoded += wips_encode_object_detection(data, in->object_detections + i);
+        status = wips_encode_object_detection(data, in->object_detections + i);
+        bytesEncoded += status.bytes_processed;
+        if (status.status_code != WIPS_STATUS_OK) return wips_make_status(bytesEncoded,status.status_code);
     }
-    return bytesEncoded;
+    return wips_make_status(bytesEncoded,WIPS_STATUS_OK);
 }
-size_t wips_decode_pipeline_result(wips_pipeline_result_t* out, wips_bin_t* data) {
+wips_status_t wips_decode_pipeline_result(wips_pipeline_result_t* out, wips_bin_t* data) {
     size_t bytesDecoded = 0;
-    bytesDecoded += wips_decode_u64(&(out->timestamp), data);
-    bytesDecoded += wips_decode_u8(&(out->pipeline_type), data);
-    bytesDecoded += wips_decode_u32(&(out->DETAILvlasize__tag_detections), data);
+    wips_status_t status;
+    status = wips_decode_u64(&(out->timestamp), data);
+    bytesDecoded += status.bytes_processed;
+    if (status.status_code != WIPS_STATUS_OK) return wips_make_status(bytesDecoded,status.status_code);
+    status = wips_decode_u8(&(out->pipeline_type), data);
+    bytesDecoded += status.bytes_processed;
+    if (status.status_code != WIPS_STATUS_OK) return wips_make_status(bytesDecoded,status.status_code);
+    status = wips_decode_u32(&(out->DETAILvlasize__tag_detections), data);
+    bytesDecoded += status.bytes_processed;
+    if (status.status_code != WIPS_STATUS_OK) return wips_make_status(bytesDecoded,status.status_code);
     out->tag_detections = malloc(out->GET_DETAIL(tag_detections,vlasize) * GET_SIZE(apriltag_detection));
+    if (!out->tag_detections) return wips_make_status(bytesDecoded,WIPS_STATUS_OOM);
     for (wips_u32_t i = 0; i < out->GET_DETAIL(tag_detections,vlasize); i++) {
-        bytesDecoded += wips_decode_apriltag_detection(out->tag_detections + i, data);
+        status = wips_decode_apriltag_detection(out->tag_detections + i, data);
+        bytesDecoded += status.bytes_processed;
+        if (status.status_code != WIPS_STATUS_OK) return wips_make_status(bytesDecoded,status.status_code);
     }
-    bytesDecoded += wips_decode_u32(&(out->DETAILvlasize__tag_poses), data);
+    status = wips_decode_u32(&(out->DETAILvlasize__tag_poses), data);
+    bytesDecoded += status.bytes_processed;
+    if (status.status_code != WIPS_STATUS_OK) return wips_make_status(bytesDecoded,status.status_code);
     out->tag_poses = malloc(out->GET_DETAIL(tag_poses,vlasize) * GET_SIZE(apriltag_relative_pose_observation));
+    if (!out->tag_poses) return wips_make_status(bytesDecoded,WIPS_STATUS_OOM);
     for (wips_u32_t i = 0; i < out->GET_DETAIL(tag_poses,vlasize); i++) {
-        bytesDecoded += wips_decode_apriltag_relative_pose_observation(out->tag_poses + i, data);
+        status = wips_decode_apriltag_relative_pose_observation(out->tag_poses + i, data);
+        bytesDecoded += status.bytes_processed;
+        if (status.status_code != WIPS_STATUS_OK) return wips_make_status(bytesDecoded,status.status_code);
     }
-    bytesDecoded += wips_decode_u8(&(out->DETAILoptpresent__field_pose), data);
+    status = wips_decode_u8(&(out->DETAILoptpresent__field_pose), data);
+    bytesDecoded += status.bytes_processed;
+    if (status.status_code != WIPS_STATUS_OK) return wips_make_status(bytesDecoded,status.status_code);
     if (out->GET_DETAIL(field_pose,optpresent)) {
-        bytesDecoded += wips_decode_apriltag_field_pose_observation(&(out->field_pose), data);
+        status = wips_decode_apriltag_field_pose_observation(&(out->field_pose), data);
+        bytesDecoded += status.bytes_processed;
+        if (status.status_code != WIPS_STATUS_OK) return wips_make_status(bytesDecoded,status.status_code);
     }
-    bytesDecoded += wips_decode_u32(&(out->DETAILvlasize__object_detections), data);
+    status = wips_decode_u32(&(out->DETAILvlasize__object_detections), data);
+    bytesDecoded += status.bytes_processed;
+    if (status.status_code != WIPS_STATUS_OK) return wips_make_status(bytesDecoded,status.status_code);
     out->object_detections = malloc(out->GET_DETAIL(object_detections,vlasize) * GET_SIZE(object_detection));
+    if (!out->object_detections) return wips_make_status(bytesDecoded,WIPS_STATUS_OOM);
     for (wips_u32_t i = 0; i < out->GET_DETAIL(object_detections,vlasize); i++) {
-        bytesDecoded += wips_decode_object_detection(out->object_detections + i, data);
+        status = wips_decode_object_detection(out->object_detections + i, data);
+        bytesDecoded += status.bytes_processed;
+        if (status.status_code != WIPS_STATUS_OK) return wips_make_status(bytesDecoded,status.status_code);
     }
-    return bytesDecoded;
+    return wips_make_status(bytesDecoded,WIPS_STATUS_OK);
 }
