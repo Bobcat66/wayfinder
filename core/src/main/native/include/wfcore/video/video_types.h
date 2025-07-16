@@ -29,7 +29,7 @@ namespace wf {
     template <typename T>
     concept CVImage = std::same_as<T, cv::Mat> || std::same_as<T, cv::UMat>;
 
-    enum ImageEncoding {
+    enum class ImageEncoding : uint8_t {
         BGR24, // Blue-Green-Red 24 bit, default color encoding
         RGB24,
         RGB565, 

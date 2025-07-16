@@ -18,7 +18,9 @@
  */
 
 #include "wfcore/video/processing/ResizeNode.h"
+#include "wfcore/common/wfexcept.h"
 #include <opencv2/imgproc.hpp>
+
 namespace wf {
 
     template <CVImage T>
@@ -34,8 +36,7 @@ namespace wf {
     template <CVImage T>
     void ResizeNode<T>::updateBuffers() {
         this->outpad = T(
-            this->outsize.width,
-            this->outsize.height,
+            this->outsize,
             this->inpad->type()
         );
         this->outcoding = *(this->incoding);

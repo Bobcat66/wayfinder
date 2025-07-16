@@ -37,17 +37,25 @@ namespace wf {
         const CameraIntrinsics& cameraIntrinsics,
         const std::unordered_set<int>& ignoreList
     ) noexcept {
-        // TODO: Profile and check if this causes unacceptable heap churn, if so,
-        // consider switching to an arena allocator or some other memory management strategy.
-        // IDT it'll cause issues, but it's worth noting
-        std::vector<cv::Point3d> objectPoints;
+
+        // Statically allocate buffers so they are not reallocated every frame
+        static thread_local std::vector<cv::Point3d> objectPoints;
+        static thread_local std::vector<cv::Point2d> imagePoints;
+        static thread_local std::vector<cv::Mat> rvecs, tvecs;
+        static thread_local std::vector<double> reprojectionErrors;
+        static thread_local std::vector<gtsam::Pose3> tagPoses;
+
+        objectPoints.clear();
+        imagePoints.clear();
+        tagPoses.clear();
+
         objectPoints.reserve(detections.size() * 4);
-        std::vector<cv::Point2d> imagePoints;
         imagePoints.reserve(detections.size() * 4);
+        tagPoses.reserve(detections.size());
+
         std::vector<int> tagsUsed;
         tagsUsed.reserve(detections.size());
-        std::vector<gtsam::Pose3> tagPoses;
-        tagPoses.reserve(detections.size());
+
         // We might be reserving more space than we need, as tags could be filtered out by the ignoreList.
 
         // Memory pool for storing corner poses
@@ -103,9 +111,11 @@ namespace wf {
         if (tagsUsed.size() == 0) {
             return std::nullopt; // No tags found, give up
         } else if (tagsUsed.size() == 1) {
-            std::vector<cv::Mat> rvecs, tvecs;
-            std::vector<double> reprojectionErrors;
+            rvecs.clear();
+            tvecs.clear();
+            reprojectionErrors.clear();
             objectPoints.clear();
+            
             objectPoints.emplace_back(
                 -tagConfig.tagSize / 2.0,
                 tagConfig.tagSize / 2.0, 
@@ -146,7 +156,7 @@ namespace wf {
                 const gtsam::Pose3 tagPose0_w = cvPoseVecsToWPILibPose3(rvecs[0], tvecs[0]);
                 const gtsam::Pose3 tagPose1_w = cvPoseVecsToWPILibPose3(rvecs[1], tvecs[1]);
                 const gtsam::Pose3 fieldPose0_w = fieldToTagPose.compose(tagPose0_w.inverse());
-                const gtsam::Pose3 fieldPose1_w = fieldToTagPose.compose(tagPose0_w.inverse());
+                const gtsam::Pose3 fieldPose1_w = fieldToTagPose.compose(tagPose1_w.inverse());
                 double error0 = reprojectionErrors[0];
                 double error1 = reprojectionErrors[1];
                 return std::optional<ApriltagFieldPoseObservation>{
@@ -159,15 +169,17 @@ namespace wf {
                 }; // Todo: Optimize this construction
             }
         } else {
-            cv::Mat tvec, rvec;
-            std::vector<double> reprojectionErrors;
+            tvecs.clear();
+            rvecs.clear();
+            reprojectionErrors.clear();
+
             bool success = cv::solvePnPGeneric(
                 objectPoints,
                 imagePoints,
                 cameraIntrinsics.cameraMatrix,
                 cameraIntrinsics.distCoeffs,
-                rvec,
-                tvec,
+                rvecs,
+                tvecs,
                 false,
                 cv::SOLVEPNP_SQPNP,
                 cv::noArray(),
@@ -180,7 +192,7 @@ namespace wf {
                 return std::optional<ApriltagFieldPoseObservation>(
                     std::in_place,
                     std::move(tagsUsed),
-                    cvPoseVecsToWPILibPose3(rvec,tvec),
+                    cvPoseVecsToWPILibPose3(rvecs[0],tvecs[0]),
                     reprojectionErrors[0]
                 );
             }
@@ -194,10 +206,17 @@ namespace wf {
         const ApriltagConfiguration& tagConfig,
         const CameraIntrinsics& cameraIntrinsics
     ) noexcept {
-        std::vector<cv::Mat> rvecs, tvecs;
-        std::vector<double> reprojectionErrors;
-        std::vector<cv::Point2d> imagePoints;
-        std::vector<cv::Point3d> objectPoints;
+        static thread_local std::vector<cv::Mat> rvecs, tvecs;
+        static thread_local std::vector<double> reprojectionErrors;
+        static thread_local std::vector<cv::Point2d> imagePoints;
+        static thread_local std::vector<cv::Point3d> objectPoints;
+
+        rvecs.clear();
+        tvecs.clear();
+        reprojectionErrors.clear();
+        imagePoints.clear();
+        objectPoints.clear();
+        
         for (const auto& corner : detection.corners) {
             imagePoints.push_back(corner);
         }

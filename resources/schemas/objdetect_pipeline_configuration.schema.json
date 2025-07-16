@@ -65,7 +65,7 @@
         "modelArch": { "$ref": "#/$defs/model_architecture" },
         "engineType": { "$ref": "#/$defs/inference_engine_type" },
         "tensorParams": { "$ref": "#/$defs/tensor_parameters" },
-        "modelInputFormat": { "$ref": "frame_format.schema.json" },
+        "modelColorSpace": { "$ref": "frame_format.schema.json#/$defs/image_encoding" },
         "filterParams": { "$ref": "#/$defs/ie_filtering_parameters" }
     },
     "additionalProperties": false

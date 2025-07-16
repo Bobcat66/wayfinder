@@ -18,7 +18,7 @@
  */
 
 #include "wfcore/inference/CPUInferenceEngineYOLO.h"
-#include "wfcore/inference/inference_utils.h"
+#include "wfcore/inference/postproc_utils.h"
 #include <opencv2/dnn.hpp>
 #include <opencv2/opencv.hpp>
 #include <cassert>
@@ -49,13 +49,13 @@ namespace wf {
         return !model.empty();
     }
     [[nodiscard]] 
-    std::vector<ObjectDetection> CPUInferenceEngineYOLO::infer(const cv::Mat& data, const FrameMetadata& meta) noexcept {
+    std::vector<RawBbox> CPUInferenceEngineYOLO::infer(const cv::Mat& data, const FrameMetadata& meta) noexcept {
         this->tensorizer.tensorize(data, reinterpret_cast<float*>(blob.data));
         model.setInput(blob);
         cv::Mat output = model.forward();
         // Output Shape: [1, number of detections, 5 + number of classes]
         int numDetections = output.rows;
-        std::vector<ObjectDetection> detections;
+        std::vector<RawBbox> detections;
         detections.reserve(numDetections);
         int num_classes = output.cols - 5;
         objclass_buffer.clear();
@@ -89,28 +89,13 @@ namespace wf {
         );
         for (int index : index_buffer) {
             auto bboxd = bboxd_buffer[index];
-            corners_buffer.clear();
-            norm_corners_buffer.clear();
-            auto corners = std::move(getCornersBboxd(bboxd));
-            corners_buffer.assign(corners.begin(),corners.end());
-            cv::undistortPoints(
-                corners_buffer,
-                norm_corners_buffer,
-                this->intrinsics.cameraMatrix,
-                this->intrinsics.distCoeffs
-            );
             detections.emplace_back(
+                static_cast<float>(bboxd.x),
+                static_cast<float>(bboxd.y),
+                static_cast<float>(bboxd.width),
+                static_cast<float>(bboxd.height),
                 objclass_buffer[index],
-                confidence_buffer[index],
-                static_cast<float>(bboxd.width * bboxd.height) 
-                    / (meta.format.rows * meta.format.cols),
-                std::move(corners),
-                std::array<cv::Point2f, 4>{
-                    cv::Point2f{std::atan(norm_corners_buffer[0].x),std::atan(norm_corners_buffer[0].y)},
-                    cv::Point2f{std::atan(norm_corners_buffer[1].x),std::atan(norm_corners_buffer[1].y)},
-                    cv::Point2f{std::atan(norm_corners_buffer[2].x),std::atan(norm_corners_buffer[2].y)},
-                    cv::Point2f{std::atan(norm_corners_buffer[3].x),std::atan(norm_corners_buffer[3].y)},
-                }
+                confidence_buffer[index]
             );
         }
         return detections;

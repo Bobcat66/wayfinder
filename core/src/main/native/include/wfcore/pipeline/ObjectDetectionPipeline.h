@@ -23,6 +23,7 @@
 #include "wfcore/inference/InferenceEngine.h"
 #include "wfcore/video/video_types.h"
 #include "wfcore/inference/Tensorizer.h"
+#include "wfcore/hardware/CameraConfiguration.h"
 
 #include <string>
 #include <memory>
@@ -55,7 +56,7 @@ namespace wf {
         ModelArch modelArch; // Architecture of the model
         InferenceEngineType engineType; // Type of inference engine to use
         TensorParameters tensorParams; // Parameters for the tensorizer
-        FrameFormat modelInputFormat; // Input format of the model
+        ImageEncoding modelColorSpace; // Color space the model expects pixels to be in
         IEFilteringParams filterParams;
     };
 

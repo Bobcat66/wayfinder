@@ -22,10 +22,12 @@
 #include <opencv2/opencv.hpp>
 #include <vector>
 #include <array>
+#include "wfcore/inference/ObjectDetection.h"
 
 namespace wf {
-    std::array<cv::Point2f, 4> getCornersBboxd(const cv::Rect2d& bbox);
-    std::array<cv::Point2f, 4> getCornersBboxf(const cv::Rect2f& bbox);
+    std::array<cv::Point2f, 4> getCorners_CVRect2d(const cv::Rect2d& bbox);
+    std::array<cv::Point2f, 4> getCorners_CVRect2f(const cv::Rect2f& bbox);
+    std::array<cv::Point2f, 4> getCorners_RawBbox(const RawBbox& bbox);
     double getConfidenceYOLO(float* yolo_result, int obj_class);
     int getClassYOLO(float* yolo_result, int num_classes);
 }

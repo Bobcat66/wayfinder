@@ -29,25 +29,16 @@
 
 // A simple reference implementation of a CPU inference engine, using OpenCV's DNN module.
 namespace wf {
-    struct RawBbox {
-        float x; // x coordinate of the top-left corner
-        float y; // y coordinate of the top-left corner
-        float width; 
-        float height;
-        int objectClass;
-        float confidence;
-    };
 
     class CPUInferenceEngineYOLO : public InferenceEngine {
     public:
         CPUInferenceEngineYOLO();
         std::string modelFormat() const override { return "onnx"; }
         bool setFilteringParameters(const IEFilteringParams& params) override { this->filterParams = params; return true; }
-        bool setCameraIntrinsics(const CameraIntrinsics& intrinsics) override { this->intrinsics = intrinsics; return true; }
         bool setTensorParameters(const TensorParameters& params) override;
         bool loadModel(const std::string& modelPath) override;
         [[nodiscard]] 
-        std::vector<ObjectDetection> infer(const cv::Mat& data, const FrameMetadata& meta) noexcept override;
+        std::vector<RawBbox> infer(const cv::Mat& data, const FrameMetadata& meta) noexcept override;
     private:
         cv::dnn::Net model; // OpenCV DNN network
         cv::Mat blob; // Blob for input data

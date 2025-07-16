@@ -111,8 +111,6 @@ namespace wf {
                 }
             case PipelineType::ObjDetect:
                 throw std::runtime_error("Object Detection not implemented"); // TODO: remove this once implemented
-            case PipelineType::ApriltagDetect:
-                throw std::runtime_error("Apriltag Detection not implemented");
             default:
                 throw std::runtime_error("How did you do this like actually. It should literally be impossible to get this error");
         }

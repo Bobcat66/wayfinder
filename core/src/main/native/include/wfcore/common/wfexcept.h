@@ -46,6 +46,7 @@ namespace wf {
     DEFEXCEPT(vision_worker_not_found,"Vision Worker not found")
     DEFEXCEPT(invalid_camera_control,"Invalid camera control")
     DEFEXCEPT(invalid_stream_format,"Invalid stream format")
+    DEFEXCEPT(invalid_image_encoding,"Invalid image encoding")
     DEFEXCEPT(unknown_exception,"Unknown")
 }
 

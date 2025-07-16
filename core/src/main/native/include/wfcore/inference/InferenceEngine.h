@@ -26,6 +26,7 @@
 #include "wfcore/video/video_types.h"
 #include "wfcore/inference/Tensorizer.h"
 #include "wfcore/inference/ObjectDetection.h"
+#include "wfcore/hardware/CameraConfiguration.h"
 #include <optional>
 #include <array>
 
@@ -43,14 +44,12 @@ namespace wf {
         virtual ~InferenceEngine() = default;
         virtual bool setFilteringParameters(const IEFilteringParams& params) = 0;
         virtual bool setTensorParameters(const TensorParameters& params) = 0;
-        virtual bool setCameraIntrinsics(const CameraIntrinsics& intrinsics) = 0;
         virtual bool loadModel(const std::string& modelPath) = 0;
         [[nodiscard]] 
-        virtual std::vector<ObjectDetection> infer(const cv::Mat& data, const FrameMetadata& meta) noexcept = 0;
+        virtual std::vector<RawBbox> infer(const cv::Mat& data, const FrameMetadata& meta) noexcept = 0;
         virtual std::string modelFormat() const = 0; // the model file extension expected by this inference engine
     protected:
         Tensorizer tensorizer;
-        CameraIntrinsics intrinsics;
         IEFilteringParams filterParams;
     };
 }

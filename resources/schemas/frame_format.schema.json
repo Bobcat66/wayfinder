@@ -2,10 +2,8 @@
     "$schema": "https://json-schema.org/draft/2020-12/schema",
     "title": "frame_format",
     "type": "object",
-    "properties": {
-        "width": { "type": "number" },
-        "height": { "type": "number" },
-        "encoding": {
+    "$defs": {
+        "image_encoding": {
             "type": "string",
             "enum": [
                 "BGR24",
@@ -22,10 +20,15 @@
             ]
         }
     },
+    "properties": {
+        "width": { "type": "number" },
+        "height": { "type": "number" },
+        "encoding": { "$ref": "#/$defs/image_encoding" },
     "required": [
         "width",
         "height",
         "encoding"
     ],
     "additionalProperties": false
+    }
 }

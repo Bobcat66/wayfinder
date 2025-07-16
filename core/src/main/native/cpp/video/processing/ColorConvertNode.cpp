@@ -18,13 +18,16 @@
  */
 
 #include "wfcore/video/processing/ColorConvertNode.h"
-
+#include "wfcore/common/wfexcept.h"
 #include <opencv2/imgproc.hpp>
 
 #include <stdexcept>
 #include <cassert>
 
 namespace wf {
+
+    using enum ImageEncoding;
+
     template <CVImage T>
     ColorConvertNode<T>::ColorConvertNode(ImageEncoding outcoding_) {
         this->outcoding = outcoding_;
@@ -78,8 +81,8 @@ namespace wf {
                             tmp.convertTo(out,CV_16UC1, 256.0);
                         };
                         break;
-                    case YUYV: throw std::runtime_error("BGR24 to YUYV conversion is not supported at the moment.");
-                    case UYVY: throw std::runtime_error("BGR24 to UYVY conversion is not supported at the moment.");
+                    case YUYV: throw invalid_image_encoding("BGR24 to YUYV conversion is not supported at the moment.");
+                    case UYVY: throw invalid_image_encoding("BGR24 to UYVY conversion is not supported at the moment.");
                     case RGBA:
                         colorConverter = [](const T& in,T& out){
                             cv::cvtColor(in,out,cv::COLOR_BGR2RGBA);
@@ -90,8 +93,8 @@ namespace wf {
                             cv::cvtColor(in,out,cv::COLOR_BGR2BGRA);
                         };
                         break;
-                    case MJPEG: throw std::runtime_error("Gng really thought the ColorConvertNode was a JPEG codec 💔💔💔");
-                    default: throw std::runtime_error("Attempted to convert from unknown encoding");
+                    case MJPEG: throw invalid_image_encoding("Gng really thought the ColorConvertNode was a JPEG codec 💔💔💔");
+                    default: throw invalid_image_encoding("Attempted to convert from unknown encoding");
                 }
                 break;
             case RGB24:
@@ -124,8 +127,8 @@ namespace wf {
                             tmp.convertTo(out,CV_16UC1, 256.0);
                         };
                         break;
-                    case YUYV: throw std::runtime_error("RGB24 to YUYV conversion is not supported at the moment.");
-                    case UYVY: throw std::runtime_error("RGB24 to UYVY conversion is not supported at the moment.");
+                    case YUYV: throw invalid_image_encoding("RGB24 to YUYV conversion is not supported at the moment.");
+                    case UYVY: throw invalid_image_encoding("RGB24 to UYVY conversion is not supported at the moment.");
                     case RGBA:
                         colorConverter = [](const T& in,T& out){
                             cv::cvtColor(in,out,cv::COLOR_RGB2RGBA);
@@ -136,8 +139,8 @@ namespace wf {
                             cv::cvtColor(in,out,cv::COLOR_RGB2BGRA);
                         };
                         break;
-                    case MJPEG: throw std::runtime_error("Gng really thought the ColorConvertNode was a JPEG codec 💔💔💔");
-                    default: throw std::runtime_error("Attempted to convert from unknown encoding");
+                    case MJPEG: throw invalid_image_encoding("Gng really thought the ColorConvertNode was a JPEG codec 💔💔💔");
+                    default: throw invalid_image_encoding("Attempted to convert from unknown encoding");
                 }
                 break;
             case RGB565:
@@ -169,8 +172,8 @@ namespace wf {
                             tmp.convertTo(out,CV_16UC1, 256.0);
                         };
                         break;
-                    case YUYV: throw std::runtime_error("RGB565 to YUYV conversion is not supported at the moment.");
-                    case UYVY: throw std::runtime_error("RGB565 to UYVY conversion is not supported at the moment.");
+                    case YUYV: throw invalid_image_encoding("RGB565 to YUYV conversion is not supported at the moment.");
+                    case UYVY: throw invalid_image_encoding("RGB565 to UYVY conversion is not supported at the moment.");
                     case RGBA:
                         colorConverter = [](const T& in,T& out){
                             cv::cvtColor(in,out,cv::COLOR_BGR5652BGRA);
@@ -181,8 +184,8 @@ namespace wf {
                             cv::cvtColor(in,out,cv::COLOR_BGR5652RGBA);
                         };
                         break;
-                    case MJPEG: throw std::runtime_error("Gng really thought the ColorConvertNode was a JPEG codec 💔💔💔");
-                    default: throw std::runtime_error("Attempted to convert from unknown encoding");
+                    case MJPEG: throw invalid_image_encoding("Gng really thought the ColorConvertNode was a JPEG codec 💔💔💔");
+                    default: throw invalid_image_encoding("Attempted to convert from unknown encoding");
                 }
                 break;
             case Y8:
@@ -212,8 +215,8 @@ namespace wf {
                             in.convertTo(out,CV_16UC1, 256.0);
                         };
                         break;
-                    case YUYV: throw std::runtime_error("Y8 to YUYV conversion is not supported at the moment.");
-                    case UYVY: throw std::runtime_error("Y8 to UYVY conversion is not supported at the moment.");
+                    case YUYV: throw invalid_image_encoding("Y8 to YUYV conversion is not supported at the moment.");
+                    case UYVY: throw invalid_image_encoding("Y8 to UYVY conversion is not supported at the moment.");
                     case RGBA:
                         colorConverter = [](const T& in,T& out){
                             cv::cvtColor(in,out,cv::COLOR_GRAY2RGBA);
@@ -224,8 +227,8 @@ namespace wf {
                             cv::cvtColor(in,out,cv::COLOR_GRAY2BGRA);
                         };
                         break;
-                    case MJPEG: throw std::runtime_error("Gng really thought the ColorConvertNode was a JPEG codec 💔💔💔");
-                    default: throw std::runtime_error("Attempted to convert from unknown encoding");
+                    case MJPEG: throw invalid_image_encoding("Gng really thought the ColorConvertNode was a JPEG codec 💔💔💔");
+                    default: throw invalid_image_encoding("Attempted to convert from unknown encoding");
                 }
                 break;
             case Y16:
@@ -261,8 +264,8 @@ namespace wf {
                             out = in;
                         };
                         break;
-                    case YUYV: throw std::runtime_error("Y16 to YUYV conversion is not supported at the moment.");
-                    case UYVY: throw std::runtime_error("Y16 to UYVY conversion is not supported at the moment.");
+                    case YUYV: throw invalid_image_encoding("Y16 to YUYV conversion is not supported at the moment.");
+                    case UYVY: throw invalid_image_encoding("Y16 to UYVY conversion is not supported at the moment.");
                     case RGBA:
                         colorConverter = [this](const T& in,T& out){
                             static T tmp{this->getInpad()->rows,this->getInpad()->cols,CV_8UC1};
@@ -277,8 +280,8 @@ namespace wf {
                             cv::cvtColor(tmp,out,cv::COLOR_GRAY2BGRA);
                         };
                         break;
-                    case MJPEG: throw std::runtime_error("Gng really thought the ColorConvertNode was a JPEG codec 💔💔💔");
-                    default: throw std::runtime_error("Attempted to convert from unknown encoding");
+                    case MJPEG: throw invalid_image_encoding("Gng really thought the ColorConvertNode was a JPEG codec 💔💔💔");
+                    default: throw invalid_image_encoding("Attempted to convert from unknown encoding");
                 }
                 break;
             case YUYV:
@@ -314,8 +317,8 @@ namespace wf {
                         break;
                     // No conversions to YUYV or UYVY are supported in general, even from YUYV and UYVY.
                     // This is meant to prevent footguns where a convert node converting to YUYV breaks after switching to a different input encoding
-                    case YUYV: throw std::runtime_error("YUYV to YUYV conversion is not supported at the moment. Why? Because screw you (yes, you in particular). That's why");
-                    case UYVY: throw std::runtime_error("YUYV to UYVY conversion is not supported at the moment.");
+                    case YUYV: throw invalid_image_encoding("YUYV to YUYV conversion is not supported at the moment. Why? Because screw you (yes, you in particular). That's why");
+                    case UYVY: throw invalid_image_encoding("YUYV to UYVY conversion is not supported at the moment.");
                     case RGBA:
                         colorConverter = [](const T& in,T& out){
                             cv::cvtColor(in,out,cv::COLOR_YUV2RGBA_YUYV);
@@ -326,8 +329,8 @@ namespace wf {
                             cv::cvtColor(in,out,cv::COLOR_YUV2BGRA_YUYV);
                         };
                         break;
-                    case MJPEG: throw std::runtime_error("Gng really thought the ColorConvertNode was a JPEG codec 💔💔💔");
-                    default: throw std::runtime_error("Attempted to convert from unknown encoding");
+                    case MJPEG: throw invalid_image_encoding("Gng really thought the ColorConvertNode was a JPEG codec 💔💔💔");
+                    default: throw invalid_image_encoding("Attempted to convert from unknown encoding");
                 }
                 break;
             case UYVY:
@@ -363,8 +366,8 @@ namespace wf {
                         break;
                     // No conversions to YUYV or UYVY are supported in general, even from YUYV and UYVY.
                     // This is meant to prevent footguns where a convert node converting to YUYV breaks after switching to a different input encoding
-                    case YUYV: throw std::runtime_error("UYVY to YUYV conversion is not supported at the moment.");
-                    case UYVY: throw std::runtime_error("UYVY to UYVY conversion is not supported at the moment. Why? Because screw you (yes, you in particular). That's why.");
+                    case YUYV: throw invalid_image_encoding("UYVY to YUYV conversion is not supported at the moment.");
+                    case UYVY: throw invalid_image_encoding("UYVY to UYVY conversion is not supported at the moment. Why? Because screw you (yes, you in particular). That's why.");
                     case RGBA:
                         colorConverter = [](const T& in,T& out){
                             cv::cvtColor(in,out,cv::COLOR_YUV2RGBA_UYVY);
@@ -375,8 +378,8 @@ namespace wf {
                             cv::cvtColor(in,out,cv::COLOR_YUV2BGRA_UYVY);
                         };
                         break;
-                    case MJPEG: throw std::runtime_error("Gng really thought the ColorConvertNode was a JPEG codec 💔💔💔");
-                    default: throw std::runtime_error("Attempted to convert from unknown encoding");
+                    case MJPEG: throw invalid_image_encoding("Gng really thought the ColorConvertNode was a JPEG codec 💔💔💔");
+                    default: throw invalid_image_encoding("Attempted to convert from unknown encoding");
                 }
                 break;
             case RGBA:
@@ -408,8 +411,8 @@ namespace wf {
                             tmp.convertTo(out,CV_16UC1, 256.0);
                         };
                         break;
-                    case YUYV: throw std::runtime_error("RGBA to YUYV conversion is not supported at the moment.");
-                    case UYVY: throw std::runtime_error("RGBA to UYVY conversion is not supported at the moment.");
+                    case YUYV: throw invalid_image_encoding("RGBA to YUYV conversion is not supported at the moment.");
+                    case UYVY: throw invalid_image_encoding("RGBA to UYVY conversion is not supported at the moment.");
                     case RGBA:
                         colorConverter = [](const T& in,T& out){
                             out = in;
@@ -420,8 +423,8 @@ namespace wf {
                             cv::cvtColor(in,out,cv::COLOR_RGBA2BGRA);
                         };
                         break;
-                    case MJPEG: throw std::runtime_error("Gng really thought the ColorConvertNode was a JPEG codec 💔💔💔");
-                    default: throw std::runtime_error("Attempted to convert from unknown encoding");
+                    case MJPEG: throw invalid_image_encoding("Gng really thought the ColorConvertNode was a JPEG codec 💔💔💔");
+                    default: throw invalid_image_encoding("Attempted to convert from unknown encoding");
                 }
                 break;
             case BGRA:
@@ -453,8 +456,8 @@ namespace wf {
                             tmp.convertTo(out,CV_16UC1, 256.0);
                         };
                         break;
-                    case YUYV: throw std::runtime_error("BGRA to YUYV conversion is not supported at the moment.");
-                    case UYVY: throw std::runtime_error("BGRA to UYVY conversion is not supported at the moment.");
+                    case YUYV: throw invalid_image_encoding("BGRA to YUYV conversion is not supported at the moment.");
+                    case UYVY: throw invalid_image_encoding("BGRA to UYVY conversion is not supported at the moment.");
                     case RGBA:
                         colorConverter = [](const T& in,T& out){
                             cv::cvtColor(in,out,cv::COLOR_BGRA2RGBA);
@@ -465,13 +468,13 @@ namespace wf {
                             out = in;
                         };
                         break;
-                    case MJPEG: throw std::runtime_error("Gng really thought the ColorConvertNode was a JPEG codec 💔💔💔");
-                    default: throw std::runtime_error("Attempted to convert from unknown encoding");
+                    case MJPEG: throw invalid_image_encoding("Gng really thought the ColorConvertNode was a JPEG codec 💔💔💔");
+                    default: throw invalid_image_encoding("Attempted to convert from unknown encoding");
                 }
                 break;
-            case MJPEG: throw std::runtime_error("Gng really thought the ColorConvertNode was a JPEG codec 💔💔💔");
+            case MJPEG: throw invalid_image_encoding("Gng really thought the ColorConvertNode was a JPEG codec 💔💔💔");
             default:
-                throw std::invalid_argument("Attempted to convert from unknown colorspace");
+                throw invalid_image_encoding("Attempted to convert from unknown colorspace");
         };
 
     }
