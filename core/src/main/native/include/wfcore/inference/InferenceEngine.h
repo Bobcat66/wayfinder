@@ -39,19 +39,32 @@ namespace wf {
         float confidenceThreshold;
     };
 
+    enum class EngineStatus {
+        Ok,
+        ModelNotLoaded,
+        InvalidModelFormat,
+        ModelNotFound,
+        Unknown,
+        InvalidInput
+    };
+
     class InferenceEngine {
     public:
         virtual ~InferenceEngine() = default;
         virtual bool setFilteringParameters(const IEFilteringParams& params) = 0;
         virtual bool setTensorParameters(const TensorParameters& params) = 0;
+        virtual bool loadModel(const std::string& modelPath) = 0;
+        virtual bool infer(const cv::Mat& data, const FrameMetadata& meta, std::vector<RawBbox>& output) noexcept = 0;
+        virtual std::string modelFormat() const = 0; // the model file extension expected by this inference engine
+
         virtual const TensorParameters& getTensorParameters() {return tensorizer.getTensorParameters();}
         virtual const IEFilteringParams& getFilteringParameters() {return filterParams;}
-        virtual const std::string& getModelPath() {return modelPath;}
-        virtual bool loadModel(const std::string& modelPath) = 0;
-        [[nodiscard]] 
-        virtual std::vector<RawBbox> infer(const cv::Mat& data, const FrameMetadata& meta) noexcept = 0;
-        virtual std::string modelFormat() const = 0; // the model file extension expected by this inference engine
+        virtual std::string getModelPath() { return modelPath; }
+        virtual EngineStatus getStatus() const noexcept { return status; }
+        virtual std::string getStatusMsg() const noexcept { return statusMsg; }
     protected:
+        EngineStatus status;
+        std::string statusMsg;
         std::string modelPath;
         Tensorizer tensorizer;
         IEFilteringParams filterParams;

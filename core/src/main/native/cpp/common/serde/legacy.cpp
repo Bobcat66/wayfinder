@@ -175,11 +175,11 @@ namespace impl {
             detection.confidence,
             detection.percentArea,
             detection.bboxTopLeftPixels.x,
-            detection.bboxTopRightPixels.y,
+            detection.bboxTopLeftPixels.y,
             detection.bboxBottomRightPixels.x,
             detection.bboxBottomRightPixels.y,
             detection.bboxTopLeftNorm.x,
-            detection.bboxTopRightNorm.y,
+            detection.bboxTopLeftNorm.y,
             detection.bboxBottomRightNorm.x,
             detection.bboxBottomRightNorm.y,
         };

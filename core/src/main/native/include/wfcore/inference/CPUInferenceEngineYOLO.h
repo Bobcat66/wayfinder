@@ -37,8 +37,7 @@ namespace wf {
         bool setFilteringParameters(const IEFilteringParams& params) override { this->filterParams = params; return true; }
         bool setTensorParameters(const TensorParameters& params) override;
         bool loadModel(const std::string& modelPath) override;
-        [[nodiscard]] 
-        std::vector<RawBbox> infer(const cv::Mat& data, const FrameMetadata& meta) noexcept override;
+        bool infer(const cv::Mat& data, const FrameMetadata& meta, std::vector<RawBbox>& output) noexcept override;
     private:
         cv::dnn::Net model; // OpenCV DNN network
         cv::Mat blob; // Blob for input data

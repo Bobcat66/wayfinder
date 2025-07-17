@@ -59,13 +59,7 @@ namespace wf {
         detector.addFamily(tagConfig.tagFamily);
     }
 
-    PipelineResult ApriltagPipeline::process(const cv::Mat& data, const FrameMetadata& meta) const noexcept {
-        if (!(data.type() == CV_8UC1)) {
-            WF_DEBUGLOG(logger,"Image data is not Y8");
-            status = PipelineStatus::InvalidInputEncoding;
-            statusMsg = "Image data is not Y8";
-            return PipelineResult::NullResult()
-        }
+    PipelineResult ApriltagPipeline::process(const cv::Mat& data, const FrameMetadata& meta) noexcept {
         auto detections = detector.detect(data);
         std::erase_if(detections, [this](ApriltagDetection detection) {
             return this->config.detectorExcludes.contains(detection.id);
@@ -92,9 +86,9 @@ namespace wf {
         );
         return PipelineResult::ApriltagResult(
             meta.micros,
-            detections,
-            atagPoses,
-            fieldPose
+            std::move(detections),
+            std::move(atagPoses),
+            std::move(fieldPose)
         );
     }
 

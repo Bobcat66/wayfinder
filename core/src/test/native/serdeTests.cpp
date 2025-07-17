@@ -17,7 +17,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "wfcore/common/serde/legacy_shims.h"
+#include "wfcore/common/serde/legacy.h"
 #include "wfcore/common/logging/LoggerManager.h"
 #include "wfcore/pipeline/pnp.h"
 #include "wips/pose3.wips.h"

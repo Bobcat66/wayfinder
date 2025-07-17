@@ -21,6 +21,9 @@
 #include "wfcore/pipeline/ObjectDetectionPipeline.h"
 #include "wfcore/common/wfexcept.h"
 #include "wfcore/inference/CPUInferenceEngineYOLO.h"
+#include "wfcore/video/video_utils.h"
+#include <cassert>
+#include <opencv2/calib3d.hpp>
 
 namespace wf {
     std::unique_ptr<InferenceEngine> ObjectDetectionPipeline::buildInferenceEngine(const ObjectDetectionPipelineConfiguration& config) {
@@ -61,7 +64,62 @@ namespace wf {
         updatePostprocParams();
     }
     PipelineResult ObjectDetectionPipeline::process(const cv::Mat& data, const FrameMetadata& meta) noexcept {
-        assert(data.rows == tens)
+        assert(data.rows == engine->getTensorParameters().height && data.cols == engine->getTensorParameters().width);
+        engine->infer(data,meta,bbox_buffer);
+        std::vector<ObjectDetection> detections;
+        detections.reserve(bbox_buffer.size());
+        pixelCorner_buffer.clear();
+        normCorner_buffer.clear();
+        pixelCorner_buffer.reserve(2 * bbox_buffer.size());
+        normCorner_buffer.reserve(2 * bbox_buffer.size());
+        for (auto& bbox : bbox_buffer) {
+            pixelCorner_buffer.emplace_back(bbox.x,bbox.y);
+            pixelCorner_buffer.emplace_back(bbox.x + bbox.width,bbox.y + bbox.height);
+        }
+        
+        // De-letterboxing
+        sparseShift(
+            pixelCorner_buffer,
+            pixelCorner_buffer,
+            horizontalShift,
+            verticalShift
+        );
+        sparseResize(
+            pixelCorner_buffer,
+            pixelCorner_buffer,
+            scale,
+            scale
+        );
+
+        // Normalization
+        cv::undistortPoints(
+            pixelCorner_buffer,
+            normCorner_buffer,
+            intrinsics.cameraMatrix,
+            intrinsics.distCoeffs
+        );
+
+        // Postprocessing
+        const auto native_frame_size = intrinsics.resolution.width * intrinsics.resolution.height;
+        for (int index = 0; index < bbox_buffer.size(); ++index) {
+            auto topleft_corner_index = 2 * index;
+            auto bottomright_corner_index = topleft_corner_index + 1;
+            const auto& bbox = bbox_buffer[index];
+            const float box_size = static_cast<float>(bbox.width * bbox.height);
+            detections.emplace_back(
+                bbox.objectClass,
+                bbox.confidence,
+                box_size/native_frame_size,
+                pixelCorner_buffer[topleft_corner_index],
+                pixelCorner_buffer[bottomright_corner_index],
+                normCorner_buffer[topleft_corner_index],
+                normCorner_buffer[bottomright_corner_index]
+            );
+        }
+        return PipelineResult::ObjectDetectionResult(
+            meta.micros,
+            std::move(detections)
+        );
     }
     void ObjectDetectionPipeline::updatePostprocParams() {
         const auto& tensorParams = engine->getTensorParameters();

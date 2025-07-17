@@ -5,7 +5,6 @@
 #include "wfcore/pipeline/Pipeline.h"
 #include "wfcore/pipeline/ApriltagPipeline.h"
 #include "wfcore/pipeline/ObjectDetectionPipeline.h"
-#include "wfcore/pipeline/ApriltagDetectPipeline.h"
 #include "wfcore/video/video_types.h"
 namespace wf {
     struct VisionWorkerConfig {
@@ -19,8 +18,7 @@ namespace wf {
         PipelineType pipelineType;
         std::variant<
             ApriltagPipelineConfiguration,
-            ObjectDetectionPipelineConfiguration,
-            ApriltagDetectPipelineConfiguration
+            ObjectDetectionPipelineConfiguration
         > pipelineConfig;
     };
 }

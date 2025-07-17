@@ -25,6 +25,7 @@
 #include <opencv2/calib3d.hpp>
 #include <cmath>
 
+// TODO: Make this use the engine status codes and messages
 namespace wf {
     CPUInferenceEngineYOLO::CPUInferenceEngineYOLO(){
         corners_buffer.reserve(4);
@@ -53,23 +54,22 @@ namespace wf {
         return success;
     }
     
-    [[nodiscard]] 
-    std::vector<RawBbox> CPUInferenceEngineYOLO::infer(const cv::Mat& data, const FrameMetadata& meta) noexcept {
+    bool CPUInferenceEngineYOLO::infer(const cv::Mat& data, const FrameMetadata& meta, std::vector<RawBbox>& output) noexcept {
+        output.clear();
         this->tensorizer.tensorize(data, reinterpret_cast<float*>(blob.data));
         model.setInput(blob);
-        cv::Mat output = model.forward();
+        cv::Mat rawOutput = model.forward();
         // Output Shape: [1, number of detections, 5 + number of classes]
-        int numDetections = output.rows;
-        std::vector<RawBbox> detections;
-        detections.reserve(numDetections);
-        int num_classes = output.cols - 5;
+        int numDetections = rawOutput.rows;
+        output.reserve(numDetections);
+        int num_classes = rawOutput.cols - 5;
         objclass_buffer.clear();
         index_buffer.clear();
         bboxd_buffer.clear();
         confidence_buffer.clear();
-        for (int i = 0; i < output.rows; ++i) {
+        for (int i = 0; i < rawOutput.rows; ++i) {
             // Detection format: [x center, y center, width, height, objectness, class_confidences...]
-            float* data = output.ptr<float>(i);
+            float* data = rawOutput.ptr<float>(i);
             int objectClass = getClassYOLO(data,num_classes); // Returns the class with the highest confidence score
             float confidence = getConfidenceYOLO(data,objectClass); // Class confidence score * objectness
             float width = data[2];
@@ -94,7 +94,7 @@ namespace wf {
         );
         for (int index : index_buffer) {
             auto bboxd = bboxd_buffer[index];
-            detections.emplace_back(
+            output.emplace_back(
                 bboxd.x,
                 bboxd.y,
                 bboxd.width,
@@ -103,6 +103,6 @@ namespace wf {
                 confidence_buffer[index]
             );
         }
-        return detections;
+        return true;
     }
 }
