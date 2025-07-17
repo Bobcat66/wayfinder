@@ -30,6 +30,7 @@ namespace wf {
         corners_buffer.reserve(4);
         norm_corners_buffer.reserve(4);
     }
+
     bool CPUInferenceEngineYOLO::setTensorParameters(const TensorParameters& params) {
         this->tensorizer.setTensorParameters(params);
         int dims[] = {
@@ -42,12 +43,16 @@ namespace wf {
         CV_Assert(blob.isContinuous());
         return true;
     }
+
     bool CPUInferenceEngineYOLO::loadModel(const std::string& modelPath) {
         model = cv::dnn::readNetFromONNX(modelPath);
         model.setPreferableBackend(cv::dnn::DNN_BACKEND_OPENCV);
         model.setPreferableTarget(cv::dnn::DNN_TARGET_CPU);
-        return !model.empty();
+        const bool success = !model.empty();
+        if (success) this->modelPath = modelPath;
+        return success;
     }
+    
     [[nodiscard]] 
     std::vector<RawBbox> CPUInferenceEngineYOLO::infer(const cv::Mat& data, const FrameMetadata& meta) noexcept {
         this->tensorizer.tensorize(data, reinterpret_cast<float*>(blob.data));
@@ -90,10 +95,10 @@ namespace wf {
         for (int index : index_buffer) {
             auto bboxd = bboxd_buffer[index];
             detections.emplace_back(
-                static_cast<float>(bboxd.x),
-                static_cast<float>(bboxd.y),
-                static_cast<float>(bboxd.width),
-                static_cast<float>(bboxd.height),
+                bboxd.x,
+                bboxd.y,
+                bboxd.width,
+                bboxd.height,
                 objclass_buffer[index],
                 confidence_buffer[index]
             );

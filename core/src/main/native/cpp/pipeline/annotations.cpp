@@ -92,13 +92,14 @@ namespace wf {
     }
     int drawBbox(cv::Mat& image, const ObjectDetection& detection) {
         static cv::Scalar Red(0,0,255);
-
-        for (int i = 0; i < 4; ++i) {
-            cv::line(image, detection.cornerPixels[i % 4], detection.cornerPixels[(i + 1) % 4], Red, 2);
-        }
+        cv::rectangle(image,
+            detection.bboxTopLeftPixels,
+            detection.bboxBottomRightPixels,
+            Red
+        );
         cv::Point labelOrig(
-            static_cast<int>(detection.cornerPixels[0].x),
-            static_cast<int>(detection.cornerPixels[0].y - 2)
+            static_cast<int>(detection.bboxTopLeftPixels.x),
+            static_cast<int>(detection.bboxTopLeftPixels.y - 2)
         );
         impl::renderText(
             image,

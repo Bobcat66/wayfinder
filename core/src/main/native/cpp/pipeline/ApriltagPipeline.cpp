@@ -20,10 +20,14 @@
 
 #include "wfcore/pipeline/ApriltagPipeline.h"
 #include "wfcore/hardware/CameraConfiguration.h"
+#include "wfcore/common/logging.h"
 #include <algorithm>
 #include <wfcore/pipeline/pnp.h>
 
 namespace wf {
+
+    static loggerPtr logger = LoggerManager::getInstance().getLogger("ApriltagPipeline");
+
     ApriltagPipeline::ApriltagPipeline(ApriltagPipelineConfiguration config_, CameraIntrinsics intrinsics_, ApriltagConfiguration tagConfig_, ApriltagField& tagField_)
     : config(std::move(config_)), intrinsics(std::move(intrinsics_)), tagConfig(tagConfig_), tagField(tagField_) {
         updateDetectorConfig();
@@ -56,6 +60,12 @@ namespace wf {
     }
 
     PipelineResult ApriltagPipeline::process(const cv::Mat& data, const FrameMetadata& meta) const noexcept {
+        if (!(data.type() == CV_8UC1)) {
+            WF_DEBUGLOG(logger,"Image data is not Y8");
+            status = PipelineStatus::InvalidInputEncoding;
+            statusMsg = "Image data is not Y8";
+            return PipelineResult::NullResult()
+        }
         auto detections = detector.detect(data);
         std::erase_if(detections, [this](ApriltagDetection detection) {
             return this->config.detectorExcludes.contains(detection.id);
@@ -80,7 +90,7 @@ namespace wf {
             intrinsics,
             config.SolvePNPExcludes
         );
-        return PipelineResult::ApriltagPipelineResult(
+        return PipelineResult::ApriltagResult(
             meta.micros,
             detections,
             atagPoses,

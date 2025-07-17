@@ -55,7 +55,10 @@
   - name: zq
     type: fp64
 ---
-# Represents an object detection
+# Represents an object detection, gives both the raw pixel coordinates of the bounding box, as well as the normalized coordinates
+# The normalized coordinates can be easily converted to angles from the principal axis of the camera, which can in
+# turn be used to compute a rough pose estimate of the object using the pythagorean theorem, assuming the object is on a plane with a known
+# height
   name: object_detection
   fields:
   - name: object_class
@@ -67,57 +70,32 @@
   - name: percent_area
     type: fp32
 
-  - name: corner0_x_pixels
-    type: fp32
+  - name: topleft_x_pixels
+    type: fp64
 
-  - name: corner0_y_pixels
-    type: fp32
+  - name: topleft_y_pixels
+    type: fp64
 
-  - name: corner1_x_pixels
-    type: fp32
+  - name: bottomright_x_pixels
+    type: fp64
 
-  - name: corner1_y_pixels
-    type: fp32
+  - name: bottomright_y_pixels
+    type: fp64
 
-  - name: corner2_x_pixels
-    type: fp32
+  - name: topleft_x_norm
+    type: fp64
 
-  - name: corner2_y_pixels
-    type: fp32
+  - name: topleft_y_norm
+    type: fp64
 
-  - name: corner3_x_pixels
-    type: fp32
+  - name: bottomright_x_norm
+    type: fp64
 
-  - name: corner3_y_pixels
-    type: fp32
-
-  - name: corner0_x_angles
-    type: fp32
-
-  - name: corner0_y_angles
-    type: fp32
-
-  - name: corner1_x_angles
-    type: fp32
-
-  - name: corner1_y_angles
-    type: fp32
-
-  - name: corner2_x_angles
-    type: fp32
-
-  - name: corner2_y_angles
-    type: fp32
-
-  - name: corner3_x_angles
-    type: fp32
-
-  - name: corner3_y_angles
-    type: fp32
+  - name: bottomright_y_norm
+    type: fp64
 ---
 # Represents an apriltag detection
-# Encodes the fiducial ID, the corners of the tag in pixels,
-# the corners of the tag in angles, the decision margin,
+# Encodes the fiducial ID, the corners of the tag in pixels, the decision margin,
 # and the hamming distance.
   name: apriltag_detection
   fields:

@@ -24,9 +24,13 @@
 #include <string>
 #include <format>
 
+#ifdef WF_DEFEXCEPT
+    #error "WF_DEFEXCEPT is defined outside of wfexcept.h, causing a macro name collision. Aborting build"
+#endif
+
 // Macro that automatically defines a subclass of std::exception
-#define DEFEXCEPT(exceptionName,defaultMsg)                                                     \
-    class exceptionName : public std::exception {                                               \
+#define WF_DEFEXCEPT(exceptionName,defaultMsg)                                                  \
+    class exceptionName : public wfexception {                                                  \
     public:                                                                                     \
         exceptionName() : msg(defaultMsg) {}                                                    \
         template <typename... Args>                                                             \
@@ -40,14 +44,22 @@
     };
 
 namespace wf {
-    DEFEXCEPT(invalid_pipeline_configuration,"Invalid pipeline configuration")
-    DEFEXCEPT(camera_not_found,"Camera Not Found")
-    DEFEXCEPT(intrinsics_not_found,"Intrinsics not found for camera at specified resolution")
-    DEFEXCEPT(vision_worker_not_found,"Vision Worker not found")
-    DEFEXCEPT(invalid_camera_control,"Invalid camera control")
-    DEFEXCEPT(invalid_stream_format,"Invalid stream format")
-    DEFEXCEPT(invalid_image_encoding,"Invalid image encoding")
-    DEFEXCEPT(unknown_exception,"Unknown")
+    class wfexception : public std::exception {
+    public:
+        virtual const char* what() const noexcept override = 0;
+        virtual ~wfexception() = default;
+    };
+    WF_DEFEXCEPT(invalid_pipeline_configuration,"Invalid pipeline configuration")
+    WF_DEFEXCEPT(camera_not_found,"Camera Not Found")
+    WF_DEFEXCEPT(intrinsics_not_found,"Intrinsics not found for camera at specified resolution")
+    WF_DEFEXCEPT(vision_worker_not_found,"Vision Worker not found")
+    WF_DEFEXCEPT(invalid_camera_control,"Invalid camera control")
+    WF_DEFEXCEPT(invalid_stream_format,"Invalid stream format")
+    WF_DEFEXCEPT(invalid_image_encoding,"Invalid image encoding")
+    WF_DEFEXCEPT(invalid_engine_type,"Invalid engine type")
+    WF_DEFEXCEPT(invalid_model_arch,"Invalid model architecture")
+    WF_DEFEXCEPT(model_not_loaded,"Failed to load model")
+    WF_DEFEXCEPT(unknown_exception,"Unknown exception")
 }
 
-#undef DEFEXCEPT
+#undef WF_DEFEXCEPT

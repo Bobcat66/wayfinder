@@ -49,7 +49,7 @@ extern "C" {
 #define WIPS_STATUS_OK 0x00 // No error
 #define WIPS_STATUS_OOM 0x01  // out of memory
 #define WIPS_STATUS_BOUNDS_ERROR 0x02 // Out-of-bounds error
-#define WIPS_STATUS_OVERFLOW 0x03
+#define WIPS_STATUS_OVERFLOW 0x03 // Overflow error
 
 typedef uint8_t wips_u8_t;
 typedef int8_t wips_i8_t;
@@ -77,7 +77,7 @@ typedef struct wips_status {
     unsigned char status_code;
 } wips_status_t;
 
-inline wips_status_t wips_make_status(size_t bytes, unsigned char code) {
+static inline wips_status_t wips_make_status(size_t bytes, unsigned char code) {
     wips_status_t s;
     s.bytes_processed = bytes;
     s.status_code = code;

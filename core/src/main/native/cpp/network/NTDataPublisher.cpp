@@ -19,7 +19,7 @@
 
 #include "wips/wips_runtime.h"
 #include "wfcore/network/NTDataPublisher.h"
-#include "wfcore/common/serde.h"
+#include "wfcore/common/serde/legacy.h"
 #include <networktables/RawTopic.h>
 #include <span>
 

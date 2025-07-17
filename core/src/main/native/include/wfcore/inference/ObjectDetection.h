@@ -25,10 +25,10 @@
 namespace wf {
 
     struct RawBbox {
-        float x; // x coordinate of the top-left corner
-        float y; // y coordinate of the top-left corner
-        float width; 
-        float height;
+        double x; // x coordinate of the top-left corner
+        double y; // y coordinate of the top-left corner
+        double width; 
+        double height;
         int objectClass;
         float confidence;
     };
@@ -37,14 +37,21 @@ namespace wf {
         int objectClass;
         float confidence;
         float percentArea;
-        std::array<cv::Point2f, 4> cornerPixels;
-        std::array<cv::Point2f, 4> cornerAngles;
+        cv::Point2d bboxTopLeftPixels;
+        cv::Point2d bboxBottomRightPixels;
+        cv::Point2d bboxTopLeftNorm;
+        cv::Point2d bboxBottomRightNorm;
         ObjectDetection(
             int objectClass_, float confidence_, float percentArea_,
-            std::array<cv::Point2f, 4> cornerPixels_,
-            std::array<cv::Point2f, 4> cornerAngles_
+            cv::Point2d bboxTopLeftPixels_,
+            cv::Point2d bboxBottomRightPixels_,
+            cv::Point2d bboxTopLeftNorm_,
+            cv::Point2d bboxBottomRightNorm
         ) : objectClass(objectClass_), confidence(confidence_), percentArea(percentArea_),
-            cornerPixels(std::move(cornerPixels_)), cornerAngles(std::move(cornerAngles_)) {}
+            bboxTopLeftPixels(std::move(bboxTopLeftPixels_)),
+            bboxBottomRightPixels(std::move(bboxBottomRightPixels_)),
+            bboxTopLeftNorm(std::move(bboxTopLeftNorm)),
+            bboxBottomRightNorm(std::move(bboxBottomRightNorm)) {}
     };
     
 }

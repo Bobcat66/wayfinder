@@ -19,8 +19,10 @@
 
 #include "wfcore/processes/VisionWorker.h"
 #include "wfcore/video/video_utils.h"
+#include "wfcore/common/logging.h"
 
 namespace wf {
+    
     VisionWorker::VisionWorker(
         std::string name_,
         FrameProvider& frameProvider_,
@@ -42,6 +44,7 @@ namespace wf {
             )
         );
         running = false;
+        logger = LoggerManager::getInstance().getLogger(name);
     }
 
     void VisionWorker::start() {
@@ -62,6 +65,10 @@ namespace wf {
             auto rawmeta = frameProvider.getFrame(rawFrameBuffer);
             auto ppmeta = preprocesser.processFrame(rawFrameBuffer,ppFrameBuffer,rawmeta);
             auto res = pipeline->process(ppFrameBuffer,ppmeta);
+            if (!res.captimeMicros) {
+                logger->warn("Error in pipeline: {}",pipeline->getStatusMsg());
+                // TODO: Add more robust error handling
+            }
             outputConsumer->accept(ppFrameBuffer,ppmeta,res);
         }
     }

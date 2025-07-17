@@ -25,14 +25,27 @@
 #include "wfcore/pipeline/PipelineResult.h"
 #include <vector>
 #include <optional>
+#include <cstdint>
 
 namespace wf {
+
+    enum class PipelineStatus {
+        Ok,
+        InvalidInputSize,
+        InvalidInputEncoding,
+        ProcessError,
+        Unknown
+    };
 
     class Pipeline {
     public:
         [[nodiscard]] 
-        virtual PipelineResult process(const cv::Mat& data, const FrameMetadata& meta) const noexcept = 0;
+        virtual PipelineResult process(const cv::Mat& data, const FrameMetadata& meta) noexcept = 0;
         virtual ~Pipeline() = default;
+        [[nodiscard]]
+        virtual PipelineStatus getStatus() const noexcept = 0;
+        [[nodiscard]]
+        virtual std::string getStatusMsg() const noexcept = 0;
     };
     
 }

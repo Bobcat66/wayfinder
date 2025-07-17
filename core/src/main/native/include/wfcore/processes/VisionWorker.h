@@ -27,6 +27,7 @@
 #include <functional>
 #include <string>
 
+#include "wfcore/common/logging.h"
 #include "wfcore/pipeline/Pipeline.h"
 #include "wfcore/pipeline/output/PipelineOutputConsumer.h"
 #include "wfcore/video/FrameProvider.h"
@@ -35,6 +36,17 @@
 #include <mutex>
 
 namespace wf {
+
+    enum class VisionWorkerStatus {
+        Ok,
+        ProviderError,
+        PreprocesserError,
+        PipelineError,
+        OutputError,
+        CameraDisconnected,
+        ProviderTimedOut,
+        Unknown
+    };
 
     class VisionWorker {
     public:
@@ -49,6 +61,10 @@ namespace wf {
         void stop();
         const std::string& getName() const noexcept { return name; }
         const bool isRunning() const noexcept { return running.load(); }
+        [[nodiscard]]
+        VisionWorkerStatus getStatus() const noexcept { return status; }
+        [[nodiscard]]
+        std::string getStatusMsg() const noexcept { return statusMsg; }
     private:
         void run() noexcept;
         std::string name;
@@ -61,5 +77,8 @@ namespace wf {
         FrameProvider& frameProvider;
         cv::Mat rawFrameBuffer;
         cv::Mat ppFrameBuffer;
+        loggerPtr logger;
+        VisionWorkerStatus status;
+        std::string statusMsg;
     };
 }

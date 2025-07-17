@@ -66,4 +66,20 @@ namespace wf {
         }
         return 0;
     }
+
+    int sparseShift(const std::vector<cv::Point2d>& input, std::vector<cv::Point2d>& output, double dx, double dy) noexcept {
+        output.resize(input.size());
+        for (size_t i = 0; i < input.size(); ++i) {
+            const auto& input_point = input[i];
+            output[i] = {input_point.x + dx,input_point.y + dy};
+        }
+    }
+
+    int sparseShift(const std::vector<cv::Point2f>& input, std::vector<cv::Point2f>& output, float dx, float dy) noexcept {
+        output.resize(input.size());
+        for (size_t i = 0; i < input.size(); ++i) {
+            const auto& input_point = input[i];
+            output[i] = {input_point.x + dx,input_point.y + dy};
+        }
+    }
 }

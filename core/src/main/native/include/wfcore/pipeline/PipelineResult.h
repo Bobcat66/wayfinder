@@ -53,7 +53,7 @@ namespace wf {
         , aprilTagDetections(std::move(aprilTagDetections_)), aprilTagPoses(std::move(aprilTagPoses_))
         , cameraPose(std::move(cameraPose_)), objectDetections(std::move(objectDetections_)) {}
         
-        static PipelineResult ApriltagPipelineResult(
+        static PipelineResult ApriltagResult(
             uint64_t captimeMicros,
             std::vector<ApriltagDetection> aprilTagDetections_,
             std::vector<ApriltagRelativePoseObservation> aprilTagPoses_,
@@ -69,7 +69,7 @@ namespace wf {
             );
         }
 
-        static PipelineResult ObjectDetectionPipelineResult(
+        static PipelineResult ObjectDetectionResult(
             uint64_t captimeMicros,
             std::vector<ObjectDetection> detections_
         ) {
@@ -81,6 +81,11 @@ namespace wf {
                 {},
                 std::move(detections_)
             );
+        }
+
+        // A null result for errors
+        static PipelineResult NullResult() {
+            return PipelineResult(0,PipelineType::NullType,{},{},{},{});
         }
     };
 

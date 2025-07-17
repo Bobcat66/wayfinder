@@ -17,12 +17,13 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "wfcore/common/serde.h"
+#include "wfcore/common/serde/legacy_shims.h"
 #include "wfcore/common/logging/LoggerManager.h"
 #include "wfcore/pipeline/pnp.h"
 #include "wips/pose3.wips.h"
 #include "wips/apriltag_field_pose_observation.wips.h"
 #include "wips/apriltag_relative_pose_observation.wips.h"
+#include "wips/wips_runtime.h"
 
 #include <chrono>
 #include <gtest/gtest.h>

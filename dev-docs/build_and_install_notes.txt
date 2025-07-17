@@ -1,0 +1,13 @@
+Wayfinder uses a two stage build system, the first stage is to build certain dependencies,
+the second stage is to build wayfinder itself
+
+All dependencies should be built with wayfinder in release builds, for maximum control
+
+Other than the dependencies, the build process should emit two binaries: libwfcore.so,
+a shared library containing most of wayfinder's functionality, and
+wayfinderd, an executable which links to libwfcore.so that serves as the primary entry point for wayfinder.
+
+During installation, a Systemd daemon will be configured on the host system that launches the 
+wayfinderd executable on startup.
+
+Also, test LTO for release builds

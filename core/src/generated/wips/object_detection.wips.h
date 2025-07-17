@@ -44,22 +44,14 @@ typedef struct wips_object_detection {
     wips_i32_t object_class;
     wips_fp32_t confidence;
     wips_fp32_t percent_area;
-    wips_fp32_t corner0_x_pixels;
-    wips_fp32_t corner0_y_pixels;
-    wips_fp32_t corner1_x_pixels;
-    wips_fp32_t corner1_y_pixels;
-    wips_fp32_t corner2_x_pixels;
-    wips_fp32_t corner2_y_pixels;
-    wips_fp32_t corner3_x_pixels;
-    wips_fp32_t corner3_y_pixels;
-    wips_fp32_t corner0_x_angles;
-    wips_fp32_t corner0_y_angles;
-    wips_fp32_t corner1_x_angles;
-    wips_fp32_t corner1_y_angles;
-    wips_fp32_t corner2_x_angles;
-    wips_fp32_t corner2_y_angles;
-    wips_fp32_t corner3_x_angles;
-    wips_fp32_t corner3_y_angles;
+    wips_fp64_t topleft_x_pixels;
+    wips_fp64_t topleft_y_pixels;
+    wips_fp64_t bottomright_x_pixels;
+    wips_fp64_t bottomright_y_pixels;
+    wips_fp64_t topleft_x_norm;
+    wips_fp64_t topleft_y_norm;
+    wips_fp64_t bottomright_x_norm;
+    wips_fp64_t bottomright_y_norm;
 } wips_object_detection_t;
 
 // Recursive function to free all memory allocated by the struct and its members. Does NOT free the struct itself if it was dynamically allocated.

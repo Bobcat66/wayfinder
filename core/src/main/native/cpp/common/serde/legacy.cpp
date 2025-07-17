@@ -17,7 +17,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "wfcore/common/serde.h"
+#include "wfcore/common/serde/legacy.h"
 
 #include "wips/pose3.wips.h"
 #include "wips/apriltag_relative_pose_observation.wips.h"
@@ -174,14 +174,14 @@ namespace impl {
             detection.objectClass,
             detection.confidence,
             detection.percentArea,
-            detection.cornerPixels[0].x, detection.cornerPixels[0].y,
-            detection.cornerPixels[1].x, detection.cornerPixels[1].y,
-            detection.cornerPixels[2].x, detection.cornerPixels[2].y,
-            detection.cornerPixels[3].x, detection.cornerPixels[3].y,
-            detection.cornerAngles[0].x, detection.cornerAngles[0].y,
-            detection.cornerAngles[1].x, detection.cornerAngles[1].y,
-            detection.cornerAngles[2].x, detection.cornerAngles[2].y,
-            detection.cornerAngles[3].x, detection.cornerAngles[3].y
+            detection.bboxTopLeftPixels.x,
+            detection.bboxTopRightPixels.y,
+            detection.bboxBottomRightPixels.x,
+            detection.bboxBottomRightPixels.y,
+            detection.bboxTopLeftNorm.x,
+            detection.bboxTopRightNorm.y,
+            detection.bboxBottomRightNorm.x,
+            detection.bboxBottomRightNorm.y,
         };
     }
 
@@ -191,16 +191,20 @@ namespace impl {
             detection.confidence,
             detection.percent_area,
             {
-                cv::Point2f{detection.corner0_x_pixels, detection.corner0_y_pixels},
-                cv::Point2f{detection.corner1_x_pixels, detection.corner1_y_pixels},
-                cv::Point2f{detection.corner2_x_pixels, detection.corner2_y_pixels},
-                cv::Point2f{detection.corner3_x_pixels, detection.corner3_y_pixels}
+                detection.topleft_x_pixels,
+                detection.topleft_y_pixels
             },
             {
-                cv::Point2f{detection.corner0_x_angles, detection.corner0_y_angles},
-                cv::Point2f{detection.corner1_x_angles, detection.corner1_y_angles},
-                cv::Point2f{detection.corner2_x_angles, detection.corner2_y_angles},
-                cv::Point2f{detection.corner3_x_angles, detection.corner3_y_angles}
+                detection.bottomright_x_pixels,
+                detection.bottomright_y_pixels
+            },
+            {
+                detection.topleft_x_norm,
+                detection.topleft_y_norm
+            },
+            {
+                detection.bottomright_x_norm,
+                detection.bottomright_y_norm
             }
         };
     }

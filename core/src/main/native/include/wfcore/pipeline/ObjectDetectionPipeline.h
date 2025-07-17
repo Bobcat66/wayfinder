@@ -27,6 +27,7 @@
 
 #include <string>
 #include <memory>
+#include <vector>
 
 namespace wf {
 
@@ -55,7 +56,7 @@ namespace wf {
         std::string modelPath; // Path to the model file
         ModelArch modelArch; // Architecture of the model
         InferenceEngineType engineType; // Type of inference engine to use
-        TensorParameters tensorParams; // Parameters for the tensorizer
+        TensorParameters tensorParams; // Parameters for the tensorizer. The resolution and format of images input to the model should match the tensor parameters, NOT the native resolution
         ImageEncoding modelColorSpace; // Color space the model expects pixels to be in
         IEFilteringParams filterParams;
     };
@@ -64,10 +65,30 @@ namespace wf {
     public:
         ObjectDetectionPipeline(ObjectDetectionPipelineConfiguration config_, CameraIntrinsics intrinsics_);
         [[nodiscard]] 
-        PipelineResult process(const cv::Mat& data, const FrameMetadata& meta) const noexcept override;
+        PipelineResult process(const cv::Mat& data, const FrameMetadata& meta) noexcept override;
+        [[nodiscard]]
+        PipelineStatus getStatus() const noexcept override { return status; }
+        [[nodiscard]]
+        std::string getStatusMsg() const noexcept override { return statusMsg; }
+        InferenceEngineType getEngineType() {return config.engineType;}
+        ImageEncoding getModelColorSpace() {return config.modelColorSpace;}
+        static std::unique_ptr<InferenceEngine> buildInferenceEngine(const ObjectDetectionPipelineConfiguration& config);
     private:
+        void updatePostprocParams();
+        // TODO: Implement these
+        PipelineStatus status;
+        std::string statusMsg;
         std::unique_ptr<InferenceEngine> engine;
-        CameraIntrinsics intrinsics;
         ObjectDetectionPipelineConfiguration config;
+        std::vector<RawBbox> bbox_buffer;
+
+        // This is for calculating corner angles, should be calibrated for the native input resolution
+        CameraIntrinsics intrinsics;
+        // Postproc params
+        // These are dynamically calculated based on the tensor parameters and the native resolution,
+        // essentially running the same algorithm used by the LetterboxNode to compute the padding and scale factors, but in reverse
+        double horizontalShift; // -leftPadding
+        double verticalShift; // -topPadding
+        double scale;
     };
 }

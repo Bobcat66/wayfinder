@@ -44,11 +44,15 @@ namespace wf {
         virtual ~InferenceEngine() = default;
         virtual bool setFilteringParameters(const IEFilteringParams& params) = 0;
         virtual bool setTensorParameters(const TensorParameters& params) = 0;
+        virtual const TensorParameters& getTensorParameters() {return tensorizer.getTensorParameters();}
+        virtual const IEFilteringParams& getFilteringParameters() {return filterParams;}
+        virtual const std::string& getModelPath() {return modelPath;}
         virtual bool loadModel(const std::string& modelPath) = 0;
         [[nodiscard]] 
         virtual std::vector<RawBbox> infer(const cv::Mat& data, const FrameMetadata& meta) noexcept = 0;
         virtual std::string modelFormat() const = 0; // the model file extension expected by this inference engine
     protected:
+        std::string modelPath;
         Tensorizer tensorizer;
         IEFilteringParams filterParams;
     };

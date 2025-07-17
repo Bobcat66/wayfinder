@@ -30,7 +30,8 @@ namespace wf {
      * MonoSLAM (local single camera Simultaneous Mapping And Localization)
      */
     enum class PipelineType : uint8_t {
-        Apriltag = 0,
-        ObjDetect = 1
+        NullType,
+        Apriltag,
+        ObjDetect
     };
 }
