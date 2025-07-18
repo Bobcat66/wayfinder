@@ -29,7 +29,7 @@
         },
         "tensor_parameters": {
             "type": "object",
-            "parameters": {
+            "properties": {
                 "interleaved": { "type": "boolean" },
                 "height": { "type": "number" },
                 "width": { "type": "number" },
@@ -52,7 +52,7 @@
         },
         "ie_filtering_parameters": {
             "type": "object",
-            "parameters": {
+            "properties": {
                 "nmsThreshold": { "type": "number" },
                 "confidenceThreshold": { "type": "number" }
             },

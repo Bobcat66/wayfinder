@@ -1,0 +1,68 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "title": "apriltag_field",
+    "type": "object",
+    "$defs": {
+        "pose": {
+            "type": "object",
+            "properties": {
+                "translation": {
+                    "type": "object",
+                    "properties": {
+                        "x": { "type": "number" },
+                        "y": { "type": "number" },
+                        "z": { "type": "number" }
+                    },
+                    "required": ["x","y","z"],
+                    "additionalProperties": false
+                },
+                "rotation": {
+                    "type": "object",
+                    "properties": {
+                        "quaternion": {
+                            "type": "object",
+                            "properties": {
+                                "W": { "type": "number" },
+                                "X": { "type": "number" },
+                                "Y": { "type": "number" },
+                                "Z": { "type": "number" }
+                            },
+                            "required": ["W","X","Y","Z"],
+                            "additionalProperties": false
+                        }
+                    },
+                    "required": ["quaternion"],
+                    "additionalProperties": false
+                }
+            },
+            "required": ["translation","rotation"],
+            "additionalProperties": false
+        },
+        "apriltag": {
+            "type": "object",
+            "properties": {
+                "ID": { "type": "number" },
+                "pose": { "$ref": "#/$defs/pose" }
+            },
+            "required": ["ID","pose"],
+            "additionalProperties": false
+        }
+    },
+    "properties": {
+        "tags": {
+            "type": "array",
+            "items": { "$ref": "#/$defs/apriltag" }
+        },
+        "field": {
+            "type": "object",
+            "properties": {
+                "length": { "type": "number" },
+                "width": { "type": "number" }
+            },
+            "required": ["length","width"],
+            "additionalProperties": false
+        }
+    },
+    "required": ["tags","field"],
+    "additionalProperties": false
+}
