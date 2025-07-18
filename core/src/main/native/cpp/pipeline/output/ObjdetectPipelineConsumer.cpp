@@ -20,6 +20,7 @@
 #include "wfcore/pipeline/output/ObjdetectPipelineConsumer.h"
 #include <format>
 #include "wfcore/pipeline/annotations.h"
+#include "wfcore/common/wfexcept.h"
 
 namespace wf {
     ObjdetectPipelineConsumer::ObjdetectPipelineConsumer(
