@@ -22,6 +22,7 @@
 
 namespace wf {
     
+    [[ deprecated ]]
     std::array<cv::Point2f, 4> getCorners_CVRect2d(const cv::Rect2d& bbox) {
         float bboxf_x = static_cast<float>(bbox.x);
         float bboxf_y = static_cast<float>(bbox.y);
@@ -35,6 +36,7 @@ namespace wf {
         };
     }
 
+    [[ deprecated ]]
     std::array<cv::Point2f, 4> getCorners_CVRect2f(const cv::Rect2f& bbox) {
         return {
             cv::Point2f{bbox.x, bbox.y},
