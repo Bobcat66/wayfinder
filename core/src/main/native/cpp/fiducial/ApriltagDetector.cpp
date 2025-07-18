@@ -20,6 +20,7 @@
 
 #include "wfcore/fiducial/ApriltagDetector.h"
 #include "wfcore/common/logging.h"
+#include "wfcore/common/wfexcept.h"
 
 #include <apriltag.h>
 #include <tag36h11.h>
@@ -37,11 +38,35 @@
 #include <format>
 
 #define C_FAMILY(x) static_cast<apriltag_family_t*>(x)
-#define C_DETECTOR static_cast<apriltag_detector_t*>(cdetector)
+#define C_DETECTOR static_cast<apriltag_detector_t*>(detectorHandle_)
 
+// Unused for now, keeping it in the codebase incase I want runtime detector pointer validation
+// in the future
+#define ON_NULL_DETECTOR_RETURN(x)                                  \
+    do {                                                            \
+        if (!detectorHandle_) [[unlikely]] {                        \
+            this->reportError(                                      \
+                ApriltagDetectorStatus::NullDetector,               \
+                "Apriltag detector is invalid"                      \
+            );                                                      \
+            return x;                                               \
+        }                                                           \
+    } while (0)
+
+// This macro was written when the process of reporting an ok status was much more verbose
+// Maybe get rid of it
+#define NOMINAL_RETURN(x)                                           \
+    do {                                                            \
+        this->reportOk();                                           \
+        return x;                                                   \
+    } while (0)
+
+    // TODO: Maybe this code is too defensive. I feel like a lot of the checks can be removed
 namespace wf {
 
-    static loggerPtr logger = LoggerManager::getInstance().getLogger("ApriltagDetector",LogGroup::General);
+    #ifndef NDEBUG
+        static loggerPtr debugLogger = LoggerManager::getInstance().getLogger("ApriltagDetectorDebug",LogGroup::General);
+    #endif
 
     typedef apriltag_family_t* (*apriltag_family_creator)();
     typedef void (*apriltag_family_destructor)(apriltag_family_t*);
@@ -105,9 +130,12 @@ namespace wf {
     }
 
     ApriltagDetector::ApriltagDetector() {
-        cdetector = apriltag_detector_create();
+        detectorHandle_ = apriltag_detector_create();
+        if (!detectorHandle_)
+            throw failed_resource_acquisition("Failed to construct apriltag");
         QuadThresholdParams qtps;
         this->setQuadThresholdParams(qtps);
+        
     }
 
     ApriltagDetector::~ApriltagDetector() {
@@ -125,10 +153,11 @@ namespace wf {
 
         // Perform detection, returns a zarray of results
         auto rawDetections = apriltag_detector_detect(C_DETECTOR,&im);
-        // Create output vector, preallocate memory to avoid reallocation costs
-        std::vector<wf::ApriltagDetection> detections;
+        assert(rawDetections);
+
+        std::vector<ApriltagDetection> detections;
         detections.reserve(zarray_size(rawDetections));
-        WF_DEBUGLOG(logger,"{} detections in zarray",zarray_size(rawDetections));
+        WF_DEBUGLOG(debugLogger,"{} detections in zarray",zarray_size(rawDetections));
         // Destructively converts rawDetections into a vector of wf::ApriltagDetections
         for (int i = 0; i < zarray_size(rawDetections); i++) {
             apriltag_detection_t* det;
@@ -147,36 +176,36 @@ namespace wf {
             );
             apriltag_detection_destroy(det);
         }
-        WF_DEBUGLOG(logger,"Destroying zarray");
+        WF_DEBUGLOG(debugLogger,"Destroying zarray");
         zarray_destroy(rawDetections);
 
-        return detections;
+        NOMINAL_RETURN(detections);
     }
 
-    QuadThresholdParams ApriltagDetector::getQuadThresholdParams() const {
+    QuadThresholdParams ApriltagDetector::getQuadThresholdParams() const noexcept {
         auto qtps = C_DETECTOR->qtp;
-        return {
-            .minClusterPixels = qtps.min_cluster_pixels,
-            .maxNumMaxima = qtps.max_nmaxima,
-            .criticalAngleRads = qtps.critical_rad,
-            .maxLineFitMSE = qtps.max_line_fit_mse,
-            .minWhiteBlackDiff = qtps.min_white_black_diff,
-            .deglitch = static_cast<bool>(qtps.deglitch)
-        };
+        NOMINAL_RETURN(QuadThresholdParams(
+            qtps.min_cluster_pixels,
+            qtps.max_nmaxima,
+            qtps.critical_rad,
+            qtps.max_line_fit_mse,
+            qtps.min_white_black_diff,
+            static_cast<bool>(qtps.deglitch)
+        ));
     }
 
-    ApriltagDetectorConfig ApriltagDetector::getConfig() const {
-        return {
-            .numThreads = C_DETECTOR->nthreads,
-            .quadDecimate = C_DETECTOR->quad_decimate,
-            .quadSigma = C_DETECTOR->quad_sigma,
-            .refineEdges = C_DETECTOR->refine_edges,
-            .decodeSharpening = C_DETECTOR->decode_sharpening,
-            .debug = C_DETECTOR->debug
-        };
+    ApriltagDetectorConfig ApriltagDetector::getConfig() const noexcept {
+        NOMINAL_RETURN(ApriltagDetectorConfig(
+            C_DETECTOR->nthreads,
+            C_DETECTOR->quad_decimate,
+            C_DETECTOR->quad_sigma,
+            C_DETECTOR->refine_edges,
+            C_DETECTOR->decode_sharpening,
+            C_DETECTOR->debug
+        ));
     }
 
-    void ApriltagDetector::setQuadThresholdParams(const QuadThresholdParams& params) {
+    void ApriltagDetector::setQuadThresholdParams(const QuadThresholdParams& params) noexcept {
         auto& qtp = C_DETECTOR->qtp;
         qtp.min_cluster_pixels = params.minClusterPixels;
         qtp.max_nmaxima = params.maxNumMaxima;
@@ -187,7 +216,7 @@ namespace wf {
         qtp.deglitch = params.deglitch;
     }
 
-    void ApriltagDetector::setConfig(const ApriltagDetectorConfig& config) {
+    void ApriltagDetector::setConfig(const ApriltagDetectorConfig& config) noexcept {
         C_DETECTOR->nthreads = config.numThreads;
         C_DETECTOR->quad_decimate = config.quadDecimate;
         C_DETECTOR->quad_sigma = config.quadSigma;
@@ -196,33 +225,57 @@ namespace wf {
         C_DETECTOR->debug = config.debug;
     }
 
-    int ApriltagDetector::removeFamily(const std::string& familyName) {
-        auto it = families.find(familyName);
-        if (it == families.end()) {
-            return 1;
+    bool ApriltagDetector::removeFamily(const std::string& familyName) noexcept {
+        auto family_it = families.find(familyName);
+        if (family_it == families.end()) {
+            NOMINAL_RETURN(true);
         }
+
+        auto destructor_it = family_destructors.find(familyName);
+        if (destructor_it == family_destructors.end()) {
+            this->reportError(
+                ApriltagDetectorStatus::InvalidFamily,
+                "{} is not a valid apriltag family", familyName
+            );
+            return false;
+        }
+
         apriltag_detector_remove_family(
             C_DETECTOR,
-            C_FAMILY(it->second)
+            C_FAMILY(family_it->second)
         );
-        family_destructors.at(familyName)(C_FAMILY(it->second));
-        families.erase(it);
-        return 0;
+        destructor_it->second(C_FAMILY(family_it->second));
+        families.erase(family_it);
+
+        NOMINAL_RETURN(true);
     }
 
-    int ApriltagDetector::addFamily(const std::string& familyName){
+    bool ApriltagDetector::addFamily(const std::string& familyName) noexcept {
         if (families.find(familyName) != families.end()){
-            return 1;
+            NOMINAL_RETURN(true);
         }
+
         auto it = family_creators.find(familyName);
         if (it == family_creators.end()) {
-            logger->warn("{} is not a valid apriltag family",familyName);
-            return 2;
+            this->reportError(
+                ApriltagDetectorStatus::InvalidFamily,
+                "{} is not a valid apriltag family", familyName
+            );
+            return false;
         }
+
         auto family = (it->second)();
+        if (!family) {
+            this->reportError(
+                ApriltagDetectorStatus::NullFamily,
+                "Failed to create apriltag family {}",familyName
+            );
+            return false;
+        }
+
         families[familyName] = family;
         apriltag_detector_add_family(C_DETECTOR,C_FAMILY(family));
-        return 0;
+        NOMINAL_RETURN(true);
     }
 
     void ApriltagDetector::clearFamilies() {

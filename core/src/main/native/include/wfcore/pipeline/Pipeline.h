@@ -23,6 +23,7 @@
 #include "wfcore/video/video_types.h"
 #include "wfcore/pipeline/PipelineType.h"
 #include "wfcore/pipeline/PipelineResult.h"
+#include "wfcore/common/status/StatusfulObject.h"
 #include <vector>
 #include <optional>
 #include <cstdint>
@@ -33,19 +34,18 @@ namespace wf {
         Ok,
         InvalidInputSize,
         InvalidInputEncoding,
+        ApriltagDetectorError,
         ProcessError,
+        InvalidConfiguration,
+        FailedResourceAcquisition,
         Unknown
     };
 
-    class Pipeline {
+    class Pipeline : public StatusfulObject<PipelineStatus,PipelineStatus::Ok> {
     public:
         [[nodiscard]] 
         virtual PipelineResult process(const cv::Mat& data, const FrameMetadata& meta) noexcept = 0;
         virtual ~Pipeline() = default;
-        [[nodiscard]]
-        virtual PipelineStatus getStatus() const noexcept = 0;
-        [[nodiscard]]
-        virtual std::string getStatusMsg() const noexcept = 0;
     };
     
 }

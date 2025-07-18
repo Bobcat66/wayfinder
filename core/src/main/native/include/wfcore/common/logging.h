@@ -22,7 +22,7 @@
 #include "wfcore/common/logging/LoggerManager.h"
 
 #ifndef NDEBUG
-    #define WF_DEBUGLOG(logger, fmt, ...) logger->debug(fmt __VA_OPT__(,) __VA_ARGS__)
+    #define WF_DEBUGLOG(logger, fmt, ...) do { logger->debug(fmt __VA_OPT__(,) __VA_ARGS__); } while (0)
 #else
     #define WF_DEBUGLOG(logger, fmt, ...) 
 #endif

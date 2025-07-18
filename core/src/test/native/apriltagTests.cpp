@@ -52,7 +52,7 @@
         detector.setQuadThresholdParams(testQTPs);                                                              \
         logger->info("Detector QTPs set to: {}",detector.getQuadThresholdParams().string());                    \
         logger->info("Adding tag family {}", tagfamily);                                                        \
-        int err = detector.addFamily(tagfamily);                                                                \
+        auto err = detector.addFamily(tagfamily);                                                               \
         logger->info("Add family op returned {}",err);                                                          \
         auto res = detector.detect(gray);                                                                       \
         logger->info("Detected {} apriltags",res.size());                                                       \

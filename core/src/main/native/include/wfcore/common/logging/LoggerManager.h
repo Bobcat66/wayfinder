@@ -65,7 +65,6 @@ namespace wf {
         loggerPtr getLogger(const std::string& name);
 
     private:
-        static LoggerManager* instancePtr;
         std::vector<spdlog::sink_ptr> sinks_; // All loggers output to the same sinks for simplicity
         std::unordered_map<std::string, std::shared_ptr<spdlog::logger>> loggers_;
         std::mutex mutex_;

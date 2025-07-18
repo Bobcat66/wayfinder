@@ -30,13 +30,16 @@
 #include <stdexcept>
 
 namespace wf {
-    static auto logger = LoggerManager::getInstance().getLogger("VisionWorkerManager",LogGroup::General);
+    using enum VisionWorkerManagerStatus;
+    //static auto logger = LoggerManager::getInstance().getLogger("VisionWorkerManager",LogGroup::General);
 
     VisionWorkerManager::VisionWorkerManager(NetworkTablesManager& ntManager_, HardwareManager& hardwareManager_,ApriltagConfiguration atagConfig_,ApriltagField& atagField_)
-    : ntManager(ntManager_), hardwareManager(hardwareManager_), atagConfig(atagConfig_), atagField(atagField_) {}
+    : ntManager(ntManager_), hardwareManager(hardwareManager_), atagConfig(atagConfig_), atagField(atagField_)
+    , LoggedStatusfulObject<VisionWorkerManagerStatus,Ok>("VisionWorkerManager",LogGroup::General) {}
 
+    // TODO: Refactor this with Status codes?
     VisionWorker& VisionWorkerManager::buildVisionWorker(const VisionWorkerConfig& config) {
-        logger->info("Building worker {}",config.name);
+        this->logger()->info("Building worker {}",config.name);
         switch (config.pipelineType) {
             case PipelineType::Apriltag:
                 {
@@ -64,7 +67,7 @@ namespace wf {
                             config.inputFormat.frameFormat.rows != hardwareFormat.frameFormat.rows
                             || config.inputFormat.frameFormat.cols != hardwareFormat.frameFormat.cols
                         ) {
-                            logger->warn("Resolution for pipeline {} differs from native resolution for camera {}. This could cause issues with calibration",config.name,config.devpath);
+                            this->logger()->warn("Resolution for pipeline {} differs from native resolution for camera {}. This could cause issues with calibration",config.name,config.devpath);
                             nodes.push_back(std::move(std::make_unique<ResizeNode<cv::Mat>>(
                                 config.inputFormat.frameFormat.cols,
                                 config.inputFormat.frameFormat.rows
@@ -117,13 +120,13 @@ namespace wf {
     }
 
     bool VisionWorkerManager::workerExists(const std::string& name) const {
-        WF_DEBUGLOG(logger,"Checking if worker {} exists",name);
+        WF_DEBUGLOG(this->logger(),"Checking if worker {} exists",name);
         auto it = workers.find(name);
         return (it != workers.end());
     }
 
     VisionWorker& VisionWorkerManager::getWorker(const std::string& name) {
-        WF_DEBUGLOG(logger,"Getting worker {}",name);
+        WF_DEBUGLOG(this->logger(),"Getting worker {}",name);
         auto it = workers.find(name);
         if (it == workers.end()) {
             throw vision_worker_not_found(std::format("Vision worker {} not found",name));
@@ -132,47 +135,47 @@ namespace wf {
     }
 
     void VisionWorkerManager::startWorker(const std::string& name) {
-        logger->info("Starting worker {}",name);
+        this->logger()->info("Starting worker {}",name);
         auto it = workers.find(name);
         if (it == workers.end()) {
-            logger->warn("Vision worker {} not found",name);
+            this->logger()->warn("Vision worker {} not found",name);
             return;
         }
         it->second.start();
     }
 
     void VisionWorkerManager::stopWorker(const std::string& name) {
-        logger->info("Stopping worker {}",name);
+        this->logger()->info("Stopping worker {}",name);
         auto it = workers.find(name);
         if (it == workers.end()) {
-            logger->warn("Worker {} not found",name);
+            this->logger()->warn("Worker {} not found",name);
             return;
         }
         if (!(it->second.isRunning())) {
-            WF_DEBUGLOG(logger,"Worker {} already stopped",name);
+            WF_DEBUGLOG(this->logger(),"Worker {} already stopped",name);
             return;
         }
         it->second.stop();
     }
 
     void VisionWorkerManager::destroyWorker(const std::string& name) {
-        logger->info("Destroying worker {}",name);
+        this->logger()->info("Destroying worker {}",name);
         auto it = workers.find(name);
         if (it == workers.end()) {
-            logger->warn("Worker {} not found",name);
+            this->logger()->warn("Worker {} not found",name);
             return;
         }
-        WF_DEBUGLOG(logger,"Stopping worker {}",it->first);
+        WF_DEBUGLOG(this->logger(),"Stopping worker {}",it->first);
         it->second.stop();
         workers.erase(it);
     }
 
     void VisionWorkerManager::startAllWorkers() {
-        logger->info("Starting all workers");
+        this->logger()->info("Starting all workers");
         for (auto& [name,worker] : workers) {
-            logger->info("Starting worker {}",name);
+            this->logger()->info("Starting worker {}",name);
             if (worker.isRunning()) { 
-                WF_DEBUGLOG(logger,"Worker {} already started",name);
+                WF_DEBUGLOG(this->logger(),"Worker {} already started",name);
                 continue;
             }
             worker.start();
@@ -180,11 +183,11 @@ namespace wf {
     }
 
     void VisionWorkerManager::stopAllWorkers() {
-        logger->info("Stopping all workers");
+        this->logger()->info("Stopping all workers");
         for (auto& [name,worker] : workers) {
-            logger->info("Stopping worker {}",name);
+            this->logger()->info("Stopping worker {}",name);
             if (!worker.isRunning()) {
-                WF_DEBUGLOG(logger,"Worker {} already stopped",name);
+                WF_DEBUGLOG(this->logger(),"Worker {} already stopped",name);
                 continue;
             }
             worker.stop();
@@ -192,10 +195,10 @@ namespace wf {
     }
 
     void VisionWorkerManager::destroyAllWorkers() {
-        logger->info("Destroying all workers");
+        this->logger()->info("Destroying all workers");
         for (auto it = workers.begin(); it != workers.end(); ) {
-            logger->info("Destroying worker {}",it->first);
-            WF_DEBUGLOG(logger,"Stopping worker {}",it->first);
+            this->logger()->info("Destroying worker {}",it->first);
+            WF_DEBUGLOG(this->logger(),"Stopping worker {}",it->first);
             it->second.stop();
             it = workers.erase(it);
         }

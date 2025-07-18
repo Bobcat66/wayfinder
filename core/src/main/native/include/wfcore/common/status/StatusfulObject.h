@@ -1,0 +1,95 @@
+/*
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ *
+ * Copyright (C) 2025 Jesse Kane
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+#pragma once
+
+#include <concepts>
+#include <type_traits>
+#include <string>
+#include <optional>
+#include <utility>
+#include <format>
+
+/*
+ * A base class for components with status reporting and error information.
+ * 
+ * This class avoids exceptions and instead uses explicit status codes and optional
+ * error messages. All operations that can fail update the internal status.
+ *
+ * NOTE: `reportError()` and `clearFaults()` are marked `const`, as status may change
+ * even in logically `const` methods. The `status_` and `errorMsg_` members are therefore
+ * marked `mutable` to enable this without breaking const-correct interfaces.
+ */
+
+namespace wf {
+    template <typename T> 
+    concept status_code =
+        std::is_integral_v<T> ||
+        std::is_enum_v<T>;
+
+    template <status_code T, T nominal_status>
+    class StatusfulObject {
+    public:
+        virtual ~StatusfulObject() = default;
+
+        [[nodiscard]]
+        virtual T getStatus() const noexcept { return status_; }
+
+        [[ nodiscard ]]
+        virtual bool ok() const noexcept { return this->status_ == nominal_status; }
+
+        /*
+         * Returns a human-readable string describing error in more detail.
+         * When
+         */
+        [[ nodiscard ]]
+        virtual std::optional<std::string> getError() const noexcept {
+            if (this->status_ == nominal_status) {
+                return std::nullopt;
+            }
+            return errorMsg_;
+        }
+
+        virtual void clearFaults() const noexcept {
+            this->status_ = nominal_status;
+            this->errorMsg_.clear();
+        }
+
+    protected:
+        // error message is only meaningful when the status code isn't nominal
+        template <typename... Args>
+        void reportError(T status, std::string_view fmt, Args&&... args) const noexcept {
+            this->status_ = status;
+            try {
+                this->errorMsg_ = std::vformat(fmt, std::make_format_args(std::forward<Args>(args)...));
+            } catch (...) {
+                this->errorMsg_ = "Error occured while formatting error message";
+            }
+        }
+
+        virtual void reportOk() const noexcept {
+            this->status_ = nominal_status;
+        }
+
+        mutable T status_;
+
+        // A human-readable message describing an error in more detail. It is only meaningful when the status code isn't nominal
+        mutable std::string errorMsg_;
+    };
+}

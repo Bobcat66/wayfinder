@@ -34,7 +34,8 @@ namespace wf {
     , preprocesser(std::move(preprocesser_))
     , frameProvider(frameProvider_)
     , pipeline(std::move(pipeline_))
-    , outputConsumer(std::move(outputConsumer_)) {
+    , outputConsumer(std::move(outputConsumer_)) 
+    , LoggedStatusfulObject<VisionWorkerStatus,VisionWorkerStatus::Ok>(name,LogGroup::General) {
         auto& rawformat = frameProvider.getStreamFormat().frameFormat;
         rawFrameBuffer.create(
             rawformat.cols,
@@ -44,7 +45,6 @@ namespace wf {
             )
         );
         running = false;
-        logger = LoggerManager::getInstance().getLogger(name);
     }
 
     void VisionWorker::start() {
@@ -59,17 +59,24 @@ namespace wf {
         }
     }
 
+    // TODO: Add more robust error handling
     void VisionWorker::run() noexcept {
         while (running.load()) {
             std::lock_guard<std::mutex> lock(pipeGuard);
             auto rawmeta = frameProvider.getFrame(rawFrameBuffer);
             auto ppmeta = preprocesser.processFrame(rawFrameBuffer,ppFrameBuffer,rawmeta);
             auto res = pipeline->process(ppFrameBuffer,ppmeta);
-            if (!res.captimeMicros) {
-                logger->warn("Error in pipeline: {}",pipeline->getStatusMsg());
-                // TODO: Add more robust error handling
+            if (pipeline->ok()) {
+                // TODO: More robust error handling
+                const auto errmsg(pipeline->getError().value());
+                this->reportWarning(
+                    VisionWorkerStatus::PipelineError,
+                    "Error in pipeline: {}",errmsg
+                );
+                continue;
             }
             outputConsumer->accept(ppFrameBuffer,ppmeta,res);
+            this->reportOk();
         }
     }
 }

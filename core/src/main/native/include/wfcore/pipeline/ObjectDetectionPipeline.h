@@ -66,10 +66,6 @@ namespace wf {
         ObjectDetectionPipeline(ObjectDetectionPipelineConfiguration config_, CameraIntrinsics intrinsics_);
         [[nodiscard]] 
         PipelineResult process(const cv::Mat& data, const FrameMetadata& meta) noexcept override;
-        [[nodiscard]]
-        PipelineStatus getStatus() const noexcept override { return status; }
-        [[nodiscard]]
-        std::string getStatusMsg() const noexcept override { return statusMsg; }
         InferenceEngineType getEngineType() {return config.engineType;}
         ImageEncoding getModelColorSpace() {return config.modelColorSpace;}
         static std::unique_ptr<InferenceEngine> buildInferenceEngine(const ObjectDetectionPipelineConfiguration& config);

@@ -39,7 +39,8 @@ int main() {
         std::cout << "Channels: " << frame.channels() << std::endl;
         std::cout << "Depth: " << frame.depth() << std::endl;
         if (meta.err()) {
-            std::cout << "Error getting frame: " << wfsink.getError() << std::endl;
+            // TODO: Make this not terrible
+            std::cout << "Error getting frame" << std::endl;
         } else {
             cv::imshow("Wayfinder CS Sink Demo",frame);
         }

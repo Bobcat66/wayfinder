@@ -24,6 +24,7 @@
 #include "wfcore/fiducial/ApriltagDetection.h"
 #include "wfcore/utils/geometry.h"
 #include "wfcore/utils/units.h"
+#include "wfcore/common/status/StatusfulObject.h"
 
 #include <gtsam/geometry/Rot2.h>
 
@@ -32,8 +33,16 @@
 #include <cmath>
 #include <cstdint>
 #include <string>
+#include <optional>
 
 namespace wf {
+
+    enum class ApriltagDetectorStatus {
+        Ok,
+        InvalidFamily,
+        NullFamily,
+        NullDetector
+    };
 
     struct ApriltagDetectorConfig {
         int numThreads = 1;
@@ -59,32 +68,35 @@ namespace wf {
         bool operator==(const QuadThresholdParams&) const = default;
     };
 
-    std::ostream& operator<<(std::ostream& os, const ApriltagDetectorConfig& qtps);
+    std::ostream& operator<<(std::ostream& os, const QuadThresholdParams& qtps);
 
-    class ApriltagDetector {
+    class ApriltagDetector : public StatusfulObject<ApriltagDetectorStatus,ApriltagDetectorStatus::Ok> {
     public:
         ApriltagDetector();
         ~ApriltagDetector();
-        [[nodiscard]] std::vector<ApriltagDetection> detect(int width, int height, int stride, uint8_t* buf) const noexcept;
-        inline std::vector<ApriltagDetection> detect(int width, int height, uint8_t* buf) const noexcept {
+        [[nodiscard]]
+        std::vector<ApriltagDetection> detect(int width, int height, int stride, uint8_t* buf) const noexcept;
+        std::vector<ApriltagDetection> detect(int width, int height, uint8_t* buf) const noexcept {
             return detect(width,height,width,buf);
         }
-        inline std::vector<ApriltagDetection> detect(const cv::Mat& im) const noexcept {
+        std::vector<ApriltagDetection> detect(const cv::Mat& im) const noexcept {
             assert(im.type() == CV_8UC1); // Asserts that the matrix contains an 8 bit grayscale image
             return detect(im.cols,im.rows,im.step[0],im.data);
         };
         // Returns a copy of the QTPs
-        QuadThresholdParams getQuadThresholdParams() const;
+        QuadThresholdParams getQuadThresholdParams() const noexcept;
         // Returns a copy of the configs
-        ApriltagDetectorConfig getConfig() const;
-        void setQuadThresholdParams(const QuadThresholdParams& params);
-        void setConfig(const ApriltagDetectorConfig& config);
-        int addFamily(const std::string& familyName);
-        int removeFamily(const std::string& familyName);
+        ApriltagDetectorConfig getConfig() const noexcept;
+        void setQuadThresholdParams(const QuadThresholdParams& params) noexcept;
+        void setConfig(const ApriltagDetectorConfig& config) noexcept;
+        [[ nodiscard ]]
+        bool addFamily(const std::string& familyName) noexcept;
+        [[ nodiscard ]]
+        bool removeFamily(const std::string& familyName) noexcept;
         void clearFamilies();
     private:
         std::unordered_map<std::string,void*> families;
-        void* cdetector;
+        void* detectorHandle_;
     };
 
 

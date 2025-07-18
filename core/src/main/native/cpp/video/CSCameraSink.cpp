@@ -23,6 +23,7 @@
 #include <format>
 #include <unordered_map>
 
+    // TODO: Make the status logic threadsafe
 namespace wf {
     static loggerPtr logger = LoggerManager::getInstance().getLogger("CSCameraSink");
 
@@ -51,10 +52,5 @@ namespace wf {
         std::lock_guard<std::mutex> lock(camera_guard);
         this->format = StreamFormat(format.fps,{ImageEncoding::BGR24,format.frameFormat.rows,format.frameFormat.cols});
     }
-
-    std::string CSCameraSink::getError() noexcept {
-        std::lock_guard<std::mutex> lock(camera_guard);
-        return std::move(appSink.GetError());
-    } 
 
 }

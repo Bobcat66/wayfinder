@@ -59,6 +59,7 @@ namespace wf {
     WF_DEFEXCEPT(invalid_engine_type,"Invalid engine type")
     WF_DEFEXCEPT(invalid_model_arch,"Invalid model architecture")
     WF_DEFEXCEPT(model_not_loaded,"Failed to load model")
+    WF_DEFEXCEPT(failed_resource_acquisition,"Failed to acquire resources")
     WF_DEFEXCEPT(unknown_exception,"Unknown exception")
 }
 

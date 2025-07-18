@@ -26,9 +26,14 @@
 #include "wfcore/hardware/HardwareManager.h"
 #include "wfcore/network/NetworkTablesManager.h"
 #include "wfcore/fiducial/ApriltagConfiguration.h"
+#include "wfcore/common/status/LoggedStatusfulObject.h"
 
 namespace wf {
-    class VisionWorkerManager {
+
+    enum class VisionWorkerManagerStatus {
+        Ok
+    };
+    class VisionWorkerManager : LoggedStatusfulObject<VisionWorkerManagerStatus,VisionWorkerManagerStatus::Ok> {
     public:
         VisionWorkerManager(NetworkTablesManager& ntManager_, HardwareManager& hardwareManager_, ApriltagConfiguration atagConfig_, ApriltagField& atagField_);
         VisionWorker& buildVisionWorker(const VisionWorkerConfig& config);

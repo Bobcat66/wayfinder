@@ -39,3 +39,6 @@ This should be refactored before 1.0.
 
 TODO: Switch to some sort of std::expected-like structure. This codebase is written in
 C++ 20, not C++ 23, so we can't directly use std::expected
+
+Note: As of now (7/17/25), StatusfulObject is the preferred method to handle runtime errors, while
+the exceptions defined in wfexcept.h should be used during resource construction and acquisition

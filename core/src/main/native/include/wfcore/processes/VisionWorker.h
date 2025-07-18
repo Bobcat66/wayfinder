@@ -28,6 +28,7 @@
 #include <string>
 
 #include "wfcore/common/logging.h"
+#include "wfcore/common/status/LoggedStatusfulObject.h"
 #include "wfcore/pipeline/Pipeline.h"
 #include "wfcore/pipeline/output/PipelineOutputConsumer.h"
 #include "wfcore/video/FrameProvider.h"
@@ -48,7 +49,7 @@ namespace wf {
         Unknown
     };
 
-    class VisionWorker {
+    class VisionWorker : public LoggedStatusfulObject<VisionWorkerStatus,VisionWorkerStatus::Ok> {
     public:
         VisionWorker(
             std::string name_,
@@ -61,10 +62,6 @@ namespace wf {
         void stop();
         const std::string& getName() const noexcept { return name; }
         const bool isRunning() const noexcept { return running.load(); }
-        [[nodiscard]]
-        VisionWorkerStatus getStatus() const noexcept { return status; }
-        [[nodiscard]]
-        std::string getStatusMsg() const noexcept { return statusMsg; }
     private:
         void run() noexcept;
         std::string name;

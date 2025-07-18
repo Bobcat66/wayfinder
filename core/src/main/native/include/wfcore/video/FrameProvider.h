@@ -21,19 +21,22 @@
 #pragma once
 
 #include "wfcore/video/video_types.h"
+#include "wfcore/common/status/ConcurrentStatusfulObject.h"
 
 #include <string>
 #include <opencv2/core.hpp>
 
 namespace wf {
-    class FrameProvider {
+    // TODO: Make more statuses and refactor frame provider code to use them
+    enum class FrameProviderStatus {
+        Ok
+    };
+
+    class FrameProvider : public ConcurrentStatusfulObject<FrameProviderStatus,FrameProviderStatus::Ok>{
     public:
         virtual FrameMetadata getFrame(cv::Mat& mat) = 0;
         virtual ~FrameProvider() noexcept = default;
         virtual const std::string& getName() const noexcept = 0;
         virtual const StreamFormat& getStreamFormat() const noexcept = 0;
-
-        // Returns human-readable string describing error
-        virtual std::string getError() noexcept = 0;
     };
 }

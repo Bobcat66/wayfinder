@@ -38,25 +38,19 @@ namespace wf {
     class ApriltagPipeline : public Pipeline {
     public:
         ApriltagPipeline(ApriltagPipelineConfiguration config_, CameraIntrinsics intrinsics_, ApriltagConfiguration tagConfig_, ApriltagField& tagField_);
-        void setConfig(const ApriltagPipelineConfiguration& config);
-        void setTagConfig(const ApriltagConfiguration& tagConfig);
-        void setTagField(const ApriltagField& tagField);
-        void setIntrinsics(const CameraIntrinsics& intrinsics);
+        bool setConfig(const ApriltagPipelineConfiguration& config);
+        bool setTagConfig(const ApriltagConfiguration& tagConfig);
+        bool setTagField(const ApriltagField& tagField);
+        bool setIntrinsics(const CameraIntrinsics& intrinsics);
         [[nodiscard]] 
         PipelineResult process(const cv::Mat& data, const FrameMetadata& meta) noexcept override;
-        [[nodiscard]]
-        PipelineStatus getStatus() const noexcept override { return status; }
-        [[nodiscard]]
-        std::string getStatusMsg() const noexcept override { return statusMsg; }
         ~ApriltagPipeline() override = default;
     private:
-        void updateDetectorConfig(); // Updates the apriltag detector's configuration
+        bool updateDetectorConfig(); // Updates the apriltag detector's configuration
         ApriltagPipelineConfiguration config;
         CameraIntrinsics intrinsics;
         ApriltagConfiguration tagConfig;
         ApriltagField& tagField;
         ApriltagDetector detector;
-        std::string statusMsg;
-        PipelineStatus status;
     };
 }
