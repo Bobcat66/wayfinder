@@ -64,7 +64,7 @@ namespace wf {
         prePostprocessor = std::make_unique<CVProcessPipe<cv::Mat>>(inputFormat,std::move(nodes));
     }
 
-    bool ObjdetectPipelineConsumer::accept(cv::Mat& data, FrameMetadata meta, PipelineResult& result) noexcept override {
+    bool ObjdetectPipelineConsumer::accept(cv::Mat& data, FrameMetadata meta, PipelineResult& result) noexcept {
         if (auto shared = ntpub.lock()) {
             shared->publishPipelineResult(result);
         } else {
