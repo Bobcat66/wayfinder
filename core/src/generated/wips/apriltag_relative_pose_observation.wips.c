@@ -56,5 +56,43 @@ void wips_apriltag_relative_pose_observation_destroy(wips_apriltag_relative_pose
 }
 
 
-DEFINE_TRIVIAL_ENCODE(apriltag_relative_pose_observation)
-DEFINE_TRIVIAL_DECODE(apriltag_relative_pose_observation)
+wips_status_t wips_encode_apriltag_relative_pose_observation(wips_bin_t* data, wips_apriltag_relative_pose_observation_t* in) {
+    size_t bytesEncoded = 0;
+    wips_status_t status;
+    status = wips_encode_i32(data, &(in->fiducial_id));
+    bytesEncoded += status.bytes_processed;
+    if (status.status_code != WIPS_STATUS_OK) return wips_make_status(bytesEncoded,status.status_code);
+    status = wips_encode_pose3(data, &(in->cam_pose_0));
+    bytesEncoded += status.bytes_processed;
+    if (status.status_code != WIPS_STATUS_OK) return wips_make_status(bytesEncoded,status.status_code);
+    status = wips_encode_fp64(data, &(in->error_0));
+    bytesEncoded += status.bytes_processed;
+    if (status.status_code != WIPS_STATUS_OK) return wips_make_status(bytesEncoded,status.status_code);
+    status = wips_encode_pose3(data, &(in->cam_pose_1));
+    bytesEncoded += status.bytes_processed;
+    if (status.status_code != WIPS_STATUS_OK) return wips_make_status(bytesEncoded,status.status_code);
+    status = wips_encode_fp64(data, &(in->error_1));
+    bytesEncoded += status.bytes_processed;
+    if (status.status_code != WIPS_STATUS_OK) return wips_make_status(bytesEncoded,status.status_code);
+    return wips_make_status(bytesEncoded,WIPS_STATUS_OK);
+}
+wips_status_t wips_decode_apriltag_relative_pose_observation(wips_apriltag_relative_pose_observation_t* out, wips_bin_t* data) {
+    size_t bytesDecoded = 0;
+    wips_status_t status;
+    status = wips_decode_i32(&(out->fiducial_id), data);
+    bytesDecoded += status.bytes_processed;
+    if (status.status_code != WIPS_STATUS_OK) return wips_make_status(bytesDecoded,status.status_code);
+    status = wips_decode_pose3(&(out->cam_pose_0), data);
+    bytesDecoded += status.bytes_processed;
+    if (status.status_code != WIPS_STATUS_OK) return wips_make_status(bytesDecoded,status.status_code);
+    status = wips_decode_fp64(&(out->error_0), data);
+    bytesDecoded += status.bytes_processed;
+    if (status.status_code != WIPS_STATUS_OK) return wips_make_status(bytesDecoded,status.status_code);
+    status = wips_decode_pose3(&(out->cam_pose_1), data);
+    bytesDecoded += status.bytes_processed;
+    if (status.status_code != WIPS_STATUS_OK) return wips_make_status(bytesDecoded,status.status_code);
+    status = wips_decode_fp64(&(out->error_1), data);
+    bytesDecoded += status.bytes_processed;
+    if (status.status_code != WIPS_STATUS_OK) return wips_make_status(bytesDecoded,status.status_code);
+    return wips_make_status(bytesDecoded,WIPS_STATUS_OK);
+}

@@ -20,8 +20,20 @@
 #include "wfcore/processes/VisionWorker.h"
 #include "wfcore/video/video_utils.h"
 #include "wfcore/common/logging.h"
+#include "wfcore/video/video_types.h"
+
+namespace impl {
+    [[ nodiscard ]]
+    static inline bool validateFrame(const cv::Mat& frame,const wf::FrameMetadata& meta) noexcept {
+        return (frame.rows == meta.format.rows) 
+            && (frame.cols == meta.format.cols) 
+            && (frame.type() == wf::getCVTypeFromEncoding(meta.format.encoding));
+    }
+}
 
 namespace wf {
+
+    using enum VisionWorkerStatus;
     
     VisionWorker::VisionWorker(
         std::string name_,
@@ -35,7 +47,7 @@ namespace wf {
     , frameProvider(frameProvider_)
     , pipeline(std::move(pipeline_))
     , outputConsumer(std::move(outputConsumer_)) 
-    , LoggedStatusfulObject<VisionWorkerStatus,VisionWorkerStatus::Ok>(name,LogGroup::General) {
+    , ConcurrentLoggedStatusfulObject<VisionWorkerStatus,VisionWorkerStatus::Ok>(name,LogGroup::General) {
         auto& rawformat = frameProvider.getStreamFormat().frameFormat;
         rawFrameBuffer.create(
             rawformat.cols,
@@ -53,7 +65,7 @@ namespace wf {
     }
 
     void VisionWorker::stop() {
-        if(running){
+        if (running) {
             running = false;
             thread.join();
         }
@@ -64,14 +76,28 @@ namespace wf {
         while (running.load()) {
             std::lock_guard<std::mutex> lock(pipeGuard);
             auto rawmeta = frameProvider.getFrame(rawFrameBuffer);
+            if (!(frameProvider.ok())) {
+                const auto errmsg(frameProvider.getError().value());
+                this->reportError(ProviderError,errmsg);
+                continue;
+            }
+            // The expected frame formats are negotiated during configuration, all we need during runtime is a simple sanity check
+            if (!impl::validateFrame(rawFrameBuffer,rawmeta)) {
+                this->reportError(InvalidFrame,"Invalid frame received from frame provider");
+                continue;
+            }
             auto ppmeta = preprocesser.processFrame(rawFrameBuffer,ppFrameBuffer,rawmeta);
+            if (!impl::validateFrame(ppFrameBuffer,ppmeta)) {
+                this->reportError(InvalidFrame,"Invalid frame received from preprocesser");
+                continue;
+            }
             auto res = pipeline->process(ppFrameBuffer,ppmeta);
-            if (pipeline->ok()) {
+            if (!(pipeline->ok())) {
                 // TODO: More robust error handling
                 const auto errmsg(pipeline->getError().value());
-                this->reportWarning(
+                this->reportError(
                     VisionWorkerStatus::PipelineError,
-                    "Error in pipeline: {}",errmsg
+                    "Error in pipeline: {}", errmsg
                 );
                 continue;
             }

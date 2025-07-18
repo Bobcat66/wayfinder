@@ -56,5 +56,79 @@ void wips_object_detection_destroy(wips_object_detection_t* struct_ptr) {
 }
 
 
-DEFINE_TRIVIAL_ENCODE(object_detection)
-DEFINE_TRIVIAL_DECODE(object_detection)
+wips_status_t wips_encode_object_detection(wips_bin_t* data, wips_object_detection_t* in) {
+    size_t bytesEncoded = 0;
+    wips_status_t status;
+    status = wips_encode_i32(data, &(in->object_class));
+    bytesEncoded += status.bytes_processed;
+    if (status.status_code != WIPS_STATUS_OK) return wips_make_status(bytesEncoded,status.status_code);
+    status = wips_encode_fp32(data, &(in->confidence));
+    bytesEncoded += status.bytes_processed;
+    if (status.status_code != WIPS_STATUS_OK) return wips_make_status(bytesEncoded,status.status_code);
+    status = wips_encode_fp32(data, &(in->percent_area));
+    bytesEncoded += status.bytes_processed;
+    if (status.status_code != WIPS_STATUS_OK) return wips_make_status(bytesEncoded,status.status_code);
+    status = wips_encode_fp64(data, &(in->topleft_x_pixels));
+    bytesEncoded += status.bytes_processed;
+    if (status.status_code != WIPS_STATUS_OK) return wips_make_status(bytesEncoded,status.status_code);
+    status = wips_encode_fp64(data, &(in->topleft_y_pixels));
+    bytesEncoded += status.bytes_processed;
+    if (status.status_code != WIPS_STATUS_OK) return wips_make_status(bytesEncoded,status.status_code);
+    status = wips_encode_fp64(data, &(in->bottomright_x_pixels));
+    bytesEncoded += status.bytes_processed;
+    if (status.status_code != WIPS_STATUS_OK) return wips_make_status(bytesEncoded,status.status_code);
+    status = wips_encode_fp64(data, &(in->bottomright_y_pixels));
+    bytesEncoded += status.bytes_processed;
+    if (status.status_code != WIPS_STATUS_OK) return wips_make_status(bytesEncoded,status.status_code);
+    status = wips_encode_fp64(data, &(in->topleft_x_norm));
+    bytesEncoded += status.bytes_processed;
+    if (status.status_code != WIPS_STATUS_OK) return wips_make_status(bytesEncoded,status.status_code);
+    status = wips_encode_fp64(data, &(in->topleft_y_norm));
+    bytesEncoded += status.bytes_processed;
+    if (status.status_code != WIPS_STATUS_OK) return wips_make_status(bytesEncoded,status.status_code);
+    status = wips_encode_fp64(data, &(in->bottomright_x_norm));
+    bytesEncoded += status.bytes_processed;
+    if (status.status_code != WIPS_STATUS_OK) return wips_make_status(bytesEncoded,status.status_code);
+    status = wips_encode_fp64(data, &(in->bottomright_y_norm));
+    bytesEncoded += status.bytes_processed;
+    if (status.status_code != WIPS_STATUS_OK) return wips_make_status(bytesEncoded,status.status_code);
+    return wips_make_status(bytesEncoded,WIPS_STATUS_OK);
+}
+wips_status_t wips_decode_object_detection(wips_object_detection_t* out, wips_bin_t* data) {
+    size_t bytesDecoded = 0;
+    wips_status_t status;
+    status = wips_decode_i32(&(out->object_class), data);
+    bytesDecoded += status.bytes_processed;
+    if (status.status_code != WIPS_STATUS_OK) return wips_make_status(bytesDecoded,status.status_code);
+    status = wips_decode_fp32(&(out->confidence), data);
+    bytesDecoded += status.bytes_processed;
+    if (status.status_code != WIPS_STATUS_OK) return wips_make_status(bytesDecoded,status.status_code);
+    status = wips_decode_fp32(&(out->percent_area), data);
+    bytesDecoded += status.bytes_processed;
+    if (status.status_code != WIPS_STATUS_OK) return wips_make_status(bytesDecoded,status.status_code);
+    status = wips_decode_fp64(&(out->topleft_x_pixels), data);
+    bytesDecoded += status.bytes_processed;
+    if (status.status_code != WIPS_STATUS_OK) return wips_make_status(bytesDecoded,status.status_code);
+    status = wips_decode_fp64(&(out->topleft_y_pixels), data);
+    bytesDecoded += status.bytes_processed;
+    if (status.status_code != WIPS_STATUS_OK) return wips_make_status(bytesDecoded,status.status_code);
+    status = wips_decode_fp64(&(out->bottomright_x_pixels), data);
+    bytesDecoded += status.bytes_processed;
+    if (status.status_code != WIPS_STATUS_OK) return wips_make_status(bytesDecoded,status.status_code);
+    status = wips_decode_fp64(&(out->bottomright_y_pixels), data);
+    bytesDecoded += status.bytes_processed;
+    if (status.status_code != WIPS_STATUS_OK) return wips_make_status(bytesDecoded,status.status_code);
+    status = wips_decode_fp64(&(out->topleft_x_norm), data);
+    bytesDecoded += status.bytes_processed;
+    if (status.status_code != WIPS_STATUS_OK) return wips_make_status(bytesDecoded,status.status_code);
+    status = wips_decode_fp64(&(out->topleft_y_norm), data);
+    bytesDecoded += status.bytes_processed;
+    if (status.status_code != WIPS_STATUS_OK) return wips_make_status(bytesDecoded,status.status_code);
+    status = wips_decode_fp64(&(out->bottomright_x_norm), data);
+    bytesDecoded += status.bytes_processed;
+    if (status.status_code != WIPS_STATUS_OK) return wips_make_status(bytesDecoded,status.status_code);
+    status = wips_decode_fp64(&(out->bottomright_y_norm), data);
+    bytesDecoded += status.bytes_processed;
+    if (status.status_code != WIPS_STATUS_OK) return wips_make_status(bytesDecoded,status.status_code);
+    return wips_make_status(bytesDecoded,WIPS_STATUS_OK);
+}

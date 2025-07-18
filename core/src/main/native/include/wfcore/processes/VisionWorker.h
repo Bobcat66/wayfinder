@@ -28,7 +28,7 @@
 #include <string>
 
 #include "wfcore/common/logging.h"
-#include "wfcore/common/status/LoggedStatusfulObject.h"
+#include "wfcore/common/status/ConcurrentLoggedStatusfulObject.h"
 #include "wfcore/pipeline/Pipeline.h"
 #include "wfcore/pipeline/output/PipelineOutputConsumer.h"
 #include "wfcore/video/FrameProvider.h"
@@ -46,10 +46,11 @@ namespace wf {
         OutputError,
         CameraDisconnected,
         ProviderTimedOut,
+        InvalidFrame,
         Unknown
     };
 
-    class VisionWorker : public LoggedStatusfulObject<VisionWorkerStatus,VisionWorkerStatus::Ok> {
+    class VisionWorker : public ConcurrentLoggedStatusfulObject<VisionWorkerStatus,VisionWorkerStatus::Ok> {
     public:
         VisionWorker(
             std::string name_,
@@ -74,8 +75,5 @@ namespace wf {
         FrameProvider& frameProvider;
         cv::Mat rawFrameBuffer;
         cv::Mat ppFrameBuffer;
-        loggerPtr logger;
-        VisionWorkerStatus status;
-        std::string statusMsg;
     };
 }
