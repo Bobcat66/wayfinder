@@ -78,6 +78,7 @@ namespace wf {
         ObjectDetectionPipelineConfiguration config;
         std::vector<RawBbox> bbox_buffer;
         std::vector<cv::Point2d> pixelCorner_buffer; // Even indexed points are topleft corners, odd indexed points are bottomright corners.
+        std::vector<cv::Point2d> resizedPixelCorner_buffer;
         std::vector<cv::Point2d> normCorner_buffer;
 
         // This is for calculating corner angles, should be calibrated for the native input resolution

@@ -80,20 +80,20 @@ namespace wf {
         // De-letterboxing
         sparseShift(
             pixelCorner_buffer,
-            pixelCorner_buffer,
+            resizedPixelCorner_buffer,
             horizontalShift,
             verticalShift
         );
         sparseResize(
-            pixelCorner_buffer,
-            pixelCorner_buffer,
+            resizedPixelCorner_buffer,
+            resizedPixelCorner_buffer,
             scale,
             scale
         );
 
         // Normalization
         cv::undistortPoints(
-            pixelCorner_buffer,
+            resizedPixelCorner_buffer,
             normCorner_buffer,
             intrinsics.cameraMatrix,
             intrinsics.distCoeffs

@@ -25,26 +25,21 @@
 #include "wfcore/video/processing.h"
 #include "wfcore/network/NTDataPublisher.h"
 #include "wfcore/hardware/CameraConfiguration.h"
-#include <memory>
 
 namespace wf {
-
-    // An apriltag pipeline output consumer that posts to networktables and streams video to HTTP
-    class ApriltagPipelineConsumer : public PipelineOutputConsumer {
+    class ObjdetectPipelineConsumer : public PipelineOutputConsumer {
     public:
-        ApriltagPipelineConsumer(
+        ObjdetectPipelineConsumer(
             std::string pipelineName_, std::string camLabel_, 
-            CameraIntrinsics intrinsics_, FrameFormat inputFormat_,
-            int rawPort, int processedPort, 
+            FrameFormat inputFormat_, 
+            int rawPort, int processedPort,
             StreamFormat streamFormat,
-            double tagSize_, std::weak_ptr<NTDataPublisher> ntpub_
+            std::weak_ptr<NTDataPublisher> ntpub_
         );
         bool accept(cv::Mat& data, FrameMetadata meta, PipelineResult& result) noexcept override;
-        PipelineType getPipelineType() const noexcept override { return PipelineType::Apriltag; }
+        PipelineType getPipelineType() const noexcept override { return PipelineType::ObjDetect; }
     private:
         FrameFormat inputFormat;
-        CameraIntrinsics intrinsics;
-        double tagSize;
         MJPEGVideoServerCS rawServer;
         MJPEGVideoServerCS processedServer;
         std::weak_ptr<NTDataPublisher> ntpub;

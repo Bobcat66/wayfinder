@@ -97,7 +97,7 @@ namespace wf {
                         atagConfig.tagSize,
                         ntManager.getDataPublisher(config.name)
                     );
-                    outputConsumer->enableStream(config.stream);
+                    outputConsumer->enableStreaming(config.stream);
 
                     // Build worker
                     workers.emplace(
