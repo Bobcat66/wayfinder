@@ -23,3 +23,4 @@
 #include "wfcore/common/status/LoggedStatusfulObject.h"
 #include "wfcore/common/status/ConcurrentStatusfulObject.h"
 #include "wfcore/common/status/ConcurrentLoggedStatusfulObject.h"
+#include "wfcore/common/status/StatusfulResult.h"

@@ -20,10 +20,37 @@
 #include "wfcore/configuration/ConfigLoader.h"
 #include <nlohmann/json.hpp>
 #include <fstream>
+#include <unordered_map>
 
 using json = nlohmann::json;
 namespace fs = std::filesystem;
 
+namespace impl {
+    using namespace wf;
+    static const std::unordered_map<CameraBackend,std::string> backendMap = {
+        {CameraBackend::CSCORE,"CSCORE"},
+        {CameraBackend::REALSENSE,"REALSENSE"},
+        {CameraBackend::GSTREAMER,"GSTREAMER"},
+        {CameraBackend::LIBCAMERA,"LIBCAMERA"}
+    };
+
+    template <typename KeyType, typename ValType>
+    std::optional<ValType> searchMapByKey(const std::unordered_map<KeyType,ValType>& map,const KeyType& key) {
+        auto it = map.find(key);
+        if (it == map.end()) {
+            return std::nullopt;
+        }
+        return it->second;
+    }
+
+    template <typename KeyType, typename ValType>
+    std::optional<KeyType> searchMapByValue(const std::unordered_map<KeyType,ValType>& map,const ValType& val) {
+        for (const auto& [key,value] : map) {
+            if (value == val) return key;
+        }
+        return std::nullopt;
+    }
+}
 namespace wf {
 
     using enum ConfigLoaderStatus;
@@ -34,16 +61,60 @@ namespace wf {
     , resourceDirPath_(resourceDirPath) {}
 
     std::optional<CameraConfiguration> ConfigLoader::loadCameraConfig(const std::string& filename) const noexcept {
+
+        this->logger()->info(
+            "Loading camera configuration from {}/cameras/{}",
+            localDirPath_.string(),
+            filename
+        );
+        // Load file
         std::ifstream configFile(localDirPath_ / "cameras" / filename);
         if (!configFile) {
             this->reportError(
                 FileNotOpened,
-                "Failed to open file {}/cameras/{}",
-                localDirPath_.string(),
+                "Failed to open file {}",
                 filename
             );
             return std::nullopt;
         }
+
+        // Parse JSON
+        json jsonData;
+        try {
+            configFile >> jsonData;
+        } catch (const json::parse_error& e) {
+            this->reportError(
+                JSONParseError,
+                "Error while parsing {}: {}",
+                filename,
+                e.what()
+            );
+            return std::nullopt;
+        }
+
+        // Retrieve devpath
+        if (!jsonData.contains("devpath")) {
+            this->reportError(
+                SchemaViolation,
+                "{} does not contain required field 'devpath'",
+                filename
+            );
+            return std::nullopt;
+        }
+        if (!jsonData["devpath"].is_string()) {
+            this->reportError(
+                SchemaViolation,
+                "{} contains field 'devpath', but it is not a string",
+                filename
+            );
+            return std::nullopt;
+        }
+        auto devpath = jsonData["devpath"].get<std::string>();
+
+        // Retrieve backend
+        if (!jsonData.contains("backend"))
+
+        
         return std::nullopt;
     }
 

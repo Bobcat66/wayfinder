@@ -32,7 +32,8 @@ namespace wf {
     enum class ConfigLoaderStatus {
         Ok,
         FileNotOpened,
-        InvalidJSON
+        SchemaViolation,
+        JSONParseError
     };
 
     class ConfigLoader : public LoggedStatusfulObject<ConfigLoaderStatus,ConfigLoaderStatus::Ok> {
