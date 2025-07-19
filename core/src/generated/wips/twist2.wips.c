@@ -39,48 +39,67 @@
 #include "wips_detail.h"
 
 wips_twist2_t* wips_twist2_create(){
+    WIPS_TRACELOG("Creating twist2 struct\n");
     wips_twist2_t* struct_ptr = calloc(1,GET_SIZE(twist2));
-    if (!struct_ptr) {return NULL;}
+    if (!struct_ptr) {
+        WIPS_DEBUGLOG("Error: Failed to allocate twist2 struct\n");
+        return NULL;
+    }
+    WIPS_TRACELOG("Created twist2 struct\n");
     return struct_ptr;
 }
 void wips_twist2_free_resources(wips_twist2_t* struct_ptr) {
+    WIPS_TRACELOG("Freeing resources held by twist2\n");
+    WIPS_TRACELOG("Freed resources held by twist2\n");
 }
 // Function to destroy the struct and free all resources
 void wips_twist2_destroy(wips_twist2_t* struct_ptr) {
+    WIPS_TRACELOG("Destroying twist2\n");
     if (!struct_ptr) { return; }
     // Free resources allocated by the struct
     wips_twist2_free_resources(struct_ptr);
     
     // Free the struct itself
     free(struct_ptr);
+    WIPS_TRACELOG("Destroyed twist2\n");
 }
 
 
 wips_status_t wips_encode_twist2(wips_bin_t* data, wips_twist2_t* in) {
+    WIPS_TRACELOG("Encoding twist2\n");
     size_t bytesEncoded = 0;
     wips_status_t status;
+    WIPS_TRACELOG("Encoding twist2 field dx (fp64)\n");
     status = wips_encode_fp64(data, &(in->dx));
     bytesEncoded += status.bytes_processed;
     if (status.status_code != WIPS_STATUS_OK) return wips_make_status(bytesEncoded,status.status_code);
+    WIPS_TRACELOG("Encoding twist2 field dy (fp64)\n");
     status = wips_encode_fp64(data, &(in->dy));
     bytesEncoded += status.bytes_processed;
     if (status.status_code != WIPS_STATUS_OK) return wips_make_status(bytesEncoded,status.status_code);
+    WIPS_TRACELOG("Encoding twist2 field dtheta (fp64)\n");
     status = wips_encode_fp64(data, &(in->dtheta));
     bytesEncoded += status.bytes_processed;
     if (status.status_code != WIPS_STATUS_OK) return wips_make_status(bytesEncoded,status.status_code);
+    WIPS_TRACELOG("Encoded twist2\n");
     return wips_make_status(bytesEncoded,WIPS_STATUS_OK);
 }
 wips_status_t wips_decode_twist2(wips_twist2_t* out, wips_bin_t* data) {
+    WIPS_TRACELOG("Decoding twist2\n");
     size_t bytesDecoded = 0;
     wips_status_t status;
+    WIPS_TRACELOG("Decoding twist2 field dx (fp64)\n");
     status = wips_decode_fp64(&(out->dx), data);
     bytesDecoded += status.bytes_processed;
     if (status.status_code != WIPS_STATUS_OK) return wips_make_status(bytesDecoded,status.status_code);
+    WIPS_TRACELOG("Decoding twist2 field dy (fp64)\n");
     status = wips_decode_fp64(&(out->dy), data);
     bytesDecoded += status.bytes_processed;
     if (status.status_code != WIPS_STATUS_OK) return wips_make_status(bytesDecoded,status.status_code);
+    WIPS_TRACELOG("Decoding twist2 field dtheta (fp64)\n");
     status = wips_decode_fp64(&(out->dtheta), data);
     bytesDecoded += status.bytes_processed;
     if (status.status_code != WIPS_STATUS_OK) return wips_make_status(bytesDecoded,status.status_code);
+    WIPS_TRACELOG("Decoded twist2\n");
     return wips_make_status(bytesDecoded,WIPS_STATUS_OK);
 }

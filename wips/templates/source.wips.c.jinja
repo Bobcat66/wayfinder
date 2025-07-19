@@ -39,16 +39,23 @@
 #include "wips_detail.h"
 
 wips_{{ name }}_t* wips_{{ name }}_create(){
+    WIPS_TRACELOG("Creating {{ name }} struct\n");
     wips_{{ name }}_t* struct_ptr = calloc(1,GET_SIZE({{ name }}));
-    if (!struct_ptr) {return NULL;}
+    if (!struct_ptr) {
+        WIPS_DEBUGLOG("Error: Failed to allocate {{ name }} struct\n");
+        return NULL;
+    }
+    WIPS_TRACELOG("Created {{ name }} struct\n");
     return struct_ptr;
 }
 void wips_{{ name }}_free_resources(wips_{{ name }}_t* struct_ptr) {
+    WIPS_TRACELOG("Freeing resources held by {{ name }}\n");
 {%- if trivial == True %}
 {%- else %}
 {%- for field in fields %}
 {%- if field.vla == True %}
     if (struct_ptr->{{ field.name }}) {
+        WIPS_TRACELOG("Freeing {{ name }} field {{ field.name }} ({{ field.type }},VLA,size=%u)\n",struct_ptr->GET_DETAIL({{ field.name }},vlasize));
         for (wips_u32_t i = 0; i < struct_ptr->GET_DETAIL({{ field.name }},vlasize); i++) {
             wips_{{ field.type }}_free_resources(struct_ptr->{{ field.name }} + i);
         }
@@ -60,65 +67,81 @@ void wips_{{ name }}_free_resources(wips_{{ name }}_t* struct_ptr) {
 {%- endif %}
 {%- endfor %}
 {%- endif %}
+    WIPS_TRACELOG("Freed resources held by {{ name }}\n");
 }
 // Function to destroy the struct and free all resources
 void wips_{{ name }}_destroy(wips_{{ name }}_t* struct_ptr) {
+    WIPS_TRACELOG("Destroying {{ name }}\n");
     if (!struct_ptr) { return; }
     // Free resources allocated by the struct
     wips_{{ name }}_free_resources(struct_ptr);
     
     // Free the struct itself
     free(struct_ptr);
+    WIPS_TRACELOG("Destroyed {{ name }}\n");
 }
 
 
 wips_status_t wips_encode_{{ name }}(wips_bin_t* data, wips_{{ name }}_t* in) {
+    WIPS_TRACELOG("Encoding {{ name }}\n");
     size_t bytesEncoded = 0;
     wips_status_t status;
 {%- for field in fields -%}
 {%- if field.vla == True %}
+    WIPS_TRACELOG("Encoding {{ name }} field {{ field.name }} ({{ field.type }},VLA,size=%u)\n",in->GET_DETAIL({{ field.name }},vlasize));
     for (wips_u32_t i = 0; i < in->GET_DETAIL({{ field.name }},vlasize); i++) {
         status = wips_encode_{{ field.type }}(data, in->{{ field.name }} + i);
         bytesEncoded += status.bytes_processed;
         if (status.status_code != WIPS_STATUS_OK) return wips_make_status(bytesEncoded,status.status_code);
     }
 {%- elif field.optional == True %}
+    WIPS_TRACELOG("Encoding {{ name }} field {{ field.name }} ({{ field.type }},optional,present=%u)\n",in->GET_DETAIL({{ field.name }},optpresent));
     if (in->GET_DETAIL({{ field.name }},optpresent)) {
         status = wips_encode_{{ field.type }}(data, &(in->{{ field.name }}));
         bytesEncoded += status.bytes_processed;
         if (status.status_code != WIPS_STATUS_OK) return wips_make_status(bytesEncoded,status.status_code);
     }
 {%- else %}
+    WIPS_TRACELOG("Encoding {{ name }} field {{ field.name }} ({{ field.type }})\n");
     status = wips_encode_{{ field.type }}(data, &(in->{{ field.name }}));
     bytesEncoded += status.bytes_processed;
     if (status.status_code != WIPS_STATUS_OK) return wips_make_status(bytesEncoded,status.status_code);
 {%- endif %}
 {%- endfor %}
+    WIPS_TRACELOG("Encoded {{ name }}\n");
     return wips_make_status(bytesEncoded,WIPS_STATUS_OK);
 }
 wips_status_t wips_decode_{{ name }}(wips_{{ name }}_t* out, wips_bin_t* data) {
+    WIPS_TRACELOG("Decoding {{ name }}\n");
     size_t bytesDecoded = 0;
     wips_status_t status;
 {%- for field in fields -%}
 {%- if field.vla == True %}
+    WIPS_TRACELOG("Decoding {{ name }} field {{ field.name }} ({{ field.type }},VLA,size=%u)\n",out->GET_DETAIL({{ field.name }},vlasize));
     out->{{ field.name }} = malloc(out->GET_DETAIL({{ field.name }},vlasize) * GET_SIZE({{ field.type }}));
-    if (!out->{{ field.name }}) return wips_make_status(bytesDecoded,WIPS_STATUS_OOM);
+    if (!out->{{ field.name }}){
+        WIPS_DEBUGLOG("Fatal error while decoding {{ name }}: OOM\n");
+        return wips_make_status(bytesDecoded,WIPS_STATUS_OOM);
+    }
     for (wips_u32_t i = 0; i < out->GET_DETAIL({{ field.name }},vlasize); i++) {
         status = wips_decode_{{ field.type }}(out->{{ field.name }} + i, data);
         bytesDecoded += status.bytes_processed;
         if (status.status_code != WIPS_STATUS_OK) return wips_make_status(bytesDecoded,status.status_code);
     }
 {%- elif field.optional == True %}
+    WIPS_TRACELOG("Decoding {{ name }} field {{ field.name }} ({{ field.type }},optional,present=%u)\n",out->GET_DETAIL({{ field.name }},optpresent));
     if (out->GET_DETAIL({{ field.name }},optpresent)) {
         status = wips_decode_{{ field.type }}(&(out->{{ field.name }}), data);
         bytesDecoded += status.bytes_processed;
         if (status.status_code != WIPS_STATUS_OK) return wips_make_status(bytesDecoded,status.status_code);
     }
 {%- else %}
+    WIPS_TRACELOG("Decoding {{ name }} field {{ field.name }} ({{ field.type }})\n");
     status = wips_decode_{{ field.type }}(&(out->{{ field.name }}), data);
     bytesDecoded += status.bytes_processed;
     if (status.status_code != WIPS_STATUS_OK) return wips_make_status(bytesDecoded,status.status_code);
 {%- endif %}
 {%- endfor %}
+    WIPS_TRACELOG("Decoded {{ name }}\n");
     return wips_make_status(bytesDecoded,WIPS_STATUS_OK);
 }

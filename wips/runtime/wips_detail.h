@@ -49,6 +49,7 @@ extern "C" {
     #warning "wips_detail.h is an INTERNAL HEADER! It should NOT be included directly in public code"
 #endif
 
+#include "options.wips.h"
 #include "wips_runtime.h"
 #include <stdlib.h>
 #include <string.h>
@@ -65,33 +66,111 @@ extern "C" {
 #define GET_DETAIL_IMPL(field,detail) DETAIL ## detail ## __ ## field
 #define GET_DETAIL(field,detail) GET_DETAIL_IMPL(field,detail)
 
+#define STRINGIZE_IMPL(x) #x
+#define STRINGIZE(x) STRINGIZE_IMPL(x)
+
+#ifndef NDEBUG
+
+#include <stdio.h>
+#include <time.h>
+
+#define WIPS_DEBUGLOG(fmt,...)                                                                                  \
+    do {                                                                                                        \
+        time_t now = time(NULL);                                                                                \
+        if (now == ((time_t)-1)) {                                                                              \
+            perror("time");                                                                                     \
+            break;                                                                                              \
+        }                                                                                                       \
+        struct tm *local = localtime(&now);                                                                     \
+        if (local == NULL) {                                                                                    \
+            perror("localtime");                                                                                \
+            break;                                                                                              \
+        }                                                                                                       \
+        char timestr[32];                                                                                       \
+        if (strftime(timestr, sizeof(timestr), "%Y-%m-%d %H:%M:%S", local) == 0) {                              \
+            strcpy(timestr, "TIME-FAIL");                                                                       \
+        }                                                                                                       \
+        fprintf(stderr, "[%s] [WIPS]: ", timestr);                                                              \
+        fprintf(stderr, fmt __VA_OPT__(,) __VA_ARGS__);                                                         \
+    } while (0)
+
+#ifdef WIPS_OPTION_TRACEBACK
+
+#define WIPS_TRACELOG(fmt,...)                                                                                  \
+    do {                                                                                                        \
+        time_t now = time(NULL);                                                                                \
+        if (now == ((time_t)-1)) {                                                                              \
+            perror("time");                                                                                     \
+            break;                                                                                              \
+        }                                                                                                       \
+        struct tm *local = localtime(&now);                                                                     \
+        if (local == NULL) {                                                                                    \
+            perror("localtime");                                                                                \
+            break;                                                                                              \
+        }                                                                                                       \
+        char timestr[32];                                                                                       \
+        if (strftime(timestr, sizeof(timestr), "%Y-%m-%d %H:%M:%S", local) == 0) {                              \
+            strcpy(timestr, "TIME-FAIL");                                                                       \
+        }                                                                                                       \
+        fprintf(stderr, "[%s] [WIPS_TRACE]: ", timestr);                                                              \
+        fprintf(stderr, fmt __VA_OPT__(,) __VA_ARGS__);                                                         \
+    } while (0)
+
+#else
+
+#define WIPS_TRACELOG(fmt,...)
+
+#endif // WIPS_OPTION_TRACEBACK
+
+#else
+
+#define WIPS_DEBUGLOG(fmt,...)
+#define WIPS_TRACELOG(fmt,...)
+
+#endif // NDEBUG
+
 #define DEFINE_TRIVIAL_ENCODE(wips_typename)                                                                    \
     wips_status_t wips_encode_##wips_typename(wips_bin_t* data, GET_CTYPE(wips_typename)* in){                  \
-        if (data->offset > (SIZE_MAX - GET_SIZE(wips_typename)))                                                \
+        WIPS_TRACELOG("Encoding %s\n",STRINGIZE(wips_typename));                                                \
+        if (data->offset > (SIZE_MAX - GET_SIZE(wips_typename))){                                               \
+            WIPS_DEBUGLOG("Fatal error while encoding %s: Integer overflow\n",STRINGIZE(wips_typename));        \
             return wips_make_status(0,WIPS_STATUS_OVERFLOW);                                                    \
+        }                                                                                                       \
         size_t newOffset = data->offset + GET_SIZE(wips_typename);                                              \
         if (newOffset > data->allocated) {                                                                      \
+            WIPS_DEBUGLOG("Reallocation triggered while encoding %s\n",STRINGIZE(wips_typename));               \
             size_t new_allocated = data->allocated * 2 >= newOffset                                             \
                 ? data->allocated * 2                                                                           \
                 : newOffset;                                                                                    \
             unsigned char* newBase = realloc(data->base, new_allocated);                                        \
-            if (!newBase) return wips_make_status(0,WIPS_STATUS_OOM);                                           \
+            if (!newBase) {                                                                                     \
+                WIPS_DEBUGLOG("Fatal error while encoding %s: OOM\n",STRINGIZE(wips_typename));                 \
+                return wips_make_status(0,WIPS_STATUS_OOM);                                                     \
+            }                                                                                                   \
             data->allocated = new_allocated;                                                                    \
             data->base = newBase;                                                                               \
         }                                                                                                       \
         memcpy(data->base+data->offset,in, GET_SIZE(wips_typename));                                            \
         data->offset = newOffset;                                                                               \
+        WIPS_TRACELOG("Finished encoding %s\n",STRINGIZE(wips_typename));                                       \
         return wips_make_status(GET_SIZE(wips_typename),WIPS_STATUS_OK);                                        \
     }
     
 #define DEFINE_TRIVIAL_DECODE(wips_typename)                                                                    \
     wips_status_t wips_decode_##wips_typename(GET_CTYPE(wips_typename)* out, wips_bin_t* data){                 \
-        if (data->offset > (SIZE_MAX - GET_SIZE(wips_typename)))                                                \
+        WIPS_TRACELOG("Decoding %s\n",STRINGIZE(wips_typename));                                                \
+        if (data->offset > (SIZE_MAX - GET_SIZE(wips_typename))){                                               \
+            WIPS_DEBUGLOG("Fatal error while decoding %s: Integer overflow\n",STRINGIZE(wips_typename));        \
             return wips_make_status(0,WIPS_STATUS_OVERFLOW);                                                    \
+        }                                                                                                       \
         size_t newOffset = data->offset + GET_SIZE(wips_typename);                                              \
-        if (newOffset > data->allocated) return wips_make_status(0,WIPS_STATUS_BOUNDS_ERROR);                   \
+        if (newOffset > data->allocated){                                                                       \
+            WIPS_DEBUGLOG("Fatal error while decoding %s: Out-of-bounds error",STRINGIZE(wips_typename));       \
+            return wips_make_status(0,WIPS_STATUS_BOUNDS_ERROR);                                                \
+        }                                                                                                       \
         memcpy(out,data->base+data->offset, GET_SIZE(wips_typename));                                           \
         data->offset = newOffset;                                                                               \
+        WIPS_TRACELOG("Finished decoding %s\n",STRINGIZE(wips_typename));                                       \
         return wips_make_status(GET_SIZE(wips_typename),WIPS_STATUS_OK);                                        \
     }
 

@@ -2,8 +2,7 @@ A short note on best practices for exceptional cases in the Wayfinder codebase
 
 There are multiple behaviors for exceptional cases in wayfinder:
 
-1. Selective failfast: As wayfinder is naturally designed with a 
-modular and compartmentalized structure, the preferred method to
+1. Selective failfast: The preferred method to
 handle an unrecoverable error is to selectively terminate the part
 of wayfinder from which the error arose, without disrupting the
 other parts of wayfinder. For example, if a camera is misconfigured
@@ -16,9 +15,9 @@ to the camera or the pipeline should also be destroyed. The user
 should be CLEARLY notified of the failure (preferably by printing
 to the DS or the client), and information about the failure
 should be recorded for posterity (to a file, not simply to memory).
-Outside the hot path, errors can be propagated by exceptions,
-but in the hot path, errors should either be propagated with
-error flags or canonically-invalid return values
+During construction and configuration, errors can be propagated with exceptions, but
+in runtime, StatusfulObject and friends are the preferred method to signal
+errors
 
 2. Recovery: If the error can be recovered from WITHOUT SILENTLY
 RECONFIGURING WAYFINDER, then recovery is another potential 
@@ -32,13 +31,7 @@ business logic, etc.) exceptional cases can be simply left undefined
 (i.e. anything can happen and nothing is guaranteed). This should only be 
 done in conjuntion with EXTENSIVE unit tests, and when correctness can
 be guaranteed externally. Code with undefined exceptions should also make
-heavy use of assertions and ifndef NDEBUG blocks.
+heavy use of assertions, WF_DEBUGLOG, and ifndef NDEBUG blocks.
 
 NOTE: Wayfinder's code as of now (Jul 10 2025), does not follow these rules.
 This should be refactored before 1.0.
-
-TODO: Switch to some sort of std::expected-like structure. This codebase is written in
-C++ 20, not C++ 23, so we can't directly use std::expected
-
-Note: As of now (7/17/25), StatusfulObject is the preferred method to handle runtime errors, while
-the exceptions defined in wfexcept.h should be used during resource construction and acquisition

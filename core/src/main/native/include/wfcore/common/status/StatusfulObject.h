@@ -77,7 +77,7 @@ namespace wf {
         void reportError(T status, std::string_view fmt, Args&&... args) const noexcept {
             this->status_ = status;
             try {
-                this->errorMsg_ = std::vformat(fmt, std::make_format_args(std::forward<Args>(args)...));
+                this->errorMsg_ = std::vformat(fmt, std::make_format_args(args...));
             } catch (...) {
                 this->errorMsg_ = "Error occured while formatting error message";
             }

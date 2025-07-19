@@ -101,7 +101,7 @@ def copyfile(src: Path, dest: Path):
     with open(dest,'w') as f_dest:
         f_dest.write(content)
 
-def compile(schemas_path: Path, output_dir: Path, py: bool = False, jvm: bool = False) -> None:
+def compile(schemas_path: Path, output_dir: Path, py: bool = False, jvm: bool = False, trace: bool = False) -> None:
     start = time.perf_counter()
     print(f"Compiling {schemas_path}...")
     # Parse YAML
@@ -146,6 +146,18 @@ def compile(schemas_path: Path, output_dir: Path, py: bool = False, jvm: bool = 
         rendered_code = render_config["template"].render(**render_config["params"])
         with open(render_target,'w') as f:
             f.write(rendered_code)
+    
+    # Render options file
+    print(f"Rendering target {output_dir}/options.wips.h")
+    options_template = env.get_template("options.wips.h.jinja")
+    rendered_opts = options_template.render(
+        {
+            "trace": trace
+        }
+    )
+    with open(output_dir / "options.wips.h",'w') as f:
+        f.write(rendered_opts)
+
     print("Render complete")
     # Loading runtime
     print("Loading WIPS runtime")
@@ -174,7 +186,8 @@ if __name__ == "__main__":
     parser.add_argument("--out", type=Path, default=".", help='Output directory')
     parser.add_argument("--py", action="store_true", help="Generate python bindings for the C code")
     parser.add_argument("--jvm", action="store_true", help="Generate Java bindings for the C code")
+    parser.add_argument("--trace", action="store_true", help="Enables trace logging in debug builds")
     args = parser.parse_args()
     args.out.mkdir(parents=True, exist_ok=True)
-    compile(args.schemas,args.out,args.py,args.jvm)
+    compile(args.schemas,args.out,args.py,args.jvm,args.trace)
 

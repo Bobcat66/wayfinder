@@ -39,66 +39,91 @@
 #include "wips_detail.h"
 
 wips_twist3_t* wips_twist3_create(){
+    WIPS_TRACELOG("Creating twist3 struct\n");
     wips_twist3_t* struct_ptr = calloc(1,GET_SIZE(twist3));
-    if (!struct_ptr) {return NULL;}
+    if (!struct_ptr) {
+        WIPS_DEBUGLOG("Error: Failed to allocate twist3 struct\n");
+        return NULL;
+    }
+    WIPS_TRACELOG("Created twist3 struct\n");
     return struct_ptr;
 }
 void wips_twist3_free_resources(wips_twist3_t* struct_ptr) {
+    WIPS_TRACELOG("Freeing resources held by twist3\n");
+    WIPS_TRACELOG("Freed resources held by twist3\n");
 }
 // Function to destroy the struct and free all resources
 void wips_twist3_destroy(wips_twist3_t* struct_ptr) {
+    WIPS_TRACELOG("Destroying twist3\n");
     if (!struct_ptr) { return; }
     // Free resources allocated by the struct
     wips_twist3_free_resources(struct_ptr);
     
     // Free the struct itself
     free(struct_ptr);
+    WIPS_TRACELOG("Destroyed twist3\n");
 }
 
 
 wips_status_t wips_encode_twist3(wips_bin_t* data, wips_twist3_t* in) {
+    WIPS_TRACELOG("Encoding twist3\n");
     size_t bytesEncoded = 0;
     wips_status_t status;
+    WIPS_TRACELOG("Encoding twist3 field dx (fp64)\n");
     status = wips_encode_fp64(data, &(in->dx));
     bytesEncoded += status.bytes_processed;
     if (status.status_code != WIPS_STATUS_OK) return wips_make_status(bytesEncoded,status.status_code);
+    WIPS_TRACELOG("Encoding twist3 field dy (fp64)\n");
     status = wips_encode_fp64(data, &(in->dy));
     bytesEncoded += status.bytes_processed;
     if (status.status_code != WIPS_STATUS_OK) return wips_make_status(bytesEncoded,status.status_code);
+    WIPS_TRACELOG("Encoding twist3 field dz (fp64)\n");
     status = wips_encode_fp64(data, &(in->dz));
     bytesEncoded += status.bytes_processed;
     if (status.status_code != WIPS_STATUS_OK) return wips_make_status(bytesEncoded,status.status_code);
+    WIPS_TRACELOG("Encoding twist3 field rx (fp64)\n");
     status = wips_encode_fp64(data, &(in->rx));
     bytesEncoded += status.bytes_processed;
     if (status.status_code != WIPS_STATUS_OK) return wips_make_status(bytesEncoded,status.status_code);
+    WIPS_TRACELOG("Encoding twist3 field ry (fp64)\n");
     status = wips_encode_fp64(data, &(in->ry));
     bytesEncoded += status.bytes_processed;
     if (status.status_code != WIPS_STATUS_OK) return wips_make_status(bytesEncoded,status.status_code);
+    WIPS_TRACELOG("Encoding twist3 field rz (fp64)\n");
     status = wips_encode_fp64(data, &(in->rz));
     bytesEncoded += status.bytes_processed;
     if (status.status_code != WIPS_STATUS_OK) return wips_make_status(bytesEncoded,status.status_code);
+    WIPS_TRACELOG("Encoded twist3\n");
     return wips_make_status(bytesEncoded,WIPS_STATUS_OK);
 }
 wips_status_t wips_decode_twist3(wips_twist3_t* out, wips_bin_t* data) {
+    WIPS_TRACELOG("Decoding twist3\n");
     size_t bytesDecoded = 0;
     wips_status_t status;
+    WIPS_TRACELOG("Decoding twist3 field dx (fp64)\n");
     status = wips_decode_fp64(&(out->dx), data);
     bytesDecoded += status.bytes_processed;
     if (status.status_code != WIPS_STATUS_OK) return wips_make_status(bytesDecoded,status.status_code);
+    WIPS_TRACELOG("Decoding twist3 field dy (fp64)\n");
     status = wips_decode_fp64(&(out->dy), data);
     bytesDecoded += status.bytes_processed;
     if (status.status_code != WIPS_STATUS_OK) return wips_make_status(bytesDecoded,status.status_code);
+    WIPS_TRACELOG("Decoding twist3 field dz (fp64)\n");
     status = wips_decode_fp64(&(out->dz), data);
     bytesDecoded += status.bytes_processed;
     if (status.status_code != WIPS_STATUS_OK) return wips_make_status(bytesDecoded,status.status_code);
+    WIPS_TRACELOG("Decoding twist3 field rx (fp64)\n");
     status = wips_decode_fp64(&(out->rx), data);
     bytesDecoded += status.bytes_processed;
     if (status.status_code != WIPS_STATUS_OK) return wips_make_status(bytesDecoded,status.status_code);
+    WIPS_TRACELOG("Decoding twist3 field ry (fp64)\n");
     status = wips_decode_fp64(&(out->ry), data);
     bytesDecoded += status.bytes_processed;
     if (status.status_code != WIPS_STATUS_OK) return wips_make_status(bytesDecoded,status.status_code);
+    WIPS_TRACELOG("Decoding twist3 field rz (fp64)\n");
     status = wips_decode_fp64(&(out->rz), data);
     bytesDecoded += status.bytes_processed;
     if (status.status_code != WIPS_STATUS_OK) return wips_make_status(bytesDecoded,status.status_code);
+    WIPS_TRACELOG("Decoded twist3\n");
     return wips_make_status(bytesDecoded,WIPS_STATUS_OK);
 }

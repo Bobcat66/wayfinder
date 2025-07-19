@@ -39,60 +39,83 @@
 #include "wips_detail.h"
 
 wips_apriltag_relative_pose_observation_t* wips_apriltag_relative_pose_observation_create(){
+    WIPS_TRACELOG("Creating apriltag_relative_pose_observation struct\n");
     wips_apriltag_relative_pose_observation_t* struct_ptr = calloc(1,GET_SIZE(apriltag_relative_pose_observation));
-    if (!struct_ptr) {return NULL;}
+    if (!struct_ptr) {
+        WIPS_DEBUGLOG("Error: Failed to allocate apriltag_relative_pose_observation struct\n");
+        return NULL;
+    }
+    WIPS_TRACELOG("Created apriltag_relative_pose_observation struct\n");
     return struct_ptr;
 }
 void wips_apriltag_relative_pose_observation_free_resources(wips_apriltag_relative_pose_observation_t* struct_ptr) {
+    WIPS_TRACELOG("Freeing resources held by apriltag_relative_pose_observation\n");
+    WIPS_TRACELOG("Freed resources held by apriltag_relative_pose_observation\n");
 }
 // Function to destroy the struct and free all resources
 void wips_apriltag_relative_pose_observation_destroy(wips_apriltag_relative_pose_observation_t* struct_ptr) {
+    WIPS_TRACELOG("Destroying apriltag_relative_pose_observation\n");
     if (!struct_ptr) { return; }
     // Free resources allocated by the struct
     wips_apriltag_relative_pose_observation_free_resources(struct_ptr);
     
     // Free the struct itself
     free(struct_ptr);
+    WIPS_TRACELOG("Destroyed apriltag_relative_pose_observation\n");
 }
 
 
 wips_status_t wips_encode_apriltag_relative_pose_observation(wips_bin_t* data, wips_apriltag_relative_pose_observation_t* in) {
+    WIPS_TRACELOG("Encoding apriltag_relative_pose_observation\n");
     size_t bytesEncoded = 0;
     wips_status_t status;
+    WIPS_TRACELOG("Encoding apriltag_relative_pose_observation field fiducial_id (i32)\n");
     status = wips_encode_i32(data, &(in->fiducial_id));
     bytesEncoded += status.bytes_processed;
     if (status.status_code != WIPS_STATUS_OK) return wips_make_status(bytesEncoded,status.status_code);
+    WIPS_TRACELOG("Encoding apriltag_relative_pose_observation field cam_pose_0 (pose3)\n");
     status = wips_encode_pose3(data, &(in->cam_pose_0));
     bytesEncoded += status.bytes_processed;
     if (status.status_code != WIPS_STATUS_OK) return wips_make_status(bytesEncoded,status.status_code);
+    WIPS_TRACELOG("Encoding apriltag_relative_pose_observation field error_0 (fp64)\n");
     status = wips_encode_fp64(data, &(in->error_0));
     bytesEncoded += status.bytes_processed;
     if (status.status_code != WIPS_STATUS_OK) return wips_make_status(bytesEncoded,status.status_code);
+    WIPS_TRACELOG("Encoding apriltag_relative_pose_observation field cam_pose_1 (pose3)\n");
     status = wips_encode_pose3(data, &(in->cam_pose_1));
     bytesEncoded += status.bytes_processed;
     if (status.status_code != WIPS_STATUS_OK) return wips_make_status(bytesEncoded,status.status_code);
+    WIPS_TRACELOG("Encoding apriltag_relative_pose_observation field error_1 (fp64)\n");
     status = wips_encode_fp64(data, &(in->error_1));
     bytesEncoded += status.bytes_processed;
     if (status.status_code != WIPS_STATUS_OK) return wips_make_status(bytesEncoded,status.status_code);
+    WIPS_TRACELOG("Encoded apriltag_relative_pose_observation\n");
     return wips_make_status(bytesEncoded,WIPS_STATUS_OK);
 }
 wips_status_t wips_decode_apriltag_relative_pose_observation(wips_apriltag_relative_pose_observation_t* out, wips_bin_t* data) {
+    WIPS_TRACELOG("Decoding apriltag_relative_pose_observation\n");
     size_t bytesDecoded = 0;
     wips_status_t status;
+    WIPS_TRACELOG("Decoding apriltag_relative_pose_observation field fiducial_id (i32)\n");
     status = wips_decode_i32(&(out->fiducial_id), data);
     bytesDecoded += status.bytes_processed;
     if (status.status_code != WIPS_STATUS_OK) return wips_make_status(bytesDecoded,status.status_code);
+    WIPS_TRACELOG("Decoding apriltag_relative_pose_observation field cam_pose_0 (pose3)\n");
     status = wips_decode_pose3(&(out->cam_pose_0), data);
     bytesDecoded += status.bytes_processed;
     if (status.status_code != WIPS_STATUS_OK) return wips_make_status(bytesDecoded,status.status_code);
+    WIPS_TRACELOG("Decoding apriltag_relative_pose_observation field error_0 (fp64)\n");
     status = wips_decode_fp64(&(out->error_0), data);
     bytesDecoded += status.bytes_processed;
     if (status.status_code != WIPS_STATUS_OK) return wips_make_status(bytesDecoded,status.status_code);
+    WIPS_TRACELOG("Decoding apriltag_relative_pose_observation field cam_pose_1 (pose3)\n");
     status = wips_decode_pose3(&(out->cam_pose_1), data);
     bytesDecoded += status.bytes_processed;
     if (status.status_code != WIPS_STATUS_OK) return wips_make_status(bytesDecoded,status.status_code);
+    WIPS_TRACELOG("Decoding apriltag_relative_pose_observation field error_1 (fp64)\n");
     status = wips_decode_fp64(&(out->error_1), data);
     bytesDecoded += status.bytes_processed;
     if (status.status_code != WIPS_STATUS_OK) return wips_make_status(bytesDecoded,status.status_code);
+    WIPS_TRACELOG("Decoded apriltag_relative_pose_observation\n");
     return wips_make_status(bytesDecoded,WIPS_STATUS_OK);
 }

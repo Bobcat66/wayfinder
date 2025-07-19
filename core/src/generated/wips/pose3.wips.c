@@ -39,72 +39,99 @@
 #include "wips_detail.h"
 
 wips_pose3_t* wips_pose3_create(){
+    WIPS_TRACELOG("Creating pose3 struct\n");
     wips_pose3_t* struct_ptr = calloc(1,GET_SIZE(pose3));
-    if (!struct_ptr) {return NULL;}
+    if (!struct_ptr) {
+        WIPS_DEBUGLOG("Error: Failed to allocate pose3 struct\n");
+        return NULL;
+    }
+    WIPS_TRACELOG("Created pose3 struct\n");
     return struct_ptr;
 }
 void wips_pose3_free_resources(wips_pose3_t* struct_ptr) {
+    WIPS_TRACELOG("Freeing resources held by pose3\n");
+    WIPS_TRACELOG("Freed resources held by pose3\n");
 }
 // Function to destroy the struct and free all resources
 void wips_pose3_destroy(wips_pose3_t* struct_ptr) {
+    WIPS_TRACELOG("Destroying pose3\n");
     if (!struct_ptr) { return; }
     // Free resources allocated by the struct
     wips_pose3_free_resources(struct_ptr);
     
     // Free the struct itself
     free(struct_ptr);
+    WIPS_TRACELOG("Destroyed pose3\n");
 }
 
 
 wips_status_t wips_encode_pose3(wips_bin_t* data, wips_pose3_t* in) {
+    WIPS_TRACELOG("Encoding pose3\n");
     size_t bytesEncoded = 0;
     wips_status_t status;
+    WIPS_TRACELOG("Encoding pose3 field x (fp64)\n");
     status = wips_encode_fp64(data, &(in->x));
     bytesEncoded += status.bytes_processed;
     if (status.status_code != WIPS_STATUS_OK) return wips_make_status(bytesEncoded,status.status_code);
+    WIPS_TRACELOG("Encoding pose3 field y (fp64)\n");
     status = wips_encode_fp64(data, &(in->y));
     bytesEncoded += status.bytes_processed;
     if (status.status_code != WIPS_STATUS_OK) return wips_make_status(bytesEncoded,status.status_code);
+    WIPS_TRACELOG("Encoding pose3 field z (fp64)\n");
     status = wips_encode_fp64(data, &(in->z));
     bytesEncoded += status.bytes_processed;
     if (status.status_code != WIPS_STATUS_OK) return wips_make_status(bytesEncoded,status.status_code);
+    WIPS_TRACELOG("Encoding pose3 field wq (fp64)\n");
     status = wips_encode_fp64(data, &(in->wq));
     bytesEncoded += status.bytes_processed;
     if (status.status_code != WIPS_STATUS_OK) return wips_make_status(bytesEncoded,status.status_code);
+    WIPS_TRACELOG("Encoding pose3 field xq (fp64)\n");
     status = wips_encode_fp64(data, &(in->xq));
     bytesEncoded += status.bytes_processed;
     if (status.status_code != WIPS_STATUS_OK) return wips_make_status(bytesEncoded,status.status_code);
+    WIPS_TRACELOG("Encoding pose3 field yq (fp64)\n");
     status = wips_encode_fp64(data, &(in->yq));
     bytesEncoded += status.bytes_processed;
     if (status.status_code != WIPS_STATUS_OK) return wips_make_status(bytesEncoded,status.status_code);
+    WIPS_TRACELOG("Encoding pose3 field zq (fp64)\n");
     status = wips_encode_fp64(data, &(in->zq));
     bytesEncoded += status.bytes_processed;
     if (status.status_code != WIPS_STATUS_OK) return wips_make_status(bytesEncoded,status.status_code);
+    WIPS_TRACELOG("Encoded pose3\n");
     return wips_make_status(bytesEncoded,WIPS_STATUS_OK);
 }
 wips_status_t wips_decode_pose3(wips_pose3_t* out, wips_bin_t* data) {
+    WIPS_TRACELOG("Decoding pose3\n");
     size_t bytesDecoded = 0;
     wips_status_t status;
+    WIPS_TRACELOG("Decoding pose3 field x (fp64)\n");
     status = wips_decode_fp64(&(out->x), data);
     bytesDecoded += status.bytes_processed;
     if (status.status_code != WIPS_STATUS_OK) return wips_make_status(bytesDecoded,status.status_code);
+    WIPS_TRACELOG("Decoding pose3 field y (fp64)\n");
     status = wips_decode_fp64(&(out->y), data);
     bytesDecoded += status.bytes_processed;
     if (status.status_code != WIPS_STATUS_OK) return wips_make_status(bytesDecoded,status.status_code);
+    WIPS_TRACELOG("Decoding pose3 field z (fp64)\n");
     status = wips_decode_fp64(&(out->z), data);
     bytesDecoded += status.bytes_processed;
     if (status.status_code != WIPS_STATUS_OK) return wips_make_status(bytesDecoded,status.status_code);
+    WIPS_TRACELOG("Decoding pose3 field wq (fp64)\n");
     status = wips_decode_fp64(&(out->wq), data);
     bytesDecoded += status.bytes_processed;
     if (status.status_code != WIPS_STATUS_OK) return wips_make_status(bytesDecoded,status.status_code);
+    WIPS_TRACELOG("Decoding pose3 field xq (fp64)\n");
     status = wips_decode_fp64(&(out->xq), data);
     bytesDecoded += status.bytes_processed;
     if (status.status_code != WIPS_STATUS_OK) return wips_make_status(bytesDecoded,status.status_code);
+    WIPS_TRACELOG("Decoding pose3 field yq (fp64)\n");
     status = wips_decode_fp64(&(out->yq), data);
     bytesDecoded += status.bytes_processed;
     if (status.status_code != WIPS_STATUS_OK) return wips_make_status(bytesDecoded,status.status_code);
+    WIPS_TRACELOG("Decoding pose3 field zq (fp64)\n");
     status = wips_decode_fp64(&(out->zq), data);
     bytesDecoded += status.bytes_processed;
     if (status.status_code != WIPS_STATUS_OK) return wips_make_status(bytesDecoded,status.status_code);
+    WIPS_TRACELOG("Decoded pose3\n");
     return wips_make_status(bytesDecoded,WIPS_STATUS_OK);
 }

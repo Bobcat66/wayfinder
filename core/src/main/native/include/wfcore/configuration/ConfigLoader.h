@@ -19,26 +19,37 @@
 
 #pragma once
 
-#include "wfcore/common/StatusfulObject.h"
+#include "wfcore/common/status.h"
 #include "wfcore/hardware/CameraConfiguration.h"
 #include "wfcore/processes/VisionWorkerConfig.h"
+#include "wfcore/fiducial/ApriltagField.h"
 #include <filesystem>
 #include <optional>
+#include <vector>
 
 namespace wf {
 
     enum class ConfigLoaderStatus {
         Ok,
-        FileNotFound,
+        FileNotOpened,
         InvalidJSON
     };
 
     class ConfigLoader : public LoggedStatusfulObject<ConfigLoaderStatus,ConfigLoaderStatus::Ok> {
     public:
-        std::optional<CameraConfiguration> loadCameraConfig(const std::filesystem::path& path);
-        std::optional<VisionWorkerConfig> loadWorkerConfig(const std::filesystem::path& path);
-        bool storeVisionWorkerConfig(const std::filesystem::path& path,const VisionWorkerConfig& newConfig);
-        bool storeCameraConfig(const std::filesystem::path& path, const CameraConfiguration& newConfig);
+        ConfigLoader(std::filesystem::path localDirPath, std::filesystem::path resourceDirPath);
+        std::optional<CameraConfiguration> loadCameraConfig(const std::string& filename) const noexcept;
+        std::optional<VisionWorkerConfig> loadWorkerConfig(const std::string& filename) const noexcept;
+        bool storeVisionWorkerConfig(const std::string& filename,const VisionWorkerConfig& config) const noexcept;
+        bool storeCameraConfig(const std::string& filename, const CameraConfiguration& config) const noexcept;
+        std::vector<std::string> searchForCameraConfigFiles() const noexcept;
+        std::vector<std::string> searchForVisionWorkerConfigFiles() const noexcept;
+        std::optional<ApriltagField> loadField(const std::string& filename) const noexcept;
     private:
+        // Path to the local/ directory containing local configuration files
+        const std::filesystem::path localDirPath_;
+
+        // Path to the resources/ directory containing WIPS resources (apriltag fields, models, etc.)
+        const std::filesystem::path resourceDirPath_;
     };
 }
