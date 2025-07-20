@@ -164,6 +164,7 @@ def compile(schemas_path: Path, output_dir: Path, py: bool = False, jvm: bool = 
     copyfile(home_path.parent/"runtime"/"wips_runtime.c",output_dir/"wips_runtime.c")
     copyfile(home_path.parent/"runtime"/"wips_runtime.h",output_dir/"wips_runtime.h")
     copyfile(home_path.parent/"runtime"/"wips_detail.h",output_dir/"wips_detail.h")
+    copyfile(home_path.parent/"runtime"/"wips_chrono.c",output_dir/"wips_chrono.c")
     end = time.perf_counter()
     print(f"Compilation finished in {end-start} seconds")
 

@@ -69,6 +69,9 @@ extern "C" {
 #define STRINGIZE_IMPL(x) #x
 #define STRINGIZE(x) STRINGIZE_IMPL(x)
 
+// Portable thread-safe version of localtime()
+struct tm* wips_localtime(const time_t* timer);
+
 #ifndef NDEBUG
 
 #include <stdio.h>
@@ -81,7 +84,7 @@ extern "C" {
             perror("time");                                                                                     \
             break;                                                                                              \
         }                                                                                                       \
-        struct tm *local = localtime(&now);                                                                     \
+        struct tm *local = wips_localtime(&now);                                                                \
         if (local == NULL) {                                                                                    \
             perror("localtime");                                                                                \
             break;                                                                                              \
@@ -120,7 +123,7 @@ extern "C" {
             perror("time");                                                                                     \
             break;                                                                                              \
         }                                                                                                       \
-        struct tm *local = localtime(&now);                                                                     \
+        struct tm *local = wips_localtime(&now);                                                                \
         if (local == NULL) {                                                                                    \
             perror("localtime");                                                                                \
             break;                                                                                              \
