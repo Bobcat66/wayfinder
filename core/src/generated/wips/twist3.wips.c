@@ -67,6 +67,7 @@ void wips_twist3_destroy(wips_twist3_t* struct_ptr) {
 
 wips_status_t wips_encode_twist3(wips_bin_t* data, wips_twist3_t* in) {
     WIPS_TRACELOG("Encoding twist3\n");
+    WIPS_Assert(data != NULL && in != NULL,0);
     size_t bytesEncoded = 0;
     wips_status_t status;
     WIPS_TRACELOG("Encoding twist3 field dx (fp64)\n");
@@ -98,6 +99,7 @@ wips_status_t wips_encode_twist3(wips_bin_t* data, wips_twist3_t* in) {
 }
 wips_status_t wips_decode_twist3(wips_twist3_t* out, wips_bin_t* data) {
     WIPS_TRACELOG("Decoding twist3\n");
+    WIPS_Assert(out != NULL && data != NULL,0);
     size_t bytesDecoded = 0;
     wips_status_t status;
     WIPS_TRACELOG("Decoding twist3 field dx (fp64)\n");

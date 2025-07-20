@@ -67,6 +67,7 @@ void wips_pose3_destroy(wips_pose3_t* struct_ptr) {
 
 wips_status_t wips_encode_pose3(wips_bin_t* data, wips_pose3_t* in) {
     WIPS_TRACELOG("Encoding pose3\n");
+    WIPS_Assert(data != NULL && in != NULL,0);
     size_t bytesEncoded = 0;
     wips_status_t status;
     WIPS_TRACELOG("Encoding pose3 field x (fp64)\n");
@@ -102,6 +103,7 @@ wips_status_t wips_encode_pose3(wips_bin_t* data, wips_pose3_t* in) {
 }
 wips_status_t wips_decode_pose3(wips_pose3_t* out, wips_bin_t* data) {
     WIPS_TRACELOG("Decoding pose3\n");
+    WIPS_Assert(out != NULL && data != NULL,0);
     size_t bytesDecoded = 0;
     wips_status_t status;
     WIPS_TRACELOG("Decoding pose3 field x (fp64)\n");

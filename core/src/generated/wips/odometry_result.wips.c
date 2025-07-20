@@ -81,6 +81,7 @@ void wips_odometry_result_destroy(wips_odometry_result_t* struct_ptr) {
 
 wips_status_t wips_encode_odometry_result(wips_bin_t* data, wips_odometry_result_t* in) {
     WIPS_TRACELOG("Encoding odometry_result\n");
+    WIPS_Assert(data != NULL && in != NULL,0);
     size_t bytesEncoded = 0;
     wips_status_t status;
     WIPS_TRACELOG("Encoding odometry_result field DETAILvlasize__timestamps (u32)\n");
@@ -108,6 +109,7 @@ wips_status_t wips_encode_odometry_result(wips_bin_t* data, wips_odometry_result
 }
 wips_status_t wips_decode_odometry_result(wips_odometry_result_t* out, wips_bin_t* data) {
     WIPS_TRACELOG("Decoding odometry_result\n");
+    WIPS_Assert(out != NULL && data != NULL,0);
     size_t bytesDecoded = 0;
     wips_status_t status;
     WIPS_TRACELOG("Decoding odometry_result field DETAILvlasize__timestamps (u32)\n");
@@ -123,7 +125,15 @@ wips_status_t wips_decode_odometry_result(wips_odometry_result_t* out, wips_bin_
     for (wips_u32_t i = 0; i < out->GET_DETAIL(timestamps,vlasize); i++) {
         status = wips_decode_u64(out->timestamps + i, data);
         bytesDecoded += status.bytes_processed;
-        if (status.status_code != WIPS_STATUS_OK) return wips_make_status(bytesDecoded,status.status_code);
+        if (status.status_code != WIPS_STATUS_OK){
+            // Free any partially decoded elements to avoid leaks
+            for (wips_u32_t j = 0; j < i; j++) {
+                wips_u64_free_resources(out->timestamps + j);
+            }
+            free(out->timestamps);
+            out->timestamps = NULL;
+            return wips_make_status(bytesDecoded,status.status_code);
+        }
     }
     WIPS_TRACELOG("Decoding odometry_result field DETAILvlasize__twists (u32)\n");
     status = wips_decode_u32(&(out->DETAILvlasize__twists), data);
@@ -138,7 +148,15 @@ wips_status_t wips_decode_odometry_result(wips_odometry_result_t* out, wips_bin_
     for (wips_u32_t i = 0; i < out->GET_DETAIL(twists,vlasize); i++) {
         status = wips_decode_twist2(out->twists + i, data);
         bytesDecoded += status.bytes_processed;
-        if (status.status_code != WIPS_STATUS_OK) return wips_make_status(bytesDecoded,status.status_code);
+        if (status.status_code != WIPS_STATUS_OK){
+            // Free any partially decoded elements to avoid leaks
+            for (wips_u32_t j = 0; j < i; j++) {
+                wips_twist2_free_resources(out->twists + j);
+            }
+            free(out->twists);
+            out->twists = NULL;
+            return wips_make_status(bytesDecoded,status.status_code);
+        }
     }
     WIPS_TRACELOG("Decoded odometry_result\n");
     return wips_make_status(bytesDecoded,WIPS_STATUS_OK);

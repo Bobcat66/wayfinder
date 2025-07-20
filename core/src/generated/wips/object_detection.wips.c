@@ -67,6 +67,7 @@ void wips_object_detection_destroy(wips_object_detection_t* struct_ptr) {
 
 wips_status_t wips_encode_object_detection(wips_bin_t* data, wips_object_detection_t* in) {
     WIPS_TRACELOG("Encoding object_detection\n");
+    WIPS_Assert(data != NULL && in != NULL,0);
     size_t bytesEncoded = 0;
     wips_status_t status;
     WIPS_TRACELOG("Encoding object_detection field object_class (i32)\n");
@@ -118,6 +119,7 @@ wips_status_t wips_encode_object_detection(wips_bin_t* data, wips_object_detecti
 }
 wips_status_t wips_decode_object_detection(wips_object_detection_t* out, wips_bin_t* data) {
     WIPS_TRACELOG("Decoding object_detection\n");
+    WIPS_Assert(out != NULL && data != NULL,0);
     size_t bytesDecoded = 0;
     wips_status_t status;
     WIPS_TRACELOG("Decoding object_detection field object_class (i32)\n");

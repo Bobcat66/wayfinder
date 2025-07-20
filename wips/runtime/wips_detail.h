@@ -94,6 +94,23 @@ extern "C" {
         fprintf(stderr, fmt __VA_OPT__(,) __VA_ARGS__);                                                         \
     } while (0)
 
+#define WIPS_Assert(expr, bytes_processed)                                                                      \
+    do {                                                                                                        \
+        if (!(expr)){                                                                                           \
+            WIPS_DEBUGLOG("Assertion failed: %s, file %s, line %d\n",STRINGIZE(expr),__FILE__,__LINE__);        \
+            return wips_make_status(bytes_processed,WIPS_STATUS_BAD_ASSERT);                                    \
+        }                                                                                                       \
+    } while (0)
+
+#define WIPS_FatalAssert(expr)                                                                                  \
+   do {                                                                                                         \
+        if (!(expr)){                                                                                           \
+            WIPS_DEBUGLOG("Fatal assertion failed: %s, file %s, line %d\n",STRINGIZE(expr),__FILE__,__LINE__);  \
+            abort();                                                                                            \
+        }                                                                                                       \
+    } while (0)
+
+
 #ifdef WIPS_OPTION_TRACEBACK
 
 #define WIPS_TRACELOG(fmt,...)                                                                                  \
@@ -112,7 +129,7 @@ extern "C" {
         if (strftime(timestr, sizeof(timestr), "%Y-%m-%d %H:%M:%S", local) == 0) {                              \
             strcpy(timestr, "TIME-FAIL");                                                                       \
         }                                                                                                       \
-        fprintf(stderr, "[%s] [WIPS_TRACE]: ", timestr);                                                              \
+        fprintf(stderr, "[%s] [WIPS_TRACE]: ", timestr);                                                        \
         fprintf(stderr, fmt __VA_OPT__(,) __VA_ARGS__);                                                         \
     } while (0)
 
@@ -126,11 +143,14 @@ extern "C" {
 
 #define WIPS_DEBUGLOG(fmt,...)
 #define WIPS_TRACELOG(fmt,...)
+#define WIPS_Assert(expr, bytes_processed)
+#define WIPS_FatalAssert(expr)
 
 #endif // NDEBUG
 
 #define DEFINE_TRIVIAL_ENCODE(wips_typename)                                                                    \
     wips_status_t wips_encode_##wips_typename(wips_bin_t* data, GET_CTYPE(wips_typename)* in){                  \
+        WIPS_Assert(data != NULL && in != NULL,0);                                                              \
         WIPS_TRACELOG("Encoding %s\n",STRINGIZE(wips_typename));                                                \
         if (data->offset > (SIZE_MAX - GET_SIZE(wips_typename))){                                               \
             WIPS_DEBUGLOG("Fatal error while encoding %s: Integer overflow\n",STRINGIZE(wips_typename));        \
@@ -158,6 +178,7 @@ extern "C" {
     
 #define DEFINE_TRIVIAL_DECODE(wips_typename)                                                                    \
     wips_status_t wips_decode_##wips_typename(GET_CTYPE(wips_typename)* out, wips_bin_t* data){                 \
+        WIPS_Assert(out != NULL && data != NULL,0);                                                             \
         WIPS_TRACELOG("Decoding %s\n",STRINGIZE(wips_typename));                                                \
         if (data->offset > (SIZE_MAX - GET_SIZE(wips_typename))){                                               \
             WIPS_DEBUGLOG("Fatal error while decoding %s: Integer overflow\n",STRINGIZE(wips_typename));        \
@@ -165,7 +186,7 @@ extern "C" {
         }                                                                                                       \
         size_t newOffset = data->offset + GET_SIZE(wips_typename);                                              \
         if (newOffset > data->allocated){                                                                       \
-            WIPS_DEBUGLOG("Fatal error while decoding %s: Out-of-bounds error",STRINGIZE(wips_typename));       \
+            WIPS_DEBUGLOG("Fatal error while decoding %s: Out-of-bounds error\n",STRINGIZE(wips_typename));     \
             return wips_make_status(0,WIPS_STATUS_BOUNDS_ERROR);                                                \
         }                                                                                                       \
         memcpy(out,data->base+data->offset, GET_SIZE(wips_typename));                                           \

@@ -74,6 +74,7 @@ void wips_apriltag_field_pose_observation_destroy(wips_apriltag_field_pose_obser
 
 wips_status_t wips_encode_apriltag_field_pose_observation(wips_bin_t* data, wips_apriltag_field_pose_observation_t* in) {
     WIPS_TRACELOG("Encoding apriltag_field_pose_observation\n");
+    WIPS_Assert(data != NULL && in != NULL,0);
     size_t bytesEncoded = 0;
     wips_status_t status;
     WIPS_TRACELOG("Encoding apriltag_field_pose_observation field DETAILvlasize__tags_used (u32)\n");
@@ -119,6 +120,7 @@ wips_status_t wips_encode_apriltag_field_pose_observation(wips_bin_t* data, wips
 }
 wips_status_t wips_decode_apriltag_field_pose_observation(wips_apriltag_field_pose_observation_t* out, wips_bin_t* data) {
     WIPS_TRACELOG("Decoding apriltag_field_pose_observation\n");
+    WIPS_Assert(out != NULL && data != NULL,0);
     size_t bytesDecoded = 0;
     wips_status_t status;
     WIPS_TRACELOG("Decoding apriltag_field_pose_observation field DETAILvlasize__tags_used (u32)\n");
@@ -134,7 +136,15 @@ wips_status_t wips_decode_apriltag_field_pose_observation(wips_apriltag_field_po
     for (wips_u32_t i = 0; i < out->GET_DETAIL(tags_used,vlasize); i++) {
         status = wips_decode_i32(out->tags_used + i, data);
         bytesDecoded += status.bytes_processed;
-        if (status.status_code != WIPS_STATUS_OK) return wips_make_status(bytesDecoded,status.status_code);
+        if (status.status_code != WIPS_STATUS_OK){
+            // Free any partially decoded elements to avoid leaks
+            for (wips_u32_t j = 0; j < i; j++) {
+                wips_i32_free_resources(out->tags_used + j);
+            }
+            free(out->tags_used);
+            out->tags_used = NULL;
+            return wips_make_status(bytesDecoded,status.status_code);
+        }
     }
     WIPS_TRACELOG("Decoding apriltag_field_pose_observation field field_pose_0 (pose3)\n");
     status = wips_decode_pose3(&(out->field_pose_0), data);

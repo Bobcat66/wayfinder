@@ -67,6 +67,7 @@ void wips_apriltag_detection_destroy(wips_apriltag_detection_t* struct_ptr) {
 
 wips_status_t wips_encode_apriltag_detection(wips_bin_t* data, wips_apriltag_detection_t* in) {
     WIPS_TRACELOG("Encoding apriltag_detection\n");
+    WIPS_Assert(data != NULL && in != NULL,0);
     size_t bytesEncoded = 0;
     wips_status_t status;
     WIPS_TRACELOG("Encoding apriltag_detection field fiducial_id (i32)\n");
@@ -122,6 +123,7 @@ wips_status_t wips_encode_apriltag_detection(wips_bin_t* data, wips_apriltag_det
 }
 wips_status_t wips_decode_apriltag_detection(wips_apriltag_detection_t* out, wips_bin_t* data) {
     WIPS_TRACELOG("Decoding apriltag_detection\n");
+    WIPS_Assert(out != NULL && data != NULL,0);
     size_t bytesDecoded = 0;
     wips_status_t status;
     WIPS_TRACELOG("Decoding apriltag_detection field fiducial_id (i32)\n");
