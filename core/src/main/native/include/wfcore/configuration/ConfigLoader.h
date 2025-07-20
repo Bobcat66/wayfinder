@@ -36,6 +36,7 @@ namespace wf {
         JSONParseError
     };
 
+    // TODO: refactor this
     class ConfigLoader : public LoggedStatusfulObject<ConfigLoaderStatus,ConfigLoaderStatus::Ok> {
     public:
         ConfigLoader(std::filesystem::path localDirPath, std::filesystem::path resourceDirPath);

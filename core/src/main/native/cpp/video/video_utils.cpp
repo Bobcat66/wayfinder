@@ -49,25 +49,23 @@ namespace wf {
         };
     }
 
-    int sparseResize(const std::vector<cv::Point2d>& input, std::vector<cv::Point2d>& output, double fx, double fy) noexcept {
+    void sparseResize(const std::vector<cv::Point2d>& input, std::vector<cv::Point2d>& output, double fx, double fy) noexcept {
         output.resize(input.size());
         for (size_t i = 0; i < input.size(); ++i) {
             const auto& input_point = input[i];
             output[i] = {input_point.x * fx,input_point.y * fy};
         }
-        return 0;
     }
 
-    int sparseResize(const std::vector<cv::Point2f>& input, std::vector<cv::Point2f>& output, float fx, float fy) noexcept {
+    void sparseResize(const std::vector<cv::Point2f>& input, std::vector<cv::Point2f>& output, float fx, float fy) noexcept {
         output.resize(input.size());
         for (size_t i = 0; i < input.size(); ++i) {
             const auto& input_point = input[i];
             output[i] = {input_point.x * fx,input_point.y * fy};
         }
-        return 0;
     }
 
-    int sparseShift(const std::vector<cv::Point2d>& input, std::vector<cv::Point2d>& output, double dx, double dy) noexcept {
+    void sparseShift(const std::vector<cv::Point2d>& input, std::vector<cv::Point2d>& output, double dx, double dy) noexcept {
         output.resize(input.size());
         for (size_t i = 0; i < input.size(); ++i) {
             const auto& input_point = input[i];
@@ -75,7 +73,7 @@ namespace wf {
         }
     }
 
-    int sparseShift(const std::vector<cv::Point2f>& input, std::vector<cv::Point2f>& output, float dx, float dy) noexcept {
+    void sparseShift(const std::vector<cv::Point2f>& input, std::vector<cv::Point2f>& output, float dx, float dy) noexcept {
         output.resize(input.size());
         for (size_t i = 0; i < input.size(); ++i) {
             const auto& input_point = input[i];

@@ -26,6 +26,9 @@
 #include <gtsam/geometry/Pose3.h>
 #include <vector>
 
+// Ideally everything in wfcore/common would only include external dependencies and other files in wfcore/common,
+// This file breaks that rule, should refactor eventually
+
 namespace wf {
     wips_bin_t* packPose3(const gtsam::Pose3& pose);
     gtsam::Pose3 unpackPose3(wips_bin_t* data);

@@ -26,3 +26,10 @@
 #else
     #define WF_DEBUGLOG(logger, fmt, ...) 
 #endif
+
+namespace wf {
+    inline loggerPtr& globalLogger() {
+        static auto logger = LoggerManager::getInstance().getLogger("Wayfinder");
+        return logger;
+    }
+}

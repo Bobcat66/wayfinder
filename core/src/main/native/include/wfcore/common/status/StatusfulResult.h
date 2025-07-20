@@ -43,6 +43,11 @@ namespace wf {
             return { nominal_status, std::move(value) };
         }
 
+        template <typename... Args>
+        static constexpr StatusfulResult success(std::in_place_t, Args&&... args) {
+            return { nominal_status, std::optional<T>(std::in_place,std::forward<Args>(args)...) };
+        }
+
         static constexpr StatusfulResult failure(U code) {
             return { code, std::nullopt };
         }

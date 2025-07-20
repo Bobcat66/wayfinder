@@ -20,6 +20,7 @@
 
 #pragma once
 
+#include "wfcore/common/json_utils.h"
 #include <opencv2/core/mat.hpp>
 #include <cstdint>
 #include <concepts>
@@ -44,25 +45,40 @@ namespace wf {
     };
 
     // TODO: Change order to be (width,height,encoding)
-    struct FrameFormat {
+    struct FrameFormat : public JSONSerializable<FrameFormat> {
         ImageEncoding encoding;
         int rows;
         int cols;
+
+        FrameFormat() : encoding(ImageEncoding::UNKNOWN), rows(0) , cols(0) {}
+
+        FrameFormat(ImageEncoding encoding_,int rows_,int cols_) : encoding(encoding_), rows(rows_), cols(cols_) {}
 
         bool operator==(const FrameFormat& other) const {
             return encoding == other.encoding
                 && rows == other.rows 
                 && cols == other.cols;
         }
+
+
+        static JSONStatusResult<JSONObject> toJSON_impl(const FrameFormat& object);
+        static JSONStatusResult<FrameFormat> fromJSON_impl(const JSONObject& jobject);
     };
 
-    struct StreamFormat {
+    struct StreamFormat : public JSONSerializable<StreamFormat> {
         int fps;
         FrameFormat frameFormat;
+
+        StreamFormat() : fps(0), frameFormat() {}
+
+        StreamFormat(int fps_,FrameFormat frameFormat_) : fps(fps_), frameFormat(frameFormat_) {}
         
         bool operator==(const StreamFormat& other) const {
             return fps == other.fps && frameFormat == other.frameFormat;
         }
+
+        static JSONStatusResult<JSONObject> toJSON_impl(const StreamFormat& object);
+        static JSONStatusResult<StreamFormat> fromJSON_impl(const JSONObject& jobject);
     };
 
     struct FrameMetadata {

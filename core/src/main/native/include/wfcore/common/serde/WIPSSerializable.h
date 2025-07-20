@@ -21,32 +21,37 @@
 #pragma once
 
 #include "wips/wips_runtime.h"
+#include "wfcore/common/status.h"
+#include <cstdint>
 
 namespace wf {
 
+    template <typename T>
+    using WIPSStatusResult = StatusfulResult<T,uint8_t,WIPS_STATUS_OK>;
+
     // Every derived type of WIPSSerializable
     // MUST implement public methods with the following signatures:
-    // `static DerivedType wips2wfcore_shim_impl(const WipsType&)`
-    // `static WipsType wips2wfcore_shim_impl(const DerivedType&)`
-    // `static wips_bin_t* pack_impl(const DerivedType&)`
-    // `static DerivedType unpack_impl(wips_bin_t*)`
+    // `static DerivedType toWIPS_impl(const WipsType&)`
+    // `static WipsType fromWIPS_impl(const DerivedType&)`
+    // `static wips_bin_t* toWIPSBin_impl(const DerivedType&)`
+    // `static DerivedType fromWIPSBin_impl(wips_bin_t*)`
     template <typename DerivedType,typename WipsType>
     class WIPSSerializable {
     public:
-        static DerivedType wips2wfcore_shim(const WipsType& wips_struct) {
-            return DerivedType::wips2wfcore_shim_impl(wips_struct);
+        static DerivedType toWIPS(const WipsType& wips_struct) {
+            return DerivedType::toWIPS_impl(wips_struct);
         }
 
-        static WipsType wfcore2wips_shim(const DerivedType& wfcore_object) {
-            return DerivedType::wfcore2wips_shim_impl(wfcore_object);
+        static WipsType fromWIPS(const DerivedType& wfcore_object) {
+            return DerivedType::fromWIPS_impl(wfcore_object);
         }
 
-        static wips_bin_t* pack(const DerivedType& wfcore_object) {
-            return DerivedType::pack_impl(wfcore_object);
+        static wips_bin_t* toWIPSBin(const DerivedType& wfcore_object) {
+            return DerivedType::toWIPSBin_impl(wfcore_object);
         }
 
-        static DerivedType unpack(wips_bin_t* data) {
-            return DerivedType::unpack_impl(data);
+        static DerivedType fromWIPSBin(wips_bin_t* data) {
+            return DerivedType::fromWIPSBin_impl(data);
         }
     };
 

@@ -64,10 +64,6 @@
     // TODO: Maybe this code is too defensive. I feel like a lot of the checks can be removed
 namespace wf {
 
-    #ifndef NDEBUG
-        static loggerPtr debugLogger = LoggerManager::getInstance().getLogger("ApriltagDetectorDebug",LogGroup::General);
-    #endif
-
     typedef apriltag_family_t* (*apriltag_family_creator)();
     typedef void (*apriltag_family_destructor)(apriltag_family_t*);
 
@@ -157,7 +153,7 @@ namespace wf {
 
         std::vector<ApriltagDetection> detections;
         detections.reserve(zarray_size(rawDetections));
-        WF_DEBUGLOG(debugLogger,"{} detections in zarray",zarray_size(rawDetections));
+        WF_DEBUGLOG(globalLogger(),"{} detections in zarray",zarray_size(rawDetections));
         // Destructively converts rawDetections into a vector of wf::ApriltagDetections
         for (int i = 0; i < zarray_size(rawDetections); i++) {
             apriltag_detection_t* det;
@@ -176,7 +172,7 @@ namespace wf {
             );
             apriltag_detection_destroy(det);
         }
-        WF_DEBUGLOG(debugLogger,"Destroying zarray");
+        WF_DEBUGLOG(globalLogger(),"Destroying zarray");
         zarray_destroy(rawDetections);
 
         NOMINAL_RETURN(detections);

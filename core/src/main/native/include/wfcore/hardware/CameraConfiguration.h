@@ -20,6 +20,9 @@
 #pragma once
 
 #include "wfcore/video/video_types.h"
+#include "wfcore/common/status.h"
+#include "wfcore/common/wfexcept.h"
+#include "wfcore/common/json_utils.h"
 #include <opencv2/core.hpp>
 #include <string>
 #include <map>
@@ -54,21 +57,28 @@ namespace wf {
         HUE
     };
 
-    struct CameraIntrinsics {
+    struct CameraIntrinsics : public JSONSerializable<CameraIntrinsics> {
         cv::Size resolution;
         cv::Mat cameraMatrix;
         cv::Mat distCoeffs;
+
+        CameraIntrinsics(cv::Size resolution_, cv::Mat cameraMatrix_, cv::Mat distCoeffs_)
+        : resolution(std::move(resolution)), cameraMatrix(std::move(cameraMatrix_)), distCoeffs(std::move(distCoeffs_)) {}
+
+        static JSONStatusResult<JSONObject> toJSON_impl(const CameraIntrinsics& object);
+        static JSONStatusResult<CameraIntrinsics> fromJSON_impl(const JSONObject& jobject);
     };
 
-    struct CameraConfiguration {
+    struct CameraConfiguration : public JSONSerializable<CameraConfiguration> {
         std::string devpath;
         CameraBackend backend;
         StreamFormat format;
         std::unordered_map<CamControl,std::string> controlAliases; // Aliases for camera controls, for V4L2/CScore interop
-        
         std::vector<CameraIntrinsics> calibrations;
-
         std::unordered_map<CamControl,int> controls; 
+
+        static JSONStatusResult<JSONObject> toJSON_impl(const CameraConfiguration& object);
+        static JSONStatusResult<CameraConfiguration> fromJSON_impl(const JSONObject& jobject);
     };
 
 }

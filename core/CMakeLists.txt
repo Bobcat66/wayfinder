@@ -59,9 +59,9 @@ target_link_libraries(wfcore
     spdlog::spdlog
     ntcore
     cscore
+    nlohmann_json::nlohmann_json
     PRIVATE
     apriltag
-    nlohmann_json::nlohmann_json
 ) # In deployment builds, this will link statically, and there will be a cmake build type variable set in the top-level CMake file. I'll put that in eventually. For now, this is nowhere near deployment
 
 target_include_directories(wfcore 
