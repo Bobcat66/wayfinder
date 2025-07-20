@@ -1,0 +1,62 @@
+NOTE: This is the planned architecture of wayfinder. As wayfinder is still a work in progress, the architecture
+described here is still actively being implemented.
+
+Wayfinder's architecture is divided into two main parts: wayfinderd, and wfcore. wayfinderd is a daemon that serves
+as the main entry point to the wayfinder program (it is the actual executable run by the operating system). wfcore
+is a library that wayfinderd links to, which actually implements wayfinder's business logic. wayfinderd is in charge of
+loading environment variables, and managing a web server that connects to a desktop client on the DriverStation.
+
+However, wayfinderd is essentially glorified boilerplate. The real "meat and potatoes", so to speak, of wayfinder is
+located in wfcore. Wfcore implements hardware management, networktables dataflow, video streaming, and the actual
+image processing. Wfcore has a "god class", `Application`, which essentially represents the wayfinder application itself. It can
+sort of be thought of as wayfinder's rough analogue to RobotContainer in a WPILib Command Based robot. the Application itself
+contains five major subsystems: ConfigLoader, NetworktablesManager, HardwareManager, VisionWorkerManager, and GraphManager
+
+ConfigLoader: ConfigLoader is in charge of loading JSON configuration files from the local/ directory. It is the first component
+of wayfinder to be created during startup, and it will be used to fetch configuration data which will then be used to initialize
+the rest of wayfinder. During runtime, it will also process requests from the client to store configurations.
+
+NetworktablesManager: NetworktablesManager is the second subsystem to be created during startup. It is not reliant on
+configuration from the ConfigLoader, and is instead entirely configured based on environment variables loaded by wayfinderd
+(which is done before the Application object is created). NetworktablesManager is in charge of managing communications and
+networking between the robot and the coprocesser. It creates and manages all publishers and subscribers to networktables used 
+by wayfinder.
+
+HardwareManager: HardwareManager is the third subsystem to be created, and is in charge of managing cameras. It abstracts away
+the various different APIs and interfaces used by wayfinder to communicate with cameras, which can range from proprietary APIs (realsense),
+and general purpose camera capture frameworks (Gstreamer,cscore,etc.). The configurations loaded by ConfigLoader defines which cameras HardwareManager
+will load, as well as how the cameras are configured. (Unlike photonvision, Wayfinder will not perform any automatic hardware identification,
+the user will need to explicitly declare any cameras they wish to use in wayfinder's configuration, as well as their capailities). HardwareManager
+also handles runtime camera reconfiguration requests.
+
+VisionWorkerManager: VisionWorkerManager is the fourth subsystem to be created, and is in charge of managing Vision Workers. A vision worker encapsulates A
+full vision pipeline, from camera capture to streaming to the network. Each vision worker also runs on its own separate thread, to allow for simultaneous
+processing of multiple pipelines. The visionworkerManager creates and configures Vision workers as specified by the configurations loaded by the ConfigLoader,
+and also manages runtime pipeline reconfiguration.
+
+GraphManager: GraphManager is planned to be the fifth subsystem created, and will manage Wayfinder's graph-solving facilities, (for SLAM, SfM, etc.). It is the
+furthest away from being implemented, and concrete details on its implementation haven't been determined yet.
+
+Application also manages negotiation between the different subsystems (e.g. if a camera is reconfigured to output a new resolution, Application is in charge
+of making sure all VisionWorkers that receive frames from that camera are also reconfigured)
+
+## AUXILIARY COMPONENTS OF WAYFINDER ##
+
+Aside from the five core subsystems, Wfcore has various auxiliary components and services, the most important of which
+are listed here:
+
+Wayfinder video utilties: The wayfinder video utilities contains various facilities for video processing and manipulation. It provides
+a common interface for managing video data flow, various classes providing a common way to define video metadata, encoding, format, etc.
+It is tightly integrated with the HardwareManager, but is used throughout wayfinder. It also provides a framework for implementing video
+processing in the form of CVProcessPipes and CVProcessNodes
+
+Status system: Wayfinder's error handling system is implemented in the form of StatusfulObjects and status codes. Components of wayfinder that can cause errors
+all implement the StatusfulObject interface, which guarantees that an object will have a status, and it guarantees that said object will
+have certain helper functions for accessing and manipulating that status.
+
+Wayfinder logging system: Wayfinder's logging system is based on spdlog, and is managed by the LoggerManager singleton object.
+
+WIPS: WIPS is Wayfinder's binary serialization framework. Wayfinder contains a common interface (WIPSSerializable) for implementing
+shims between Wayfinder and WIPS (as WIPS cannot interact directly with Wayfinder objects, it can only work with WIPS structs). Additionally,
+the common/serde/legacy.h defines legacy interface logic. the legacy.h code is slated to be deprecated and eventually replaced entirely
+by WIPSSerializable, but for now it is still the primary way to interface between wfcore and WIPS
