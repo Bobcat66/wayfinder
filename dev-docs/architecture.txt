@@ -56,7 +56,7 @@ have certain helper functions for accessing and manipulating that status.
 
 Wayfinder logging system: Wayfinder's logging system is based on spdlog, and is managed by the LoggerManager singleton object.
 
-WIPS: WIPS is Wayfinder's binary serialization framework. Wayfinder contains a common interface (WIPSSerializable) for implementing
+WIPS Shim system: WIPS is Wayfinder's binary serialization framework. Wayfinder contains a common interface (WIPSSerializable) for implementing
 shims between Wayfinder and WIPS (as WIPS cannot interact directly with Wayfinder objects, it can only work with WIPS structs). Additionally,
 the common/serde/legacy.h defines legacy interface logic. the legacy.h code is slated to be deprecated and eventually replaced entirely
 by WIPSSerializable, but for now it is still the primary way to interface between wfcore and WIPS
