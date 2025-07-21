@@ -20,14 +20,65 @@
 #include "wfcore/hardware/CameraConfiguration.h"
 #include "wfcore/common/logging.h"
 #include <opencv2/core.hpp>
+#include <unordered_map>
 
 namespace impl {
+
+    using namespace wf;
     cv::Mat createIntrinsicsMatrix(double fx, double fy, double cx, double cy) {
         return (cv::Mat_<double>(3, 3) <<
             fx,  0, cx,
             0, fy, cy,
             0,  0,  1);
     }
+
+    static const std::unordered_map<CameraBackend,std::string> backendStringMap = {
+        {CameraBackend::CSCORE,"CSCORE"},
+        {CameraBackend::REALSENSE,"REALSENSE"},
+        {CameraBackend::GSTREAMER,"GSTREAMER"},
+        {CameraBackend::LIBCAMERA,"LIBCAMERA"}
+    };
+
+    static const std::unordered_map<std::string,CameraBackend> backendMap = {
+        {"CSCORE",CameraBackend::CSCORE},
+        {"REALSENSE",CameraBackend::REALSENSE},
+        {"GSTREAMER",CameraBackend::GSTREAMER},
+        {"LIBCAMERA",CameraBackend::LIBCAMERA}
+    };
+
+    static const std::unordered_map<CamControl,std::string> camControlStringMap = {
+        {CamControl::EXPOSURE,"EXPOSURE"},
+        {CamControl::AUTO_EXPOSURE,"AUTO_EXPOSURE"},
+        {CamControl::BRIGHTNESS,"BRIGHTNESS"},
+        {CamControl::ISO,"ISO"},
+        {CamControl::SHUTTER,"SHUTTER"},
+        {CamControl::FOCUS,"FOCUS"},
+        {CamControl::ZOOM,"ZOOM"},
+        {CamControl::WHITE_BALANCE,"WHITE_BALANCE"},
+        {CamControl::AUTO_WHITE_BALANCE,"AUTO_WHITE_BALANCE"},
+        {CamControl::SHARPNESS,"SHARPNESS"},
+        {CamControl::SATURATION,"SATURATION"},
+        {CamControl::CONTRAST,"CONTRAST"},
+        {CamControl::GAMMA,"GAMMA"},
+        {CamControl::HUE,"HUE"}
+    };
+
+    static const std::unordered_map<std::string,CamControl> camControlMap = {
+        {"EXPOSURE",CamControl::EXPOSURE},
+        {"AUTO_EXPOSURE",CamControl::AUTO_EXPOSURE},
+        {"BRIGHTNESS",CamControl::BRIGHTNESS},
+        {"ISO",CamControl::ISO},
+        {"SHUTTER",CamControl::SHUTTER},
+        {"FOCUS",CamControl::FOCUS},
+        {"ZOOM",CamControl::ZOOM},
+        {"WHITE_BALANCE",CamControl::WHITE_BALANCE},
+        {"AUTO_WHITE_BALANCE",CamControl::AUTO_WHITE_BALANCE},
+        {"SHARPNESS",CamControl::SHARPNESS},
+        {"SATURATION",CamControl::SATURATION},
+        {"CONTRAST",CamControl::CONTRAST},
+        {"GAMMA",CamControl::GAMMA},
+        {"HUE",CamControl::HUE}
+    };
 }
 
 namespace wf {
@@ -165,7 +216,7 @@ namespace wf {
 
 
     JSONStatusResult<JSONObject> CameraConfiguration::toJSON_impl(const CameraConfiguration& object) {
-        return JSONStatusResult<JSONObject>::failure(Unknown); // Placeholder
+        std::string backendStr = 
     }
 
     JSONStatusResult<CameraConfiguration> CameraConfiguration::fromJSON_impl(const JSONObject& jobject) {
