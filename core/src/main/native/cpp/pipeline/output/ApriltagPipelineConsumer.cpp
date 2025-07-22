@@ -43,12 +43,12 @@ namespace wf {
             throw invalid_image_encoding("As of now, output pixel format for OpenCV stream MUST be BGR24");
         }
         std::vector<std::unique_ptr<CVProcessNode<cv::Mat>>> nodes;
-        if (streamFormat.frameFormat.cols != inputFormat.cols || streamFormat.frameFormat.rows != inputFormat.rows) {
+        if (streamFormat.frameFormat.width != inputFormat.width || streamFormat.frameFormat.height != inputFormat.height) {
             nodes.emplace_back(
                 std::make_unique<ResizeNode<cv::Mat>>(
                     cv::INTER_LINEAR,
-                    streamFormat.frameFormat.cols,
-                    streamFormat.frameFormat.rows
+                    streamFormat.frameFormat.width,
+                    streamFormat.frameFormat.height
                 )
             );
         }

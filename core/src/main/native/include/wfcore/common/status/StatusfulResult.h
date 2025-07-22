@@ -19,26 +19,35 @@
 
 #pragma once
 
-#include "wfcore/common/status/StatusfulObject.h"
+#include "wfcore/common/status/StatusType.h"
 #include "wfcore/common/logging.h"
 #include <variant>
 #include <type_traits>
 #include <functional>
+#include <format>
 
 namespace wf {
+    
     // StatusfulResult is a monad which wraps a value and a status code
     // A monad is a design pattern that wraps a value along with some extra context,
     // such as success/failure, optionality, or side effects. It provides a way to 
     // chain operations on the wrapped value, automatically handling the context 
     // (like errors or missing values) so that the code stays clean and easy to read.
-    template <typename T,status_code status_type, status_type nominal_status>
+    template <typename T,status_code status_type, status_type nominal_status, const char* (*StringMapper) (status_type)>
     class StatusfulResult {
     public:
         constexpr StatusfulResult(status_type status, std::optional<T> val = std::nullopt)
-        : status_(status), optval(std::move(val)) {}
+        : status_(status), optval(std::move(val)), msg_(std::nullopt) {}
+
+        StatusfulResult(status_type status, std::string msg, std::optional<T> val = std::nullopt)
+        : status_(status), optval(std::move(val)), msg_(std::move(msg)) {}
 
         constexpr bool ok() const { 
             return status_ == nominal_status && optval.has_value(); 
+        }
+
+        constexpr bool hasMsg() const {
+            return msg_.has_value();
         }
 
         constexpr explicit operator bool() const {
@@ -61,24 +70,35 @@ namespace wf {
 
         // Applies mapper to the wrapped value, and returns a StatusfulResult wrapping the result
         template <typename F>
-        constexpr auto and_then(F&& mapper) const -> decltype(mapper(std::declval<T>())) {
+        auto and_then(F&& mapper) const -> decltype(mapper(std::declval<T>())) {
             using ResultType = decltype(mapper(std::declval<T>()));
             static_assert(std::is_same_v<typename ResultType::status_type, status_type>, 
                 "Mapper must return StatusfulResult with same status_type");
             static_assert(ResultType::nominal_status == nominal_status, 
                 "Mapper must use same nominal_status");
-            if (!ok()) return ResultType::failure(status());
+            static_assert(ResultType::StringMapper == StringMapper,
+                "Mapper must use same StringMapper");
+            if (!ok()){
+                if (hasMsg()) return ResultType::failure(status(),what());
+                return ResultType::failure(status());
+            }
             return mapper(optval.value());
         }
+        
+        // Returns the message string if present, lazily constructs a default if not
+        std::string_view what() const {
+            if (msg_.has_value()) return msg_.value();
+            return ok() ? nominal_msg() : StringMapper(status());
+        }
 
-        // and_then() for nerds
-        template <typename F>
-        constexpr auto bind(F&& mapper) const -> decltype(mapper(std::declval<T>())) {
-            return and_then(mapper);
+        // Ensures compatibility with the C ABI. For pure C++, what() is preferred.
+        const char* c_what() const {
+            if (msg_.has_value()) return msg_.value().c_str();
+            return ok() ? nominal_msg() : StringMapper(status());
         }
 
         static constexpr StatusfulResult success(T value) {
-            return {nominal_status, std::move(value)};
+            return { nominal_status, std::optional<T>(std::move(value)) };
         }
 
         // This will default-construct a result value
@@ -96,13 +116,23 @@ namespace wf {
             return { code, std::nullopt };
         }
 
+        template <typename... Args>
+        static StatusfulResult failure(status_type code,std::string_view fmt,Args&&... args) {
+            return { 
+                code,
+                std::vformat(fmt,std::make_format_args(args...)),
+                std::nullopt
+            };
+        }
+
         // Propagates a statusful result. If the statusfulResult passed in is nominal, this method will
         // return another nominal statusfulResult that wraps valueOnSuccess
         template <typename U>
-        static constexpr StatusfulResult propagate(const StatusfulResult<U,status_type,nominal_status>& result, T&& valueOnSuccess) {
+        static StatusfulResult propagate(const StatusfulResult<U,status_type,nominal_status,StringMapper>& result, T&& valueOnSuccess) {
             if (result) {
                 return success(std::move(valueOnSuccess));
             } else {
+                if (result.hasMsg()) return failure(result.status(),result.what());
                 return failure(result.status());
             }
         }
@@ -115,10 +145,17 @@ namespace wf {
             return !(lhs == rhs);
         }
     private:
+        static constexpr const char* nominal_msg() {
+            return "Nominal";
+        }
+
         const status_type status_;
         std::optional<T> optval;
+        // Messages are only meaningful when the status is NOT NOMINAL!
+        const std::optional<std::string> msg_;
     };
 
-    template <status_code status_type, status_type nominal_status>
-    using StatusResult = StatusfulResult<std::monostate,status_type,nominal_status>;
+    template <status_code status_type, status_type nominal_status, const char* (*StringMapper) (status_type)>
+    using StatusResult = StatusfulResult<std::monostate,status_type,nominal_status,StringMapper>;
+
 }

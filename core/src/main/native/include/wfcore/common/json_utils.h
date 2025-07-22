@@ -23,6 +23,7 @@
 #include "wfcore/common/status.h"
 #include <unordered_map>
 #include "wfcore/common/logging.h"
+#include "wfcore/common/wfexcept.h"
 
 namespace wf {
 
@@ -83,7 +84,7 @@ namespace wf {
         std::string dump() const {
             auto jres = toJSON(static_cast<const DerivedType&>(*this));
             if (!jres) [[ unlikely ]] {
-                throw json_error("Error while dumping json: {}",wfstatus_name(jres.status()));
+                throw json_error("Error while dumping json: {}",wfstatus_name_view(jres.status()));
             }
             return jres.value().dump();
         }
@@ -139,6 +140,6 @@ namespace wf {
 
     template <typename T>
     WFResult<T> jsonCast(const JSON& jobject, bool verbose) {
-        return jsonCast(jobject,"JSON Object",verbose);
+        return jsonCast<T>(jobject,"JSON Object",verbose);
     }
 }

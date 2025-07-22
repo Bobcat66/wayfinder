@@ -29,7 +29,7 @@ namespace wf {
 
     CSCameraSink::CSCameraSink(std::string name_,std::string devPath_, cs::CvSink appSink_, StreamFormat format_)
     : appSink(appSink_), devPath(devPath_), name(name_)
-    , format(format_.fps,{ImageEncoding::BGR24,format_.frameFormat.rows,format_.frameFormat.cols}) {}
+    , format(format_.fps,{ImageEncoding::BGR24,format_.frameFormat.height,format_.frameFormat.width}) {}
 
     FrameMetadata CSCameraSink::getFrame(cv::Mat& data) noexcept {
         WF_DEBUGLOG(logger,"Acquiring mutex");
@@ -50,7 +50,7 @@ namespace wf {
     // TODO: Test if CvSink converts grayscale images to Y8 and not BGR. Also test depth cameras to see if they output Y16
     void CSCameraSink::setStreamFormat(StreamFormat format) {
         std::lock_guard<std::mutex> lock(camera_guard);
-        this->format = StreamFormat(format.fps,{ImageEncoding::BGR24,format.frameFormat.rows,format.frameFormat.cols});
+        this->format = StreamFormat(format.fps,{ImageEncoding::BGR24,format.frameFormat.height,format.frameFormat.width});
     }
 
 }

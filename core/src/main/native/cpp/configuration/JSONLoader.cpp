@@ -17,128 +17,228 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "wfcore/configuration/ConfigLoader.h"
-#include <nlohmann/json.hpp>
+#include "wfcore/configuration/JSONLoader.h"
+#include "wfcore/common/logging.h"
+#include "wfcore/common/wfexcept.h"
 #include <fstream>
 #include <unordered_map>
 
-using json = nlohmann::json;
 namespace fs = std::filesystem;
 
-namespace impl {
-    using namespace wf;
-    static const std::unordered_map<CameraBackend,std::string> backendMap = {
-        {CameraBackend::CSCORE,"CSCORE"},
-        {CameraBackend::REALSENSE,"REALSENSE"},
-        {CameraBackend::GSTREAMER,"GSTREAMER"},
-        {CameraBackend::LIBCAMERA,"LIBCAMERA"}
-    };
-
-    template <typename KeyType, typename ValType>
-    std::optional<ValType> searchMapByKey(const std::unordered_map<KeyType,ValType>& map,const KeyType& key) {
-        auto it = map.find(key);
-        if (it == map.end()) {
-            return std::nullopt;
-        }
-        return it->second;
-    }
-
-    template <typename KeyType, typename ValType>
-    std::optional<KeyType> searchMapByValue(const std::unordered_map<KeyType,ValType>& map,const ValType& val) {
-        for (const auto& [key,value] : map) {
-            if (value == val) return key;
-        }
-        return std::nullopt;
-    }
-}
 namespace wf {
 
-    using enum ConfigLoaderStatus;
+    using enum WFStatus;
 
-    ConfigLoader::ConfigLoader(fs::path localDirPath, fs::path resourceDirPath) 
-    : LoggedStatusfulObject<ConfigLoaderStatus,ConfigLoaderStatus::Ok>("ConfigLoader",LogGroup::System)
-    , localDirPath_(localDirPath)
-    , resourceDirPath_(resourceDirPath) {}
-
-    std::optional<CameraConfiguration> ConfigLoader::loadCameraConfig(const std::string& filename) const noexcept {
-
-        this->logger()->info(
-            "Loading camera configuration from {}/cameras/{}",
-            localDirPath_.string(),
-            filename
-        );
-        // Load file
-        std::ifstream configFile(localDirPath_ / "cameras" / filename);
-        if (!configFile) {
-            this->reportError(
-                FileNotOpened,
-                "Failed to open file {}",
-                filename
-            );
-            return std::nullopt;
+    JSONLoader::JSONLoader(
+        std::filesystem::path resourceDir,
+        std::filesystem::path localDir
+    ) 
+    : WFLoggedStatusfulObject("JSONLoader",LogGroup::General)
+    , resourceDir_(resourceDir)
+    , localDir_(localDir) {
+        if (!fs::is_directory(resourceDir_)){
+            auto rdirstr = resourceDir_.string();
+            throw bad_resource_dir("'{}' is not a directory",rdirstr);
         }
-
-        // Parse JSON
-        json jsonData;
-        try {
-            configFile >> jsonData;
-        } catch (const json::parse_error& e) {
-            this->reportError(
-                JSONParseError,
-                "Error while parsing {}: {}",
-                filename,
-                e.what()
-            );
-            return std::nullopt;
-        }
-
-        // Retrieve devpath
-        if (!jsonData.contains("devpath")) {
-            this->reportError(
-                SchemaViolation,
-                "{} does not contain required field 'devpath'",
-                filename
-            );
-            return std::nullopt;
-        }
-        if (!jsonData["devpath"].is_string()) {
-            this->reportError(
-                SchemaViolation,
-                "{} contains field 'devpath', but it is not a string",
-                filename
-            );
-            return std::nullopt;
-        }
-        auto devpath = jsonData["devpath"].get<std::string>();
-
-        // Retrieve backend
-        if (!jsonData.contains("backend"))
-
         
-        return std::nullopt;
+        if (!fs::is_directory(localDir_)){
+            auto ldirstr = localDir_.string();
+            throw bad_local_dir("'{}' is not a directory",ldirstr);
+        }
     }
 
-    std::optional<VisionWorkerConfig> ConfigLoader::loadWorkerConfig(const std::string& filename) const noexcept {
-        return std::nullopt; // Placeholder so the damn thing builds
+    WFResult<JSON> JSONLoader::loadResourceJSON(const std::string& subdirName,const std::string& filename) const {
+        JSON jobject;
+
+        WF_DEBUGLOG(globalLogger(), "Searching for resource subdir '{}'",subdirName);
+        auto it = resourceSubdirs.find(subdirName);
+        if (it == resourceSubdirs.end()) 
+            return WFResult<JSON>::failure(CONFIG_BAD_SUBDIR,"'{}' is not recognized as a valid resource subdir",subdirName);
+        
+        fs::path subdirPath = resourceDir_ / it->second;
+        if (!fs::exists(subdirPath) || !fs::is_directory(subdirPath)) 
+            return WFResult<JSON>::failure(CONFIG_BAD_SUBDIR,"'{}' is not a valid directory",subdirPath.string());
+
+        fs::path resourcePath = subdirPath / filename;
+        WF_DEBUGLOG(globalLogger(), "Searching for resource file '{}'",resourcePath.string());
+        if (!fs::exists(resourcePath))
+            return WFResult<JSON>::failure(FILE_NOT_FOUND,"File '{}' does not exist",resourcePath.string());
+
+        WF_DEBUGLOG(globalLogger(), "Opening file '{}'", resourcePath.string());
+        std::ifstream file(resourcePath);
+        if (!file.is_open())
+            return WFResult<JSON>::failure(FILE_NOT_OPENED,"Failed to open file '{}'", resourcePath.string());
+        
+        try {
+            file >> jobject;
+            return WFResult<JSON>::success(std::move(jobject));
+        } catch (const JSON::parse_error& e) {
+            return WFResult<JSON>::failure(
+                JSON_PARSE,
+                "JSON Parse error {} at byte {}: {}",
+                e.id, e.byte, e.what()
+            );
+        } catch (const std::exception& e) {
+            return WFResult<JSON>::failure(UNKNOWN,"Unknown error while parsing JSON: {}",e.what());
+        }
+        
     }
 
-    bool ConfigLoader::storeVisionWorkerConfig(const std::string& filename,const VisionWorkerConfig& config) const noexcept {
-        return true; // Placeholder
+    WFResult<JSON> JSONLoader::loadLocalJSON(const std::string& subdirName,const std::string& filename) const {
+        JSON jobject;
+
+        WF_DEBUGLOG(globalLogger(), "Searching for local subdir '{}'",subdirName);
+        auto it = localSubdirs.find(subdirName);
+        if (it == localSubdirs.end()) 
+            return WFResult<JSON>::failure(CONFIG_SUBDIR_NOT_FOUND,"'{}' is not recognized as a valid local subdir",subdirName);
+
+        fs::path subdirPath = localDir_ / it->second;
+        if (!fs::exists(subdirPath) || !fs::is_directory(subdirPath)) 
+            return WFResult<JSON>::failure(CONFIG_BAD_SUBDIR,"'{}' is not a valid directory",subdirPath.string());
+        
+
+        fs::path localPath = subdirPath / filename;
+        WF_DEBUGLOG(globalLogger(), "Searching for local file '{}'",localPath.string());
+        if (!fs::exists(localPath))
+            return WFResult<JSON>::failure(FILE_NOT_FOUND,"File '{}' does not exist",localPath.string());
+
+        WF_DEBUGLOG(globalLogger(), "Opening file '{}'", localPath.string());
+        std::ifstream file(localPath);
+        if (!file.is_open())
+            return WFResult<JSON>::failure(FILE_NOT_OPENED,"Failed to open file '{}'", localPath.string());
+        
+        try {
+            file >> jobject;
+            return WFResult<JSON>::success(std::move(jobject));
+        } catch (const JSON::parse_error& e) {
+            return WFResult<JSON>::failure(
+                JSON_PARSE,
+                "JSON Parse error {} at byte {}: {}",
+                e.id, e.byte, e.what()
+            );
+        } catch (const std::exception& e) {
+            return WFResult<JSON>::failure(UNKNOWN,"Unknown error while parsing JSON: {}",e.what());
+        }
+        
     }
 
-    bool ConfigLoader::storeCameraConfig(const std::string& filename, const CameraConfiguration& config) const noexcept {
-        return true; // Placeholder
+    // This will completely overrwrite the file if it already exists, use with caution
+    WFStatusResult JSONLoader::storeLocalJSON(const std::string& subdirName, const std::string& filename, const JSON& jobject) const {
+        WF_DEBUGLOG(globalLogger(),"Searching for local subdir {}",subdirName);
+        auto it = localSubdirs.find(subdirName);
+        if (it == localSubdirs.end()) 
+            return WFStatusResult::failure(CONFIG_SUBDIR_NOT_FOUND,"'{}' is not recognized as a valid local subdir",subdirName);
+
+        fs::path subdirPath = localDir_ / it->second;
+        if (!fs::exists(subdirPath) || !fs::is_directory(subdirPath)) 
+            return WFStatusResult::failure(CONFIG_BAD_SUBDIR,"'{}' is not a valid directory",subdirPath.string());
+
+        fs::path localPath =  subdirPath / filename;
+        WF_DEBUGLOG(globalLogger(),"Opening local file {}",localPath.string());
+        std::ofstream file(localPath);
+        if (!file.is_open()) return WFStatusResult::failure(FILE_NOT_OPENED,"Failed to open file '{}'",localPath.string());
+        
+        WF_DEBUGLOG(globalLogger(),"Writing to local file {}",localPath.string());
+        // Pretty-prints the JSON object with indentation of 4 for human readability
+        file << jobject.dump(4);
+        
+        return file.good()
+            ? WFStatusResult::success()
+            : WFStatusResult::failure(UNKNOWN,"File stream error");
     }
 
-    std::vector<std::string> ConfigLoader::searchForCameraConfigFiles() const noexcept {
-        return {}; // Placeholder
+    WFResult<std::vector<std::string>> JSONLoader::enumerateResourceSubdir(const std::string& subdirName) const {
+        WF_DEBUGLOG(globalLogger(),"Enumerating resource subdir {}",subdirName);
+        auto it = resourceSubdirs.find(subdirName);
+        if (it == resourceSubdirs.end())
+            return WFResult<std::vector<std::string>>::failure(CONFIG_SUBDIR_NOT_FOUND,"'{}' is not recognized as a valid resource subdir",subdirName);
+        
+        fs::path subdirPath = resourceDir_ / it->second;
+        if (!fs::exists(subdirPath) || !fs::is_directory(subdirPath)) 
+            return WFResult<std::vector<std::string>>::failure(CONFIG_BAD_SUBDIR,"'{}' is not a valid directory",subdirPath.string());
+
+        std::vector<std::string> subdirFiles;
+        for (const auto& entry : fs::directory_iterator(subdirPath)) {
+            if (entry.is_regular_file()) {
+                WF_DEBUGLOG(globalLogger(),"Found file {} in subdir {}",entry.path().string(),subdirName);
+                subdirFiles.push_back(entry.path().filename().string());
+            }
+        }
+
+        return WFResult<std::vector<std::string>>::success(std::move(subdirFiles));
     }
 
-    std::vector<std::string> ConfigLoader::searchForVisionWorkerConfigFiles() const noexcept {
-        return {}; // Placeholder
+    WFResult<std::vector<std::string>> JSONLoader::enumerateLocalSubdir(const std::string& subdirName) const {
+        WF_DEBUGLOG(globalLogger(),"Enumerating local subdir {}",subdirName);
+        auto it = localSubdirs.find(subdirName);
+        if (it == localSubdirs.end())
+            return WFResult<std::vector<std::string>>::failure(CONFIG_SUBDIR_NOT_FOUND,"'{}' is not recognized as a valid local subdir",subdirName);
+        
+        fs::path subdirPath = localDir_ / it->second;
+        if (!fs::exists(subdirPath) || !fs::is_directory(subdirPath)) 
+            return WFResult<std::vector<std::string>>::failure(CONFIG_BAD_SUBDIR,"'{}' is not a valid directory",subdirPath.string());
+
+        std::vector<std::string> subdirFiles;
+        for (const auto& entry : fs::directory_iterator(subdirPath)) {
+            if (entry.is_regular_file()) {
+                WF_DEBUGLOG(globalLogger(),"Found file {} in subdir {}",entry.path().string(),subdirName);
+                subdirFiles.push_back(entry.path().filename().string());
+            }
+        }
+
+        return WFResult<std::vector<std::string>>::success(std::move(subdirFiles));
     }
 
-    std::optional<ApriltagField> ConfigLoader::loadField(const std::string& filename) const noexcept {
-        return std::nullopt; // Placeholder
+    std::vector<std::string> JSONLoader::enumerateResourceSubdirs() const {
+        std::vector<std::string> subdirs;
+        for (const auto& [key,value] : resourceSubdirs) {
+            subdirs.emplace_back(key);
+        }
+        return subdirs;
     }
+    std::vector<std::string> JSONLoader::enumerateLocalSubdirs() const {
+        std::vector<std::string> subdirs;
+        for (const auto& [key,value] : localSubdirs) {
+            subdirs.emplace_back(key);
+        }
+        return subdirs;
+    }
+    bool JSONLoader::resourceSubdirExists(const std::string& name) const {
+        auto it = resourceSubdirs.find(name);
+        return it != resourceSubdirs.end();
+    }
+    bool JSONLoader::localSubdirExists(const std::string& name) const {
+        auto it = localSubdirs.find(name);
+        return it != localSubdirs.end();
+    }
+
+    WFStatusResult JSONLoader::assignLocalSubdir(const std::string& subdirName,const std::filesystem::path& subdirRelpath) {
+        WF_DEBUGLOG(globalLogger(),"Assigning local subdir {} to relpath {}",subdirName,subdirRelpath.string());
+
+        // Validate subdir path
+        fs::path fullpath = localDir_ / subdirRelpath;
+        if (!fs::exists(fullpath) || !fs::is_directory(fullpath))
+            return WFStatusResult::failure(CONFIG_BAD_SUBDIR,"'{}' is not a valid directory",fullpath.string());
+        
+        localSubdirs[subdirName] = subdirRelpath;
+        return WFStatusResult::success();
+    }
+
+    WFStatusResult JSONLoader::assignResourceSubdir(const std::string& subdirName,const std::filesystem::path& subdirRelpath) {
+        WF_DEBUGLOG(globalLogger(),"Assigning resource subdir {} to relpath {}",subdirName,subdirRelpath.string());
+
+        // Validate subdir path
+        fs::path fullpath = resourceDir_ / subdirRelpath;
+        if (!fs::exists(fullpath) || !fs::is_directory(fullpath))
+            return WFStatusResult::failure(CONFIG_BAD_SUBDIR,"'{}' is not a valid directory",fullpath.string());
+        
+        resourceSubdirs[subdirName] = subdirRelpath;
+        return WFStatusResult::success();
+    }
+
+
+
+
+
+
 }

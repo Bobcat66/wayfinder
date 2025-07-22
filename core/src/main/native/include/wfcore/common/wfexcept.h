@@ -38,9 +38,14 @@
         : msg(wfstatus_name(statusCode)) {}                                                     \
         template <typename... Args>                                                             \
         exceptionName(std::string_view fmt, Args&&... args)                                     \
-        : msg(std::vformat(fmt,std::make_format_args(std::forward<Args>(args)...))) {}          \
+        : msg(std::vformat(fmt,std::make_format_args(args...))) {}                              \
         const char* what() const noexcept override {                                            \
-            return msg.c_str();                                                                 \
+            return std::format(                                                                 \
+                "{} ({}): {}",                                                                  \
+                wfstatus_name(status()),                                                        \
+                static_cast<uint32_t>(status()),                                                \
+                msg                                                                             \
+            ).c_str();                                                                          \
         }                                                                                       \
         static constexpr WFStatus status_impl() noexcept {                                      \
             return statusCode;                                                                  \
@@ -61,6 +66,9 @@ namespace wf {
     };
 
     // TODO: refactor these to use actual status codes
+    WF_DEFEXCEPT(bad_assert,BAD_ASSERT)
+    WF_DEFEXCEPT(bad_local_dir,CONFIG_BAD_LOCALDIR)
+    WF_DEFEXCEPT(bad_resource_dir,CONFIG_BAD_RESOURCEDIR)
     WF_DEFEXCEPT(invalid_pipeline_configuration,UNKNOWN)
     WF_DEFEXCEPT(camera_not_found,UNKNOWN)
     WF_DEFEXCEPT(intrinsics_not_found,UNKNOWN)

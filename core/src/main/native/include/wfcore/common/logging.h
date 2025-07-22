@@ -27,6 +27,15 @@
     #define WF_DEBUGLOG(logger, fmt, ...) 
 #endif
 
+#define WF_LOGEXCEPT(exception) do {                            \
+    wf::globalLogger()->error(                                  \
+        "Exception caught at {}:{} in function {}: {}",         \
+        __FILE__,                                               \
+        __LINE__,                                               \
+        __func__,                                               \
+        exception.what());                                      \
+} while (0)
+
 namespace wf {
     inline loggerPtr& globalLogger() {
         static auto logger = LoggerManager::getInstance().getLogger("Wayfinder");

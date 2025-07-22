@@ -74,8 +74,8 @@ namespace wf {
 
     std::optional<CameraIntrinsics> CSCameraHandler::getIntrinsics() {
         cv::Size res(
-            this->format.frameFormat.cols,
-            this->format.frameFormat.rows
+            this->format.frameFormat.width,
+            this->format.frameFormat.height
         );
         for (auto calibration : calibrations) {
             if (calibration.resolution == res) {

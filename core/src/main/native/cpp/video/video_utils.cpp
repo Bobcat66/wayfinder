@@ -24,14 +24,14 @@
 
 namespace wf {
     cv::Mat generateEmptyFrameBuf(FrameFormat format) {
-        return cv::Mat(format.rows,format.cols,getCVTypeFromEncoding(format.encoding));
+        return cv::Mat(format.height,format.width,getCVTypeFromEncoding(format.encoding));
     };
 
     cs::VideoMode getVideoModeFromStreamFormat(const StreamFormat& sformat) {
         return {
             getPixelFormatFromEncoding(sformat.frameFormat.encoding),
-            sformat.frameFormat.cols,
-            sformat.frameFormat.rows,
+            sformat.frameFormat.width,
+            sformat.frameFormat.height,
             sformat.fps
         };
     }

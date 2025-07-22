@@ -63,8 +63,8 @@ namespace wf {
     WFResult<JSON> FrameFormat::toJSON_impl(const FrameFormat& object) {
         try {
             JSON jobject = {
-                {"width",object.cols},
-                {"height",object.rows},
+                {"width",object.width},
+                {"height",object.height},
                 {"encoding",impl::encodingToString(object.encoding)}
             };
             return WFResult<JSON>::success(std::move(jobject));

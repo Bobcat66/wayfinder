@@ -31,27 +31,33 @@
 
 namespace wf {
 
-    enum class JSONLoaderStatus {
-        Ok,
-        FileNotOpened,
-        SchemaViolation,
-        JSONParseError
-    };
-
     // TODO: refactor this
-    class JSONLoader : public LoggedStatusfulObject<JSONLoaderStatus,JSONLoaderStatus::Ok> {
+    class JSONLoader : public WFLoggedStatusfulObject {
     public:
-        JSONLoader(std::filesystem::path rootPath);
+        JSONLoader(
+            std::filesystem::path resourceDir,
+            std::filesystem::path localDir
+        );
         // Loads a JSON object from the resources directory
-        std::optional<JSONObject> loadJSONObject(const std::string& subdirName, const std::string& filename) const;
-        bool storeJSONObject(const std::string& subdirName, const std::string& filename, const JSONObject& jobject) const;
-        std::vector<std::string> enumerateFiles(const std::string& subdirName) const;
-        bool addSubdirectory(const std::string& subdirName, std::filesystem::path relpath);
+        WFResult<JSON> loadResourceJSON(const std::string& subdirName, const std::string& filename) const;
+        WFResult<JSON> loadLocalJSON(const std::string& subdirName, const std::string& filename) const;
+        // This will completely overrwrite the file if it already exists, use with caution
+        WFStatusResult storeLocalJSON(const std::string& subdirName, const std::string& filename, const JSON& jobject) const;
+        WFResult<std::vector<std::string>> enumerateResourceSubdir(const std::string& subdirName) const;
+        WFResult<std::vector<std::string>> enumerateLocalSubdir(const std::string& subdirName) const;
+        std::vector<std::string> enumerateResourceSubdirs() const;
+        std::vector<std::string> enumerateLocalSubdirs() const;
+        bool resourceSubdirExists(const std::string& name) const;
+        bool localSubdirExists(const std::string& name) const;
+        WFStatusResult assignLocalSubdir(const std::string& subdirName,const std::filesystem::path& subdirRelpath);
+        WFStatusResult assignResourceSubdir(const std::string& subdirName,const std::filesystem::path& subdirRelpath);
     private:
-        // Path to the directory containing the local/ and resource/ directories.
-        // Usually this will be wayfinder's root directory
-        const std::filesystem::path rootPath_;
-        
-        std::unordered_map<std::string,std::filesystem::path> subdirectories;
+        // Path to the directory containing wayfinder resources (models, field configs, etc.)
+        const std::filesystem::path resourceDir_;
+        // Path to the directory containing local configuration (hardware config, vision worker config)
+        const std::filesystem::path localDir_;
+
+        std::unordered_map<std::string,std::filesystem::path> localSubdirs;
+        std::unordered_map<std::string,std::filesystem::path> resourceSubdirs;
     };
 }

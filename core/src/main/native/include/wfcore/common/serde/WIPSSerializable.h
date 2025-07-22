@@ -26,9 +26,6 @@
 
 namespace wf {
 
-    template <typename T>
-    using WIPSStatusResult = StatusfulResult<T,uint8_t,WIPS_STATUS_OK>;
-
     // Every derived type of WIPSSerializable
     // MUST implement public methods with the following signatures:
     // `static DerivedType toWIPS_impl(const WipsType&)`

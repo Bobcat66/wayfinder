@@ -17,8 +17,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-// TODO: Refactor code to use broader status categories
-// (Not every StatusfulObject derived class needs its own special type of status)
 #pragma once
 
 #include "wfcore/common/status/StatusfulObject.h"
@@ -43,6 +41,12 @@ namespace wf {
     enum class WFStatus : uint32_t {
         OK =                        0x00000000,
         UNCATEGORIZED_BASE =        0x00000000, // Ts is lowkey scuffed, but whatever
+        BAD_ARGUMENT =              0x00000001,
+        OUT_OF_MEMORY =             0x00000002,
+        OUT_OF_BOUNDS =             0x00000003,
+        BAD_ASSERT =                0x00000004,
+        FILE_NOT_OPENED =           0x00000005,
+        FILE_NOT_FOUND =            0x00000006,
         UNKNOWN =                   0x000FFFFF,
 
         PIPELINE_BASE =             0x00100000,
@@ -64,18 +68,40 @@ namespace wf {
         JSON_PROPERTY_NOT_FOUND =   0x00600001,
         JSON_INVALID_TYPE =         0x00600002,
         JSON_SCHEMA_VIOLATION =     0x00600003,
+        JSON_PARSE =                0x00600004,
         JSON_UNKNOWN =              0x006FFFFF,
 
         GRAPH_BASE =                0x00700000,
         GRAPH_UNKNOWN =             0x007FFFFF,
 
         VIDEO_BASE =                0x00800000,
-        VIDEO_UNKNOWN =             0x008FFFFF
+        VIDEO_UNKNOWN =             0x008FFFFF,
+
+        CONFIG_BASE =               0x00900000,
+        CONFIG_BAD_SUBDIR =         0x00900001,
+        CONFIG_BAD_LOCALDIR =       0x00900002,
+        CONFIG_BAD_RESOURCEDIR =    0x00900003,
+        CONFIG_SUBDIR_NOT_FOUND =   0x00900004,
+        CONFIG_UNKNOWN =            0x009FFFFF,
+
+        SERDE_BASE =                0x00A00000,
+        SERDE_WIPS_OOM =            0x00A00001, // 0x00A00001 to 0x00A000FF are reserved for WIPS status codes
+        SERDE_WIPS_BOUNDS_ERROR =   0x00A00002,
+        SERDE_WIPS_OVERFLOW =       0x00A00003,
+        SERDE_WIPS_BAD_ASSERT =     0x00A00004,
+        SERDE_WIPS_UNKNOWN =        0x00A000FF,
+        SERDE_UNKNOWN =             0x00AFFFFF
     };
 
-    constexpr std::string_view wfstatus_name(WFStatus status) {
+    inline constexpr const char* wfstatus_name(WFStatus status) {
         switch (status) {
             case WFStatus::OK:                          return "OK";
+            case WFStatus::BAD_ARGUMENT:                return "BAD_ARGUMENT";
+            case WFStatus::OUT_OF_MEMORY:               return "OUT_OF_MEMORY";
+            case WFStatus::OUT_OF_BOUNDS:               return "OUT_OF_BOUNDS";
+            case WFStatus::BAD_ASSERT:                  return "BAD_ASSERT";
+            case WFStatus::FILE_NOT_OPENED:             return "FILE_NOT_OPENED";
+            case WFStatus::FILE_NOT_FOUND:              return "FILE_NOT_FOUND";
             case WFStatus::UNKNOWN:                     return "UNKNOWN";
 
             case WFStatus::PIPELINE_BASE:               return "PIPELINE_BASE";
@@ -97,6 +123,7 @@ namespace wf {
             case WFStatus::JSON_PROPERTY_NOT_FOUND:     return "JSON_PROPERTY_NOT_FOUND";
             case WFStatus::JSON_INVALID_TYPE:           return "JSON_INVALID_TYPE";
             case WFStatus::JSON_SCHEMA_VIOLATION:       return "JSON_SCHEMA_VIOLATION";
+            case WFStatus::JSON_PARSE:                  return "JSON_PARSE";
             case WFStatus::JSON_UNKNOWN:                return "JSON_UNKNOWN";
 
             case WFStatus::GRAPH_BASE:                  return "GRAPH_BASE";
@@ -105,19 +132,38 @@ namespace wf {
             case WFStatus::VIDEO_BASE:                  return "VIDEO_BASE";
             case WFStatus::VIDEO_UNKNOWN:               return "VIDEO_UNKNOWN";
 
+            case WFStatus::CONFIG_BASE:                 return "CONFIG_BASE";
+            case WFStatus::CONFIG_BAD_SUBDIR:           return "CONFIG_BAD_SUBDIR";
+            case WFStatus::CONFIG_BAD_LOCALDIR:         return "CONFIG_BAD_LOCALDIR";
+            case WFStatus::CONFIG_BAD_RESOURCEDIR:      return "CONFIG_BAD_RESOURCEDIR";
+            case WFStatus::CONFIG_SUBDIR_NOT_FOUND:     return "CONFIG_SUBDIR_NOT_FOUND";
+            case WFStatus::CONFIG_UNKNOWN:              return "CONFIG_UNKNOWN";
+
+            case WFStatus::SERDE_BASE:                  return "SERDE_BASE";
+            case WFStatus::SERDE_WIPS_OOM:              return "SERDE_WIPS_OOM";
+            case WFStatus::SERDE_WIPS_BOUNDS_ERROR:     return "SERDE_WIPS_BOUNDS_ERROR";
+            case WFStatus::SERDE_WIPS_OVERFLOW:         return "SERDE_WIPS_OVERFLOW";
+            case WFStatus::SERDE_WIPS_BAD_ASSERT:       return "SERDE_WIPS_BAD_ASSERT";
+            case WFStatus::SERDE_WIPS_UNKNOWN:          return "SERDE_WIPS_UNKNOWN";
+            case WFStatus::SERDE_UNKNOWN:               return "SERDE_UNKNOWN";
+
             default:                                    return "UNRECOGNIZED";
         }
     }
 
+    inline constexpr std::string_view wfstatus_name_view(WFStatus status) {
+        return wfstatus_name(status);
+    }
+
     // Returns the category base of an error code
-    constexpr WFStatus wfstatus_catbase(WFStatus status) {
+    inline constexpr WFStatus wfstatus_category_base(WFStatus status) {
         return static_cast<WFStatus>(static_cast<uint32_t>(status) & CATEGORY_MASK); 
     }
 
-    constexpr std::string_view wfstatus_catname(WFStatus status) {
+    inline constexpr std::string_view wfstatus_category_name(WFStatus status) {
         // WFStatus::OK is a special case that needs to be handled separately
         if (status == WFStatus::OK)                 return "Nominal";
-        switch (wfstatus_catbase(status)) {
+        switch (wfstatus_category_base(status)) {
             case WFStatus::UNCATEGORIZED_BASE:      return "Uncategorized";
             case WFStatus::PIPELINE_BASE:           return "Pipeline";
             case WFStatus::APRILTAG_BASE:           return "Apriltag";
@@ -127,6 +173,8 @@ namespace wf {
             case WFStatus::JSON_BASE:               return "JSON";
             case WFStatus::GRAPH_BASE:              return "Graph";
             case WFStatus::VIDEO_BASE:              return "Video";
+            case WFStatus::CONFIG_BASE:             return "Config";
+            case WFStatus::SERDE_BASE:              return "Serde";
             default:                                return "Unknown";
         }
     }
@@ -137,7 +185,7 @@ namespace wf {
     using WFConcurrentLoggedStatusfulObject = ConcurrentLoggedStatusfulObject<WFStatus,WFStatus::OK>;
 
     template <typename T>
-    using WFResult = StatusfulResult<T,WFStatus,WFStatus::OK>;
+    using WFResult = StatusfulResult<T,WFStatus,WFStatus::OK,wfstatus_name>;
 
-    using WFStatusResult = StatusResult<WFStatus,WFStatus::OK>;
+    using WFStatusResult = StatusResult<WFStatus,WFStatus::OK,wfstatus_name>;
 }

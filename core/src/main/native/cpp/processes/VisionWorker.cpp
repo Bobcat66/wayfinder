@@ -25,8 +25,8 @@
 namespace impl {
     [[ nodiscard ]]
     static inline bool validateFrame(const cv::Mat& frame,const wf::FrameMetadata& meta) noexcept {
-        return (frame.rows == meta.format.rows) 
-            && (frame.cols == meta.format.cols) 
+        return (frame.rows == meta.format.height) 
+            && (frame.cols == meta.format.width) 
             && (frame.type() == wf::getCVTypeFromEncoding(meta.format.encoding));
     }
 }
@@ -50,8 +50,8 @@ namespace wf {
     , ConcurrentLoggedStatusfulObject<VisionWorkerStatus,VisionWorkerStatus::Ok>(name,LogGroup::General) {
         auto& rawformat = frameProvider.getStreamFormat().frameFormat;
         rawFrameBuffer.create(
-            rawformat.cols,
-            rawformat.rows,
+            rawformat.width,
+            rawformat.height,
             getCVTypeFromEncoding(
                 rawformat.encoding
             )

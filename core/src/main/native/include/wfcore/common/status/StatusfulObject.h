@@ -25,6 +25,7 @@
 #include <optional>
 #include <utility>
 #include <format>
+#include "wfcore/common/status/StatusType.h"
 
 /*
  * A base class for components with status reporting and error information.
@@ -35,13 +36,12 @@
  * NOTE: `reportError()` and `clearFaults()` are marked `const`, as status may change
  * even in logically `const` methods. The `status_` and `errorMsg_` members are therefore
  * marked `mutable` to enable this without breaking const-correct interfaces.
+ * 
+ * In general, a StatusfulObject's status should only be updated in the case of a severe fault,
+ * transient errors (timeouts, dropped frames, etc.) should NOT update the internal status
  */
 
 namespace wf {
-    template <typename T> 
-    concept status_code =
-        std::is_integral_v<T> ||
-        std::is_enum_v<T>;
 
     template <status_code T, T nominal_status>
     class StatusfulObject {
@@ -60,7 +60,7 @@ namespace wf {
          */
         [[ nodiscard ]]
         virtual std::optional<std::string> getError() const noexcept {
-            if (this->status_ == nominal_status) {
+            if (this->status_ == nominal_status || this->errorMsg_.empty()) {
                 return std::nullopt;
             }
             return errorMsg_;

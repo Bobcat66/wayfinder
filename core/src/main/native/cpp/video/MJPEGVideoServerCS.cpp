@@ -27,8 +27,8 @@ namespace wf {
     , source(
         std::format("{}_source",name),
         cs_pfmt,
-        format.frameFormat.cols,
-        format.frameFormat.rows,
+        format.frameFormat.width,
+        format.frameFormat.height,
         format.fps
     )
     , server(
@@ -50,7 +50,7 @@ namespace wf {
         format = newformat;
         cs_pfmt = getPixelFormatFromEncoding(format.frameFormat.encoding);
         if (!source.SetPixelFormat(cs_pfmt)) return 1;
-        if (!source.SetResolution(format.frameFormat.cols,format.frameFormat.rows)) return 2;
+        if (!source.SetResolution(format.frameFormat.width,format.frameFormat.height)) return 2;
         if (!source.SetFPS(format.fps)) return 3;
         return 0;
     }

@@ -47,17 +47,21 @@ namespace wf {
     // TODO: Change order to be (width,height,encoding)
     struct FrameFormat : public JSONSerializable<FrameFormat> {
         ImageEncoding encoding;
-        int rows;
-        int cols;
+        int width;
+        int height;
 
-        FrameFormat() : encoding(ImageEncoding::UNKNOWN), rows(0) , cols(0) {}
+        FrameFormat() : encoding(ImageEncoding::UNKNOWN), width(0) , height(0) {}
 
-        FrameFormat(ImageEncoding encoding_,int rows_,int cols_) : encoding(encoding_), rows(rows_), cols(cols_) {}
+        FrameFormat(ImageEncoding encoding_,int width_,int height_) : encoding(encoding_), width(width_), height(height_) {}
 
         bool operator==(const FrameFormat& other) const {
             return encoding == other.encoding
-                && rows == other.rows 
-                && cols == other.cols;
+                && width == other.width 
+                && height == other.height;
+        }
+
+        cv::Size size() const {
+            return cv::Size(width,height);
         }
 
 

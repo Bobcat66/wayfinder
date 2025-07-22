@@ -64,13 +64,13 @@ namespace wf {
                         nodes.emplace_back(std::move(std::make_unique<IdentityNode<cv::Mat>>()));
                     } else {
                         if (
-                            config.inputFormat.frameFormat.rows != hardwareFormat.frameFormat.rows
-                            || config.inputFormat.frameFormat.cols != hardwareFormat.frameFormat.cols
+                            config.inputFormat.frameFormat.height != hardwareFormat.frameFormat.height
+                            || config.inputFormat.frameFormat.width != hardwareFormat.frameFormat.width
                         ) {
                             this->logger()->warn("Resolution for pipeline {} differs from native resolution for camera {}. This could cause issues with calibration",config.name,config.devpath);
                             nodes.push_back(std::move(std::make_unique<ResizeNode<cv::Mat>>(
-                                config.inputFormat.frameFormat.cols,
-                                config.inputFormat.frameFormat.rows
+                                config.inputFormat.frameFormat.width,
+                                config.inputFormat.frameFormat.height
                             )));
                         }
                         if (config.inputFormat.frameFormat.encoding != hardwareFormat.frameFormat.encoding) {

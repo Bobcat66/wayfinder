@@ -72,7 +72,7 @@ namespace wf {
 
     template <CVImage T>
     inline T generateEmptyCVImg(FrameFormat format) {
-        return T{format.rows,format.cols,getCVTypeFromEncoding(format.encoding)};
+        return T{format.height,format.width,getCVTypeFromEncoding(format.encoding)};
     }
 
     cs::VideoMode getVideoModeFromStreamFormat(const StreamFormat& sformat);

@@ -22,6 +22,7 @@
 #include "wfcore/pipeline/annotations.h"
 #include "wfcore/common/wfexcept.h"
 
+//TODO refactor to use status.h
 namespace wf {
     ObjdetectPipelineConsumer::ObjdetectPipelineConsumer(
         std::string pipelineName_, std::string camLabel_, 
@@ -43,12 +44,12 @@ namespace wf {
         if (streamFormat.frameFormat == inputFormat) {
             nodes.emplace_back(std::make_unique<IdentityNode<cv::Mat>>());
         } else {
-            if (streamFormat.frameFormat.cols != inputFormat.cols || streamFormat.frameFormat.rows != inputFormat.rows) {
+            if (streamFormat.frameFormat.width != inputFormat.width || streamFormat.frameFormat.height != inputFormat.height) {
                 nodes.emplace_back(
                     std::make_unique<ResizeNode<cv::Mat>>(
                         cv::INTER_LINEAR,
-                        streamFormat.frameFormat.cols,
-                        streamFormat.frameFormat.rows
+                        streamFormat.frameFormat.width,
+                        streamFormat.frameFormat.height
                     )
                 );
             }
