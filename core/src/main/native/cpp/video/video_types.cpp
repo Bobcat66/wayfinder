@@ -23,56 +23,60 @@
 
 namespace impl {
     using namespace wf;
-    static const std::unordered_map<std::string,ImageEncoding> encodingMap = {
-        {"BGR24",ImageEncoding::BGR24},
-        {"RGB24",ImageEncoding::RGB24},
-        {"RGB565",ImageEncoding::RGB565},
-        {"Y8",ImageEncoding::Y8},
-        {"Y16",ImageEncoding::Y16},
-        {"YUYV",ImageEncoding::YUYV},
-        {"UYVY",ImageEncoding::UYVY},
-        {"RGBA",ImageEncoding::RGBA},
-        {"BGRA",ImageEncoding::BGRA},
-        {"MJPEG",ImageEncoding::MJPEG},
-        {"UNKNOWN",ImageEncoding::UNKNOWN}
-    };
 
-    static const std::unordered_map<ImageEncoding,std::string> encodingStringMap = {
-        {ImageEncoding::BGR24,"BGR24"},
-        {ImageEncoding::RGB24,"RGB24"},
-        {ImageEncoding::RGB565,"RGB565"},
-        {ImageEncoding::Y8,"Y8"},
-        {ImageEncoding::Y16,"Y16"},
-        {ImageEncoding::YUYV,"YUYV"},
-        {ImageEncoding::UYVY,"UYVY"},
-        {ImageEncoding::RGBA,"RGBA"},
-        {ImageEncoding::BGRA,"BGRA"},
-        {ImageEncoding::MJPEG,"MJPEG"},
-        {ImageEncoding::UNKNOWN,"UNKNOWN"}
-    };
+    inline ImageEncoding parseEncoding(const std::string& name) {
+        if (name == "BGR24") return ImageEncoding::BGR24;
+        if (name == "RGB24") return ImageEncoding::RGB24;
+        if (name == "RGB565") return ImageEncoding::RGB565;
+        if (name == "Y8") return ImageEncoding::Y8;
+        if (name == "Y16") return ImageEncoding::Y16;
+        if (name == "YUYV") return ImageEncoding::YUYV;
+        if (name == "UYVY") return ImageEncoding::UYVY;
+        if (name == "RGBA") return ImageEncoding::RGBA;
+        if (name == "BGRA") return ImageEncoding::BGRA;
+        if (name == "MJPEG") return ImageEncoding::MJPEG;
+        return ImageEncoding::UNKNOWN;
+    }
+
+    constexpr std::string_view encodingToString(ImageEncoding encoding) {
+    using enum ImageEncoding;
+    switch (encoding) {
+        case BGR24: return "BGR24";
+        case RGB24: return "RGB24";
+        case RGB565: return "RGB565";
+        case Y8: return "Y8";
+        case Y16: return "Y16";
+        case YUYV: return "YUYV";
+        case UYVY: return "UYVY";
+        case RGBA: return "RGBA";
+        case BGRA: return "BGRA";
+        case MJPEG: return "MJPEG";
+        default: return "UNKNOWN";
+    }
+}
 }
 
 namespace wf {
 
-    using enum JSONStatus;
+    using enum WFStatus;
 
-    JSONStatusResult<JSONObject> FrameFormat::toJSON_impl(const FrameFormat& object) {
+    WFResult<JSON> FrameFormat::toJSON_impl(const FrameFormat& object) {
         try {
-            JSONObject jobject = {
+            JSON jobject = {
                 {"width",object.cols},
                 {"height",object.rows},
-                {"encoding",impl::encodingStringMap.at(object.encoding)}
+                {"encoding",impl::encodingToString(object.encoding)}
             };
-            return JSONStatusResult<JSONObject>::success(std::move(jobject));
+            return WFResult<JSON>::success(std::move(jobject));
         } catch (const nlohmann::json::exception& e) {
             jsonLogger()->error("Error while serializing FrameFormat: {}",e.what());
-            return JSONStatusResult<JSONObject>::failure(Unknown);
+            return WFResult<JSON>::failure(JSON_UNKNOWN);
         }
     }
 
-    JSONStatusResult<FrameFormat> FrameFormat::fromJSON_impl(const JSONObject& jobject) {
+    WFResult<FrameFormat> FrameFormat::fromJSON_impl(const JSON& jobject) {
         if (!validateProperties(jobject,{"width","height","encoding"},"frame_format"))
-            return JSONStatusResult<FrameFormat>::failure(PropertyNotFound);
+            return WFResult<FrameFormat>::failure(JSON_PROPERTY_NOT_FOUND);
         int width,height;
         std::string encodingString;
         try {
@@ -81,51 +85,47 @@ namespace wf {
             encodingString = jobject["encoding"].get<std::string>();
         } catch (const nlohmann::json::type_error& e) {
             jsonLogger()->error("Type error while parsing frame_format: {}",e.what());
-            return JSONStatusResult<FrameFormat>::failure(InvalidType);
+            return WFResult<FrameFormat>::failure(JSON_INVALID_TYPE);
         } catch (const nlohmann::json::exception& e) {
             jsonLogger()->error("JSON error while parsing frame_format: {}",e.what());
-            return JSONStatusResult<FrameFormat>::failure(Unknown);
+            return WFResult<FrameFormat>::failure(JSON_UNKNOWN);
         }
 
-        auto it = impl::encodingMap.find(encodingString);
-        if (it == impl::encodingMap.end()) {
-            jsonLogger()->error("Schema violation while parsing frame_format: '{}' is not a recognized image encoding",encodingString);
-            return JSONStatusResult<FrameFormat>::failure(SchemaViolation);
-        }
+        auto encoding = impl::parseEncoding(encodingString);
 
-        return JSONStatusResult<FrameFormat>::success(std::in_place,it->second,width,height);
+        return WFResult<FrameFormat>::success(std::in_place,encoding,width,height);
         
     }
 
-    JSONStatusResult<JSONObject> StreamFormat::toJSON_impl(const StreamFormat& object) {
-        JSONObject frameFormat_jobject;
+    WFResult<JSON> StreamFormat::toJSON_impl(const StreamFormat& object) {
+        JSON frameFormat_jobject = JSON::object();
         if (auto jresult = FrameFormat::toJSON(object.frameFormat)) {
             frameFormat_jobject = std::move(jresult.value());
         } else {
             jsonLogger()->error("Error while parsing StreamFormat.frameFormat");
-            return JSONStatusResult<JSONObject>::failure(jresult.status());
+            return WFResult<JSON>::failure(jresult.status());
         }
 
         try {
-            JSONObject jobject = {
+            JSON jobject = {
                 { "fps",object.fps },
                 { "frameFormat",std::move(frameFormat_jobject) }
             };
-            return JSONStatusResult<JSONObject>::success(std::move(jobject));
+            return WFResult<JSON>::success(std::move(jobject));
         } catch (const nlohmann::json::exception& e) {
             jsonLogger()->error("Error while serializing StreamFormat: {}",e.what());
-            return JSONStatusResult<JSONObject>::failure(Unknown);
+            return WFResult<JSON>::failure(JSON_UNKNOWN);
         }
     }
 
-    JSONStatusResult<StreamFormat> StreamFormat::fromJSON_impl(const JSONObject& jobject) {
+    WFResult<StreamFormat> StreamFormat::fromJSON_impl(const JSON& jobject) {
         if (!validateProperties(jobject,{"fps","frameFormat"},"stream_format")) {
-            return JSONStatusResult<StreamFormat>::failure(PropertyNotFound);
+            return WFResult<StreamFormat>::failure(JSON_PROPERTY_NOT_FOUND);
         }
 
         if (!jobject["frameFormat"].is_object()) {
             jsonLogger()->error("stream_format.frameFormat is not an object");
-            return JSONStatusResult<StreamFormat>::failure(InvalidType);
+            return WFResult<StreamFormat>::failure(JSON_INVALID_TYPE);
         }
 
         FrameFormat frameFormat;
@@ -133,7 +133,7 @@ namespace wf {
             frameFormat = std::move(jresult.value());
         } else {
             jsonLogger()->error("Error while parsing stream_format.frameFormat");
-            return JSONStatusResult<StreamFormat>::failure(jresult.status());
+            return WFResult<StreamFormat>::failure(jresult.status());
         }
 
         int fps;
@@ -141,12 +141,12 @@ namespace wf {
             fps = jobject["fps"].get<int>();
         } catch (const nlohmann::json::type_error& e) {
             jsonLogger()->error("Type error while parsing stream_format: {}",e.what());
-            return JSONStatusResult<StreamFormat>::failure(InvalidType);
+            return WFResult<StreamFormat>::failure(JSON_INVALID_TYPE);
         } catch (const nlohmann::json::exception& e) {
             jsonLogger()->error("JSON error while parsing stream_format: {}",e.what());
-            return JSONStatusResult<StreamFormat>::failure(Unknown);
+            return WFResult<StreamFormat>::failure(JSON_UNKNOWN);
         }
 
-        return JSONStatusResult<StreamFormat>::success(std::in_place,fps,std::move(frameFormat));
+        return WFResult<StreamFormat>::success(std::in_place,fps,std::move(frameFormat));
     }
 }

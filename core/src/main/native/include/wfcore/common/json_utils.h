@@ -28,27 +28,7 @@ namespace wf {
 
     // NOTE: In general, JSON code is not performance critical (hot path marshalling is done through WIPS) and should be written primarily for clarity and maintainability, not performance
 
-    // JSON Status codes
-    enum class JSONStatus {
-        Ok,
-        PropertyNotFound,
-        InvalidType,
-        SchemaViolation,
-        Unknown
-    };
-
-    inline std::unordered_map<JSONStatus,std::string> JSONStatusStrings = {
-        {JSONStatus::Ok,"Ok"},
-        {JSONStatus::PropertyNotFound,"PropertyNotFound"},
-        {JSONStatus::InvalidType,"InvalidType"},
-        {JSONStatus::SchemaViolation,"SchemaViolation"},
-        {JSONStatus::Unknown,"Unknown"}
-    };
-
-    using JSONObject = nlohmann::json;
-
-    template <typename T>
-    using JSONStatusResult = StatusfulResult<T, JSONStatus, JSONStatus::Ok>;
+    using JSON = nlohmann::json;
 
     inline loggerPtr& jsonLogger() { 
         static auto logger = LoggerManager::getInstance().getLogger("JSON");
@@ -58,12 +38,16 @@ namespace wf {
     // Returns whether all the properties listed are present in the jobject
     // optionally logs missing properties to the global logger, can also be
     // provided with an object name for clearer logs
-    inline bool validateProperties(
-        const JSONObject& jobject, 
+    inline WFStatusResult validateProperties(
+        const JSON& jobject, 
         std::initializer_list<std::string_view> properties,
         std::string_view objectName = "JSON Object",
         bool verbose = true
     ) noexcept {
+        if (!jobject.is_object()) {
+            if (verbose) jsonLogger()->warn("{} is not an object",objectName);
+            return WFStatusResult::failure(WFStatus::JSON_INVALID_TYPE);
+        }
         bool valid = true;
         for (std::string_view property : properties) {
             if (!jobject.contains(property)) {
@@ -71,12 +55,14 @@ namespace wf {
                 valid = false;
             }
         }
-        return valid;
+        return valid 
+            ? WFStatusResult::success()
+            : WFStatusResult::failure(WFStatus::JSON_PROPERTY_NOT_FOUND);
     }
 
     // Overload with default object name for conciseness
-    inline bool validateProperties(
-        const JSONObject& jobject,
+    inline WFStatusResult validateProperties(
+        const JSON& jobject,
         std::initializer_list<std::string_view> properties,
         bool verbose
     ) noexcept {
@@ -87,19 +73,72 @@ namespace wf {
     template <typename DerivedType>
     class JSONSerializable {
     public:
-        static JSONStatusResult<JSONObject> toJSON(const DerivedType& object) {
+        static WFResult<JSON> toJSON(const DerivedType& object) {
             return DerivedType::toJSON_impl(object);
         }
-        static JSONStatusResult<DerivedType> fromJSON(const JSONObject& jobject) {
+        static WFResult<DerivedType> fromJSON(const JSON& jobject) {
             return DerivedType::fromJSON_impl(jobject);
         }
 
         std::string dump() const {
             auto jres = toJSON(static_cast<const DerivedType&>(*this));
             if (!jres) [[ unlikely ]] {
-                throw json_error("Error while dumping json: {}",JSONStatusStrings.at(jres.status()));
+                throw json_error("Error while dumping json: {}",wfstatus_name(jres.status()));
             }
             return jres.value().dump();
         }
     };
+
+    template <typename T>
+    WFResult<T> getProperty(const JSON& jobject,std::string_view propertyName,std::string_view objectName = "JSON Object",bool verbose = true) {
+        // Jobject verification
+        if (!jobject.is_object()) {
+            if (verbose)
+                jsonLogger()->error("{} is not an object",objectName);
+            return WFResult<T>::failure(WFStatus::JSON_INVALID_TYPE);
+        }
+        if (!jobject.contains(propertyName)) {
+            if (verbose)
+                jsonLogger()->error("property {} of {} not found",propertyName,objectName);
+            return WFResult<T>::failure(WFStatus::JSON_PROPERTY_NOT_FOUND);
+        }
+
+        // Safely extract the field
+        try {
+            T property = jobject[propertyName].get<T>();
+            return WFResult<T>::success(std::move(property));
+        } catch (const JSON::type_error& e) {
+            if (verbose)
+                jsonLogger()->error("Type error while parsing property {} of {}: {}",propertyName,objectName,e.what());
+            return WFResult<T>::failure(WFStatus::JSON_INVALID_TYPE);
+        } catch (const JSON::exception& e) {
+            if (verbose)
+                jsonLogger()->error("JSON error while parsing property {} of {}: {}",propertyName,objectName,e.what());
+            return WFResult<T>::failure(WFStatus::JSON_UNKNOWN);
+        }
+    }
+
+    template <typename T>
+    WFResult<T> getProperty(const JSON& jobject,std::string_view propertyName,bool verbose) {
+        return getProperty<T>(jobject,propertyName,"JSON Object",verbose);
+    }
+
+    template <typename T>
+    WFResult<T> jsonCast(const JSON& jobject, std::string_view objectName = "JSON Object", bool verbose = true) {
+        try {
+            T castVal = jobject.get<T>();
+            return WFResult<T>::success(std::move(castVal));
+        } catch (const JSON::type_error& e) {
+            if (verbose) jsonLogger()->error("Type error while casting {}: {}", objectName, e.what());
+            return WFResult<T>::failure(WFStatus::JSON_INVALID_TYPE);
+        } catch (const JSON::exception& e) {
+            if (verbose) jsonLogger()->error("JSON error while casting {}: {}", objectName, e.what());
+            return WFResult<T>::failure(WFStatus::JSON_UNKNOWN);
+        }
+    }
+
+    template <typename T>
+    WFResult<T> jsonCast(const JSON& jobject, bool verbose) {
+        return jsonCast(jobject,"JSON Object",verbose);
+    }
 }

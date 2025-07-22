@@ -61,8 +61,8 @@ namespace wf {
         }
 
 
-        static JSONStatusResult<JSONObject> toJSON_impl(const FrameFormat& object);
-        static JSONStatusResult<FrameFormat> fromJSON_impl(const JSONObject& jobject);
+        static WFResult<JSON> toJSON_impl(const FrameFormat& object);
+        static WFResult<FrameFormat> fromJSON_impl(const JSON& jobject);
     };
 
     struct StreamFormat : public JSONSerializable<StreamFormat> {
@@ -77,8 +77,8 @@ namespace wf {
             return fps == other.fps && frameFormat == other.frameFormat;
         }
 
-        static JSONStatusResult<JSONObject> toJSON_impl(const StreamFormat& object);
-        static JSONStatusResult<StreamFormat> fromJSON_impl(const JSONObject& jobject);
+        static WFResult<JSON> toJSON_impl(const StreamFormat& object);
+        static WFResult<StreamFormat> fromJSON_impl(const JSON& jobject);
     };
 
     struct FrameMetadata {

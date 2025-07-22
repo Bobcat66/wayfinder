@@ -32,15 +32,16 @@
 
 namespace wf {
 
-    enum CameraBackend {
+    enum class CameraBackend {
         CSCORE,
         REALSENSE, //WIP
         GSTREAMER, //WIP
-        LIBCAMERA //WIP
+        LIBCAMERA, //WIP
+        UNKNOWN
     };
 
     // TODO: Enumerate more controls. That is for after 1.0, though
-    enum CamControl {
+    enum class CamControl {
         EXPOSURE,
         AUTO_EXPOSURE,
         BRIGHTNESS,
@@ -54,7 +55,8 @@ namespace wf {
         SATURATION,
         CONTRAST,
         GAMMA,
-        HUE
+        HUE,
+        UNKNOWN
     };
 
     struct CameraIntrinsics : public JSONSerializable<CameraIntrinsics> {
@@ -65,11 +67,21 @@ namespace wf {
         CameraIntrinsics(cv::Size resolution_, cv::Mat cameraMatrix_, cv::Mat distCoeffs_)
         : resolution(std::move(resolution)), cameraMatrix(std::move(cameraMatrix_)), distCoeffs(std::move(distCoeffs_)) {}
 
-        static JSONStatusResult<JSONObject> toJSON_impl(const CameraIntrinsics& object);
-        static JSONStatusResult<CameraIntrinsics> fromJSON_impl(const JSONObject& jobject);
+        static WFResult<JSON> toJSON_impl(const CameraIntrinsics& object);
+        static WFResult<CameraIntrinsics> fromJSON_impl(const JSON& jobject);
     };
 
     struct CameraConfiguration : public JSONSerializable<CameraConfiguration> {
+
+        CameraConfiguration(
+            std::string devpath_,
+            CameraBackend backend_,StreamFormat format_,
+            std::unordered_map<CamControl,std::string> controlAliases_,
+            std::vector<CameraIntrinsics> calibrations_,
+            std::unordered_map<CamControl,int> controls_
+        ) : devpath(std::move(devpath_)), backend(backend_), format(std::move(format_)),
+        controlAliases(std::move(controlAliases_)), calibrations(std::move(calibrations_)),
+        controls(std::move(controls_)) {}
         std::string devpath;
         CameraBackend backend;
         StreamFormat format;
@@ -77,8 +89,8 @@ namespace wf {
         std::vector<CameraIntrinsics> calibrations;
         std::unordered_map<CamControl,int> controls; 
 
-        static JSONStatusResult<JSONObject> toJSON_impl(const CameraConfiguration& object);
-        static JSONStatusResult<CameraConfiguration> fromJSON_impl(const JSONObject& jobject);
+        static WFResult<JSON> toJSON_impl(const CameraConfiguration& object);
+        static WFResult<CameraConfiguration> fromJSON_impl(const JSON& jobject);
     };
 
 }
