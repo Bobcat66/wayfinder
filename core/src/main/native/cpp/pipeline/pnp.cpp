@@ -23,6 +23,7 @@
 #include "wfcore/utils/cv2gtsam_interface.h"
 #include "wfcore/utils/coordinates.h"
 #include "wfcore/utils/geometry.h"
+#include "wfcore/common/logging.h"
 
 #include <opencv2/calib3d.hpp>
 #include <gtsam/geometry/Pose3.h>
@@ -62,10 +63,12 @@ namespace wf {
         std::array<gtsam::Pose3, 4> cornerPoses;
         for (const auto& det : detections) {
             if (std::find(ignoreList.begin(), ignoreList.end(), det.id) != ignoreList.end()) {
+                WF_DEBUGLOG(globalLogger(),"Ignoring tag {} for PnP",det.id);
                 continue; // Skip ignored tags
             }
             const wf::Apriltag* tag = tagField.getTag(det.id);
             if (!tag) {
+                WF_DEBUGLOG(globalLogger(),"Tag {} not found in field",det.id);
                 continue; // Skip tags without a pose
             }
             tagsUsed.push_back(det.id);
@@ -111,6 +114,7 @@ namespace wf {
         if (tagsUsed.size() == 0) {
             return std::nullopt; // No tags found, give up
         } else if (tagsUsed.size() == 1) {
+            WF_DEBUGLOG(globalLogger(),"1 valid tag found. Using IPPE Square algorithm");
             rvecs.clear();
             tvecs.clear();
             reprojectionErrors.clear();
@@ -150,6 +154,7 @@ namespace wf {
                 reprojectionErrors
             );
             if (!success) {
+                WF_DEBUGLOG(globalLogger(),"IPPE Square calculation failed");
                 return std::nullopt; // Failed to solve PnP, give up
             } else {
                 const gtsam::Pose3 fieldToTagPose = tagPoses[0];
@@ -169,6 +174,7 @@ namespace wf {
                 }; // Todo: Optimize this construction
             }
         } else {
+            WF_DEBUGLOG(globalLogger(),">1 valid tags found. Using SQPnP algorithm");
             tvecs.clear();
             rvecs.clear();
             reprojectionErrors.clear();
@@ -187,6 +193,7 @@ namespace wf {
                 reprojectionErrors
             );
             if (!success) {
+                WF_DEBUGLOG(globalLogger(),"SQPnP calculation failed");
                 return std::nullopt; // Failed to solve PnP, give up
             } else {
                 return std::optional<ApriltagFieldPoseObservation>(
@@ -252,6 +259,7 @@ namespace wf {
             reprojectionErrors
         );
         if (!success) {
+            WF_DEBUGLOG(globalLogger(),"PnP calculation failed");
             return std::nullopt; //PnP was not successful, give up
         } else {
             return std::optional<ApriltagRelativePoseObservation>{

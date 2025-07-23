@@ -21,6 +21,7 @@
 #include "wfcore/video/video_types.h"
 #include <gtest/gtest.h>
 #include <iostream>
+#include "wfcore/common/testutils.h"
 
 TEST(JSONTests,videoTypesTest) {
     wf::StreamFormat test_format_0_orig(30,{wf::ImageEncoding::BGR24,720,1280});
@@ -95,7 +96,56 @@ TEST(JSONTests,videoTypesTest) {
     test_format_4_decode = std::move(dres4.value());
     std::cout << "Decoded test format 4: " << test_format_4_decode.dump() << std::endl;
     EXPECT_EQ(test_format_4_orig,test_format_4_decode);
+}
 
+TEST(JSONTests,hardwareTypesTest) {
+    wf::CameraIntrinsics test_intrinsics_0_orig(
+        {1280,720},
+        wf::test::mockMatrix(10.0,10.0,20.0,20.0),
+        wf::test::mockDistortion({1.0,2.0,3.0,4.0,5.0})
+    );
+    wf::CameraIntrinsics test_intrinsics_1_orig(
+        {420,420},
+        wf::test::mockMatrix(2.0,9.0,80.0,80.0),
+        wf::test::mockDistortion({1.0,2.0,3.0,4.0,5.0,6.0})
+    );
+    wf::CameraIntrinsics test_intrinsics_2_orig(
+        {1920,1080},
+        wf::test::mockMatrix(4.0,42.0,30.0,10.0),
+        wf::test::mockDistortion({1.03,23.0,3.0,4.0,5.0})
+    );
 
+    wf::JSON test_intrinsics_0_jobject;
+    wf::JSON test_intrinsics_1_jobject;
+    wf::JSON test_intrinsics_2_jobject;
 
+    auto jres0 = wf::CameraIntrinsics::toJSON(test_intrinsics_0_orig);
+    ASSERT_TRUE(jres0);
+    test_intrinsics_0_jobject = std::move(jres0.value());
+    std::cout << "Test intrinsics 0 JSON: " << test_intrinsics_0_jobject.dump() << std::endl;
+
+    auto jres1 = wf::CameraIntrinsics::toJSON(test_intrinsics_1_orig);
+    ASSERT_TRUE(jres1);
+    test_intrinsics_1_jobject = std::move(jres1.value());
+    std::cout << "Test intrinsics 1 JSON: " << test_intrinsics_1_jobject.dump() << std::endl;
+
+    auto jres2 = wf::CameraIntrinsics::toJSON(test_intrinsics_2_orig);
+    ASSERT_TRUE(jres2);
+    test_intrinsics_2_jobject = std::move(jres2.value());
+    std::cout << "Test intrinsics 0 JSON: " << test_intrinsics_2_jobject.dump() << std::endl;
+
+    auto dres0 = wf::CameraIntrinsics::fromJSON(test_intrinsics_0_jobject);
+    ASSERT_TRUE(dres0);
+    wf::CameraIntrinsics test_intrinsics_0_decode(std::move(dres0.value()));
+    std::cout << "Test intrinsics 0 decode: " << test_intrinsics_0_decode.dump() << std::endl;
+
+    auto dres1 = wf::CameraIntrinsics::fromJSON(test_intrinsics_1_jobject);
+    ASSERT_TRUE(dres1);
+    wf::CameraIntrinsics test_intrinsics_1_decode(std::move(dres1.value()));
+    std::cout << "Test intrinsics 1 decode: " << test_intrinsics_1_decode.dump() << std::endl;
+
+    auto dres2 = wf::CameraIntrinsics::fromJSON(test_intrinsics_2_jobject);
+    ASSERT_TRUE(dres2);
+    wf::CameraIntrinsics test_intrinsics_2_decode(std::move(dres2.value()));
+    std::cout << "Test intrinsics 2 decode: " << test_intrinsics_2_decode.dump() << std::endl;
 }

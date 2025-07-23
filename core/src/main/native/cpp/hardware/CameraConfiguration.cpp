@@ -214,7 +214,12 @@ namespace wf {
         auto matrix = impl::createIntrinsicsMatrix(fx,fy,cx,cy);
         cv::Size resolution(width,height);
         
-        return WFResult<CameraIntrinsics>::success(std::in_place,resolution,matrix,distCoeffs);
+        return WFResult<CameraIntrinsics>::success(
+            std::in_place,
+            resolution,
+            std::move(matrix),
+            std::move(distCoeffs)
+        );
     }
 
 

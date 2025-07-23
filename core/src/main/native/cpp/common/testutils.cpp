@@ -17,14 +17,22 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#pragma once
-
-#include <iostream>
-#include <filesystem>
-#include <string>
-#include <opencv2/core.hpp>
+#include "wfcore/common/testutils.h"
+#include <vector>
 
 namespace wf::test {
-    cv::Mat mockMatrix(double fx, double fy, double cx, double cy);
-    cv::Mat mockDistortion(std::initializer_list<double> coeffs);
+    cv::Mat mockMatrix(double fx, double fy, double cx, double cy) {
+        return (cv::Mat_<double>(3, 3) <<
+            fx,  0, cx,
+            0,  fy, cy,
+            0,   0,  1
+        );
+    }
+    cv::Mat mockDistortion(std::initializer_list<double> coeffs) {
+        std::vector<double> covec;
+        for (auto coeff : coeffs) {
+            covec.push_back(coeff);
+        }
+        return cv::Mat(1, static_cast<int>(covec.size()), CV_64F, covec.data()).clone();
+    }
 }
