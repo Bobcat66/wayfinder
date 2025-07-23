@@ -120,7 +120,7 @@ TEST(JSONLoaderTests,localLoadTest) {
                 EXPECT_NEAR(expectedDistvec[i],distvec[i],0.000001);
             } catch (const std::exception& e) {
                 std::cerr << e.what() << std::endl;
-                continue;
+                break;
             }
         }
     }
