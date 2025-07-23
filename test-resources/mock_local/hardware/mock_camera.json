@@ -1,0 +1,49 @@
+{
+    "devpath": "/dev/video0",
+    "backend": "CSCORE",
+    "format": {
+        "fps": 10,
+        "frameFormat": {
+            "width": 1280,
+            "height": 720,
+            "encoding": "YUYV"
+        }
+    },
+    "controlAliases": {
+        "BRIGHTNESS": "brightness",
+        "CONTRAST": "contrast",
+        "SATURATION": "saturation",
+        "HUE": "hue",
+        "AUTO_WHITE_BALANCE": "white_balance_automatic",
+        "GAMMA": "gamma",
+        "WHITE_BALANCE": "white_balance_temperature",
+        "SHARPNESS": "sharpness",
+        "AUTO_EXPOSURE": "auto_exposure"
+    },
+    "calibrations": [
+        {
+            "resolution": {
+                "width": 1280,
+                "height": 720
+            },
+            "matrix": { 
+                "fx": 979.1087360312252,
+                "fy": 979.8457780935689,
+                "cx": 608.5591334099096,
+                "cy": 352.9815581130428
+            },
+            "distortion": [
+                0.09581952042360092,
+                -0.2603932345361037,
+                0.0035795949814343524,
+                -0.005134231272255606,
+                0.19101200082384226
+            ]
+        }
+    ],
+    "controls": {
+        "BRIGHTNESS": 128,
+        "CONTRAST": 32,
+        "AUTO_WHITE_BALANCE": 1
+    }
+}

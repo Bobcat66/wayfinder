@@ -32,8 +32,9 @@
 namespace wf {
 
     // TODO: refactor this
-    class JSONLoader : public WFLoggedStatusfulObject {
+    class JSONLoader {
     public:
+        JSONLoader() = default;
         JSONLoader(
             std::filesystem::path resourceDir,
             std::filesystem::path localDir
@@ -53,9 +54,9 @@ namespace wf {
         WFStatusResult assignResourceSubdir(const std::string& subdirName,const std::filesystem::path& subdirRelpath);
     private:
         // Path to the directory containing wayfinder resources (models, field configs, etc.)
-        const std::filesystem::path resourceDir_;
+        std::filesystem::path resourceDir_;
         // Path to the directory containing local configuration (hardware config, vision worker config)
-        const std::filesystem::path localDir_;
+        std::filesystem::path localDir_;
 
         std::unordered_map<std::string,std::filesystem::path> localSubdirs;
         std::unordered_map<std::string,std::filesystem::path> resourceSubdirs;

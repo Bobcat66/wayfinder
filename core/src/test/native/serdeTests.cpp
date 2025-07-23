@@ -135,7 +135,7 @@ TEST(serdeTests, FPOSerdeCharacterizationTest) {
         auto deserializedPoseObservation = wf::unpackApriltagFieldPoseObservation(wipsbin);
         end = clock::now();
         logger->info(
-            "FPODerialization + Shims took {} ns for iteration {}", 
+            "FPODeserialization + Shims took {} ns for iteration {}", 
             std::chrono::duration_cast<std::chrono::nanoseconds>(end - start).count(),
             i
         );

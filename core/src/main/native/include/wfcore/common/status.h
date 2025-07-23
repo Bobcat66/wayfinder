@@ -29,7 +29,7 @@
 
 namespace wf {
 
-    constexpr uint32_t CATEGORY_MASK = 0xFFF00000;
+    constexpr uint32_t CATEGORY_MASK = 0xfff00000;
 
     // The first three digits specify the context of the error code, 
     // and the remaining five hex digits specify the specific error code
@@ -47,50 +47,50 @@ namespace wf {
         BAD_ASSERT =                0x00000004,
         FILE_NOT_OPENED =           0x00000005,
         FILE_NOT_FOUND =            0x00000006,
-        UNKNOWN =                   0x000FFFFF,
+        UNKNOWN =                   0x000fffff,
 
         PIPELINE_BASE =             0x00100000,
-        PIPELINE_UNKNOWN =          0x001FFFFF,
+        PIPELINE_UNKNOWN =          0x001fffff,
 
         APRILTAG_BASE =             0x00200000,
-        APRILTAG_UNKNOWN =          0x002FFFFF,
+        APRILTAG_UNKNOWN =          0x002fffff,
 
         INFERENCE_BASE =            0x00300000,
-        INFERENCE_UNKNOWN =         0x003FFFFF,
+        INFERENCE_UNKNOWN =         0x003fffff,
 
         HARDWARE_BASE =             0x00400000,
-        HARDWARE_UNKNOWN =          0x004FFFFF,
+        HARDWARE_UNKNOWN =          0x004fffff,
 
         NETWORK_BASE =              0x00500000,
-        NETWORK_UNKNOWN =           0x005FFFFF,
+        NETWORK_UNKNOWN =           0x005fffff,
 
         JSON_BASE =                 0x00600000,
         JSON_PROPERTY_NOT_FOUND =   0x00600001,
         JSON_INVALID_TYPE =         0x00600002,
         JSON_SCHEMA_VIOLATION =     0x00600003,
         JSON_PARSE =                0x00600004,
-        JSON_UNKNOWN =              0x006FFFFF,
+        JSON_UNKNOWN =              0x006fffff,
 
         GRAPH_BASE =                0x00700000,
-        GRAPH_UNKNOWN =             0x007FFFFF,
+        GRAPH_UNKNOWN =             0x007fffff,
 
         VIDEO_BASE =                0x00800000,
-        VIDEO_UNKNOWN =             0x008FFFFF,
+        VIDEO_UNKNOWN =             0x008fffff,
 
         CONFIG_BASE =               0x00900000,
         CONFIG_BAD_SUBDIR =         0x00900001,
         CONFIG_BAD_LOCALDIR =       0x00900002,
         CONFIG_BAD_RESOURCEDIR =    0x00900003,
         CONFIG_SUBDIR_NOT_FOUND =   0x00900004,
-        CONFIG_UNKNOWN =            0x009FFFFF,
+        CONFIG_UNKNOWN =            0x009fffff,
 
         SERDE_BASE =                0x00A00000,
         SERDE_WIPS_OOM =            0x00A00001, // 0x00A00001 to 0x00A000FF are reserved for WIPS status codes
         SERDE_WIPS_BOUNDS_ERROR =   0x00A00002,
         SERDE_WIPS_OVERFLOW =       0x00A00003,
         SERDE_WIPS_BAD_ASSERT =     0x00A00004,
-        SERDE_WIPS_UNKNOWN =        0x00A000FF,
-        SERDE_UNKNOWN =             0x00AFFFFF
+        SERDE_WIPS_UNKNOWN =        0x00A000ff,
+        SERDE_UNKNOWN =             0x00Afffff
     };
 
     inline constexpr const char* wfstatus_name(WFStatus status) {

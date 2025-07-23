@@ -33,8 +33,7 @@ namespace wf {
         std::filesystem::path resourceDir,
         std::filesystem::path localDir
     ) 
-    : WFLoggedStatusfulObject("JSONLoader",LogGroup::General)
-    , resourceDir_(resourceDir)
+    : resourceDir_(resourceDir)
     , localDir_(localDir) {
         if (!fs::is_directory(resourceDir_)){
             auto rdirstr = resourceDir_.string();

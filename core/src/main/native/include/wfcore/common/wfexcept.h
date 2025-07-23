@@ -30,24 +30,25 @@
 #endif
 
 // Macro that automatically defines a subclass of std::exception
-#define WF_DEFEXCEPT(exceptionName,statusCode)                                                  \
-    class exceptionName : public wfexception<exceptionName> {                                   \
+#define WF_DEFEXCEPT(exceptionName,statusCode,defaultMsg)                                       \
+    class exceptionName : public wfexception {                                                  \
         using enum WFStatus;                                                                    \
     public:                                                                                     \
         exceptionName()                                                                         \
-        : msg(wfstatus_name(statusCode)) {}                                                     \
+        : msg(defaultMsg) {}                                                                    \
         template <typename... Args>                                                             \
         exceptionName(std::string_view fmt, Args&&... args)                                     \
         : msg(std::vformat(fmt,std::make_format_args(args...))) {}                              \
         const char* what() const noexcept override {                                            \
-            return std::format(                                                                 \
-                "{} ({}): {}",                                                                  \
+            static std::string fullmsg = std::format(                                           \
+                "{} ({:#10x}): {}",                                                             \
                 wfstatus_name(status()),                                                        \
                 static_cast<uint32_t>(status()),                                                \
                 msg                                                                             \
-            ).c_str();                                                                          \
+            );                                                                                  \
+            return fullmsg.c_str();                                                             \
         }                                                                                       \
-        static constexpr WFStatus status_impl() noexcept {                                      \
+        WFStatus status() const noexcept override {                                             \
             return statusCode;                                                                  \
         }                                                                                       \
     private:                                                                                    \
@@ -55,33 +56,30 @@
     };
 
 namespace wf {
-    template <typename T>
     class wfexception : public std::exception {
     public:
         virtual const char* what() const noexcept override = 0;
         virtual ~wfexception() = default;
-        static constexpr WFStatus status() noexcept {
-            return T::status_impl();
-        }
+        virtual WFStatus status() const noexcept = 0;
     };
 
     // TODO: refactor these to use actual status codes
-    WF_DEFEXCEPT(bad_assert,BAD_ASSERT)
-    WF_DEFEXCEPT(bad_local_dir,CONFIG_BAD_LOCALDIR)
-    WF_DEFEXCEPT(bad_resource_dir,CONFIG_BAD_RESOURCEDIR)
-    WF_DEFEXCEPT(invalid_pipeline_configuration,UNKNOWN)
-    WF_DEFEXCEPT(camera_not_found,UNKNOWN)
-    WF_DEFEXCEPT(intrinsics_not_found,UNKNOWN)
-    WF_DEFEXCEPT(vision_worker_not_found,UNKNOWN)
-    WF_DEFEXCEPT(invalid_camera_control,UNKNOWN)
-    WF_DEFEXCEPT(invalid_stream_format,UNKNOWN)
-    WF_DEFEXCEPT(invalid_image_encoding,UNKNOWN)
-    WF_DEFEXCEPT(invalid_engine_type,UNKNOWN)
-    WF_DEFEXCEPT(invalid_model_arch,UNKNOWN)
-    WF_DEFEXCEPT(model_not_loaded,UNKNOWN)
-    WF_DEFEXCEPT(failed_resource_acquisition,UNKNOWN)
-    WF_DEFEXCEPT(json_error,UNKNOWN)
-    WF_DEFEXCEPT(unknown_exception,UNKNOWN)
+    WF_DEFEXCEPT(bad_assert,BAD_ASSERT,"Bad assertion")
+    WF_DEFEXCEPT(bad_local_dir,CONFIG_BAD_LOCALDIR,"Bad local directory")
+    WF_DEFEXCEPT(bad_resource_dir,CONFIG_BAD_RESOURCEDIR,"Bad resource directory")
+    WF_DEFEXCEPT(invalid_pipeline_configuration,UNKNOWN,"Invalid pipeline configuration")
+    WF_DEFEXCEPT(camera_not_found,UNKNOWN,"Camera not found")
+    WF_DEFEXCEPT(intrinsics_not_found,UNKNOWN,"Intrinsics not found")
+    WF_DEFEXCEPT(vision_worker_not_found,UNKNOWN,"Vision worker not found")
+    WF_DEFEXCEPT(invalid_camera_control,UNKNOWN,"Invalid camera control")
+    WF_DEFEXCEPT(invalid_stream_format,UNKNOWN,"Invalid stream format")
+    WF_DEFEXCEPT(invalid_image_encoding,UNKNOWN,"Invalid image encoding")
+    WF_DEFEXCEPT(invalid_engine_type,UNKNOWN,"Invalid engine type")
+    WF_DEFEXCEPT(invalid_model_arch,UNKNOWN,"Invalid model architecture")
+    WF_DEFEXCEPT(model_not_loaded,UNKNOWN,"Model not loaded")
+    WF_DEFEXCEPT(failed_resource_acquisition,UNKNOWN,"Failed resource acquisition")
+    WF_DEFEXCEPT(json_error,UNKNOWN,"JSON Error")
+    WF_DEFEXCEPT(unknown_exception,UNKNOWN,"Unknown exception")
 }
 
 #undef WF_DEFEXCEPT
