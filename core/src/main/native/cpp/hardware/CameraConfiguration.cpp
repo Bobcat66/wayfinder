@@ -279,7 +279,7 @@ namespace wf {
                 {"controls",std::move(controls_jobject)}
             };
             return WFResult<JSON>::success(std::move(jobject));
-        } catch (const nlohmann::json::exception& e) {
+        } catch (const JSON::exception& e) {
             jsonLogger()->error("JSON error while serializing CameraConfiguration: {}",e.what());
             return WFResult<JSON>::failure(JSON_UNKNOWN);
         }

@@ -137,6 +137,19 @@ namespace wf {
             }
         }
 
+        // More ergonomic syntactic sugar for cases where we don't care what gets propagated on success
+        // It will return a default-constructed value on success
+        template <typename U>
+        static StatusfulResult propagateFail(const StatusfulResult<U,status_type,nominal_status,StringMapper>& result) {
+            if (result) {
+                // This should never happen
+                return failure(result.status());
+            } else {
+                if (result.hasMsg()) return failure(result.status(),result.what());
+                return failure(result.status());
+            }
+        }
+
         friend constexpr bool operator==(const StatusfulResult& lhs, const StatusfulResult& rhs) noexcept {
             return lhs.status_ == rhs.status_ && lhs.optval == rhs.optval;
         }

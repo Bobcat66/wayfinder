@@ -26,6 +26,7 @@
 #include <string>
 #include <memory>
 #include <unordered_map>
+#include "wfcore/common/json_utils.h"
 
 namespace wf {
 
@@ -37,7 +38,7 @@ namespace wf {
     };
 
     // Apriltag Layout for an FRC Field
-    struct ApriltagField {
+    struct ApriltagField : public JSONSerializable<ApriltagField> {
 
         std::unordered_map<int, Apriltag> aprilTags;
         double length;
@@ -51,6 +52,9 @@ namespace wf {
 
         static ApriltagField loadFromJSONFile(const std::string& filepath);
         static ApriltagField loadFromJSONString(const std::string& jsonstr);
+
+        static WFResult<JSON> toJSON_impl(const ApriltagField& object);
+        static WFResult<ApriltagField> fromJSON_impl(const JSON& jobject);
         
     };
 
