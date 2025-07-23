@@ -34,7 +34,7 @@ namespace wf {
     // The first three digits specify the context of the error code, 
     // and the remaining five hex digits specify the specific error code
     // As an example, every status code with the format 0x001XXXXX comes from a pipeline
-    // The status codes 0x00000001 to 0x000FFFFF are reserved for uncategorized status codes
+    // The status codes 0x00000001 to 0x000fffff are reserved for uncategorized status codes
     // 0x00000000 is reserved as the sole "everything's fine" status, and has its own special category
 
     // TODO: Refactor everything to use WFStatus
@@ -84,13 +84,13 @@ namespace wf {
         CONFIG_SUBDIR_NOT_FOUND =   0x00900004,
         CONFIG_UNKNOWN =            0x009fffff,
 
-        SERDE_BASE =                0x00A00000,
-        SERDE_WIPS_OOM =            0x00A00001, // 0x00A00001 to 0x00A000FF are reserved for WIPS status codes
-        SERDE_WIPS_BOUNDS_ERROR =   0x00A00002,
-        SERDE_WIPS_OVERFLOW =       0x00A00003,
-        SERDE_WIPS_BAD_ASSERT =     0x00A00004,
-        SERDE_WIPS_UNKNOWN =        0x00A000ff,
-        SERDE_UNKNOWN =             0x00Afffff
+        SERDE_BASE =                0x00a00000,
+        SERDE_WIPS_OOM =            0x00a00001, // 0x00a00001 to 0x00a000ff are reserved for WIPS status codes
+        SERDE_WIPS_BOUNDS_ERROR =   0x00a00002,
+        SERDE_WIPS_OVERFLOW =       0x00a00003,
+        SERDE_WIPS_BAD_ASSERT =     0x00a00004,
+        SERDE_WIPS_UNKNOWN =        0x00a000ff,
+        SERDE_UNKNOWN =             0x00afffff
     };
 
     inline constexpr const char* wfstatus_name(WFStatus status) {
