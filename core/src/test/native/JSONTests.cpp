@@ -148,4 +148,37 @@ TEST(JSONTests,hardwareTypesTest) {
     ASSERT_TRUE(dres2);
     wf::CameraIntrinsics test_intrinsics_2_decode(std::move(dres2.value()));
     std::cout << "Test intrinsics 2 decode: " << test_intrinsics_2_decode.dump() << std::endl;
+
+    wf::CameraConfiguration test_camconfig_orig(
+        "/dev/video0",
+        wf::CameraBackend::CSCORE,
+        {30,{wf::ImageEncoding::YUYV,1920,1080}},
+        {
+            {wf::CamControl::EXPOSURE,"Exposure"},
+            {wf::CamControl::BRIGHTNESS,"Brightness"}
+        },
+        {
+            {
+                {1920,1080},
+                wf::test::mockMatrix(10.0,10.0,20.0,20.0),
+                wf::test::mockDistortion({1.0,2.0,3.0,4.0,5.0})
+            }
+        },
+        {
+            {wf::CamControl::EXPOSURE,3}
+        }
+    );
+
+    wf::JSON test_camconfig_jobject;
+    auto ccjres = wf::CameraConfiguration::toJSON(test_camconfig_orig);
+    ASSERT_TRUE(ccjres);
+    test_camconfig_jobject = std::move(ccjres.value());
+    std::cout << "Camera Configuration JSON: " << test_camconfig_jobject.dump() << std::endl;
+    
+    auto ccdres = wf::CameraConfiguration::fromJSON(test_camconfig_jobject);
+    ASSERT_TRUE(ccdres);
+    auto test_camconfig_decode = std::move(ccdres.value());
+    std::cout << "Decoded Camera Configuration: " << test_camconfig_decode.dump() << std::endl;
+    EXPECT_EQ(test_camconfig_jobject.dump(),test_camconfig_decode.dump());
+    
 }

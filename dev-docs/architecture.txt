@@ -50,9 +50,12 @@ a common interface for managing video data flow, various classes providing a com
 It is tightly integrated with the HardwareManager, but is used throughout wayfinder. It also provides a framework for implementing video
 processing in the form of CVProcessPipes and CVProcessNodes
 
-Status system: Wayfinder's error handling system is implemented in the form of StatusfulObjects and status codes. Components of wayfinder that can cause errors
-all implement the StatusfulObject interface, which guarantees that an object will have a status, and it guarantees that said object will
-have certain helper functions for accessing and manipulating that status.
+Status system: Wayfinder's error handling system is implemented in the form of StatusfulObjects, and StatusfulResults. StatusfulObjects represent
+high-level stateful components of wayfinder (each vision worker, for example, is a StatusfulObject). StatusfulObjects statuses represent persistent
+faults (e.g. a camera disconnects). Alongside the StatusfulObject system is the StatusfulResult system. StatusfulResults are monadic containers which
+encapsulate a return value and a status code. In general, error handling *within* a major subsystem is handled through StatusfulResults, while error
+handling *between* major subsystems is handled with StatusfulObjects. Underlying both systems is Wayfinder's status system, which provides a unified
+interface for categorizing and logging errors between the two frameworks
 
 Wayfinder logging system: Wayfinder's logging system is based on spdlog, and is managed by the LoggerManager singleton object.
 
