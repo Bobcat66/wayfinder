@@ -22,7 +22,23 @@
 #include "version.h"
 #include "wfcore/processes/VisionWorkerManager.h"
 
+// signals to the launcher
+
+// Success, will cause the launcher to exit
+#define WAYFINDER_SUCCESS 0
+// General error, will cause the launcher to exit
+#define WAYFINDER_ERROR 1
+// Restart required, signals the launcher to restart wayfinder
+#define WAYFINDER_RESTART 2
+// Reload required, signals the launcher to reload environment variables and restart wayfinder
+#define WAYFINDER_RELOAD 3
+// Shutdown request, signals the launcher to execute shutdown now
+#define WAYFINDER_SHUTDOWN 4
+// Reboot request, signals the launcher to execute shutdown -r now
+#define WAYFINDER_REBOOT 5
+
+
 int main() {
     std::cout << "Starting Wayfinder v" << PROJECT_VERSION << std::endl;
-    return 0;
+    return WAYFINDER_SUCCESS;
 }

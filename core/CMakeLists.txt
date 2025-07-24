@@ -70,6 +70,7 @@ target_include_directories(wfcore
     ${CMAKE_CURRENT_SOURCE_DIR}/src/generated
     ${OpenCV_INCLUDE_DIRS}
     PRIVATE 
+    ${CMAKE_CURENT_SOURCE_DIR}/src/main/native/internal
     ${CMAKE_CURRENT_BINARY_DIR}/../meta
 )
 

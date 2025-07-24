@@ -24,42 +24,13 @@
 #include "wfcore/video/video_types.h"
 #include "wfcore/inference/Tensorizer.h"
 #include "wfcore/hardware/CameraConfiguration.h"
+#include "wfcore/pipeline/ObjectDetectionPipelineConfiguration.h"
 
 #include <string>
 #include <memory>
 #include <vector>
 
 namespace wf {
-
-    // All AI stuff is designed to work with YOLO models
-    enum class InferenceEngineType {
-        CV_CPU, // OpenCV DNN-based inference engine
-        CV_OPENCL, // OpenCV-based inference engine with OpenCL acceleration (not implemented yet)
-        CV_VULKAN, // OpenCV-based inference engine with Vulkan acceleration (not implemented yet)
-        CUDA, // NVIDIA TensorRT-based inference engine, uses CUDA terminology for better brand recognition (not implemented yet)
-        OpenVINO, // Intel OpenVINO-based inference engine (not implemented yet)
-        RKNN, // Rockchip NPU-based inference engine (not implemented yet)
-        CoreML, // Apple Core ML-based inference engine (not implemented yet)
-        ROCm, // AMD MIVisionX-based inference engine, uses ROCm terminology for better brand recognition (not implemented yet),
-        EdgeTPU, // Google Edge TPU-based inference engine (not implemented yet)
-        HailoRT, // Hailo RT-based inference engine (not implemented yet)
-    };
-
-    enum class ModelArch {
-        YOLO,
-        SSD, // Not implemented
-        RETINA_NET, // Not implemented
-        RCNN // Not implemented
-    };
-
-    struct ObjectDetectionPipelineConfiguration {
-        std::string modelPath; // Path to the model file
-        ModelArch modelArch; // Architecture of the model
-        InferenceEngineType engineType; // Type of inference engine to use
-        TensorParameters tensorParams; // Parameters for the tensorizer. The resolution and format of images input to the model should match the tensor parameters, NOT the native resolution
-        ImageEncoding modelColorSpace; // Color space the model expects pixels to be in
-        IEFilteringParams filterParams;
-    };
 
     class ObjectDetectionPipeline : public Pipeline {
     public:

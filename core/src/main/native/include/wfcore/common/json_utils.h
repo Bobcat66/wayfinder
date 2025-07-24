@@ -47,7 +47,7 @@ namespace wf {
     // Returns whether all the properties listed are present in the jobject
     // optionally logs missing properties to the global logger, can also be
     // provided with an object name for clearer logs
-    // [[ deprecated ]]
+    [[ deprecated ]]
     inline WFStatusResult validateProperties(
         const JSON& jobject, 
         std::initializer_list<std::string_view> properties,
@@ -82,7 +82,7 @@ namespace wf {
     }
 
     // Overload with default object name for conciseness
-    // [[ deprecated ]]
+    [[ deprecated ]]
     inline WFStatusResult validateProperties(
         const JSON& jobject,
         std::initializer_list<std::string_view> properties,
@@ -92,6 +92,7 @@ namespace wf {
     }
 
     template <typename T>
+    [[ deprecated ]]
     WFResult<T> getProperty(const JSON& jobject,std::string_view propertyName,std::string_view objectName = "JSON Object",bool verbose = true) {
         // Jobject verification
         if (!jobject.is_object()) {
@@ -121,6 +122,7 @@ namespace wf {
     }
 
     template <typename T>
+    [[ deprecated ]]
     WFResult<T> getProperty(const JSON& jobject,std::string_view propertyName,bool verbose) {
         return getProperty<T>(jobject,propertyName,"JSON Object",verbose);
     }
@@ -140,6 +142,7 @@ namespace wf {
     }
 
     template <typename T>
+    [[ deprecated ]]
     WFResult<T> jsonCast(const JSON& jobject, bool verbose) {
         return jsonCast<T>(jobject,"JSON Object",verbose);
     }
