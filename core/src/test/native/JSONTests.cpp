@@ -182,3 +182,472 @@ TEST(JSONTests,hardwareTypesTest) {
     EXPECT_EQ(test_camconfig_jobject.dump(),test_camconfig_decode.dump());
     
 }
+
+TEST(JSONTests,validatorTest) {
+    // Control, should pass validation
+    std::string control_json
+= R"({
+    "devpath": "/dev/video0",
+    "backend": "CSCORE",
+    "format": {
+        "fps": 10,
+        "frameFormat": {
+            "width": 1280,
+            "height": 720,
+            "encoding": "YUYV"
+        }
+    },
+    "controlAliases": {
+        "BRIGHTNESS": "brightness",
+        "CONTRAST": "contrast",
+        "SATURATION": "saturation",
+        "HUE": "hue",
+        "AUTO_WHITE_BALANCE": "white_balance_automatic",
+        "GAMMA": "gamma",
+        "WHITE_BALANCE": "white_balance_temperature",
+        "SHARPNESS": "sharpness",
+        "AUTO_EXPOSURE": "auto_exposure"
+    },
+    "calibrations": [
+        {
+            "resolution": {
+                "width": 1280,
+                "height": 720
+            },
+            "matrix": { 
+                "fx": 979.1087360312252,
+                "fy": 979.8457780935689,
+                "cx": 608.5591334099096,
+                "cy": 352.9815581130428
+            },
+            "distortion": [
+                0.09581952042360092,
+                -0.2603932345361037,
+                0.0035795949814343524,
+                -0.005134231272255606,
+                0.19101200082384226
+            ]
+        }
+    ],
+    "controls": {
+        "BRIGHTNESS": 128,
+        "CONTRAST": 32,
+        "AUTO_WHITE_BALANCE": 1
+    }
+})";
+    // /backend is missing
+    std::string bad_json_0
+= R"({
+    "devpath": "/dev/video0",
+    "format": {
+        "fps": 10,
+        "frameFormat": {
+            "width": 1280,
+            "height": 720,
+            "encoding": "YUYV"
+        }
+    },
+    "controlAliases": {
+        "BRIGHTNESS": "brightness",
+        "CONTRAST": "contrast",
+        "SATURATION": "saturation",
+        "HUE": "hue",
+        "AUTO_WHITE_BALANCE": "white_balance_automatic",
+        "GAMMA": "gamma",
+        "WHITE_BALANCE": "white_balance_temperature",
+        "SHARPNESS": "sharpness",
+        "AUTO_EXPOSURE": "auto_exposure"
+    },
+    "calibrations": [
+        {
+            "resolution": {
+                "width": 1280,
+                "height": 720
+            },
+            "matrix": { 
+                "fx": 979.1087360312252,
+                "fy": 979.8457780935689,
+                "cx": 608.5591334099096,
+                "cy": 352.9815581130428
+            },
+            "distortion": [
+                0.09581952042360092,
+                -0.2603932345361037,
+                0.0035795949814343524,
+                -0.005134231272255606,
+                0.19101200082384226
+            ]
+        }
+    ],
+    "controls": {
+        "BRIGHTNESS": 128,
+        "CONTRAST": 32,
+        "AUTO_WHITE_BALANCE": 1
+    }
+})";
+    // /format/frameFormat/height is missing
+    std::string bad_json_1
+= R"({
+    "devpath": "/dev/video0",
+    "backend": "CSCORE",
+    "format": {
+        "fps": 10,
+        "frameFormat": {
+            "width": 1280,
+            "encoding": "YUYV"
+        }
+    },
+    "controlAliases": {
+        "BRIGHTNESS": "brightness",
+        "CONTRAST": "contrast",
+        "SATURATION": "saturation",
+        "HUE": "hue",
+        "AUTO_WHITE_BALANCE": "white_balance_automatic",
+        "GAMMA": "gamma",
+        "WHITE_BALANCE": "white_balance_temperature",
+        "SHARPNESS": "sharpness",
+        "AUTO_EXPOSURE": "auto_exposure"
+    },
+    "calibrations": [
+        {
+            "resolution": {
+                "width": 1280,
+                "height": 720
+            },
+            "matrix": { 
+                "fx": 979.1087360312252,
+                "fy": 979.8457780935689,
+                "cx": 608.5591334099096,
+                "cy": 352.9815581130428
+            },
+            "distortion": [
+                0.09581952042360092,
+                -0.2603932345361037,
+                0.0035795949814343524,
+                -0.005134231272255606,
+                0.19101200082384226
+            ]
+        }
+    ],
+    "controls": {
+        "BRIGHTNESS": 128,
+        "CONTRAST": 32,
+        "AUTO_WHITE_BALANCE": 1
+    }
+})";
+    // /calibrations/0/matrix/fx is a string
+    std::string bad_json_2
+= R"({
+    "devpath": "/dev/video0",
+    "backend": "CSCORE",
+    "format": {
+        "fps": 10,
+        "frameFormat": {
+            "width": 1280,
+            "height": 720,
+            "encoding": "YUYV"
+        }
+    },
+    "controlAliases": {
+        "BRIGHTNESS": "brightness",
+        "CONTRAST": "contrast",
+        "SATURATION": "saturation",
+        "HUE": "hue",
+        "AUTO_WHITE_BALANCE": "white_balance_automatic",
+        "GAMMA": "gamma",
+        "WHITE_BALANCE": "white_balance_temperature",
+        "SHARPNESS": "sharpness",
+        "AUTO_EXPOSURE": "auto_exposure"
+    },
+    "calibrations": [
+        {
+            "resolution": {
+                "width": 1280,
+                "height": 720
+            },
+            "matrix": { 
+                "fx": "979.1087360312252",
+                "fy": 979.8457780935689,
+                "cx": 608.5591334099096,
+                "cy": 352.9815581130428
+            },
+            "distortion": [
+                0.09581952042360092,
+                -0.2603932345361037,
+                0.0035795949814343524,
+                -0.005134231272255606,
+                0.19101200082384226
+            ]
+        }
+    ],
+    "controls": {
+        "BRIGHTNESS": 128,
+        "CONTRAST": 32,
+        "AUTO_WHITE_BALANCE": 1
+    }
+})";
+    // /calibrations/0/distortion is 4 elements long
+    std::string bad_json_3
+= R"({
+    "devpath": "/dev/video0",
+    "backend": "CSCORE",
+    "format": {
+        "fps": 10,
+        "frameFormat": {
+            "width": 1280,
+            "height": 720,
+            "encoding": "YUYV"
+        }
+    },
+    "controlAliases": {
+        "BRIGHTNESS": "brightness",
+        "CONTRAST": "contrast",
+        "SATURATION": "saturation",
+        "HUE": "hue",
+        "AUTO_WHITE_BALANCE": "white_balance_automatic",
+        "GAMMA": "gamma",
+        "WHITE_BALANCE": "white_balance_temperature",
+        "SHARPNESS": "sharpness",
+        "AUTO_EXPOSURE": "auto_exposure"
+    },
+    "calibrations": [
+        {
+            "resolution": {
+                "width": 1280,
+                "height": 720
+            },
+            "matrix": { 
+                "fx": 979.1087360312252,
+                "fy": 979.8457780935689,
+                "cx": 608.5591334099096,
+                "cy": 352.9815581130428
+            },
+            "distortion": [
+                0.09581952042360092,
+                -0.2603932345361037,
+                0.0035795949814343524,
+                -0.005134231272255606
+            ]
+        }
+    ],
+    "controls": {
+        "BRIGHTNESS": 128,
+        "CONTRAST": 32,
+        "AUTO_WHITE_BALANCE": 1
+    }
+})";
+    // /calibrations/0/distortion/3 is a string
+    std::string bad_json_4
+= R"({
+    "devpath": "/dev/video0",
+    "backend": "CSCORE",
+    "format": {
+        "fps": 10,
+        "frameFormat": {
+            "width": 1280,
+            "height": 720,
+            "encoding": "YUYV"
+        }
+    },
+    "controlAliases": {
+        "BRIGHTNESS": "brightness",
+        "CONTRAST": "contrast",
+        "SATURATION": "saturation",
+        "HUE": "hue",
+        "AUTO_WHITE_BALANCE": "white_balance_automatic",
+        "GAMMA": "gamma",
+        "WHITE_BALANCE": "white_balance_temperature",
+        "SHARPNESS": "sharpness",
+        "AUTO_EXPOSURE": "auto_exposure"
+    },
+    "calibrations": [
+        {
+            "resolution": {
+                "width": 1280,
+                "height": 720
+            },
+            "matrix": { 
+                "fx": 979.1087360312252,
+                "fy": 979.8457780935689,
+                "cx": 608.5591334099096,
+                "cy": 352.9815581130428
+            },
+            "distortion": [
+                0.09581952042360092,
+                -0.2603932345361037,
+                0.0035795949814343524,
+                "-0.005134231272255606",
+                0.19101200082384226
+            ]
+        }
+    ],
+    "controls": {
+        "BRIGHTNESS": 128,
+        "CONTRAST": 32,
+        "AUTO_WHITE_BALANCE": 1
+    }
+})";
+    // /backend is misspelled
+    std::string bad_json_5
+= R"({
+    "devpath": "/dev/video0",
+    "backend": "CSCOR",
+    "format": {
+        "fps": 10,
+        "frameFormat": {
+            "width": 1280,
+            "height": 720,
+            "encoding": "YUYV"
+        }
+    },
+    "controlAliases": {
+        "BRIGHTNESS": "brightness",
+        "CONTRAST": "contrast",
+        "SATURATION": "saturation",
+        "HUE": "hue",
+        "AUTO_WHITE_BALANCE": "white_balance_automatic",
+        "GAMMA": "gamma",
+        "WHITE_BALANCE": "white_balance_temperature",
+        "SHARPNESS": "sharpness",
+        "AUTO_EXPOSURE": "auto_exposure"
+    },
+    "calibrations": [
+        {
+            "resolution": {
+                "width": 1280,
+                "height": 720
+            },
+            "matrix": { 
+                "fx": 979.1087360312252,
+                "fy": 979.8457780935689,
+                "cx": 608.5591334099096,
+                "cy": 352.9815581130428
+            },
+            "distortion": [
+                0.09581952042360092,
+                -0.2603932345361037,
+                0.0035795949814343524,
+                -0.005134231272255606,
+                0.19101200082384226
+            ]
+        }
+    ],
+    "controls": {
+        "BRIGHTNESS": 128,
+        "CONTRAST": 32,
+        "AUTO_WHITE_BALANCE": 1
+    }
+})";
+    // /controlAliases/SHARPNES is misspelled
+    std::string bad_json_6
+= R"({
+    "devpath": "/dev/video0",
+    "backend": "CSCORE",
+    "format": {
+        "fps": 10,
+        "frameFormat": {
+            "width": 1280,
+            "height": 720,
+            "encoding": "YUYV"
+        }
+    },
+    "controlAliases": {
+        "BRIGHTNESS": "brightness",
+        "CONTRAST": "contrast",
+        "SATURATION": "saturation",
+        "HUE": "hue",
+        "AUTO_WHITE_BALANCE": "white_balance_automatic",
+        "GAMMA": "gamma",
+        "WHITE_BALANCE": "white_balance_temperature",
+        "SHARPNES": "sharpness",
+        "AUTO_EXPOSURE": "auto_exposure"
+    },
+    "calibrations": [
+        {
+            "resolution": {
+                "width": 1280,
+                "height": 720
+            },
+            "matrix": { 
+                "fx": 979.1087360312252,
+                "fy": 979.8457780935689,
+                "cx": 608.5591334099096,
+                "cy": 352.9815581130428
+            },
+            "distortion": [
+                0.09581952042360092,
+                -0.2603932345361037,
+                0.0035795949814343524,
+                -0.005134231272255606,
+                0.19101200082384226
+            ]
+        }
+    ],
+    "controls": {
+        "BRIGHTNESS": 128,
+        "CONTRAST": 32,
+        "AUTO_WHITE_BALANCE": 1
+    }
+})";
+    const wf::JSONValidationFunctor* validate = wf::CameraConfiguration::getValidator();
+
+    wf::JSON control_jobject = wf::JSON::parse(control_json);
+
+    auto controlRes = (*validate)(control_jobject);
+    EXPECT_TRUE(controlRes);
+    if (!controlRes) {
+        std::cout << "Control error: " << controlRes.what() << std::endl;
+    }
+
+    wf::JSON bad_jobject_0 = wf::JSON::parse(bad_json_0);
+    wf::JSON bad_jobject_1 = wf::JSON::parse(bad_json_1);
+    wf::JSON bad_jobject_2 = wf::JSON::parse(bad_json_2);
+    wf::JSON bad_jobject_3 = wf::JSON::parse(bad_json_3);
+    wf::JSON bad_jobject_4 = wf::JSON::parse(bad_json_4);
+    wf::JSON bad_jobject_5 = wf::JSON::parse(bad_json_5);
+    wf::JSON bad_jobject_6 = wf::JSON::parse(bad_json_6);
+
+    auto badRes0 = (*validate)(bad_jobject_0);
+    EXPECT_FALSE(badRes0);
+    std::cout << "Bad JSON 0 Error: " << badRes0.what() << std::endl;
+    EXPECT_EQ("/backend",badRes0.what());
+    EXPECT_EQ(wf::WFStatus::JSON_PROPERTY_NOT_FOUND,badRes0.status());
+
+    auto badRes1 = (*validate)(bad_jobject_1);
+    EXPECT_FALSE(badRes1);
+    std::cout << "Bad JSON 1 Error: " << badRes1.what() << std::endl;
+    EXPECT_EQ("/format/frameFormat/height",badRes1.what());
+    EXPECT_EQ(wf::WFStatus::JSON_PROPERTY_NOT_FOUND,badRes1.status());
+
+    auto badRes2 = (*validate)(bad_jobject_2);
+    EXPECT_FALSE(badRes2);
+    std::cout << "Bad JSON 2 Error: " << badRes2.what() << std::endl;
+    EXPECT_EQ("/calibrations/0/matrix/fx",badRes2.what());
+    EXPECT_EQ(wf::WFStatus::JSON_INVALID_TYPE,badRes2.status());
+
+    auto badRes3 = (*validate)(bad_jobject_3);
+    EXPECT_FALSE(badRes3);
+    std::cout << "Bad JSON 3 Error: " << badRes3.what() << std::endl;
+    EXPECT_EQ("/calibrations/0/distortion",badRes3.what());
+    EXPECT_EQ(wf::WFStatus::JSON_SCHEMA_VIOLATION,badRes3.status());
+
+    auto badRes4 = (*validate)(bad_jobject_4);
+    EXPECT_FALSE(badRes4);
+    std::cout << "Bad JSON 4 Error: " << badRes4.what() << std::endl;
+    EXPECT_EQ("/calibrations/0/distortion/3",badRes4.what());
+    EXPECT_EQ(wf::WFStatus::JSON_INVALID_TYPE,badRes4.status());
+
+    auto badRes5 = (*validate)(bad_jobject_5);
+    EXPECT_FALSE(badRes5);
+    std::cout << "Bad JSON 5 Error: " << badRes5.what() << std::endl;
+    EXPECT_EQ("/backend",badRes5.what());
+    EXPECT_EQ(wf::WFStatus::JSON_SCHEMA_VIOLATION,badRes5.status());
+
+    auto badRes6 = (*validate)(bad_jobject_6);
+    EXPECT_FALSE(badRes6);
+    std::cout << "Bad JSON 6 Error: " << badRes6.what() << std::endl;
+    EXPECT_EQ("/controlAliases/SHARPNES",badRes6.what());
+    EXPECT_EQ(wf::WFStatus::JSON_SCHEMA_VIOLATION,badRes6.status());
+
+
+}

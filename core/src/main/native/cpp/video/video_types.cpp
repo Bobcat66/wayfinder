@@ -24,6 +24,22 @@
 namespace impl {
     using namespace wf;
 
+    static const JSONValidationFunctor* getEncodingValidator() {
+        static JSONEnumValidator validator({
+            "BGR24",
+            "RGB24",
+            "RGB565",
+            "Y8",
+            "Y16",
+            "YUYV",
+            "UYVY",
+            "RGBA",
+            "BGRA",
+            "MJPEG"
+        });
+        return static_cast<JSONValidationFunctor*>(&validator);
+    }
+
     inline ImageEncoding parseEncoding(const std::string& name) {
         if (name == "BGR24") return ImageEncoding::BGR24;
         if (name == "RGB24") return ImageEncoding::RGB24;
@@ -60,6 +76,18 @@ namespace wf {
 
     using enum WFStatus;
 
+    const JSONValidationFunctor* FrameFormat::getValidator_impl() {
+        static JSONStructValidator validator(
+            {
+                {"width",getPrimitiveValidator<int>()},
+                {"height",getPrimitiveValidator<int>()},
+                {"encoding",impl::getEncodingValidator()}
+            },
+            {"width","height","encoding"}
+        );
+        return static_cast<JSONValidationFunctor*>(&validator);
+    }
+
     WFResult<JSON> FrameFormat::toJSON_impl(const FrameFormat& object) {
         try {
             JSON jobject = {
@@ -95,6 +123,17 @@ namespace wf {
 
         return WFResult<FrameFormat>::success(std::in_place,encoding,width,height);
         
+    }
+
+    const JSONValidationFunctor* StreamFormat::getValidator_impl() {
+        static JSONStructValidator validator(
+            {
+                {"fps", getPrimitiveValidator<int>()},
+                {"frameFormat", FrameFormat::getValidator()}
+            },
+            {"fps","frameFormat"}
+        );
+        return static_cast<JSONValidationFunctor*>(&validator);
     }
 
     WFResult<JSON> StreamFormat::toJSON_impl(const StreamFormat& object) {

@@ -67,6 +67,7 @@ namespace wf {
 
         static WFResult<JSON> toJSON_impl(const FrameFormat& object);
         static WFResult<FrameFormat> fromJSON_impl(const JSON& jobject);
+        static const JSONValidationFunctor* getValidator_impl();
     };
 
     struct StreamFormat : public JSONSerializable<StreamFormat> {
@@ -83,6 +84,7 @@ namespace wf {
 
         static WFResult<JSON> toJSON_impl(const StreamFormat& object);
         static WFResult<StreamFormat> fromJSON_impl(const JSON& jobject);
+        static const JSONValidationFunctor* getValidator_impl();
     };
 
     struct FrameMetadata {

@@ -69,6 +69,7 @@ namespace wf {
 
         static WFResult<JSON> toJSON_impl(const CameraIntrinsics& object);
         static WFResult<CameraIntrinsics> fromJSON_impl(const JSON& jobject);
+        static const JSONValidationFunctor* getValidator_impl();
     };
 
     struct CameraConfiguration : public JSONSerializable<CameraConfiguration> {
@@ -91,6 +92,7 @@ namespace wf {
 
         static WFResult<JSON> toJSON_impl(const CameraConfiguration& object);
         static WFResult<CameraConfiguration> fromJSON_impl(const JSON& jobject);
+        static const JSONValidationFunctor* getValidator_impl();
     };
 
 }

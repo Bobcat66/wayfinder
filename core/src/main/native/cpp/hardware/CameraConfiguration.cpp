@@ -23,6 +23,8 @@
 #include <unordered_map>
 #include <format>
 
+#define CAMCONTROL_PATTERN R"(^(EXPOSURE|AUTO_EXPOSURE|BRIGHTNESS|ISO|SHUTTER|FOCUS|ZOOM|WHITE_BALANCE|AUTO_WHITE_BALANCE|SHARPNESS|SATURATION|CONTRAST|GAMMA|HUE)$)"
+
 // TODO: refactor to use getProperty();
 namespace impl {
 
@@ -31,8 +33,64 @@ namespace impl {
     cv::Mat createIntrinsicsMatrix(double fx, double fy, double cx, double cy) {
         return (cv::Mat_<double>(3, 3) <<
             fx,  0, cx,
-            0, fy, cy,
-            0,  0,  1);
+             0, fy, cy,
+             0,  0,  1);
+    }
+
+    static const JSONValidationFunctor* getBackendValidator() {
+        static JSONEnumValidator validator({
+            "CSCORE",
+            "REALSENSE",
+            "GSTREAMER",
+            "LIBCAMERA"
+        });
+        return static_cast<JSONValidationFunctor*>(&validator);
+    }
+
+    static const JSONValidationFunctor* getResolutionValidator() {
+        static JSONStructValidator validator(
+            // Properties
+            {
+                {"width", getPrimitiveValidator<int>()},
+                {"height", getPrimitiveValidator<int>()}
+            },
+            // Required properties
+            {"width","height"}
+        );
+        return static_cast<JSONValidationFunctor*>(&validator);
+    }
+
+    static const JSONValidationFunctor* getMatrixValidator() {
+        static JSONStructValidator validator(
+            {
+                {"fx", getPrimitiveValidator<double>()},
+                {"fy", getPrimitiveValidator<double>()},
+                {"cx", getPrimitiveValidator<double>()},
+                {"cy", getPrimitiveValidator<double>()}
+            },
+            {"fx","fy","cx","cy"}
+        );
+        return static_cast<JSONValidationFunctor*>(&validator);
+    }
+
+    static const JSONValidationFunctor* getDistortionValidator() {
+        static JSONArrayValidator validator(getPrimitiveValidator<double>(),5,8);
+        return static_cast<JSONValidationFunctor*>(&validator);
+    }
+
+    static const JSONValidationFunctor* getControlAliasValidator() {
+        static JSONMapValidator validator(getPrimitiveValidator<std::string>(),CAMCONTROL_PATTERN);
+        return static_cast<JSONValidationFunctor*>(&validator);
+    }
+
+    static const JSONValidationFunctor* getCalibrationsValidator() {
+        static JSONArrayValidator validator(CameraIntrinsics::getValidator());
+        return static_cast<JSONValidationFunctor*>(&validator);
+    }
+
+    static const JSONValidationFunctor* getControlsValidator() {
+        static JSONMapValidator validator(getPrimitiveValidator<int>(),CAMCONTROL_PATTERN);
+        return static_cast<JSONValidationFunctor*>(&validator);
     }
 
     static const std::unordered_map<CameraBackend,std::string> backendStringMap = {
@@ -86,6 +144,18 @@ namespace impl {
 
 namespace wf {
     using enum WFStatus;
+
+    const JSONValidationFunctor* CameraIntrinsics::getValidator_impl() {
+        static JSONStructValidator validator(
+            {
+                {"resolution",impl::getResolutionValidator()},
+                {"matrix",impl::getMatrixValidator()},
+                {"distortion",impl::getDistortionValidator()}
+            },
+            {"resolution","matrix","distortion"}
+        );
+        return static_cast<JSONValidationFunctor*>(&validator);
+    }
 
     WFResult<JSON> CameraIntrinsics::toJSON_impl(const CameraIntrinsics& object) {
 
@@ -220,6 +290,21 @@ namespace wf {
             std::move(matrix),
             std::move(distCoeffs)
         );
+    }
+
+    const JSONValidationFunctor* CameraConfiguration::getValidator_impl() {
+        static JSONStructValidator validator(
+            {
+                {"devpath", getPrimitiveValidator<std::string>()},
+                {"backend", impl::getBackendValidator()},
+                {"format", StreamFormat::getValidator()},
+                {"controlAliases",impl::getControlAliasValidator()},
+                {"calibrations",impl::getCalibrationsValidator()},
+                {"controls",impl::getControlsValidator()}
+            },
+            {"devpath","backend","format","controlAliases"}
+        );
+        return static_cast<JSONValidationFunctor*>(&validator);
     }
 
 
