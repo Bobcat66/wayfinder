@@ -34,14 +34,14 @@ namespace wf {
             auto it = jobject.find(property);
             if (it == jobject.end()) {
                 if (required.contains(property))
-                    return WFStatusResult::failure(JSON_PROPERTY_NOT_FOUND,"/{}",property);
+                    return WFStatusResult::failure(JSON_PROPERTY_NOT_FOUND,"/{}: {}",property,wfstatus_name_view(JSON_PROPERTY_NOT_FOUND));
                 continue;
             }
             auto res = (*validator)(it.value());
             if (!res)
                 return res.hasMsg()
                     ? WFStatusResult::failure(res.status(),"/{}{}",property,res.what())
-                    : WFStatusResult::failure(res.status(),"/{}",property);
+                    : WFStatusResult::failure(res.status(),"/{}: {}",property,wfstatus_name_view(res.status()));
         }
         return WFStatusResult::success();
     }
@@ -52,12 +52,12 @@ namespace wf {
         
         for (const auto& [key,value] : jobject.items()) {
             if (!std::regex_match(key,keyMatcher))
-                return WFStatusResult::failure(JSON_SCHEMA_VIOLATION,"/{}",key);
+                return WFStatusResult::failure(JSON_SCHEMA_VIOLATION,"/{}: {}",key,wfstatus_name_view(JSON_SCHEMA_VIOLATION));
             auto res = (*valueValidator)(value);
             if (!res)
                 return res.hasMsg()
                     ? WFStatusResult::failure(res.status(),"/{}{}",key,res.what())
-                    : WFStatusResult::failure(res.status(),"/{}",key);
+                    : WFStatusResult::failure(res.status(),"/{}: {}",key,wfstatus_name_view(res.status()));
         }
         return WFStatusResult::success();
     }
@@ -75,7 +75,7 @@ namespace wf {
             if (!res)
                 return res.hasMsg()
                     ? WFStatusResult::failure(res.status(),"/{}{}",i,res.what())
-                    : WFStatusResult::failure(res.status(),"/{}",i);
+                    : WFStatusResult::failure(res.status(),"/{}: {}",i,wfstatus_name_view(res.status()));
         }
         return WFStatusResult::success();
         
@@ -89,5 +89,12 @@ namespace wf {
             return WFStatusResult::failure(JSON_SCHEMA_VIOLATION);
         
         return WFStatusResult::success();
+    }
+
+    WFStatusResult JSONUnionValidator::operator()(const JSON& jobject) const {
+        for (const auto validator : validators) {
+            if (auto res = (*validator)(jobject)) return WFStatusResult::success();
+        }
+        return WFStatusResult::failure(JSON_SCHEMA_VIOLATION);
     }
 }

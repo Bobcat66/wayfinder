@@ -24,16 +24,10 @@
 #include "wfcore/fiducial/ApriltagField.h"
 #include "wfcore/fiducial/ApriltagConfiguration.h"
 #include "wfcore/hardware/CameraConfiguration.h"
+#include "wfcore/common/json_utils.h"
+#include "wfcore/pipeline/ApriltagPipelineConfiguration.h"
 
 namespace wf {
-
-    struct ApriltagPipelineConfiguration {
-        ApriltagDetectorConfig detConfig;
-        QuadThresholdParams detQTPs;
-        std::unordered_set<int> detectorExcludes;
-        std::unordered_set<int> SolvePNPExcludes; // Does not effect tag relative solvePNP
-        bool solveTagRelative; // Whether or not to solve tag relative
-    };
 
     class ApriltagPipeline : public Pipeline {
     public:

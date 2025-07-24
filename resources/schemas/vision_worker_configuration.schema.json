@@ -21,7 +21,7 @@
         "processed_port": { "type": "number" },
         "pipelineType": { "$ref": "#/$defs/pipeline_type" },
         "pipelineConfig": {
-            "oneOf": [
+            "anyOf": [
                 { "$ref": "apriltag_pipeline_configuration.schema.json" },
                 { "$ref": "objdetect_pipeline_configuration.schema.json" }
             ]

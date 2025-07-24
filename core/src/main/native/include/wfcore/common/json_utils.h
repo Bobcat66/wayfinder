@@ -220,6 +220,20 @@ namespace wf {
         const JSONValidationFunctor* valueValidator;
     };
 
+    class JSONUnionValidator : public JSONValidationFunctor {
+    public:
+        JSONUnionValidator(std::vector<JSONValidationFunctor*> validators_) : validators(std::move(validators_)) {}
+        WFStatusResult operator()(const JSON& jobject) const override;
+    private:
+        const std::vector<JSONValidationFunctor*> validators;
+    };
+
+    // Returns a primitive optional property or a default
+    template <typename T>
+    inline T getJSONOpt(const JSON& jobject,std::string_view property, T defaultValue) {
+        return jobject.contains(property) ? jobject[property].get<T>() : defaultValue;
+    }
+
     // CRTP-based JSON serializable object interface
     template <typename DerivedType>
     class JSONSerializable {

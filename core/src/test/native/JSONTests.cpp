@@ -610,43 +610,43 @@ TEST(JSONTests,validatorTest) {
     auto badRes0 = (*validate)(bad_jobject_0);
     EXPECT_FALSE(badRes0);
     std::cout << "Bad JSON 0 Error: " << badRes0.what() << std::endl;
-    EXPECT_EQ("/backend",badRes0.what());
+    EXPECT_EQ("/backend: JSON_PROPERTY_NOT_FOUND",badRes0.what());
     EXPECT_EQ(wf::WFStatus::JSON_PROPERTY_NOT_FOUND,badRes0.status());
 
     auto badRes1 = (*validate)(bad_jobject_1);
     EXPECT_FALSE(badRes1);
     std::cout << "Bad JSON 1 Error: " << badRes1.what() << std::endl;
-    EXPECT_EQ("/format/frameFormat/height",badRes1.what());
+    EXPECT_EQ("/format/frameFormat/height: JSON_PROPERTY_NOT_FOUND",badRes1.what());
     EXPECT_EQ(wf::WFStatus::JSON_PROPERTY_NOT_FOUND,badRes1.status());
 
     auto badRes2 = (*validate)(bad_jobject_2);
     EXPECT_FALSE(badRes2);
     std::cout << "Bad JSON 2 Error: " << badRes2.what() << std::endl;
-    EXPECT_EQ("/calibrations/0/matrix/fx",badRes2.what());
+    EXPECT_EQ("/calibrations/0/matrix/fx: JSON_INVALID_TYPE",badRes2.what());
     EXPECT_EQ(wf::WFStatus::JSON_INVALID_TYPE,badRes2.status());
 
     auto badRes3 = (*validate)(bad_jobject_3);
     EXPECT_FALSE(badRes3);
     std::cout << "Bad JSON 3 Error: " << badRes3.what() << std::endl;
-    EXPECT_EQ("/calibrations/0/distortion",badRes3.what());
+    EXPECT_EQ("/calibrations/0/distortion: JSON_SCHEMA_VIOLATION",badRes3.what());
     EXPECT_EQ(wf::WFStatus::JSON_SCHEMA_VIOLATION,badRes3.status());
 
     auto badRes4 = (*validate)(bad_jobject_4);
     EXPECT_FALSE(badRes4);
     std::cout << "Bad JSON 4 Error: " << badRes4.what() << std::endl;
-    EXPECT_EQ("/calibrations/0/distortion/3",badRes4.what());
+    EXPECT_EQ("/calibrations/0/distortion/3: JSON_INVALID_TYPE",badRes4.what());
     EXPECT_EQ(wf::WFStatus::JSON_INVALID_TYPE,badRes4.status());
 
     auto badRes5 = (*validate)(bad_jobject_5);
     EXPECT_FALSE(badRes5);
     std::cout << "Bad JSON 5 Error: " << badRes5.what() << std::endl;
-    EXPECT_EQ("/backend",badRes5.what());
+    EXPECT_EQ("/backend: JSON_SCHEMA_VIOLATION",badRes5.what());
     EXPECT_EQ(wf::WFStatus::JSON_SCHEMA_VIOLATION,badRes5.status());
 
     auto badRes6 = (*validate)(bad_jobject_6);
     EXPECT_FALSE(badRes6);
     std::cout << "Bad JSON 6 Error: " << badRes6.what() << std::endl;
-    EXPECT_EQ("/controlAliases/SHARPNES",badRes6.what());
+    EXPECT_EQ("/controlAliases/SHARPNES: JSON_SCHEMA_VIOLATION",badRes6.what());
     EXPECT_EQ(wf::WFStatus::JSON_SCHEMA_VIOLATION,badRes6.status());
 
 

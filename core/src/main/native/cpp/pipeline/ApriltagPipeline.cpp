@@ -25,6 +25,7 @@
 #include <wfcore/pipeline/pnp.h>
 #include <cassert>
 
+
 namespace wf {
 
     static loggerPtr logger = LoggerManager::getInstance().getLogger("ApriltagPipeline");

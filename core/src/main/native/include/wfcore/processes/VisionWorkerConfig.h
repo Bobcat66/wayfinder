@@ -6,8 +6,10 @@
 #include "wfcore/pipeline/ApriltagPipeline.h"
 #include "wfcore/pipeline/ObjectDetectionPipeline.h"
 #include "wfcore/video/video_types.h"
+#include "wfcore/common/json_utils.h"
+
 namespace wf {
-    struct VisionWorkerConfig {
+    struct VisionWorkerConfig : public JSONSerializable<VisionWorkerConfig> {
         std::string devpath;
         std::string name;
         StreamFormat inputFormat; // Format of the input stream
@@ -20,5 +22,24 @@ namespace wf {
             ApriltagPipelineConfiguration,
             ObjectDetectionPipelineConfiguration
         > pipelineConfig;
+
+        VisionWorkerConfig(
+            std::string devpath_, std::string name_,
+            StreamFormat inputFormat_, StreamFormat outputFormat_,
+            bool stream_,
+            int raw_port_, int processed_port_,
+            PipelineType pipelineType_,
+            std::variant<
+                ApriltagPipelineConfiguration,
+                ObjectDetectionPipelineConfiguration
+            > pipelineConfig_
+        ) : devpath(std::move(devpath_)), name(std::move(name_))
+        , inputFormat(std::move(inputFormat_)), outputFormat(std::move(outputFormat_))
+        , stream(stream_), raw_port(raw_port_), processed_port(processed_port_)
+        , pipelineConfig(std::move(pipelineConfig_)) {}
+
+        static WFResult<VisionWorkerConfig> fromJSON_impl();
+        static WFResult<JSON> toJSON_impl();
+        static const JSONValidationFunctor* getValidator_impl();
     };
 }
