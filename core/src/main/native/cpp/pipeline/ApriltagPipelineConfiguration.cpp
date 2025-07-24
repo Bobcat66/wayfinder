@@ -34,7 +34,7 @@ namespace impl {
             },
             {}
         );
-        return static_cast<JSONValidationFunctor*>(validator);
+        return static_cast<JSONValidationFunctor*>(&validator);
     }
 
     static const JSONValidationFunctor* getDetectorQTPsValidator() {
@@ -49,30 +49,30 @@ namespace impl {
             },
             {}
         );
-        return static_cast<JSONValidationFunctor*>(validator);
+        return static_cast<JSONValidationFunctor*>(&validator);
     }
 
     static const JSONValidationFunctor* getIntArrayValidator() {
         static JSONArrayValidator validator(getPrimitiveValidator<int>());
-        return static_cast<JSONValidationFunctor*>(validator);
+        return static_cast<JSONValidationFunctor*>(&validator);
     }
 }
 
 namespace wf {
-    static const JSONValidationFunctor* ApriltagPipelineConfiguration::getValidator_impl() {
+    const JSONValidationFunctor* ApriltagPipelineConfiguration::getValidator_impl() {
         static JSONStructValidator validator(
             {
-                {"detConfig", getDetectorConfigValidator()},
-                {"detQTPs", getDetectorQTPsValidator()},
-                {"detectorExcludes", getIntArrayValidator()},
-                {"solvePnPExcludes", getIntArrayValidator()},
+                {"detConfig", impl::getDetectorConfigValidator()},
+                {"detQTPs", impl::getDetectorQTPsValidator()},
+                {"detectorExcludes", impl::getIntArrayValidator()},
+                {"solvePnPExcludes", impl::getIntArrayValidator()},
                 {"solveTagRelative", getPrimitiveValidator<bool>()}
             },
             {}
         );
-        return static_cast<JSONValidationFunctor*>(validator);
+        return static_cast<JSONValidationFunctor*>(&validator);
     }
-    static WFResult<ApriltagPipelineConfiguration> ApriltagPipelineConfiguration::fromJSON_impl(const JSON& jobject) {
+    WFResult<ApriltagPipelineConfiguration> ApriltagPipelineConfiguration::fromJSON_impl(const JSON& jobject) {
         auto valid = (*getValidator())(jobject);
         if (!valid) return WFResult<ApriltagPipelineConfiguration>::propagateFail(valid);
 
@@ -100,13 +100,13 @@ namespace wf {
         return WFResult<ApriltagPipelineConfiguration>::success(
             std::in_place,
             std::move(detConfig),
-            std::move(detQTPs),
+            std::move(qtps),
             detectorExcludes,
             solvePnPExcludes,
             solveTagRelative
         );
     }
-    static WFResult<JSON> toJSON_impl(const ApriltagPipelineConfiguration& object) {
+    WFResult<JSON> toJSON_impl(const ApriltagPipelineConfiguration& object) {
         return WFResult<JSON>::failure(WFStatus::UNKNOWN); // Placeholder
     }
 }
