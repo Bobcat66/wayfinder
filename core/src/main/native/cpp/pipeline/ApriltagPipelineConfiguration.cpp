@@ -107,6 +107,31 @@ namespace wf {
         );
     }
     WFResult<JSON> toJSON_impl(const ApriltagPipelineConfiguration& object) {
-        return WFResult<JSON>::failure(WFStatus::UNKNOWN); // Placeholder
+        try {
+            JSON jobject = {
+                {"detConfig", {
+                    {"numThreads", object.detConfig.numThreads},
+                    {"quadDecimate", object.detConfig.quadDecimate},
+                    {"quadSigma", object.detConfig.quadSigma},
+                    {"refineEdges", object.detConfig.refineEdges},
+                    {"decodeSharpening", object.detConfig.decodeSharpening},
+                    {"debug", object.detConfig.debug}
+                }},
+                {"detQTPs", {
+                    {"minClusterPixels", object.detQTPs.minClusterPixels},
+                    {"maxNumMaxima", object.detQTPs.maxNumMaxima},
+                    {"criticalAngleRads", object.detQTPs.criticalAngleRads},
+                    {"maxLineFitMSE", object.detQTPs.maxLineFitMSE},
+                    {"minWhiteBlackDiff", object.detQTPs.minWhiteBlackDiff},
+                    {"deglitch", object.detQTPs.deglitch}
+                }},
+                {"detectorExcludes", object.detectorExcludes},
+                {"solvePnPExcludes", object.SolvePNPExcludes},
+                {"solveTagRelative", object.solveTagRelative}
+            };
+            return WFResult<JSON>::success(std::move(jobject));
+        } catch (const JSON::exception& e) {
+            return WFResult<JSON>::failure(WFStatus::JSON_UNKNOWN,e.what());
+        }
     }
 }
