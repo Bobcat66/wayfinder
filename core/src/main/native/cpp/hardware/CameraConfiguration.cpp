@@ -201,94 +201,23 @@ namespace wf {
     }
 
     WFResult<CameraIntrinsics> CameraIntrinsics::fromJSON_impl(const JSON& jobject) {
-        // Verifying fields
-        if (!jobject.is_object()) {
-            jsonLogger()->error("camera_intrinsics is not an object");
-            return WFResult<CameraIntrinsics>::failure(JSON_INVALID_TYPE);
-        }
-        if (!validateProperties(jobject,{"resolution","matrix","distortion"},"camera_intrinsics")) {
-            return WFResult<CameraIntrinsics>::failure(JSON_PROPERTY_NOT_FOUND);
-        }
 
-        // Verifying resolution
-        if (!jobject["resolution"].is_object()) {
-            jsonLogger()->error("camera_intrinsics.resolution is not an object");
-            return WFResult<CameraIntrinsics>::failure(JSON_INVALID_TYPE);
-        }
-        if (!validateProperties(jobject["resolution"],{"width","height"})) {
-            return WFResult<CameraIntrinsics>::failure(JSON_PROPERTY_NOT_FOUND);
-        }
-
-        // Verifying cameraMatrix
-        if (!jobject["matrix"].is_object()) {
-            jsonLogger()->error("camera_intrinsics.matrix is not an object");
-            return WFResult<CameraIntrinsics>::failure(JSON_INVALID_TYPE);
-        }
-        if (!validateProperties(jobject["matrix"],{"fx","fy","cx","cy"},"camera_intrinsics.matrix")) {
-            return WFResult<CameraIntrinsics>::failure(JSON_PROPERTY_NOT_FOUND);
-        }
-
-        // Verifying distCoeffs
-        if (!jobject["distortion"].is_array()) {
-            jsonLogger()->error("camera_intrinsics.matrix is not an array");
-            return WFResult<CameraIntrinsics>::failure(JSON_INVALID_TYPE);
-        }
-
-        // Construct object
-        double width,height,fx,fy,cx,cy;
-        std::vector<double> distVec;
-
-        // resolution
-        try {
-            width = jobject["resolution"]["width"].get<double>();
-            height = jobject["resolution"]["height"].get<double>();
-        } catch (const nlohmann::json::type_error& e) {
-            jsonLogger()->error("Type error while parsing camera_intrinsics.resolution: {}",e.what());
-            return WFResult<CameraIntrinsics>::failure(JSON_INVALID_TYPE);
-        } catch (const nlohmann::json::exception& e) {
-            jsonLogger()->error("JSON error while parsing camera_intrinsics.resolution: {}",e.what());
-            return WFResult<CameraIntrinsics>::failure(JSON_UNKNOWN);
-        }
-
-        // matrix
-        try {
-            fx = jobject["matrix"]["fx"].get<double>();
-            fy = jobject["matrix"]["fy"].get<double>();
-            cx = jobject["matrix"]["cx"].get<double>();
-            cy = jobject["matrix"]["cy"].get<double>();
-        } catch (const nlohmann::json::type_error& e) {
-            jsonLogger()->error("Type error while parsing camera_intrinsics.matrix: {}",e.what());
-            return WFResult<CameraIntrinsics>::failure(JSON_INVALID_TYPE);
-        } catch (const nlohmann::json::exception& e) {
-            jsonLogger()->error("JSON error while parsing camera_intrinsics.matrix: {}",e.what());
-            return WFResult<CameraIntrinsics>::failure(JSON_UNKNOWN);
-        }
-
-        // distortion
-        try {
-            distVec = jobject["distortion"].get<std::vector<double>>();
-        } catch (const nlohmann::json::type_error& e) {
-            jsonLogger()->error("Type error while parsing camera_intrinsics.distortion: {}",e.what());
-            return WFResult<CameraIntrinsics>::failure(JSON_INVALID_TYPE);
-        } catch (const nlohmann::json::exception& e) {
-            jsonLogger()->error("JSON error while parsing camera_intrinsics.distortion: {}",e.what());
-            return WFResult<CameraIntrinsics>::failure(JSON_UNKNOWN);
-        }
-
-        if (!(distVec.size() >= 5 && distVec.size() <= 8)){
-            jsonLogger()->error("camera_intrinsics.distortion is the wrong size");
-            return WFResult<CameraIntrinsics>::failure(JSON_INVALID_TYPE);
-        }
-
-        cv::Mat distCoeffs = cv::Mat(distVec).reshape(1,1).clone();
-        auto matrix = impl::createIntrinsicsMatrix(fx,fy,cx,cy);
-        cv::Size resolution(width,height);
+        auto valid = (*getValidator())(jobject);
+        if (!valid) return WFResult<CameraIntrinsics>::propagateFail(valid);
         
         return WFResult<CameraIntrinsics>::success(
             std::in_place,
-            resolution,
-            std::move(matrix),
-            std::move(distCoeffs)
+            cv::Size{
+                jobject["resolution"]["width"].get<int>(),
+                jobject["resolution"]["height"].get<int>()
+            },
+            impl::createIntrinsicsMatrix(
+                jobject["matrix"]["fx"],
+                jobject["matrix"]["fy"],
+                jobject["matrix"]["cx"],
+                jobject["matrix"]["cy"]
+            ),
+            cv::Mat(jobject["distortion"].get<std::vector<double>>()).reshape(1,1).clone()
         );
     }
 
@@ -372,6 +301,9 @@ namespace wf {
 
     WFResult<CameraConfiguration> CameraConfiguration::fromJSON_impl(const JSON& jobject) {
 
+        auto valid = (*getValidator())(jobject);
+        if (!valid) return WFResult<CameraConfiguration>::propagateFail(valid);
+
         // Object verification
         if (!jobject.is_object()) {
             jsonLogger()->error("camera_configuration is not an object");
@@ -381,99 +313,43 @@ namespace wf {
             return WFResult<CameraConfiguration>::failure(JSON_PROPERTY_NOT_FOUND);
         }
 
-        std::string devpath;
-        CameraBackend backend;
-
-        // Devpath
-        if (auto devpathRes = getProperty<std::string>(jobject,"devpath","camera_configuration")) {
-            devpath = std::move(devpathRes.value());
-        } else {
-            return WFResult<CameraConfiguration>::failure(devpathRes.status());
-        }
-
-        // camera backend
-        if (auto backendRes = getProperty<std::string>(jobject,"backend","camera_configuration")) {
-            auto it = impl::backendMap.find(backendRes.value());
-            if (it == impl::backendMap.end()) {
-                jsonLogger()->error("Error while parsing camera_configuration.backend: '{}' is not a valid backend",it->first);
-                return WFResult<CameraConfiguration>::failure(JSON_SCHEMA_VIOLATION);
-            }
-            backend = it->second;
-        } else {
-            return WFResult<CameraConfiguration>::failure(backendRes.status());
-        }
-
-        // Stream format
-        StreamFormat format;
-        if (auto formatResult = StreamFormat::fromJSON(jobject["format"])) {
-            format = std::move(formatResult.value());
-        } else {
-            jsonLogger()->error("Error while parsing camera_configuration.format");
-            return WFResult<CameraConfiguration>::failure(formatResult.status());
-        }
-
         // control aliases
         std::unordered_map<CamControl,std::string> controlAliases;
-        if (!jobject["controlAliases"].is_object()) {
-            jsonLogger()->error("camera_configuration.controlAliases is not an object");
-            return WFResult<CameraConfiguration>::failure(JSON_INVALID_TYPE);
-        }
         for (const auto& [control,alias] : jobject["controlAliases"].items()) {
-            auto it = impl::camControlMap.find(control);
-            if (it == impl::camControlMap.end()) {
-                jsonLogger()->error("'{}' is not a recognized camera control",control);
-                return WFResult<CameraConfiguration>::failure(JSON_SCHEMA_VIOLATION);
-            }
-            if (auto astrres = jsonCast<std::string>(alias,std::format("camera_configuration.controlAliases.{}",control))) {
-                controlAliases.emplace(it->second,std::move(astrres.value()));
-            } else {
-                return WFResult<CameraConfiguration>::failure(astrres.status());
-            }
+            controlAliases[impl::camControlMap.at(control)] = alias.get<std::string>();
         }
 
-        std::vector<CameraIntrinsics> calibvecs;
+        std::vector<CameraIntrinsics> calibvec;
         // calibrations
         if (jobject.contains("calibrations")) {
-            if (!jobject["calibrations"].is_array()) {
-                jsonLogger()->error("camera_configuration.calibrations is not an array");
-                return WFResult<CameraConfiguration>::failure(JSON_INVALID_TYPE);
-            }
             for (const auto& calib_jobject : jobject["calibrations"]) {
                 if (auto calibres = CameraIntrinsics::fromJSON(calib_jobject)) {
-                    calibvecs.emplace_back(std::move(calibres.value()));
+                    calibvec.emplace_back(std::move(calibres.value()));
                 } else {
-                    return WFResult<CameraConfiguration>::failure(calibres.status());
+                    return WFResult<CameraConfiguration>::propagateFail(calibres);
                 }
             }
         }
 
         std::unordered_map<CamControl,int> controls;
         if(jobject.contains("controls")) {
-            if (!jobject["controls"].is_object()) {
-                jsonLogger()->error("camera_configuration.controls is not an object");
-                return WFResult<CameraConfiguration>::failure(JSON_INVALID_TYPE);
-            }
             for (const auto& [control,value] : jobject["controls"].items()) {
-                auto it = impl::camControlMap.find(control);
-                if (it == impl::camControlMap.end()) {
-                    jsonLogger()->error("'{}' is not a recognized camera control",control);
-                    return WFResult<CameraConfiguration>::failure(JSON_SCHEMA_VIOLATION);
-                }
-                if (auto valres = jsonCast<int>(value,std::format("camera_configuration.controlAliases.{}",control))) {
-                    controls.emplace(it->second,valres.value());
-                } else {
-                    return WFResult<CameraConfiguration>::failure(valres.status());
-                }
+                controls[impl::camControlMap.at(control)] = value.get<int>();
             }
         }
 
+        StreamFormat format;
+        auto fres = StreamFormat::fromJSON(jobject["format"]);
+        if (!fres) return WFResult<CameraConfiguration>::propagateFail(fres);
+        format = std::move(fres.value());
+
         return WFResult<CameraConfiguration>::success(
             std::in_place,
-            std::move(devpath),
-            backend,
+            jobject["devpath"].get<std::string>(),
+            impl::backendMap.at(jobject["backend"].get<std::string>()),
             std::move(format),
             std::move(controlAliases),
-            std::move(calibvecs),
+            std::move(calibvec),
             std::move(controls)
         );
     }

@@ -28,40 +28,81 @@ using json = nlohmann::json;
 
 namespace impl {
 
-    static wf::Apriltag makeApriltagFromJSON(const nlohmann::json& tagJSON) {
-        return wf::Apriltag(
-            tagJSON["ID"].get<int>(),
-            gtsam::Pose3(
-                gtsam::Rot3(
-                    tagJSON["rotation"]["quaternion"]["W"].get<double>(),
-                    tagJSON["rotation"]["quaternion"]["X"].get<double>(),
-                    tagJSON["rotation"]["quaternion"]["Y"].get<double>(),
-                    tagJSON["rotation"]["quaternion"]["Z"].get<double>()
-                ),
-                gtsam::Point3(
-                    tagJSON["translation"]["x"].get<double>(),
-                    tagJSON["translation"]["y"].get<double>(),
-                    tagJSON["translation"]["z"].get<double>()
-                )
-            )
+    using namespace wf;
+
+    static const JSONValidationFunctor* getTranslationValidator() {
+        static JSONStructValidator validator(
+            {
+                {"x",getPrimitiveValidator<double>()},
+                {"y",getPrimitiveValidator<double>()},
+                {"z",getPrimitiveValidator<double>()}
+            },
+            {"x","y","z"}
         );
+        return static_cast<JSONValidationFunctor*>(&validator);
     }
 
-    static wf::ApriltagField makeFieldFromJSON(const json& j) {
-        // TODO: add json schema validation
-        std::unordered_map<int,wf::Apriltag> apriltags;
-        for (json tagJSON : j["tags"]) {
-            apriltags.insert({
-                tagJSON["ID"].get<int>(),
-                makeApriltagFromJSON(tagJSON)
-            });
-        }
-        double width = j["field"]["width"].get<double>();
-        double length = j["field"]["length"].get<double>();
-
-        return wf::ApriltagField(apriltags,length,width);
-        
+    static const JSONValidationFunctor* getQuaternionValidator() {
+        static JSONStructValidator validator(
+            {
+                {"W",getPrimitiveValidator<double>()},
+                {"X",getPrimitiveValidator<double>()},
+                {"Y",getPrimitiveValidator<double>()},
+                {"Z",getPrimitiveValidator<double>()}
+            },
+            {"W","X","Y","Z"}
+        );
+        return static_cast<JSONValidationFunctor*>(&validator);
     }
+
+    static const JSONValidationFunctor* getRotationValidator() {
+        static JSONStructValidator validator(
+            {
+                {"quaternion",getQuaternionValidator()}
+            },
+            {"quaternion"}
+        );
+        return static_cast<JSONValidationFunctor*>(&validator);
+    }
+
+    static const JSONValidationFunctor* getPoseValidator() {
+        static JSONStructValidator validator(
+            {
+                {"rotation", getRotationValidator()},
+                {"translation", getTranslationValidator()}
+            },
+            {"rotation","translation"}
+        );
+        return static_cast<JSONValidationFunctor*>(&validator);
+    }
+
+    static const JSONValidationFunctor* getApriltagValidator() {
+        static JSONStructValidator validator(
+            {
+                {"ID", getPrimitiveValidator<int>()},
+                {"pose", getPoseValidator()}
+            },
+            {"ID","pose"}
+        );
+        return static_cast<JSONValidationFunctor*>(&validator);
+    }
+
+    static const JSONValidationFunctor* getTagsValidator() {
+        static JSONArrayValidator validator(getApriltagValidator());
+        return static_cast<JSONValidationFunctor*>(&validator);
+    }
+
+    static const JSONValidationFunctor* getFieldValidator() {
+        static JSONStructValidator validator(
+            {
+                {"length", getPrimitiveValidator<double>()},
+                {"width", getPrimitiveValidator<double>()}
+            },
+            {"length","width"}
+        );
+        return static_cast<JSONValidationFunctor*>(&validator);
+    }
+    
 }
 
 namespace wf {
@@ -76,32 +117,15 @@ namespace wf {
         return nullptr; // Not found
     }
 
-    ApriltagField ApriltagField::loadFromJSONFile(const std::string& filepath) {
-        std::ifstream file(filepath);
-        if (!file.is_open()) {
-            // TODO: Make this a logger
-            throw std::runtime_error("Failed to open file");
-        }
-
-        json jsonData;
-        try {
-            file >> jsonData;
-        } catch (const json::parse_error& e) {
-            // TODO: Logger
-            throw std::runtime_error(std::format("Parse error: {}", e.what()));
-        }
-        return impl::makeFieldFromJSON(jsonData);
-    }
-    ApriltagField ApriltagField::loadFromJSONString(const std::string& jsonstr) {
-        json jsonData;
-        try {
-            jsonData = json::parse(jsonstr);
-        } catch (const json::parse_error& e) {
-            // TODO: Logger
-            throw std::runtime_error(std::format("Parse error: {}", e.what()));
-        }
-
-        return impl::makeFieldFromJSON(jsonData);
+    const JSONValidationFunctor* ApriltagField::getValidator_impl() {
+        static JSONStructValidator validator(
+            {
+                {"tags", impl::getTagsValidator()},
+                {"field", impl::getFieldValidator()}
+            },
+            {"tags","field"}
+        );
+        return static_cast<JSONValidationFunctor*>(&validator);
     }
 
     WFResult<JSON> ApriltagField::toJSON_impl(const ApriltagField& object) {
@@ -146,76 +170,43 @@ namespace wf {
     }
 
     WFResult<ApriltagField> ApriltagField::fromJSON_impl(const JSON& jobject) {
+
+        auto valid = (*getValidator())(jobject);
+        if (!valid) return WFResult<ApriltagField>::propagateFail(valid);
+
         auto vres0 = validateProperties(jobject,{"tags","field"},"apriltag_field");
         if (!vres0) {
             return WFResult<ApriltagField>::propagateFail(vres0);
         }
 
         std::unordered_map<int,Apriltag> tags;
-        if (!jobject["tags"].is_array()) {
-            return WFResult<ApriltagField>::failure(
-                JSON_INVALID_TYPE,
-                "apriltag_field.tags is not an array"
-            );
-        }
         for (const auto& tag_jobject : jobject["tags"]) {
-            if (!validateProperties(tag_jobject,{"ID","pose"},"apriltag"))
-                return WFResult<ApriltagField>::failure(JSON_PROPERTY_NOT_FOUND);
-            
-            int id;
-            if (auto idres = getProperty<int>(tag_jobject,"ID","apriltag")) { id = idres.value(); } 
-            else { return WFResult<ApriltagField>::propagateFail(idres); }
-
-            auto vres1 = validateProperties(tag_jobject["pose"],{"rotation","translation"},"apriltag.pose");
-            if (!vres1) return WFResult<ApriltagField>::propagateFail(vres1);
-
-            auto vres2 = validateProperties(tag_jobject["pose"]["translation"],{"x","y","z"},"apriltag.pose.translation");
-            if (!vres2) return WFResult<ApriltagField>::propagateFail(vres2);
-
-            double x;
-            double y;
-            double z;
-            if (auto xres = getProperty<double>(tag_jobject["pose"]["translation"],"x")) { x = xres.value(); } 
-            else { return WFResult<ApriltagField>::propagateFail(xres); }
-
-            if (auto yres = getProperty<double>(tag_jobject["pose"]["translation"],"y")) { y = yres.value(); }
-            else { return WFResult<ApriltagField>::propagateFail(yres); }
-
-            if (auto zres = getProperty<double>(tag_jobject["pose"]["translation"],"z")) { x = zres.value(); }
-            else { return WFResult<ApriltagField>::failure(zres.status()); }
-
-
-
-            if (!tag_jobject["pose"]["rotation"].contains("quaternion")) {
-                return WFResult<ApriltagField>::failure(
-                    JSON_PROPERTY_NOT_FOUND,
-                    "apriltag.pose.rotation does not contain property quaternion"
-                );
-            }
-
-            double wq;
-            double xq;
-            double yq;
-            double zq;
-            if (auto wqres = getProperty<double>(tag_jobject["pose"]["translation"]["quaternion"],"W")) { wq = wqres.value(); }
-            else { return WFResult<ApriltagField>::failure(wqres.status()); }
-
-            if (auto xqres = getProperty<double>(tag_jobject["pose"]["translation"]["quaternion"],"X")) { xq = xqres.value(); }
-            else { return WFResult<ApriltagField>::failure(xqres.status()); }
-
-            if (auto yqres = getProperty<double>(tag_jobject["pose"]["translation"]["quaternion"],"Y")) { yq = yqres.value();} 
-            else { return WFResult<ApriltagField>::failure(yqres.status()); }
-
-            if (auto zqres = getProperty<double>(tag_jobject["pose"]["translation"]["quaternion"],"Z")) { zq = zqres.value(); }
-            else { return WFResult<ApriltagField>::failure(zqres.status()); }
-
-            gtsam::Pose3 pose(
-                {wq,xq,yq,zq},
-                {x,y,z}
+            gtsam::Pose3 pose = {
+                {
+                    tag_jobject["pose"]["rotation"]["quaternion"]["W"].get<double>(),
+                    tag_jobject["pose"]["rotation"]["quaternion"]["X"].get<double>(),
+                    tag_jobject["pose"]["rotation"]["quaternion"]["Y"].get<double>(),
+                    tag_jobject["pose"]["rotation"]["quaternion"]["Z"].get<double>()
+                },
+                {
+                    tag_jobject["pose"]["translation"]["x"].get<double>(),
+                    tag_jobject["pose"]["translation"]["y"].get<double>(),
+                    tag_jobject["pose"]["translation"]["z"].get<double>()
+                }
+            };
+            int id = tag_jobject["ID"].get<int>();
+            Apriltag tag(
+                id,
+                std::move(pose)
             );
-            //tags[id] = {id,std::move(pose)};
+            tags.insert({id,std::move(tag)});
         }
 
-        return WFResult<ApriltagField>::failure(UNKNOWN); // placeholder
+        return WFResult<ApriltagField>::success(
+            std::in_place,
+            std::move(tags),
+            jobject["field"]["length"].get<double>(),
+            jobject["field"]["width"].get<double>()
+        );
     }
 }

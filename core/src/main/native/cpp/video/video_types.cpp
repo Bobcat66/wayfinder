@@ -103,25 +103,16 @@ namespace wf {
     }
 
     WFResult<FrameFormat> FrameFormat::fromJSON_impl(const JSON& jobject) {
-        if (!validateProperties(jobject,{"width","height","encoding"},"frame_format"))
-            return WFResult<FrameFormat>::failure(JSON_PROPERTY_NOT_FOUND);
-        int width,height;
-        std::string encodingString;
-        try {
-            width = jobject["width"].get<int>();
-            height = jobject["height"].get<int>();
-            encodingString = jobject["encoding"].get<std::string>();
-        } catch (const nlohmann::json::type_error& e) {
-            jsonLogger()->error("Type error while parsing frame_format: {}",e.what());
-            return WFResult<FrameFormat>::failure(JSON_INVALID_TYPE);
-        } catch (const nlohmann::json::exception& e) {
-            jsonLogger()->error("JSON error while parsing frame_format: {}",e.what());
-            return WFResult<FrameFormat>::failure(JSON_UNKNOWN);
-        }
 
-        auto encoding = impl::parseEncoding(encodingString);
-
-        return WFResult<FrameFormat>::success(std::in_place,encoding,width,height);
+        auto valid = (*getValidator())(jobject);
+        if (!valid) return WFResult<FrameFormat>::propagateFail(valid);
+        
+        return WFResult<FrameFormat>::success(
+            std::in_place,
+            impl::parseEncoding(jobject["encoding"].get<std::string>()),
+            jobject["width"].get<int>(),
+            jobject["height"].get<int>()
+        );
         
     }
 
@@ -158,34 +149,19 @@ namespace wf {
     }
 
     WFResult<StreamFormat> StreamFormat::fromJSON_impl(const JSON& jobject) {
-        if (!validateProperties(jobject,{"fps","frameFormat"},"stream_format")) {
-            return WFResult<StreamFormat>::failure(JSON_PROPERTY_NOT_FOUND);
-        }
 
-        if (!jobject["frameFormat"].is_object()) {
-            jsonLogger()->error("stream_format.frameFormat is not an object");
-            return WFResult<StreamFormat>::failure(JSON_INVALID_TYPE);
-        }
+        auto valid = (*getValidator())(jobject);
+        if (!valid) return WFResult<StreamFormat>::propagateFail(valid);
 
         FrameFormat frameFormat;
-        if (auto jresult = FrameFormat::fromJSON(jobject["frameFormat"])) {
-            frameFormat = std::move(jresult.value());
-        } else {
-            jsonLogger()->error("Error while parsing stream_format.frameFormat");
-            return WFResult<StreamFormat>::failure(jresult.status());
-        }
+        auto fres = FrameFormat::fromJSON(jobject["frameFormat"]);
+        if (!fres) return WFResult<StreamFormat>::propagateFail(fres);
+        frameFormat = std::move(fres.value());
 
-        int fps;
-        try {
-            fps = jobject["fps"].get<int>();
-        } catch (const nlohmann::json::type_error& e) {
-            jsonLogger()->error("Type error while parsing stream_format: {}",e.what());
-            return WFResult<StreamFormat>::failure(JSON_INVALID_TYPE);
-        } catch (const nlohmann::json::exception& e) {
-            jsonLogger()->error("JSON error while parsing stream_format: {}",e.what());
-            return WFResult<StreamFormat>::failure(JSON_UNKNOWN);
-        }
-
-        return WFResult<StreamFormat>::success(std::in_place,fps,std::move(frameFormat));
+        return WFResult<StreamFormat>::success(
+            std::in_place,
+            jobject["fps"].get<int>(),
+            std::move(frameFormat)
+        );
     }
 }
