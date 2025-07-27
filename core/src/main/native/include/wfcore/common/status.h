@@ -29,7 +29,7 @@
 
 namespace wf {
 
-    constexpr uint32_t CATEGORY_MASK = 0xfff00000;
+    constexpr std::uint32_t CATEGORY_MASK = 0xfff00000;
 
     // The first three digits specify the context of the error code, 
     // and the remaining five hex digits specify the specific error code
@@ -38,7 +38,7 @@ namespace wf {
     // 0x00000000 is reserved as the sole "everything's fine" status, and has its own special category
 
     // TODO: Refactor everything to use WFStatus
-    enum class WFStatus : uint32_t {
+    enum class WFStatus : std::uint32_t {
         OK =                        0x00000000,
         UNCATEGORIZED_BASE =        0x00000000, // Ts is lowkey scuffed, but whatever
         BAD_ARGUMENT =              0x00000001,
@@ -90,7 +90,14 @@ namespace wf {
         SERDE_WIPS_OVERFLOW =       0x00a00003,
         SERDE_WIPS_BAD_ASSERT =     0x00a00004,
         SERDE_WIPS_UNKNOWN =        0x00a000ff,
-        SERDE_UNKNOWN =             0x00afffff
+        SERDE_UNKNOWN =             0x00afffff,
+
+        ENV_BASE =                  0x00b00000,
+        ENV_BAD_ENVIRONMENT =       0x00b00001,
+        ENV_BAD_KEY =               0x00b00002,
+        ENV_BAD_FORMAT =            0x00b00003,
+        ENV_BAD_RANGE =             0x00b00004,
+        ENV_UNKNOWN =               0x00bfffff
     };
 
     inline constexpr const char* wfstatus_name(WFStatus status) {
@@ -147,6 +154,13 @@ namespace wf {
             case WFStatus::SERDE_WIPS_UNKNOWN:          return "SERDE_WIPS_UNKNOWN";
             case WFStatus::SERDE_UNKNOWN:               return "SERDE_UNKNOWN";
 
+            case WFStatus::ENV_BASE:                    return "ENV_BASE";
+            case WFStatus::ENV_BAD_ENVIRONMENT:         return "ENV_BAD_ENVIRONMENT";
+            case WFStatus::ENV_BAD_KEY:                 return "ENV_BAD_KEY";
+            case WFStatus::ENV_BAD_FORMAT:              return "ENV_BAD_FORMAT";
+            case WFStatus::ENV_BAD_RANGE:               return "ENV_BAD_RANGE";
+            case WFStatus::ENV_UNKNOWN:                 return "ENV_UNKNOWN";
+
             default:                                    return "UNRECOGNIZED";
         }
     }
@@ -175,6 +189,7 @@ namespace wf {
             case WFStatus::VIDEO_BASE:              return "Video";
             case WFStatus::CONFIG_BASE:             return "Config";
             case WFStatus::SERDE_BASE:              return "Serde";
+            case WFStatus::ENV_BASE:                return "Environment";
             default:                                return "Unknown";
         }
     }

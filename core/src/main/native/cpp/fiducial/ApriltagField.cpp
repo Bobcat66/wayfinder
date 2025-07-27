@@ -174,11 +174,6 @@ namespace wf {
         auto valid = (*getValidator())(jobject);
         if (!valid) return WFResult<ApriltagField>::propagateFail(valid);
 
-        auto vres0 = validateProperties(jobject,{"tags","field"},"apriltag_field");
-        if (!vres0) {
-            return WFResult<ApriltagField>::propagateFail(vres0);
-        }
-
         std::unordered_map<int,Apriltag> tags;
         for (const auto& tag_jobject : jobject["tags"]) {
             gtsam::Pose3 pose = {

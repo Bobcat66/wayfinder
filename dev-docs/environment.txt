@@ -1,0 +1,31 @@
+Wayfinder relies on certain environment variables.
+
+WF_ENV_PATH: Absolute path to wayfinder's .env file. This environment variable must be set externally
+
+WF_DEVICE_NAME: A unique name used by a device to identify itself. Also doubles as the device's local hostname
+WF_TEAM: FRC team number
+WF_SLAM_SERVER: Whether or not this device should act as a SLAM server
+WF_LOCAL: path to wayfinder's local/ directory, relative to the working directory
+WF_RESOURCE: path to wayfinder's resources/ directory, relative to the working directory
+WF_API_PORT: Port to expose the Wayfinder HTTP API
+WF_MODELS_RSUBDIR: path to the models/ directory, relative to the resources/ directory
+WF_FIELDS_RSUBDIR: path to the fields/ directory, relative to the resources/ directory
+WF_HARDWARE_LSUBDIR: path to the hardware/ directory, relative to the local/ directory
+WF_PIPELINE_LSUBDIR: path to the pipelines/ directory, relative to the local/ directory
+WF_DEFAULT_MODEL: default model file
+WF_DEFAULT_IE: default inference engine
+WF_DEFAULT_MODEL_ARCH: default model architecture
+WF_DEFAULT_MODEL_TENSORHEIGHT: default model input height
+WF_DEFAULT_MODEL_TENSORWIDTH: default model input width
+WF_DEFAULT_MODEL_TENSORSCALE: default model tensorization scale factor
+WF_DEFAULT_MODEL_MEANS: default model tensorization means (JSON array)
+WF_DEFAULT_MODEL_STDS: default model tensorization standard deviations (JSON array)
+WF_DEFAULT_MODEL_CHANNELS: default model tensor channels
+WF_DEFAULT_MODEL_COLORSPACE: default model input color space
+WF_DEFAULT_MODEL_INTERLEAVED: whether or not model tensors are interleaved by default
+WF_DEFAULT_MODEL_NMSTHRESHOLD: default NMS threshold
+WF_DEFAULT_MODEL_CONFTHRESHOLD: default confidence threshold
+WF_EXEC: path to the wayfinderd executable, relative to the working directory
+WF_SCRIPTS: path to wayfinder auxiliary scripts, relative to the working directory
+
+In general, the working directory will be /opt/wayfinder in deployment

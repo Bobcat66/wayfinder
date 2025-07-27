@@ -36,8 +36,8 @@
 namespace wf {
 
     struct IEFilteringParams {
-        float nmsThreshold;
-        float confidenceThreshold;
+        float nmsThreshold = 0.0;
+        float confidenceThreshold = 0.0;
     };
 
     enum class EngineStatus {

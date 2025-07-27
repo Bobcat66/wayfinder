@@ -58,6 +58,9 @@ jobs:
             
     - name: Set permissions for test executables
       run: find build -name '*_tests' -exec chmod +x {} +
+    
+    - name: Load test environment
+      run: source tools/load-test-env.sh
 
     - name: Test
       run: ctest --test-dir build/release --verbose

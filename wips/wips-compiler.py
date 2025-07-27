@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 # SPDX-License-Identifier: GPL-3.0-or-later
 #
 # Copyright (C) 2025 Jesse Kane
@@ -169,16 +171,16 @@ def compile(schemas_path: Path, output_dir: Path, py: bool = False, jvm: bool = 
     print(f"Compilation finished in {end-start} seconds")
 
 # Core:
-# python3 wips_compiler.py messages.yaml --out=../core/src/generated/wips
+# ./wips-compiler.py messages.yaml --out=../core/src/generated/wips
 
 # Client:
-# python3 wips_compiler.py messages.yaml --py --out=../client/src/generated/wips
+# ./wips-compiler.py messages.yaml --py --out=../client/src/generated/wips
 
 # Lib:
-# python3 wips_compiler.py messages.yaml --jvm --out=../wayfinderlib/src/generated/wips
+# ./wips-compiler.py messages.yaml --jvm --out=../wayfinderlib/src/generated/wips
 
 # Testing:
-# python3 wips_compiler.py messages.yaml --out=./wips_output
+# ./wips-compiler.py messages.yaml --out=./wips_output
 
 # Python and Java bindings generation is not implemented yet, but the flags are here for future use.
 if __name__ == "__main__":

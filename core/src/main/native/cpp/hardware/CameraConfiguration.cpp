@@ -304,15 +304,6 @@ namespace wf {
         auto valid = (*getValidator())(jobject);
         if (!valid) return WFResult<CameraConfiguration>::propagateFail(valid);
 
-        // Object verification
-        if (!jobject.is_object()) {
-            jsonLogger()->error("camera_configuration is not an object");
-            return WFResult<CameraConfiguration>::failure(JSON_INVALID_TYPE);
-        }
-        if (!validateProperties(jobject,{"devpath","backend","format","controlAliases"},"camera_configuration")) {
-            return WFResult<CameraConfiguration>::failure(JSON_PROPERTY_NOT_FOUND);
-        }
-
         // control aliases
         std::unordered_map<CamControl,std::string> controlAliases;
         for (const auto& [control,alias] : jobject["controlAliases"].items()) {

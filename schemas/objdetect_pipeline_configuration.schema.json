@@ -48,6 +48,7 @@
                     "maxItems": 4
                 }
             },
+            "required": ["interleaved","height","width","channels","scale","stds","means"],
             "additionalProperties": false
         },
         "ie_filtering_parameters": {
