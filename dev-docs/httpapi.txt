@@ -1,0 +1,61 @@
+
+api/ - Root
+
+api/env/ - System Environment
+[there will be resources corresponding to some (but not all) environment variables under the api/env/ collection]
+api/env/team - Team number
+api/env/devname - Device name/hostname
+api/env/slam - whether or not SLAM is enabled
+(Not an exhaustive list)
+
+api/network/ - Network Configuration
+api/network/dhcp - whether or not DHCP is enabled
+api/network/ip - Static IP address
+
+api/sftp - SFTP file transfer proxy
+TBA, will be used for loading custom vision models and Apriltag fields
+
+api/local - Local configuration directory
+api/local/hardware - Hardware configuration subdirectory
+api/local/pipelines - Pipeline configuration subdirectory
+api/local/graphs - Graph configuration subdirectory(TBA)
+Each config file will be referenced by its name (e.g. a pipline configuration file named pipeline0.json would be referenced as api/local/pipelines/pipeline0.json)
+Config requests will also support queries that can reference individual fields in the config files with JSON pointers. ?json-pointer=[json pointer]
+
+api/live - Live configuration
+This differs from api/local in that api/local accesses the persisted configurations stored on disk, while api/live accessed the actual runtime configuration of the system. Otherwise, it has a very similar layout as api/local. However, .json suffixes are stripped (as these resources do not reference literal JSON files anymore), and the api refers to objects by their programmatic name, not the name of their config file
+
+api/resources - global Resource directory. This is Read-only (modification to the system resources should be done through api/sftp).
+api/resources/fields - Apriltag field layouts. Again, these follow similar semantics as other JSON files exposed by the API
+api/resources/models - only can provide a list of models found in the directory, the weights themselves cannot be accessed
+
+Client: the client dashboard will be an SPA. I haven’t decided on a framework, but I am leaning towards React + Typescript. Until the client is ready, curl + the raw REST API will serve as a stopgap.
+
+docs/ will expose the markdown documentation over HTTP, which will be rendered and prettified on the front end
+
+J
+wfctl: a client-side command line utility that will support transactions. wfctl will be passed the host of the web server as a command line argument, and will start a REPL in the shell. The wfctl REPL will support various commands:
+quit: exit the wfctl REPL
+post: send a POST request to the server
+get: send a GET request to the server (not enabled in a transaction)
+put: send a PUT request to the server
+delete: send a DELETE request to the server
+transact: begin a transaction
+diff: print all changes that would be caused by the current transaction to the console
+commit: commit a transaction
+abort: abort a transaction
+source: execute a wfctl script (usage: source foo.wfctl) will execute the foo.wfctl script
+
+wfctl commands only require the path to the resource being requested (with the `api` root truncated), optionally a query to specify fields within a resource, and optionally a data field. Wfctl will handle HTTP headers internally. If a command is invoked with the -f flag (e.g. post -f /local/hardware/cam0.json foo/new_camera_config.json), a path to a file should be passed in instead of the data field, and the contents of that file will be copied verbatim as the data field
+
+The wfctl program can be invoked with the repl subcommand, which will start a REPL session, the batch subcommand, which will execute an arbitrary number of wfctl commands passed in after it, separated by &&, or it can be invoked with the exec subcommand, which will execute a wfctl script whose path is passed in as the next argument
+
+Wayfinder has a four layer configuration system, each layer more powerful but less user friendly than the last:
+
+1: the web dashboard, user friendly, has strong guardrails that make it difficult to break wayfinder through misuse, but also limits how powerful it is. It only exposes a subset of the API. Most teams will likely only use this
+
+2: wfctl: Powerful transactional CLI utility, exposes the entire HTTP API, meant for advanced teams, can also be used in automated workflows
+
+3: HTTP API: very powerful, but not user friendly at all, and not really intended for end users. However, it will be well documented and stable, so advanced teams have the option of developing their own tooling if they want
+
+4: ssh + wfcfg.py  + direct access to JSON config files: most powerful, exposes complete control over every aspect of wayfinder, not well documented in public facing docs, but internal developer documentation is publicly available. Intended mostly for wayfinder developers and programmatic use by wayfinder itself. It has little to no guardrails, Misuse can easily render wayfinder inoperable. Can also be used by very advanced users who know what they are doing, if they want an advanced configuration not supported by the HTTP API
