@@ -47,7 +47,9 @@ namespace wf {
         virtual std::string getError() const noexcept {
             std::lock_guard lock(status_mtx);
             if (this->status_ == nominal_status) {
-                return std::nullopt;
+                return "Nominal";
+            } else if (this->errorMsg_.empty()) {
+                return StringMapper(this->status_);
             }
             return this->errorMsg_;
         }

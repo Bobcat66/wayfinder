@@ -30,7 +30,7 @@ namespace impl {
 
     static const std::unordered_map<ModelArch,std::unordered_map<InferenceEngineType,InferenceEngineCreatorCreator>> creatorMap = {
         {ModelArch::YOLO, {
-            InferenceEngineType::CV_CPU, InferenceEngineCreator::getCreator<CPUInferenceEngineYOLO>
+            {InferenceEngineType::CV_CPU, InferenceEngineCreator::getCreator<CPUInferenceEngineYOLO>}
         }}
     };
 
