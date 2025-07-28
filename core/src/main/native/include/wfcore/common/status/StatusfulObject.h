@@ -53,7 +53,7 @@ namespace wf {
         virtual ~StatusfulObject() = default;
 
         [[nodiscard]]
-        virtual T getStatus() const noexcept { return status_; }
+        virtual status_type getStatus() const noexcept { return status_; }
 
         [[ nodiscard ]]
         virtual bool ok() const noexcept { return this->status_ == nominal_status; }
@@ -66,7 +66,7 @@ namespace wf {
         virtual std::string getError() const noexcept {
             if (this->status_ == nominal_status) {
                 return "Nominal";
-            } else (this->errorMsg_.empty()) {
+            } else if (this->errorMsg_.empty()) {
                 return StringMapper(this->status_);
             }
             return errorMsg_;
@@ -80,7 +80,7 @@ namespace wf {
     protected:
         // error message is only meaningful when the status code isn't nominal
         template <typename... Args>
-        void reportError(T status, std::string_view fmt, Args&&... args) const noexcept {
+        void reportError(status_type status, std::string_view fmt, Args&&... args) const noexcept {
             this->status_ = status;
             try {
                 this->errorMsg_ = std::vformat(fmt, std::make_format_args(args...));
@@ -89,11 +89,12 @@ namespace wf {
             }
         }
 
-        void reportError(T status) {
+        void reportError(status_type status) {
             this->status_ = status;
         }
 
-        void reportError(const StatusfulResult<T,status_type,StringMapper>& result) const noexcept {
+        template <typename T>
+        void reportError(const StatusfulResult<T,status_type,nominal_status,StringMapper>& result) const noexcept {
             this->status_ = result.status();
             this->errorMsg_ = result.what();
         }
@@ -102,7 +103,7 @@ namespace wf {
             this->status_ = nominal_status;
         }
 
-        mutable T status_;
+        mutable status_type status_;
 
         // A human-readable message describing an error in more detail. It is only meaningful when the status code isn't nominal
         mutable std::string errorMsg_;

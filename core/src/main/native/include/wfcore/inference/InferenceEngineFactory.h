@@ -42,7 +42,7 @@ namespace wf {
         );
         WFResult<std::unique_ptr<InferenceEngine>> makeInferenceEngine(const ObjectDetectionPipelineConfiguration& config) {
             return makeInferenceEngine(
-                config.modelArch
+                config.modelArch,
                 config.engineType,
                 config.modelFile,
                 config.tensorParams,

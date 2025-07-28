@@ -20,13 +20,12 @@
 #include "wfcore/inference/InferenceEngineFactory.h"
 #include "wfcore/inference/CPUInferenceEngineYOLO.h"
 #include "wfcore/inference/BrokenInferenceEngine.h"
+#include "wfcore/inference/InferenceEngineCreator.h"
 #include <unordered_map>
 #include <functional>
 
 namespace impl {
     using namespace wf;
-    using enum ModelArch;
-    using enum InferenceEngineType;
     using InferenceEngineCreatorCreator = std::function<InferenceEngineCreator(void)>;
 
     static const std::unordered_map<ModelArch,std::unordered_map<InferenceEngineType,InferenceEngineCreatorCreator>> creatorMap = {

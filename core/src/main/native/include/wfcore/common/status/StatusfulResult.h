@@ -57,7 +57,7 @@ namespace wf {
 
         // Calling value() on a non-nominal statusful result is UB
         constexpr const T& value() const noexcept {
-            assert(ok())
+            assert(ok());
             return optval.value();
         }
 

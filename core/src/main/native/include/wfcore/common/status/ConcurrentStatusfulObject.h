@@ -75,7 +75,8 @@ namespace wf {
         }
 
         // scuffed, fix later
-        void reportError(const StatusfulResult<status_type,nominal_status,StringMapper>& result) const noexcept {
+        template <typename T>
+        void reportError(const StatusfulResult<T,status_type,nominal_status,StringMapper>& result) const noexcept {
             std::lock_guard lock(status_mtx);
             this->status_ = result.status();
             this->errorMsg_ = result.what();

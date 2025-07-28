@@ -59,11 +59,15 @@ namespace wf {
         }
     };
 
+    template <typename T>
+        requires HasCreatorImpl<T>
+    struct TypeTag {};
+
     class InferenceEngineCreator {
     public:
         template <typename T>
             requires HasCreatorImpl<T>
-        InferenceEngineCreator() : self(std::make_shared<InferenceEngineCreatorImpl<T>>()) {}
+        InferenceEngineCreator(TypeTag<T>) : self(std::make_shared<InferenceEngineCreatorImpl<T>>()) {}
         WFResult<std::unique_ptr<InferenceEngine>> operator()(
             std::filesystem::path modelPath,
             TensorParameters tensorParams,
@@ -75,7 +79,7 @@ namespace wf {
         template <typename T>
             requires HasCreatorImpl<T>
         static InferenceEngineCreator getCreator() {
-            return { InferenceEngineCreator<T>() };
+            return InferenceEngineCreator(TypeTag<T>());
         }
     private:
         std::shared_ptr<const InferenceEngineCreatorBase> self;
