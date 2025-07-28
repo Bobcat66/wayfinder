@@ -2,7 +2,9 @@
 api/ - Root
 
 api/env/ - System Environment
-[there will be resources corresponding to some (but not all) environment variables under the api/env/ collection]
+[there will be resources corresponding 
+to some (but not all) environment
+variables under the api/env/ collection]
 api/env/team - Team number
 api/env/devname - Device name/hostname
 api/env/slam - whether or not SLAM is enabled
