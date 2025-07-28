@@ -29,8 +29,8 @@ namespace impl {
     using InferenceEngineCreatorCreator = std::function<InferenceEngineCreator(void)>;
 
     static const std::unordered_map<ModelArch,std::unordered_map<InferenceEngineType,InferenceEngineCreatorCreator>> creatorMap = {
-        {YOLO, {
-            CV_CPU, InferenceEngineCreator::getCreator<CPUInferenceEngineYOLO>
+        {ModelArch::YOLO, {
+            InferenceEngineType::CV_CPU, InferenceEngineCreator::getCreator<CPUInferenceEngineYOLO>
         }}
     };
 

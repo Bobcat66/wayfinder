@@ -32,7 +32,7 @@ namespace wf {
         Ok
     };
 
-    class FrameProvider : public ConcurrentStatusfulObject<FrameProviderStatus,FrameProviderStatus::Ok>{
+    class FrameProvider : public WFConcurrentStatusfulObject {
     public:
         virtual FrameMetadata getFrame(cv::Mat& mat) = 0;
         virtual ~FrameProvider() noexcept = default;

@@ -54,7 +54,9 @@
         logger->info("Adding tag family {}", tagfamily);                                                        \
         auto err = detector.addFamily(tagfamily);                                                               \
         logger->info("Add family op returned {}",err);                                                          \
-        auto res = detector.detect(gray);                                                                       \
+        auto resres = detector.detect(gray);                                                                    \
+        ASSERT_TRUE(resres);                                                                                    \
+        auto res = resres.value();                                                                              \
         logger->info("Detected {} apriltags",res.size());                                                       \
         for (auto detection : res) {                                                                            \
             wf::drawTag(image,detection);                                                                       \

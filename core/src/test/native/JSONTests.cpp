@@ -17,7 +17,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "wfcore/configuration/JSONLoader.h"
+#include "wfcore/configuration/ResourceManager.h"
 #include "wfcore/video/video_types.h"
 #include <gtest/gtest.h>
 #include <iostream>

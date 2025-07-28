@@ -47,7 +47,7 @@ namespace wf {
     , frameProvider(frameProvider_)
     , pipeline(std::move(pipeline_))
     , outputConsumer(std::move(outputConsumer_)) 
-    , ConcurrentLoggedStatusfulObject<VisionWorkerStatus,VisionWorkerStatus::Ok>(name,LogGroup::General) {
+    , WFConcurrentLoggedStatusfulObject(name,LogGroup::General) {
         auto& rawformat = frameProvider.getStreamFormat().frameFormat;
         rawFrameBuffer.create(
             rawformat.width,

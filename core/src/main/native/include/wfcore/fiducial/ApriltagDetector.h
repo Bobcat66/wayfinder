@@ -70,7 +70,7 @@ namespace wf {
 
     std::ostream& operator<<(std::ostream& os, const QuadThresholdParams& qtps);
 
-    class ApriltagDetector : public StatusfulObject<ApriltagDetectorStatus,ApriltagDetectorStatus::Ok> {
+    class ApriltagDetector {
     public:
         ApriltagDetector();
         ~ApriltagDetector();

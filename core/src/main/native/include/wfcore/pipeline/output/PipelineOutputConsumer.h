@@ -31,7 +31,7 @@ namespace wf {
         InvalidFormat
     };
 
-    class PipelineOutputConsumer : public StatusfulObject<PipelineOutputConsumerStatus,PipelineOutputConsumerStatus::Ok> {
+    class PipelineOutputConsumer {
     public:
         virtual ~PipelineOutputConsumer() = default;
         virtual bool accept(cv::Mat& data, FrameMetadata meta, PipelineResult& result) noexcept = 0;

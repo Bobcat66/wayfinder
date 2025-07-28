@@ -48,8 +48,8 @@ namespace wf {
         std::vector<std::string> enumerateLocalSubdirs() const;
         bool resourceSubdirExists(const std::string& name) const;
         bool localSubdirExists(const std::string& name) const;
-        WFResult<std::filesystem::path> resolveLocalFile(const std::string& subdirName, const std::string& filename);
-        WFResult<std::filesystem::path> resolveResourceFile(const std::string& subdirName, const std::string& filename);
+        WFResult<std::filesystem::path> resolveLocalFile(const std::string& subdirName, const std::string& filename) const;
+        WFResult<std::filesystem::path> resolveResourceFile(const std::string& subdirName, const std::string& filename) const;
         WFStatusResult assignLocalSubdir(const std::string& subdirName,const std::filesystem::path& subdirRelpath);
         WFStatusResult assignResourceSubdir(const std::string& subdirName,const std::filesystem::path& subdirRelpath);
     private:

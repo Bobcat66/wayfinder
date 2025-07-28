@@ -17,7 +17,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "wfcore/configuration/JSONLoader.h"
+#include "wfcore/configuration/ResourceManager.h"
 #include <gtest/gtest.h>
 #include <filesystem>
 #include "wfcore/common/logging.h"
@@ -37,9 +37,9 @@ TEST(JSONLoaderTests,localLoadTest) {
     fs::path mock_lpath(MOCK_LOCAL_PATH);
     fs::path mock_rpath(MOCK_RESOURCE_PATH);
     wf::globalLogger()->info("Created path objects");
-    wf::JSONLoader loader;
+    wf::ResourceManager loader;
     try {
-        loader = wf::JSONLoader(mock_rpath,mock_lpath);
+        loader = wf::ResourceManager(mock_rpath,mock_lpath);
     } catch (const wf::wfexception& e) {
         wf::globalLogger()->info("Caught wfexception");
         FAIL() << e.what();

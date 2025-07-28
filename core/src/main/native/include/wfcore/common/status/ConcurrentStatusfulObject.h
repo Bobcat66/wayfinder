@@ -44,7 +44,7 @@ namespace wf {
          * Returns a human-readable string describing error in more detail.
          */
         [[ nodiscard ]]
-        virtual std::optional<std::string> getError() const noexcept {
+        virtual std::string getError() const noexcept {
             std::lock_guard lock(status_mtx);
             if (this->status_ == nominal_status) {
                 return std::nullopt;

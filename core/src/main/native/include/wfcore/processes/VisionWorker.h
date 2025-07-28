@@ -28,7 +28,7 @@
 #include <string>
 
 #include "wfcore/common/logging.h"
-#include "wfcore/common/status/ConcurrentLoggedStatusfulObject.h"
+#include "wfcore/common/status.h"
 #include "wfcore/pipeline/Pipeline.h"
 #include "wfcore/pipeline/output/PipelineOutputConsumer.h"
 #include "wfcore/video/FrameProvider.h"
@@ -50,7 +50,7 @@ namespace wf {
         Unknown
     };
 
-    class VisionWorker : public ConcurrentLoggedStatusfulObject<VisionWorkerStatus,VisionWorkerStatus::Ok> {
+    class VisionWorker : public WFConcurrentLoggedStatusfulObject {
     public:
         VisionWorker(
             std::string name_,

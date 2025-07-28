@@ -32,7 +32,7 @@ namespace wf {
 
     class InferenceEngineFactory {
     public:
-        InferenceEngineFactory(const ResourceManager& resourceManager_): resourceManager(resouceManager_) {}
+        InferenceEngineFactory(const ResourceManager& resourceManager_): resourceManager(resourceManager_) {}
         WFResult<std::unique_ptr<InferenceEngine>> makeInferenceEngine(
             ModelArch modelArch,
             InferenceEngineType engineType,

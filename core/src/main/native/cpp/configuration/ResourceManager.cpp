@@ -20,7 +20,7 @@
 #include "wfcore/configuration/ResourceManager.h"
 #include "wfcore/common/logging.h"
 #include "wfcore/common/wfexcept.h"
-#include "wfcore/common/status.h
+#include "wfcore/common/status.h"
 #include <fstream>
 #include <unordered_map>
 
@@ -238,7 +238,7 @@ namespace wf {
     }
 
     
-    WFResult<fs::path> ResourceManager::resolveLocalFile(const std::string& subdirName, const std::string& filename) {
+    WFResult<fs::path> ResourceManager::resolveLocalFile(const std::string& subdirName, const std::string& filename) const {
         // Validate subdir path
         WF_DEBUGLOG(globalLogger(),"Searching for local subdir {}",subdirName);
         auto it = localSubdirs.find(subdirName);
@@ -257,7 +257,7 @@ namespace wf {
         return WFResult<fs::path>::success(std::move(localPath));
 
     }
-    WFResult<fs::path> ResourceManager::resolveResourceFile(const std::string& subdirName, const std::string& filename) {
+    WFResult<fs::path> ResourceManager::resolveResourceFile(const std::string& subdirName, const std::string& filename) const {
         WF_DEBUGLOG(globalLogger(),"Searching for resource subdir {}",subdirName);
         auto it = resourceSubdirs.find(subdirName);
         if (it == resourceSubdirs.end()) 
