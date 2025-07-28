@@ -33,9 +33,9 @@ namespace wf {
     using enum VisionWorkerManagerStatus;
     //static auto logger = LoggerManager::getInstance().getLogger("VisionWorkerManager",LogGroup::General);
 
-    VisionWorkerManager::VisionWorkerManager(NetworkTablesManager& ntManager_, HardwareManager& hardwareManager_,ApriltagConfiguration atagConfig_,ApriltagField& atagField_)
-    : ntManager(ntManager_), hardwareManager(hardwareManager_), atagConfig(atagConfig_), atagField(atagField_)
-    , LoggedStatusfulObject<VisionWorkerManagerStatus,Ok>("VisionWorkerManager",LogGroup::General) {}
+    VisionWorkerManager::VisionWorkerManager(NetworkTablesManager& ntManager_, HardwareManager& hardwareManager_,ApriltagConfiguration atagConfig_,ApriltagField& atagField_,InferenceEngineFactory& engineFactory)
+    : ntManager(ntManager_), hardwareManager(hardwareManager_), atagConfig(atagConfig_), atagField(atagField_), engineFactory(engineFactory)
+    , WFLoggedStatusfulObject("VisionWorkerManager",LogGroup::General) {}
 
     // TODO: Refactor this with Status codes?
     VisionWorker& VisionWorkerManager::buildVisionWorker(const VisionWorkerConfig& config) {

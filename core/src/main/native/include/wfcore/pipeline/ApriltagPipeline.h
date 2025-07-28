@@ -32,15 +32,15 @@ namespace wf {
     class ApriltagPipeline : public Pipeline {
     public:
         ApriltagPipeline(ApriltagPipelineConfiguration config_, CameraIntrinsics intrinsics_, ApriltagConfiguration tagConfig_, ApriltagField& tagField_);
-        bool setConfig(const ApriltagPipelineConfiguration& config);
-        bool setTagConfig(const ApriltagConfiguration& tagConfig);
-        bool setTagField(const ApriltagField& tagField);
-        bool setIntrinsics(const CameraIntrinsics& intrinsics);
+        WFStatusResult setConfig(const ApriltagPipelineConfiguration& config);
+        WFStatusResult setTagConfig(const ApriltagConfiguration& tagConfig);
+        void setTagField(const ApriltagField& tagField);
+        void setIntrinsics(const CameraIntrinsics& intrinsics);
         [[nodiscard]] 
         PipelineResult process(const cv::Mat& data, const FrameMetadata& meta) noexcept override;
         ~ApriltagPipeline() override = default;
     private:
-        bool updateDetectorConfig(); // Updates the apriltag detector's configuration
+        WFStatusResult updateDetectorConfig(); // Updates the apriltag detector's configuration
         ApriltagPipelineConfiguration config;
         CameraIntrinsics intrinsics;
         ApriltagConfiguration tagConfig;

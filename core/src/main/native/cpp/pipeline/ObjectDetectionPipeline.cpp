@@ -22,7 +22,7 @@
 #include "wfcore/common/wfexcept.h"
 #include "wfcore/inference/CPUInferenceEngineYOLO.h"
 #include "wfcore/video/video_utils.h"
-#include <cassert>
+#include "wfcore/common/wfassert.h"
 #include <opencv2/calib3d.hpp>
 
 namespace wf {
@@ -58,14 +58,18 @@ namespace wf {
             default: throw invalid_engine_type("Unknown engine type specified. How did you even do this?");
         }
     }
-    ObjectDetectionPipeline::ObjectDetectionPipeline(ObjectDetectionPipelineConfiguration config_, CameraIntrinsics intrinsics_) 
-    : config(std::move(config_)), intrinsics(std::move(intrinsics_)) {
-        engine = buildInferenceEngine(config);
+    
+    ObjectDetectionPipeline::ObjectDetectionPipeline(ImageEncoding modelColorSpace_, std::unique_ptr<InferenceEngine> engine_, CameraIntrinsics intrinsics_)
+    : modelColorSpace(modelColorSpace_), engine(std::move(engine_)), intrinsics(std::move(intrinsics_)) {
         updatePostprocParams();
     }
     PipelineResult ObjectDetectionPipeline::process(const cv::Mat& data, const FrameMetadata& meta) noexcept {
-        assert(data.rows == engine->getTensorParameters().height && data.cols == engine->getTensorParameters().width);
-        engine->infer(data,meta,bbox_buffer);
+        WF_Assert(data.rows == engine->getTensorParameters().height && data.cols == engine->getTensorParameters().width);
+        auto infres = engine->infer(data,meta,bbox_buffer);
+        if (!infres) {
+            this->reportError(infres);
+            return PipelineResult::NullResult();
+        }
         std::vector<ObjectDetection> detections;
         detections.reserve(bbox_buffer.size());
         pixelCorner_buffer.clear();
@@ -116,6 +120,8 @@ namespace wf {
                 normCorner_buffer[bottomright_corner_index]
             );
         }
+
+        reportOk();
         return PipelineResult::ObjectDetectionResult(
             meta.micros,
             std::move(detections)

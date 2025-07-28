@@ -4,23 +4,24 @@ described here is still actively being implemented.
 Wayfinder's architecture is divided into two main parts: wayfinderd, and wfcore. wayfinderd is a daemon that serves
 as the main entry point to the wayfinder program (it is the actual executable run by the operating system). wfcore
 is a library that wayfinderd links to, which actually implements wayfinder's business logic. wayfinderd is in charge of
-loading environment variables, and managing a web server that connects to a desktop client on the DriverStation.
+managing a web server that connects to a desktop client on the DriverStation. This web server exposes a RESTful API that is
+used for remote configuration, and serves as a modular backend for any client-side utilities (CLI, website, GUI app, etc.)
 
-However, wayfinderd is essentially glorified boilerplate. The real "meat and potatoes", so to speak, of wayfinder is
-located in wfcore. Wfcore implements hardware management, networktables dataflow, video streaming, and the actual
-image processing. Wfcore has a "god class", `Application`, which essentially represents the wayfinder application itself. It can
-sort of be thought of as wayfinder's rough analogue to RobotContainer in a WPILib Command Based robot. the Application itself
-contains five major subsystems: ConfigLoader, NetworktablesManager, HardwareManager, VisionWorkerManager, and GraphManager
+However, The real "meat and potatoes", so to speak, of wayfinder is located in wfcore. Wfcore implements hardware management,
+networktables dataflow, video streaming, and the actual image processing. Wfcore has a "god class", `WFOrchestrator`, which
+essentially represents the wayfinder application itself. It can sort of be thought of as wayfinder's rough analogue to 
+RobotContainer in a WPILib Command Based robot. the WFOrchestrator itself supervises five major subsystems: ResourceManager,
+NetworktablesManager, HardwareManager, VisionWorkerManager, and GraphManager
 
-ConfigLoader: ConfigLoader is in charge of loading JSON configuration files from the local/ directory. It is the first component
+ResourceManager: ResourceManager is in charge of loading JSON configuration files from the local/ directory. It is the first component
 of wayfinder to be created during startup, and it will be used to fetch configuration data which will then be used to initialize
-the rest of wayfinder. During runtime, it will also process requests from the client to store configurations.
+the rest of wayfinder. During runtime, it will also process requests from the client to store configurations. It also handles
+loading non-JSON resources from the filesystem, including model weights
 
 NetworktablesManager: NetworktablesManager is the second subsystem to be created during startup. It is not reliant on
-configuration from the ConfigLoader, and is instead entirely configured based on environment variables loaded by wayfinderd
-(which is done before the Application object is created). NetworktablesManager is in charge of managing communications and
-networking between the robot and the coprocesser. It creates and manages all publishers and subscribers to networktables used 
-by wayfinder.
+configuration from the ResourceManager, and is instead entirely configured based on environment variables. NetworktablesManager 
+is in charge of managing communications and networking between the robot and the coprocesser. It creates and manages all 
+publishers and subscribers to networktables used by wayfinder.
 
 HardwareManager: HardwareManager is the third subsystem to be created, and is in charge of managing cameras. It abstracts away
 the various different APIs and interfaces used by wayfinder to communicate with cameras, which can range from proprietary APIs (realsense),
@@ -31,13 +32,13 @@ also handles runtime camera reconfiguration requests.
 
 VisionWorkerManager: VisionWorkerManager is the fourth subsystem to be created, and is in charge of managing Vision Workers. A vision worker encapsulates A
 full vision pipeline, from camera capture to streaming to the network. Each vision worker also runs on its own separate thread, to allow for simultaneous
-processing of multiple pipelines. The visionworkerManager creates and configures Vision workers as specified by the configurations loaded by the ConfigLoader,
+processing of multiple pipelines. The visionworkerManager creates and configures Vision workers as specified by the configurations loaded by the ResourceManager,
 and also manages runtime pipeline reconfiguration.
 
 GraphManager: GraphManager is planned to be the fifth subsystem created, and will manage Wayfinder's graph-solving facilities, (for SLAM, SfM, etc.). It is the
 furthest away from being implemented, and concrete details on its implementation haven't been determined yet.
 
-Application also manages negotiation between the different subsystems (e.g. if a camera is reconfigured to output a new resolution, Application is in charge
+WFOrchestrator also manages negotiation between the different subsystems (e.g. if a camera is reconfigured to output a new resolution, WFOrchestrator is in charge
 of making sure all VisionWorkers that receive frames from that camera are also reconfigured)
 
 ## AUXILIARY COMPONENTS OF WAYFINDER ##
@@ -63,3 +64,16 @@ WIPS Shim system: WIPS is Wayfinder's binary serialization framework. Wayfinder 
 shims between Wayfinder and WIPS (as WIPS cannot interact directly with Wayfinder objects, it can only work with WIPS structs). Additionally,
 the common/serde/legacy.h defines legacy interface logic. the legacy.h code is slated to be deprecated and eventually replaced entirely
 by WIPSSerializable, but for now it is still the primary way to interface between wfcore and WIPS
+
+Wayfinder JSON verification: This is a lightweight toolkit that wayfinder uses to verify JSON formats
+
+wfcfg.py: wfcfg.py is a command-line utility used to configure wayfinder's environment. It is used to configure systemd-networkd, as well as
+to edit the wayfinder .env file. It can also be used to reconfigure the defaults used by wayfinder. It is *not* directly exposed
+to clients. Instead, it is usually invoked as a subprocess by the wayfinderd daemon. It is also intended to be used as a standalone
+utility for configuration, for users that want a greater level of control than what is exposed over the REST API
+
+launch.sh: launch.sh is wayfinder's launch system. It is in charge of starting and stopping the wayfinderd process, as well as loading environment
+variables
+
+
+

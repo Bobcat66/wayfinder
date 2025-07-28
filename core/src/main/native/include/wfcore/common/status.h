@@ -42,20 +42,25 @@ namespace wf {
         OK =                        0x00000000,
         UNCATEGORIZED_BASE =        0x00000000, // Ts is lowkey scuffed, but whatever
         BAD_ARGUMENT =              0x00000001,
-        OUT_OF_MEMORY =             0x00000002,
+        BAD_ALLOC =                 0x00000002,
         OUT_OF_BOUNDS =             0x00000003,
         BAD_ASSERT =                0x00000004,
         FILE_NOT_OPENED =           0x00000005,
         FILE_NOT_FOUND =            0x00000006,
+        NOT_IMPLEMENTED =           0x00000007,
         UNKNOWN =                   0x000fffff,
 
         PIPELINE_BASE =             0x00100000,
         PIPELINE_UNKNOWN =          0x001fffff,
 
         APRILTAG_BASE =             0x00200000,
+        APRILTAG_BAD_FAMILY =       0x00200001,
         APRILTAG_UNKNOWN =          0x002fffff,
 
         INFERENCE_BASE =            0x00300000,
+        INFERENCE_BAD_MODEL =       0x00300001,
+        INFERENCE_BAD_INPUT =       0x00300002,
+        INFERENCE_BAD_PASS =        0x00300003,
         INFERENCE_UNKNOWN =         0x003fffff,
 
         HARDWARE_BASE =             0x00400000,
@@ -104,20 +109,25 @@ namespace wf {
         switch (status) {
             case WFStatus::OK:                          return "OK";
             case WFStatus::BAD_ARGUMENT:                return "BAD_ARGUMENT";
-            case WFStatus::OUT_OF_MEMORY:               return "OUT_OF_MEMORY";
+            case WFStatus::BAD_ALLOC:                   return "BAD_ALLOC";
             case WFStatus::OUT_OF_BOUNDS:               return "OUT_OF_BOUNDS";
             case WFStatus::BAD_ASSERT:                  return "BAD_ASSERT";
             case WFStatus::FILE_NOT_OPENED:             return "FILE_NOT_OPENED";
             case WFStatus::FILE_NOT_FOUND:              return "FILE_NOT_FOUND";
+            case WFStatus::NOT_IMPLEMENTED:             return "NOT_IMPLEMENTED";
             case WFStatus::UNKNOWN:                     return "UNKNOWN";
 
             case WFStatus::PIPELINE_BASE:               return "PIPELINE_BASE";
             case WFStatus::PIPELINE_UNKNOWN:            return "PIPELINE_UNKNOWN";
 
             case WFStatus::APRILTAG_BASE:               return "APRILTAG_BASE";
+            case WFStatus::APRILTAG_BAD_FAMILY:         return "APRILTAG_BAD_FAMILY";
             case WFStatus::APRILTAG_UNKNOWN:            return "APRILTAG_UNKNOWN";
 
             case WFStatus::INFERENCE_BASE:              return "INFERENCE_BASE";
+            case WFStatus::INFERENCE_BAD_MODEL:         return "INFERENCE_BAD_MODEL";
+            case WFStatus::INFERENCE_BAD_INPUT:         return "INFERENCE_BAD_INPUT";
+            case WFStatus::INFERENCE_BAD_PASS:          return "INFERENCE_BAD_PASS";
             case WFStatus::INFERENCE_UNKNOWN:           return "INFERENCE_UNKNOWN";
 
             case WFStatus::HARDWARE_BASE:               return "HARDWARE_BASE";
@@ -194,10 +204,10 @@ namespace wf {
         }
     }
 
-    using WFStatusfulObject = StatusfulObject<WFStatus,WFStatus::OK>;
-    using WFConcurrentStatusfulObject = ConcurrentStatusfulObject<WFStatus,WFStatus::OK>;
-    using WFLoggedStatusfulObject = LoggedStatusfulObject<WFStatus,WFStatus::OK>;
-    using WFConcurrentLoggedStatusfulObject = ConcurrentLoggedStatusfulObject<WFStatus,WFStatus::OK>;
+    using WFStatusfulObject = StatusfulObject<WFStatus,WFStatus::OK,wfstatus_name>;
+    using WFConcurrentStatusfulObject = ConcurrentStatusfulObject<WFStatus,WFStatus::OK,wfstatus_name>;
+    using WFLoggedStatusfulObject = LoggedStatusfulObject<WFStatus,WFStatus::OK,wfstatus_name>;
+    using WFConcurrentLoggedStatusfulObject = ConcurrentLoggedStatusfulObject<WFStatus,WFStatus::OK,wfstatus_name>;
 
     template <typename T>
     using WFResult = StatusfulResult<T,WFStatus,WFStatus::OK,wfstatus_name>;

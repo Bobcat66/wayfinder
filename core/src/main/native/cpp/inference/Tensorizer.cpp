@@ -25,8 +25,8 @@
 
 namespace wf {
 
-    void Tensorizer::setTensorParameters(const TensorParameters& params) {
-        this->params = params;
+    void Tensorizer::setTensorParameters(TensorParameters params) {
+        this->params = std::move(params);
         temp.create(params.height, params.width, CV_32FC(params.channels));
         channels.clear();
         channels.reserve(params.channels);

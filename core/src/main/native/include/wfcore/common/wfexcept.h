@@ -29,7 +29,7 @@
     #error "WF_DEFEXCEPT is defined outside of wfexcept.h, causing a macro name collision. Aborting build"
 #endif
 
-// Macro that automatically defines a subclass of std::exception
+// Macro that automatically defines a subclass of std::exception. Warning: not thread-safe by default
 #define WF_DEFEXCEPT(exceptionName,statusCode,defaultMsg)                                       \
     class exceptionName : public wfexception {                                                  \
         using enum WFStatus;                                                                    \
@@ -37,10 +37,15 @@
         exceptionName()                                                                         \
         : msg(defaultMsg) {}                                                                    \
         template <typename... Args>                                                             \
-        exceptionName(std::string_view fmt, Args&&... args)                                     \
-        : msg(std::vformat(fmt,std::make_format_args(args...))) {}                              \
+        exceptionName(std::string_view fmt, Args&&... args) {                                   \
+            try {                                                                               \
+                msg = std::vformat(fmt, std::make_format_args(args...));                        \
+            } catch (const std::format_error& e) {                                              \
+                msg = "MSGERR bad_format";                                                      \
+            }                                                                                   \
+        }                                                                                       \
         const char* what() const noexcept override {                                            \
-            static std::string fullmsg = std::format(                                           \
+            if (fullmsg.empty()) fullmsg = std::format(                                         \
                 "{} ({:#10x}): {}",                                                             \
                 wfstatus_name(status()),                                                        \
                 static_cast<uint32_t>(status()),                                                \
@@ -53,6 +58,7 @@
         }                                                                                       \
     private:                                                                                    \
         std::string msg;                                                                        \
+        mutable std::string fullmsg;                                                            \
     };
 
 namespace wf {
@@ -67,6 +73,7 @@ namespace wf {
     WF_DEFEXCEPT(bad_assert,BAD_ASSERT,"Bad assertion")
     WF_DEFEXCEPT(bad_local_dir,CONFIG_BAD_LOCALDIR,"Bad local directory")
     WF_DEFEXCEPT(bad_resource_dir,CONFIG_BAD_RESOURCEDIR,"Bad resource directory")
+    WF_DEFEXCEPT(bad_model,INFERENCE_BAD_MODEL,"Bad model")
     WF_DEFEXCEPT(invalid_pipeline_configuration,UNKNOWN,"Invalid pipeline configuration")
     WF_DEFEXCEPT(camera_not_found,UNKNOWN,"Camera not found")
     WF_DEFEXCEPT(intrinsics_not_found,UNKNOWN,"Intrinsics not found")

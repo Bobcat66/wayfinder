@@ -196,7 +196,7 @@ namespace wf {
     const JSONValidationFunctor* ObjectDetectionPipelineConfiguration::getValidator_impl() {
         static JSONStructValidator validator(
             {
-                {"modelPath", getPrimitiveValidator<std::string>()},
+                {"modelFile", getPrimitiveValidator<std::string>()},
                 {"modelArch", impl::getModelArchValidator()},
                 {"engineType", impl::getInferenceEngineTypeValidator()},
                 {"tensorParams", impl::getTensorParamsValidator()},
@@ -211,7 +211,7 @@ namespace wf {
     WFResult<JSON> ObjectDetectionPipelineConfiguration::toJSON_impl(const ObjectDetectionPipelineConfiguration& object) {
         try {
             JSON jobject = {
-                {"modelPath", object.modelPath},
+                {"modelFile", object.modelFile},
                 {"modelArch", impl::modelArchToString(object.modelArch)},
                 {"engineType", impl::inferenceEngineTypeToString(object.engineType)},
                 {"tensorParams", {
@@ -253,7 +253,7 @@ namespace wf {
         auto stds = impl::toScalar(jobject["tensorParams"]["stds"].get<std::vector<double>>());
         auto means = impl::toScalar(jobject["tensorParams"]["means"].get<std::vector<double>>());
 
-        std::string defaultPath;
+        std::string defaultFile;
         std::string defaultArch;
         std::string defaultEngine;
         bool defaultInterleaved;
@@ -269,9 +269,9 @@ namespace wf {
         
 
         if (auto pathopt = env::getVar("WF_DEFAULT_MODEL")) {
-            defaultPath = std::move(pathopt.value());
+            defaultFile = std::move(pathopt.value());
         } else {
-            if (!jobject.contains("modelPath"))
+            if (!jobject.contains("modelFile"))
                 return WFResult<ObjectDetectionPipelineConfiguration>::failure(
                     static_cast<WFStatus>(env::getError()),
                     "Object detection config does not specify a model file and failed to retrieve fallback from environment"
@@ -395,7 +395,7 @@ namespace wf {
         }
         return WFResult<ObjectDetectionPipelineConfiguration>::success(
             std::in_place,
-            getJSONOpt(jobject,"modelPath",std::move(defaultPath)),
+            getJSONOpt(jobject,"modelFile",std::move(defaultFile)),
             impl::parseModelArch(getJSONOpt(jobject,"modelArch",std::move(defaultArch))),
             impl::parseInferenceEngineType(getJSONOpt(jobject,"engineType",std::move(defaultEngine))),
             std::move(params),

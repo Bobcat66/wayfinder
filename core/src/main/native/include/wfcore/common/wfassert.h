@@ -22,7 +22,7 @@
 #include "wfcore/common/wfexcept.h"
 #include <string>
 #include <format>
-#include <wfdef.h>
+#include "wfcore/common/wfdef.h"
 #include <iostream>
 
 // This assertion macro should only be used OUTSIDE of the common directory.
@@ -52,3 +52,24 @@
 #else
 #define WF_Assert(expr)
 #endif
+
+#define WF_AssertAlways(expr)                                               \
+    do {                                                                    \
+        if (!expr) {                                                        \
+            std::string msg                                                 \
+                = std::format(                                              \
+                    "Runtime Assertion failed: {} at {}:{} in function {}", \
+                    WF_TOSTRING(expr),                                      \
+                    __FILE__,                                               \
+                    __LINE__,                                               \
+                    __func__                                                \
+                );                                                          \
+            auto& logger = globalLogger();                                  \
+            if (logger) {                                                   \
+                logger->error(msg);                                         \
+            } else {                                                        \
+                std::cerr << msg << std::endl;                              \
+            }                                                               \
+            throw wf::bad_assert(msg);                                      \
+        }                                                                   \
+    } while (0)

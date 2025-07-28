@@ -62,7 +62,7 @@
         }
     },
     "properties": {
-        "modelPath": { "type": "string" },
+        "modelFile": { "type": "string" },
         "modelArch": { "$ref": "#/$defs/model_architecture" },
         "engineType": { "$ref": "#/$defs/inference_engine_type" },
         "tensorParams": { "$ref": "#/$defs/tensor_parameters" },

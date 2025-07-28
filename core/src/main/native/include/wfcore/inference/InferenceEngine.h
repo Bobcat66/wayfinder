@@ -30,10 +30,35 @@
 #include "wfcore/common/status/StatusfulObject.h"
 #include <optional>
 #include <array>
-
+#include <functional>
+#include <memory>
+#include <filesystem>
 // TODO: Figure out resizing and letterboxing for Inference, also restructure Inference pipeline
 // Object detection postprocessing should be done in the pipeline, not the Inference Engine
 namespace wf {
+
+    // All AI stuff is designed to work with YOLO models
+    enum class InferenceEngineType {
+        CV_CPU, // OpenCV DNN-based inference engine
+        CV_OPENCL, // OpenCV-based inference engine with OpenCL acceleration (not implemented yet)
+        CV_VULKAN, // OpenCV-based inference engine with Vulkan acceleration (not implemented yet)
+        CUDA, // NVIDIA TensorRT-based inference engine, uses CUDA terminology for better brand recognition (not implemented yet)
+        OpenVINO, // Intel OpenVINO-based inference engine (not implemented yet)
+        RKNN, // Rockchip NPU-based inference engine (not implemented yet)
+        CoreML, // Apple Core ML-based inference engine (not implemented yet)
+        ROCm, // AMD MIVisionX-based inference engine, uses ROCm terminology for better brand recognition (not implemented yet),
+        EdgeTPU, // Google Edge TPU-based inference engine (not implemented yet)
+        HailoRT, // Hailo RT-based inference engine (not implemented yet)
+        Unknown
+    };
+
+    enum class ModelArch {
+        YOLO,
+        SSD, // Not implemented
+        RETINA_NET, // Not implemented
+        RCNN, // Not implemented
+        Unknown
+    };
 
     struct IEFilteringParams {
         float nmsThreshold = 0.0;
@@ -49,21 +74,24 @@ namespace wf {
         InvalidInput
     };
 
-    class InferenceEngine : public StatusfulObject<EngineStatus,EngineStatus::Ok> {
+    // Each
+    class InferenceEngine {
     public:
         virtual ~InferenceEngine() = default;
-        virtual bool setFilteringParameters(const IEFilteringParams& params) = 0;
-        virtual bool setTensorParameters(const TensorParameters& params) = 0;
-        virtual bool loadModel(const std::string& modelPath) = 0;
-        virtual bool infer(const cv::Mat& data, const FrameMetadata& meta, std::vector<RawBbox>& output) noexcept = 0;
-        virtual std::string modelFormat() const = 0; // the model file extension expected by this inference engine
+        virtual void setFilteringParameters(IEFilteringParams params) = 0;
+        virtual void setTensorParameters(TensorParameters params) = 0;
+        virtual WFStatusResult infer(const cv::Mat& data, const FrameMetadata& meta, std::vector<RawBbox>& output) noexcept = 0;
+        virtual const std::string& modelFormat() const = 0; // the model file extension expected by this inference engine
 
         virtual const TensorParameters& getTensorParameters() { return tensorizer.getTensorParameters(); }
         virtual const IEFilteringParams& getFilteringParameters() { return filterParams; }
-        virtual std::string getModelPath() { return modelPath; }
+        virtual const std::filesystem::path getModelPath() { return modelPath; }
+        virtual InferenceEngineType getEngineType() const noexcept = 0;
+        virtual ModelArch getModelArch() const noexcept = 0;
     protected:
-        std::string modelPath;
+        std::filesystem::path modelPath;
         Tensorizer tensorizer;
         IEFilteringParams filterParams;
     };
+    
 }

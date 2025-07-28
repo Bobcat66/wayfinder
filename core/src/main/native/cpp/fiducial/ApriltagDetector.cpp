@@ -63,6 +63,7 @@
 
     // TODO: Maybe this code is too defensive. I feel like a lot of the checks can be removed
 namespace wf {
+    using enum WFStatus;
 
     typedef apriltag_family_t* (*apriltag_family_creator)();
     typedef void (*apriltag_family_destructor)(apriltag_family_t*);
@@ -131,7 +132,6 @@ namespace wf {
             throw failed_resource_acquisition("Failed to construct apriltag");
         QuadThresholdParams qtps;
         this->setQuadThresholdParams(qtps);
-        
     }
 
     ApriltagDetector::~ApriltagDetector() {
@@ -144,7 +144,7 @@ namespace wf {
         }
     }
 
-    std::vector<ApriltagDetection> ApriltagDetector::detect(int width, int height, int stride, uint8_t* buf) const noexcept {
+    WFResult<std::vector<ApriltagDetection>> ApriltagDetector::detect(int width, int height, int stride, uint8_t* buf) const noexcept {
         image_u8_t im = {width,height,stride,buf};
 
         // Perform detection, returns a zarray of results
@@ -175,30 +175,30 @@ namespace wf {
         WF_DEBUGLOG(globalLogger(),"Destroying zarray");
         zarray_destroy(rawDetections);
 
-        NOMINAL_RETURN(detections);
+        return WFResult<std::vector<ApriltagDetection>>::success(std::move(detections));
     }
 
     QuadThresholdParams ApriltagDetector::getQuadThresholdParams() const noexcept {
         auto qtps = C_DETECTOR->qtp;
-        NOMINAL_RETURN(QuadThresholdParams(
+        return QuadThresholdParams(
             qtps.min_cluster_pixels,
             qtps.max_nmaxima,
             qtps.critical_rad,
             qtps.max_line_fit_mse,
             qtps.min_white_black_diff,
             static_cast<bool>(qtps.deglitch)
-        ));
+        );
     }
 
     ApriltagDetectorConfig ApriltagDetector::getConfig() const noexcept {
-        NOMINAL_RETURN(ApriltagDetectorConfig(
+        return ApriltagDetectorConfig(
             C_DETECTOR->nthreads,
             C_DETECTOR->quad_decimate,
             C_DETECTOR->quad_sigma,
             C_DETECTOR->refine_edges,
             C_DETECTOR->decode_sharpening,
             C_DETECTOR->debug
-        ));
+        );
     }
 
     void ApriltagDetector::setQuadThresholdParams(const QuadThresholdParams& params) noexcept {
@@ -221,19 +221,18 @@ namespace wf {
         C_DETECTOR->debug = config.debug;
     }
 
-    bool ApriltagDetector::removeFamily(const std::string& familyName) noexcept {
+    WFStatusResult ApriltagDetector::removeFamily(const std::string& familyName) noexcept {
         auto family_it = families.find(familyName);
         if (family_it == families.end()) {
-            NOMINAL_RETURN(true);
+            return WFStatusResult::success();
         }
 
         auto destructor_it = family_destructors.find(familyName);
         if (destructor_it == family_destructors.end()) {
-            this->reportError(
-                ApriltagDetectorStatus::InvalidFamily,
+            return WFStatusResult::failure(
+                APRILTAG_BAD_FAMILY,
                 "{} is not a valid apriltag family", familyName
             );
-            return false;
         }
 
         apriltag_detector_remove_family(
@@ -243,35 +242,31 @@ namespace wf {
         destructor_it->second(C_FAMILY(family_it->second));
         families.erase(family_it);
 
-        NOMINAL_RETURN(true);
+        return WFStatusResult::success();
     }
 
-    bool ApriltagDetector::addFamily(const std::string& familyName) noexcept {
-        if (families.find(familyName) != families.end()){
-            NOMINAL_RETURN(true);
-        }
+    WFStatusResult ApriltagDetector::addFamily(const std::string& familyName) noexcept {
+        if (families.find(familyName) != families.end())
+            return WFStatusResult::success();
 
         auto it = family_creators.find(familyName);
         if (it == family_creators.end()) {
-            this->reportError(
-                ApriltagDetectorStatus::InvalidFamily,
+            return WFStatusResult::failure(
+                APRILTAG_BAD_FAMILY,
                 "{} is not a valid apriltag family", familyName
             );
-            return false;
         }
 
         auto family = (it->second)();
-        if (!family) {
-            this->reportError(
-                ApriltagDetectorStatus::NullFamily,
-                "Failed to create apriltag family {}",familyName
+        if (!family)
+            return WFStatusResult::failure(
+                BAD_ALLOC,
+                "Failed to allocate apriltag family {}",familyName
             );
-            return false;
-        }
-
+        
         families[familyName] = family;
         apriltag_detector_add_family(C_DETECTOR,C_FAMILY(family));
-        NOMINAL_RETURN(true);
+        return WFStatusResult::success();
     }
 
     void ApriltagDetector::clearFamilies() {

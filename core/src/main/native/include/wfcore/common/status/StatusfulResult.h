@@ -21,6 +21,7 @@
 
 #include "wfcore/common/status/StatusType.h"
 #include "wfcore/common/logging.h"
+#include <cassert>
 #include <variant>
 #include <type_traits>
 #include <functional>
@@ -36,35 +37,37 @@ namespace wf {
     template <typename T,status_code status_type, status_type nominal_status, const char* (*StringMapper) (status_type)>
     class StatusfulResult {
     public:
-        constexpr StatusfulResult(status_type status, std::optional<T> val = std::nullopt)
+        constexpr StatusfulResult(status_type status, std::optional<T> val = std::nullopt) noexcept
         : status_(status), optval(std::move(val)), msg_(std::nullopt) {}
 
-        StatusfulResult(status_type status, std::string msg, std::optional<T> val = std::nullopt)
+        StatusfulResult(status_type status, std::string msg, std::optional<T> val = std::nullopt) noexcept
         : status_(status), optval(std::move(val)), msg_(std::move(msg)) {}
 
-        constexpr bool ok() const { 
+        constexpr bool ok() const noexcept { 
             return status_ == nominal_status && optval.has_value(); 
         }
 
-        constexpr bool hasMsg() const {
+        constexpr bool hasMsg() const noexcept {
             return msg_.has_value();
         }
 
-        constexpr explicit operator bool() const {
+        constexpr explicit operator bool() const noexcept {
             return ok();
         }
 
-        // Calling value() on a non-nominal statusful result will throw
-        constexpr const T& value() const {
+        // Calling value() on a non-nominal statusful result is UB
+        constexpr const T& value() const noexcept {
+            assert(ok())
             return optval.value();
         }
 
-        // Calling value() on a non-nominal statusful result will throw
-        constexpr T& value() {
+        // Calling value() on a non-nominal statusful result is UB
+        constexpr T& value() noexcept {
+            assert(ok());
             return optval.value();
         }
 
-        constexpr status_type status() const {
+        constexpr status_type status() const noexcept {
             return status_;
         }
 
@@ -86,15 +89,23 @@ namespace wf {
         }
         
         // Returns the message string if present, lazily constructs a default if not
-        std::string_view what() const {
+        std::string_view what() const noexcept {
             if (msg_.has_value()) return msg_.value();
-            return ok() ? nominal_msg() : StringMapper(status());
+            try {
+                return ok() ? nominal_msg() : StringMapper(status());
+            } catch (...) {
+                return msgerr_unknown();
+            }
         }
 
         // Ensures compatibility with the C ABI. For pure C++, what() is preferred.
-        const char* c_what() const {
+        const char* c_what() const noexcept {
             if (msg_.has_value()) return msg_.value().c_str();
-            return ok() ? nominal_msg() : StringMapper(status());
+            try {
+                return ok() ? nominal_msg() : StringMapper(status());
+            } catch (...) {
+                return msgerr_unknown();
+            }
         }
 
         static constexpr StatusfulResult success(T value) {
@@ -109,26 +120,40 @@ namespace wf {
 
         template <typename... Args>
         static constexpr StatusfulResult success(std::in_place_t, Args&&... args) {
-            return { nominal_status, std::optional<T>(std::in_place,std::forward<Args>(args)...) };
+            return { nominal_status, std::optional<T>(std::in_place,std::forward<Args>(args)...) };     
         }
 
-        static constexpr StatusfulResult failure(status_type code) {
+        static constexpr StatusfulResult failure(status_type code) noexcept {
             return { code, std::nullopt };
         }
 
         template <typename... Args>
-        static StatusfulResult failure(status_type code,std::string_view fmt,Args&&... args) {
-            return { 
-                code,
-                std::vformat(fmt,std::make_format_args(args...)),
-                std::nullopt
-            };
+        static StatusfulResult failure(status_type code,std::string_view fmt,Args&&... args) noexcept {
+            try {
+                return { 
+                    code,
+                    std::vformat(fmt,std::make_format_args(args...)),
+                    std::nullopt
+                };
+            } catch (const std::format_error&) {
+                return {
+                    code,
+                    msgerr_bad_format(),
+                    std::nullopt
+                };
+            } catch (const std::bad_alloc&) {
+                return {
+                    code,
+                    msgerr_bad_alloc(),
+                    std::nullopt
+                };
+            }
         }
 
         // Propagates a statusful result. If the statusfulResult passed in is nominal, this method will
         // return another nominal statusfulResult that wraps valueOnSuccess
         template <typename U>
-        static StatusfulResult propagate(const StatusfulResult<U,status_type,nominal_status,StringMapper>& result, T&& valueOnSuccess) {
+        static StatusfulResult propagate(const StatusfulResult<U,status_type,nominal_status,StringMapper>& result, T&& valueOnSuccess) noexcept {
             if (result) {
                 return success(std::move(valueOnSuccess));
             } else {
@@ -140,7 +165,7 @@ namespace wf {
         // More ergonomic syntactic sugar for cases where we don't care what gets propagated on success
         // It will return a default-constructed value on success
         template <typename U>
-        static StatusfulResult propagateFail(const StatusfulResult<U,status_type,nominal_status,StringMapper>& result) {
+        static StatusfulResult propagateFail(const StatusfulResult<U,status_type,nominal_status,StringMapper>& result) noexcept {
             if (result) {
                 // This should never happen
                 return failure(result.status());
@@ -158,8 +183,17 @@ namespace wf {
             return !(lhs == rhs);
         }
     private:
-        static constexpr const char* nominal_msg() {
+        static constexpr const char* nominal_msg() noexcept {
             return "Nominal";
+        }
+        static constexpr const char* msgerr_unknown() noexcept {
+            return "MSGERR unknown";
+        }
+        static constexpr const char* msgerr_bad_alloc() noexcept {
+            return "MSGERR bad_alloc";
+        }
+        static constexpr const char* msgerr_bad_format() noexcept {
+            return "MSGERR bad_format";
         }
 
         const status_type status_;

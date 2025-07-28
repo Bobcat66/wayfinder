@@ -19,6 +19,8 @@
 
 #include "wfcore/inference/CPUInferenceEngineYOLO.h"
 #include "wfcore/inference/postproc_utils.h"
+#include "wfcore/common/wfassert.h"
+#include "wfcore/common/wfexcept.h"
 #include <opencv2/dnn.hpp>
 #include <opencv2/opencv.hpp>
 #include <cassert>
@@ -27,12 +29,46 @@
 
 // TODO: Make this use the engine status codes and messages
 namespace wf {
-    CPUInferenceEngineYOLO::CPUInferenceEngineYOLO(){
+
+    using enum WFStatus;
+    
+    CPUInferenceEngineYOLO::CPUInferenceEngineYOLO(std::filesystem::path modelPath, TensorParameters tensorParams, IEFilteringParams filterParams) {
+        setTensorParameters(std::move(tensorParams));
+        setFilteringParameters(std::move(filterParams));
+        try {
+            model = cv::dnn::readNetFromONNX(modelPath);
+        } catch (const cv::Exception& e) {
+            throw bad_model("OpenCV Error while loading model: {}", e.what());
+        }
+        model.setPreferableBackend(cv::dnn::DNN_BACKEND_OPENCV);
+        model.setPreferableTarget(cv::dnn::DNN_TARGET_CPU);
+        this->modelPath = modelPath;
         corners_buffer.reserve(4);
         norm_corners_buffer.reserve(4);
     }
 
-    bool CPUInferenceEngineYOLO::setTensorParameters(const TensorParameters& params) {
+    WFResult<std::unique_ptr<CPUInferenceEngineYOLO>> CPUInferenceEngineYOLO::creator_impl(
+        std::filesystem::path modelPath,
+        TensorParameters tensorParams,
+        IEFilteringParams filterParams
+    ) {
+        try {
+            return WFResult<std::unique_ptr<CPUInferenceEngineYOLO>>::success(
+                std::move(std::make_unique<CPUInferenceEngineYOLO>(
+                    std::move(modelPath),
+                    std::move(tensorParams),
+                    std::move(filterParams)
+                ))
+            );
+        } catch (const wfexception& e) {
+            return WFResult<std::unique_ptr<CPUInferenceEngineYOLO>>::failure(
+                e.status(),
+                e.what()
+            );
+        }
+    }
+
+    void CPUInferenceEngineYOLO::setTensorParameters(TensorParameters params) {
         this->tensorizer.setTensorParameters(params);
         int dims[] = {
             1,
@@ -41,24 +77,29 @@ namespace wf {
             params.interleaved ? params.channels : params.width
         };
         blob = cv::Mat(4, dims, CV_32F);
-        CV_Assert(blob.isContinuous());
-        return true;
-    }
-
-    bool CPUInferenceEngineYOLO::loadModel(const std::string& modelPath) {
-        model = cv::dnn::readNetFromONNX(modelPath);
-        model.setPreferableBackend(cv::dnn::DNN_BACKEND_OPENCV);
-        model.setPreferableTarget(cv::dnn::DNN_TARGET_CPU);
-        const bool success = !model.empty();
-        if (success) this->modelPath = modelPath;
-        return success;
+        WF_Assert(blob.isContinuous());
     }
     
-    bool CPUInferenceEngineYOLO::infer(const cv::Mat& data, const FrameMetadata& meta, std::vector<RawBbox>& output) noexcept {
+    WFStatusResult CPUInferenceEngineYOLO::infer(const cv::Mat& data, const FrameMetadata& meta, std::vector<RawBbox>& output) noexcept {
         output.clear();
+        cv::Mat rawOutput;
         this->tensorizer.tensorize(data, reinterpret_cast<float*>(blob.data));
-        model.setInput(blob);
-        cv::Mat rawOutput = model.forward();
+        try {
+            model.setInput(blob);
+        } catch (const cv::Exception& e) {
+            return WFStatusResult::failure(
+                INFERENCE_BAD_INPUT,
+                "OpenCV Error while inputting blob: {}", e.what()
+            );
+        }
+        try {
+            rawOutput = model.forward();
+        } catch (const cv::Exception& e) {
+            return WFStatusResult::failure(
+                INFERENCE_BAD_PASS,
+                "OpenCV Error while running forward pass: {}", e.what()
+            );
+        }
         // Output Shape: [1, number of detections, 5 + number of classes]
         int numDetections = rawOutput.rows;
         output.reserve(numDetections);
@@ -103,6 +144,6 @@ namespace wf {
                 confidence_buffer[index]
             );
         }
-        return true;
+        return WFStatusResult::success();
     }
 }

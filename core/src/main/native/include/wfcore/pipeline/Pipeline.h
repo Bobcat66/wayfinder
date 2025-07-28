@@ -23,25 +23,14 @@
 #include "wfcore/video/video_types.h"
 #include "wfcore/pipeline/PipelineType.h"
 #include "wfcore/pipeline/PipelineResult.h"
-#include "wfcore/common/status/StatusfulObject.h"
+#include "wfcore/common/status.h"
 #include <vector>
 #include <optional>
 #include <cstdint>
 
 namespace wf {
 
-    enum class PipelineStatus {
-        Ok,
-        InvalidInputSize,
-        InvalidInputEncoding,
-        ApriltagDetectorError,
-        ProcessError,
-        InvalidConfiguration,
-        FailedResourceAcquisition,
-        Unknown
-    };
-
-    class Pipeline : public StatusfulObject<PipelineStatus,PipelineStatus::Ok> {
+    class Pipeline : public WFStatusfulObject {
     public:
         [[nodiscard]] 
         virtual PipelineResult process(const cv::Mat& data, const FrameMetadata& meta) noexcept = 0;

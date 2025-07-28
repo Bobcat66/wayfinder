@@ -24,11 +24,12 @@
 
 // Somewhat naive implementation, there's probably a better way to do this
 namespace wf {
-    template <status_code T, T nominal_status>
-    class ConcurrentStatusfulObject : public StatusfulObject<T,nominal_status> {
+    
+    template <status_code status_type, status_type nominal_status, const char* (*StringMapper) (status_type)>
+    class ConcurrentStatusfulObject : public StatusfulObject<status_type,nominal_status,StringMapper> {
     public:
         [[nodiscard]]
-        virtual T getStatus() const noexcept { 
+        virtual status_type getStatus() const noexcept { 
             std::lock_guard lock(status_mtx);
             return this->status_; 
         }
@@ -62,9 +63,22 @@ namespace wf {
         // Note, as this function merely masks the StatusfulObject's function, rather than overriding it,
         // It will NOT have runtime polymorphic behavior
         template <typename... Args>
-        void reportError(T status, std::string_view fmt, Args&&... args) const noexcept {
+        void reportError(status_type status, std::string_view fmt, Args&&... args) const noexcept {
             std::lock_guard lock(status_mtx);
-            this->StatusfulObject<T,nominal_status>::reportError(status,fmt,std::forward<Args>(args)...);
+            this->StatusfulObject<status_type,nominal_status,StringMapper>::reportError(status,fmt,std::forward<Args>(args)...);
+        }
+
+        // scuffed, fix later
+        void reportError(status_type status) {
+            std::lock_guard lock(status_mtx);
+            this->status_ = status;
+        }
+
+        // scuffed, fix later
+        void reportError(const StatusfulResult<status_type,nominal_status,StringMapper>& result) const noexcept {
+            std::lock_guard lock(status_mtx);
+            this->status_ = result.status();
+            this->errorMsg_ = result.what();
         }
 
         virtual void reportOk() const noexcept {

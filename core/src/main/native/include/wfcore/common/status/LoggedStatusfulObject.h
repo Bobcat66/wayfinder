@@ -24,8 +24,9 @@
 
 namespace wf {
 
-    template <status_code T, T nominal_status>
-    class LoggedStatusfulObject : public StatusfulObject<T,nominal_status> {
+   
+    template <status_code status_type, status_type nominal_status, const char* (*StringMapper) (status_type)>
+    class LoggedStatusfulObject : public StatusfulObject<status_type,nominal_status,StringMapper> {
     protected:
         LoggedStatusfulObject(const std::string& name, const spdlog::level::level_enum logLevel) {
             this->logger_ = LoggerManager::getInstance().getLogger(name,logLevel);
@@ -35,16 +36,29 @@ namespace wf {
         // Note, as this function merely masks the StatusfulObject's function, rather than overriding it,
         // It will NOT have runtime polymorphic behavior
         template <typename... Args>
-        void reportError(T status, std::string_view fmt, Args&&... args) const noexcept {
-            this->StatusfulObject<T,nominal_status>::reportError(status,fmt,std::forward<Args>(args)...);
+        void reportError(status_type status, std::string_view fmt, Args&&... args) const noexcept {
+            this->StatusfulObject<status_type,nominal_status,StringMapper>::reportError(status,fmt,std::forward<Args>(args)...);
+            logger_->error(this->errorMsg_);
+        }
+
+        // scuffed, fix later
+        void reportError(status_type status) {
+            this->status_ = status;
+            logger_->error(getError());
+        }
+
+        // scuffed, fix later
+        void reportError(const StatusfulResult<status_type,status_type,StringMapper>& result) const noexcept {
+            this->status_ = result.status();
+            this->errorMsg_ = result.what();
             logger_->error(this->errorMsg_);
         }
 
         // same functionality as the reportError method, but logs the message as a warning and not an error
         template <typename... Args>
-        void reportWarning(T status, std::string_view fmt, Args&&... args) const noexcept {
+        void reportWarning(status_type status, std::string_view fmt, Args&&... args) const noexcept {
             // The base method only formats and sets status, does not log
-            this->StatusfulObject<T,nominal_status>::reportError(status,fmt,std::forward<Args>(args)...);
+            this->StatusfulObject<status_type,nominal_status,StringMapper>::reportError(status,fmt,std::forward<Args>(args)...);
             logger_->warn(this->errorMsg_);
         }
 

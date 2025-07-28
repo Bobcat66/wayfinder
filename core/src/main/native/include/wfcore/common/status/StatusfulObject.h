@@ -26,6 +26,7 @@
 #include <utility>
 #include <format>
 #include "wfcore/common/status/StatusType.h"
+#include "wfcore/common/status/StatusfulResult.h"
 
 /*
  * A base class for components with status reporting and error information.
@@ -39,11 +40,14 @@
  * 
  * In general, a StatusfulObject's status should only be updated in the case of a severe fault,
  * transient errors (timeouts, dropped frames, etc.) should NOT update the internal status
+ * 
+ * TODO: Maybe switch to CRTP?
  */
 
 namespace wf {
 
-    template <status_code T, T nominal_status>
+    
+    template <status_code status_type, status_type nominal_status, const char* (*StringMapper) (status_type)>
     class StatusfulObject {
     public:
         virtual ~StatusfulObject() = default;
@@ -56,12 +60,14 @@ namespace wf {
 
         /*
          * Returns a human-readable string describing error in more detail.
-         * When
+         * TODO: add bad_alloc guards
          */
         [[ nodiscard ]]
-        virtual std::optional<std::string> getError() const noexcept {
-            if (this->status_ == nominal_status || this->errorMsg_.empty()) {
-                return std::nullopt;
+        virtual std::string getError() const noexcept {
+            if (this->status_ == nominal_status) {
+                return "Nominal";
+            } else (this->errorMsg_.empty()) {
+                return StringMapper(this->status_);
             }
             return errorMsg_;
         }
@@ -79,8 +85,17 @@ namespace wf {
             try {
                 this->errorMsg_ = std::vformat(fmt, std::make_format_args(args...));
             } catch (...) {
-                this->errorMsg_ = "Error occured while formatting error message";
+                this->errorMsg_ = "MSGERR unknown";
             }
+        }
+
+        void reportError(T status) {
+            this->status_ = status;
+        }
+
+        void reportError(const StatusfulResult<T,status_type,StringMapper>& result) const noexcept {
+            this->status_ = result.status();
+            this->errorMsg_ = result.what();
         }
 
         virtual void reportOk() const noexcept {

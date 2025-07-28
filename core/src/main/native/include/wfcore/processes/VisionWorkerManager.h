@@ -26,16 +26,18 @@
 #include "wfcore/hardware/HardwareManager.h"
 #include "wfcore/network/NetworkTablesManager.h"
 #include "wfcore/fiducial/ApriltagConfiguration.h"
-#include "wfcore/common/status/LoggedStatusfulObject.h"
+#include "wfcore/common/status.h"
+#include "wfcore/inference/InferenceEngineFactory.h"
+
 
 namespace wf {
 
     enum class VisionWorkerManagerStatus {
         Ok
     };
-    class VisionWorkerManager : LoggedStatusfulObject<VisionWorkerManagerStatus,VisionWorkerManagerStatus::Ok> {
+    class VisionWorkerManager : public WFLoggedStatusfulObject {
     public:
-        VisionWorkerManager(NetworkTablesManager& ntManager_, HardwareManager& hardwareManager_, ApriltagConfiguration atagConfig_, ApriltagField& atagField_);
+        VisionWorkerManager(NetworkTablesManager& ntManager_, HardwareManager& hardwareManager_, ApriltagConfiguration atagConfig_, ApriltagField& atagField_, InferenceEngineFactory& engineFactory_);
         VisionWorker& buildVisionWorker(const VisionWorkerConfig& config);
         bool workerExists(const std::string& name) const;
         VisionWorker& getWorker(const std::string& name);
@@ -47,9 +49,11 @@ namespace wf {
         void destroyAllWorkers();
     private:
         std::unordered_map<std::string,VisionWorker> workers;
+
         ApriltagConfiguration atagConfig;
         ApriltagField& atagField;
         NetworkTablesManager& ntManager;
         HardwareManager& hardwareManager;
+        InferenceEngineFactory& engineFactory;
     };
 }

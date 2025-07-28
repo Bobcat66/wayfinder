@@ -34,19 +34,17 @@ namespace wf {
 
     class ObjectDetectionPipeline : public Pipeline {
     public:
-        ObjectDetectionPipeline(ObjectDetectionPipelineConfiguration config_, CameraIntrinsics intrinsics_);
+        ObjectDetectionPipeline(ImageEncoding modelColorSpace_, std::unique_ptr<InferenceEngine> engine_, CameraIntrinsics intrinsics_);
         [[nodiscard]] 
         PipelineResult process(const cv::Mat& data, const FrameMetadata& meta) noexcept override;
-        InferenceEngineType getEngineType() {return config.engineType;}
-        ImageEncoding getModelColorSpace() {return config.modelColorSpace;}
+        InferenceEngineType getEngineType() const noexcept { return engine->getEngineType(); }
+        ModelArch getModelArch() const noexcept { return engine->getModelArch(); }
+        ImageEncoding getModelColorSpace() const noexcept { };
         static std::unique_ptr<InferenceEngine> buildInferenceEngine(const ObjectDetectionPipelineConfiguration& config);
     private:
         void updatePostprocParams();
-        // TODO: Implement these
-        PipelineStatus status;
-        std::string statusMsg;
         std::unique_ptr<InferenceEngine> engine;
-        ObjectDetectionPipelineConfiguration config;
+        ImageEncoding modelColorSpace;
         std::vector<RawBbox> bbox_buffer;
         std::vector<cv::Point2d> pixelCorner_buffer; // Even indexed points are topleft corners, odd indexed points are bottomright corners.
         std::vector<cv::Point2d> resizedPixelCorner_buffer;

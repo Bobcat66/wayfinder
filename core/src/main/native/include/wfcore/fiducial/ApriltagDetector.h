@@ -75,11 +75,11 @@ namespace wf {
         ApriltagDetector();
         ~ApriltagDetector();
         [[nodiscard]]
-        std::vector<ApriltagDetection> detect(int width, int height, int stride, uint8_t* buf) const noexcept;
-        std::vector<ApriltagDetection> detect(int width, int height, uint8_t* buf) const noexcept {
+        WFResult<std::vector<ApriltagDetection>> detect(int width, int height, int stride, uint8_t* buf) const noexcept;
+        WFResult<std::vector<ApriltagDetection>> detect(int width, int height, uint8_t* buf) const noexcept {
             return detect(width,height,width,buf);
         }
-        std::vector<ApriltagDetection> detect(const cv::Mat& im) const noexcept {
+        WFResult<std::vector<ApriltagDetection>> detect(const cv::Mat& im) const noexcept {
             assert(im.type() == CV_8UC1); // Asserts that the matrix contains an 8 bit grayscale image
             return detect(im.cols,im.rows,im.step[0],im.data);
         };
@@ -90,9 +90,9 @@ namespace wf {
         void setQuadThresholdParams(const QuadThresholdParams& params) noexcept;
         void setConfig(const ApriltagDetectorConfig& config) noexcept;
         [[ nodiscard ]]
-        bool addFamily(const std::string& familyName) noexcept;
+        WFStatusResult addFamily(const std::string& familyName) noexcept;
         [[ nodiscard ]]
-        bool removeFamily(const std::string& familyName) noexcept;
+        WFStatusResult removeFamily(const std::string& familyName) noexcept;
         void clearFamilies();
     private:
         std::unordered_map<std::string,void*> families;

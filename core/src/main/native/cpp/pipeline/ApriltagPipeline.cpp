@@ -20,6 +20,7 @@
 
 #include "wfcore/pipeline/ApriltagPipeline.h"
 #include "wfcore/hardware/CameraConfiguration.h"
+#include "wfcore/common/wfassert.h"
 #include "wfcore/common/logging.h"
 #include <algorithm>
 #include <wfcore/pipeline/pnp.h>
@@ -35,66 +36,43 @@ namespace wf {
         updateDetectorConfig();
     }
 
-    bool ApriltagPipeline::setConfig(const ApriltagPipelineConfiguration& config) {
+    WFStatusResult ApriltagPipeline::setConfig(const ApriltagPipelineConfiguration& config) {
         this->config = config;
         return updateDetectorConfig();
     }
     
-    bool ApriltagPipeline::setTagConfig(const ApriltagConfiguration& tagConfig) {
+    WFStatusResult ApriltagPipeline::setTagConfig(const ApriltagConfiguration& tagConfig) {
         this->tagConfig = tagConfig;
         return updateDetectorConfig();
     }
 
-    bool ApriltagPipeline::setTagField(const ApriltagField& tagField) {
+    void ApriltagPipeline::setTagField(const ApriltagField& tagField) {
         this->tagField = tagField;
-        return true;
     }
 
-    bool ApriltagPipeline::setIntrinsics(const CameraIntrinsics& intrinsics) {
+    void ApriltagPipeline::setIntrinsics(const CameraIntrinsics& intrinsics) {
         this->intrinsics = intrinsics;
-        return true;
     }
 
     // TODO: Refactor this???
-    bool ApriltagPipeline::updateDetectorConfig() {     
+    WFStatusResult ApriltagPipeline::updateDetectorConfig() {     
         detector.setQuadThresholdParams(config.detQTPs);
         detector.setConfig(config.detConfig);
         detector.clearFamilies();
 
-        if (!detector.addFamily(tagConfig.tagFamily)) {
-            switch (detector.getStatus()) {
-                case ApriltagDetectorStatus::NullDetector:
-                    this->reportError(
-                        PipelineStatus::FailedResourceAcquisition,
-                        detector.getError().value()
-                    );
-                    break;
-                case ApriltagDetectorStatus::NullFamily:
-                    this->reportError(
-                        PipelineStatus::FailedResourceAcquisition,
-                        detector.getError().value()
-                    );
-                    break;
-                case ApriltagDetectorStatus::InvalidFamily:
-                    this->reportError(
-                        PipelineStatus::InvalidConfiguration,
-                        detector.getError().value()
-                    );
-                    break;
-                default:
-                    this->reportError(
-                        PipelineStatus::ApriltagDetectorError,
-                        detector.getError().value_or("An unknown error occurred")
-                    );
-            }
-            return false;
+        if (auto detres = detector.addFamily(tagConfig.tagFamily)) {
+            return WFStatusResult::success();
+        } else {
+            return WFStatusResult::propagateFail(detres);
         }
-        return true;
     }
 
-    PipelineResult ApriltagPipeline::process(const cv::Mat& data, const FrameMetadata& meta) noexcept {
-        assert(data.type() == CV_8UC1);
-        auto detections = detector.detect(data);
+    WFResult<PipelineResult> ApriltagPipeline::process(const cv::Mat& data, const FrameMetadata& meta) noexcept {
+        WF_Assert(data.type() == CV_8UC1);
+        auto detectres = detector.detect(data);
+        if (!detectres)
+            return WFResult<PipelineResult>::propagateFail(detectres);
+        auto detections = std::move(detectres.value());
         std::erase_if(detections, [this](ApriltagDetection detection) {
             return this->config.detectorExcludes.contains(detection.id);
         });
@@ -118,7 +96,8 @@ namespace wf {
             intrinsics,
             config.SolvePNPExcludes
         );
-        return PipelineResult::ApriltagResult(
+        return WFResult<PipelineResult>::success(
+            std::in_place,
             meta.micros,
             std::move(detections),
             std::move(atagPoses),

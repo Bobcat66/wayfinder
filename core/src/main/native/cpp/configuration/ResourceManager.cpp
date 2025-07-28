@@ -17,19 +17,21 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "wfcore/configuration/JSONLoader.h"
+#include "wfcore/configuration/ResourceManager.h"
 #include "wfcore/common/logging.h"
 #include "wfcore/common/wfexcept.h"
+#include "wfcore/common/status.h
 #include <fstream>
 #include <unordered_map>
 
 namespace fs = std::filesystem;
 
+// TODO: Refactor this to use helper functions
 namespace wf {
 
     using enum WFStatus;
 
-    JSONLoader::JSONLoader(
+    ResourceManager::ResourceManager(
         std::filesystem::path resourceDir,
         std::filesystem::path localDir
     ) 
@@ -46,7 +48,7 @@ namespace wf {
         }
     }
 
-    WFResult<JSON> JSONLoader::loadResourceJSON(const std::string& subdirName,const std::string& filename) const {
+    WFResult<JSON> ResourceManager::loadResourceJSON(const std::string& subdirName,const std::string& filename) const {
         JSON jobject;
 
         WF_DEBUGLOG(globalLogger(), "Searching for resource subdir '{}'",subdirName);
@@ -83,7 +85,7 @@ namespace wf {
         
     }
 
-    WFResult<JSON> JSONLoader::loadLocalJSON(const std::string& subdirName,const std::string& filename) const {
+    WFResult<JSON> ResourceManager::loadLocalJSON(const std::string& subdirName,const std::string& filename) const {
         JSON jobject;
 
         WF_DEBUGLOG(globalLogger(), "Searching for local subdir '{}'",subdirName);
@@ -122,7 +124,7 @@ namespace wf {
     }
 
     // This will completely overrwrite the file if it already exists, use with caution
-    WFStatusResult JSONLoader::storeLocalJSON(const std::string& subdirName, const std::string& filename, const JSON& jobject) const {
+    WFStatusResult ResourceManager::storeLocalJSON(const std::string& subdirName, const std::string& filename, const JSON& jobject) const {
         WF_DEBUGLOG(globalLogger(),"Searching for local subdir {}",subdirName);
         auto it = localSubdirs.find(subdirName);
         if (it == localSubdirs.end()) 
@@ -146,7 +148,7 @@ namespace wf {
             : WFStatusResult::failure(UNKNOWN,"File stream error");
     }
 
-    WFResult<std::vector<std::string>> JSONLoader::enumerateResourceSubdir(const std::string& subdirName) const {
+    WFResult<std::vector<std::string>> ResourceManager::enumerateResourceSubdir(const std::string& subdirName) const {
         WF_DEBUGLOG(globalLogger(),"Enumerating resource subdir {}",subdirName);
         auto it = resourceSubdirs.find(subdirName);
         if (it == resourceSubdirs.end())
@@ -167,7 +169,7 @@ namespace wf {
         return WFResult<std::vector<std::string>>::success(std::move(subdirFiles));
     }
 
-    WFResult<std::vector<std::string>> JSONLoader::enumerateLocalSubdir(const std::string& subdirName) const {
+    WFResult<std::vector<std::string>> ResourceManager::enumerateLocalSubdir(const std::string& subdirName) const {
         WF_DEBUGLOG(globalLogger(),"Enumerating local subdir {}",subdirName);
         auto it = localSubdirs.find(subdirName);
         if (it == localSubdirs.end())
@@ -188,30 +190,30 @@ namespace wf {
         return WFResult<std::vector<std::string>>::success(std::move(subdirFiles));
     }
 
-    std::vector<std::string> JSONLoader::enumerateResourceSubdirs() const {
+    std::vector<std::string> ResourceManager::enumerateResourceSubdirs() const {
         std::vector<std::string> subdirs;
         for (const auto& [key,value] : resourceSubdirs) {
             subdirs.emplace_back(key);
         }
         return subdirs;
     }
-    std::vector<std::string> JSONLoader::enumerateLocalSubdirs() const {
+    std::vector<std::string> ResourceManager::enumerateLocalSubdirs() const {
         std::vector<std::string> subdirs;
         for (const auto& [key,value] : localSubdirs) {
             subdirs.emplace_back(key);
         }
         return subdirs;
     }
-    bool JSONLoader::resourceSubdirExists(const std::string& name) const {
+    bool ResourceManager::resourceSubdirExists(const std::string& name) const {
         auto it = resourceSubdirs.find(name);
         return it != resourceSubdirs.end();
     }
-    bool JSONLoader::localSubdirExists(const std::string& name) const {
+    bool ResourceManager::localSubdirExists(const std::string& name) const {
         auto it = localSubdirs.find(name);
         return it != localSubdirs.end();
     }
 
-    WFStatusResult JSONLoader::assignLocalSubdir(const std::string& subdirName,const std::filesystem::path& subdirRelpath) {
+    WFStatusResult ResourceManager::assignLocalSubdir(const std::string& subdirName,const std::filesystem::path& subdirRelpath) {
         WF_DEBUGLOG(globalLogger(),"Assigning local subdir {} to relpath {}",subdirName,subdirRelpath.string());
 
         // Validate subdir path
@@ -223,7 +225,7 @@ namespace wf {
         return WFStatusResult::success();
     }
 
-    WFStatusResult JSONLoader::assignResourceSubdir(const std::string& subdirName,const std::filesystem::path& subdirRelpath) {
+    WFStatusResult ResourceManager::assignResourceSubdir(const std::string& subdirName,const std::filesystem::path& subdirRelpath) {
         WF_DEBUGLOG(globalLogger(),"Assigning resource subdir {} to relpath {}",subdirName,subdirRelpath.string());
 
         // Validate subdir path
@@ -233,6 +235,44 @@ namespace wf {
         
         resourceSubdirs[subdirName] = subdirRelpath;
         return WFStatusResult::success();
+    }
+
+    
+    WFResult<fs::path> ResourceManager::resolveLocalFile(const std::string& subdirName, const std::string& filename) {
+        // Validate subdir path
+        WF_DEBUGLOG(globalLogger(),"Searching for local subdir {}",subdirName);
+        auto it = localSubdirs.find(subdirName);
+        if (it == localSubdirs.end()) 
+            return WFResult<fs::path>::failure(CONFIG_SUBDIR_NOT_FOUND,"'{}' is not recognized as a valid local subdir",subdirName);
+
+        fs::path subdirPath = localDir_ / it->second;
+        if (!fs::exists(subdirPath) || !fs::is_directory(subdirPath)) 
+            return WFResult<fs::path>::failure(CONFIG_BAD_SUBDIR,"'{}' is not a valid directory",subdirPath.string());
+        
+        fs::path localPath = subdirPath / filename;
+        WF_DEBUGLOG(globalLogger(), "Searching for local file '{}'",localPath.string());
+        if (!fs::exists(localPath))
+            return WFResult<fs::path>::failure(FILE_NOT_FOUND,"File '{}' does not exist",localPath.string());
+        
+        return WFResult<fs::path>::success(std::move(localPath));
+
+    }
+    WFResult<fs::path> ResourceManager::resolveResourceFile(const std::string& subdirName, const std::string& filename) {
+        WF_DEBUGLOG(globalLogger(),"Searching for resource subdir {}",subdirName);
+        auto it = resourceSubdirs.find(subdirName);
+        if (it == resourceSubdirs.end()) 
+            return WFResult<fs::path>::failure(CONFIG_SUBDIR_NOT_FOUND,"'{}' is not recognized as a valid resource subdir",subdirName);
+
+        fs::path subdirPath = resourceDir_ / it->second;
+        if (!fs::exists(subdirPath) || !fs::is_directory(subdirPath)) 
+            return WFResult<fs::path>::failure(CONFIG_BAD_SUBDIR,"'{}' is not a valid directory",subdirPath.string());
+        
+        fs::path filePath = subdirPath / filename;
+        WF_DEBUGLOG(globalLogger(), "Searching for resource file '{}'",filePath.string());
+        if (!fs::exists(filePath))
+            return WFResult<fs::path>::failure(FILE_NOT_FOUND,"File '{}' does not exist",filePath.string());
+        
+        return WFResult<fs::path>::success(std::move(filePath));
     }
 
 

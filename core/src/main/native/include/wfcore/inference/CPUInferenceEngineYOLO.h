@@ -21,23 +21,33 @@
 
 #include "wfcore/hardware/CameraConfiguration.h"
 #include "wfcore/inference/InferenceEngine.h"
-
+#include <filesystem>
 #include <opencv2/core.hpp>
 #include <opencv2/dnn.hpp>
 #include <string>
 #include <vector>
+#include <memory>
 
 // A simple reference implementation of a CPU inference engine, using OpenCV's DNN module.
 namespace wf {
 
     class CPUInferenceEngineYOLO : public InferenceEngine {
     public:
-        CPUInferenceEngineYOLO();
-        std::string modelFormat() const override { return "onnx"; }
-        bool setFilteringParameters(const IEFilteringParams& params) override { this->filterParams = params; return true; }
-        bool setTensorParameters(const TensorParameters& params) override;
-        bool loadModel(const std::string& modelPath) override;
-        bool infer(const cv::Mat& data, const FrameMetadata& meta, std::vector<RawBbox>& output) noexcept override;
+        CPUInferenceEngineYOLO(std::filesystem::path modelPath_, TensorParameters tensorParams_, IEFilteringParams filterParams);
+        const std::string& modelFormat() const override {
+            static const std::string format("onnx");
+            return format;
+        }
+        void setFilteringParameters(IEFilteringParams params) override { this->filterParams = std::move(params); }
+        void setTensorParameters(TensorParameters params) override;
+        WFStatusResult infer(const cv::Mat& data, const FrameMetadata& meta, std::vector<RawBbox>& output) noexcept override;
+        static WFResult<std::unique_ptr<CPUInferenceEngineYOLO>> creator_impl(
+            std::filesystem::path modelPath,
+            TensorParameters tensorParams,
+            IEFilteringParams filterParams
+        );
+        InferenceEngineType getEngineType() const noexcept override { return InferenceEngineType::CV_CPU; }
+        ModelArch getModelArch() const noexcept override { return ModelArch::YOLO; }
     private:
         cv::dnn::Net model; // OpenCV DNN network
         cv::Mat blob; // Blob for input data

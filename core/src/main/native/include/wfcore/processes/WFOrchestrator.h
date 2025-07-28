@@ -25,7 +25,7 @@
 #include "wfcore/network/NetworkTablesManager.h"
 
 namespace wf {
-    class Application {
+    class WFOrchestrator {
     public:
     private:
     }

@@ -43,7 +43,7 @@ namespace wf {
     public:
         Tensorizer() = default;
         ~Tensorizer() = default;
-        void setTensorParameters(const TensorParameters& params);
+        void setTensorParameters(TensorParameters params);
         void tensorize(const cv::Mat& input, float* tensorBuffer) const noexcept;
         const TensorParameters& getTensorParameters() const noexcept { return params; }
     private:

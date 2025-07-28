@@ -20,8 +20,6 @@
 #pragma once
 
 #include "wfcore/common/status.h"
-#include "wfcore/hardware/CameraConfiguration.h"
-#include "wfcore/processes/VisionWorkerConfig.h"
 #include "wfcore/fiducial/ApriltagField.h"
 #include <filesystem>
 #include <unordered_map>
@@ -32,10 +30,10 @@
 namespace wf {
 
     // TODO: refactor this
-    class JSONLoader {
+    class ResourceManager {
     public:
-        JSONLoader() = default;
-        JSONLoader(
+        ResourceManager() = default;
+        ResourceManager(
             std::filesystem::path resourceDir,
             std::filesystem::path localDir
         );
@@ -50,6 +48,8 @@ namespace wf {
         std::vector<std::string> enumerateLocalSubdirs() const;
         bool resourceSubdirExists(const std::string& name) const;
         bool localSubdirExists(const std::string& name) const;
+        WFResult<std::filesystem::path> resolveLocalFile(const std::string& subdirName, const std::string& filename);
+        WFResult<std::filesystem::path> resolveResourceFile(const std::string& subdirName, const std::string& filename);
         WFStatusResult assignLocalSubdir(const std::string& subdirName,const std::filesystem::path& subdirRelpath);
         WFStatusResult assignResourceSubdir(const std::string& subdirName,const std::filesystem::path& subdirRelpath);
     private:
