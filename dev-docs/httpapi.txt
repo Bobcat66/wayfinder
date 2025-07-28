@@ -50,12 +50,32 @@ wfctl commands only require the path to the resource being requested (with the `
 
 The wfctl program can be invoked with the repl subcommand, which will start a REPL session, the batch subcommand, which will execute an arbitrary number of wfctl commands passed in after it, separated by &&, or it can be invoked with the exec subcommand, which will execute a wfctl script whose path is passed in as the next argument
 
-Wayfinder has a four layer configuration system, each layer more powerful but less user friendly than the last:
+Wayfinder has a four layer configuration system, 
+each layer more powerful but less user friendly 
+than the last:
 
-1: the web dashboard, user friendly, has strong guardrails that make it difficult to break wayfinder through misuse, but also limits how powerful it is. It only exposes a subset of the API. Most teams will likely only use this
+1: the web dashboard, user friendly, has strong 
+guardrails that make it difficult to break wayfinder 
+through misuse, but also limits how powerful it is. 
+It only exposes a subset of the API. Most teams will
+likely only use this
 
-2: wfctl: Powerful transactional CLI utility, exposes the entire HTTP API, meant for advanced teams, can also be used in automated workflows
+2: wfctl: Powerful transactional CLI utility, exposes
+the entire HTTP API, meant for advanced teams, can also
+be used in automated workflows
 
-3: HTTP API: very powerful, but not user friendly at all, and not really intended for end users. However, it will be well documented and stable, so advanced teams have the option of developing their own tooling if they want
+3: HTTP API: very powerful, but not user friendly at all,
+and not really intended for end users. However, it will be
+well documented and stable, so advanced teams have the
+option of developing their own tooling if they want
 
-4: ssh + wfcfg.py  + direct access to JSON config files: most powerful, exposes complete control over every aspect of wayfinder, not well documented in public facing docs, but internal developer documentation is publicly available. Intended mostly for wayfinder developers and programmatic use by wayfinder itself. It has little to no guardrails, Misuse can easily render wayfinder inoperable. Can also be used by very advanced users who know what they are doing, if they want an advanced configuration not supported by the HTTP API
+4: ssh + wfcfg.py  + direct access to JSON config files: 
+most powerful, exposes complete control over every aspect
+of wayfinder, not well documented in public facing docs,
+but internal developer documentation is publicly available.
+Intended mostly for wayfinder developers and programmatic
+use by wayfinder itself. It has little to no guardrails,
+Misuse can easily render wayfinder inoperable. Can also be
+used by very advanced users who know what they are doing,
+if they want an advanced configuration not supported by
+the HTTP API
