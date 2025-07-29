@@ -1,6 +1,8 @@
 
 api/ - Root
 
+api/summary - Returns a short JSON object describing overall wayfinder status
+
 api/env/ - System Environment
 [there will be resources corresponding 
 to some (but not all) environment
@@ -13,6 +15,7 @@ api/env/slam - whether or not SLAM is enabled
 api/network/ - Network Configuration
 api/network/dhcp - whether or not DHCP is enabled
 api/network/ip - Static IP address
+api/network/summary - JSON string with summary of network configuration
 
 api/sftp - SFTP file transfer proxy
 TBA, will be used for loading custom vision models and Apriltag fields
@@ -21,36 +24,115 @@ api/local - Local configuration directory
 api/local/hardware - Hardware configuration subdirectory
 api/local/pipelines - Pipeline configuration subdirectory
 api/local/graphs - Graph configuration subdirectory(TBA)
-Each config file will be referenced by its name (e.g. a pipline configuration file named pipeline0.json would be referenced as api/local/pipelines/pipeline0.json)
-Config requests will also support queries that can reference individual fields in the config files with JSON pointers. ?json-pointer=[json pointer]
+Each config file will be referenced by its name
+(e.g. a pipline configuration file named pipeline0.json would
+be referenced as api/local/pipelines/pipeline0.json)
+GET requests will also support queries that can reference
+individual fields in the config files with JSON pointers. ?ptr=[json pointer]
 
 api/live - Live configuration
-This differs from api/local in that api/local accesses the persisted configurations stored on disk, while api/live accessed the actual runtime configuration of the system. Otherwise, it has a very similar layout as api/local. However, .json suffixes are stripped (as these resources do not reference literal JSON files anymore), and the api refers to objects by their programmatic name, not the name of their config file
+This differs from api/local in that api/local accesses
+the persisted configurations stored on disk, while api/live
+accessed the actual runtime configuration of the system.
+Otherwise, it has a very similar layout as api/local.
+However, .json suffixes are stripped (as these resources do
+not reference literal JSON files anymore), and the api refers
+to objects by their programmatic name, not the name of their config file
 
-api/resources - global Resource directory. This is Read-only (modification to the system resources should be done through api/sftp).
-api/resources/fields - Apriltag field layouts. Again, these follow similar semantics as other JSON files exposed by the API
-api/resources/models - only can provide a list of models found in the directory, the weights themselves cannot be accessed
+api/resources - global Resource directory. This is Read-only (modification
+to the system resources should be done through api/sftp).
+api/resources/fields - Apriltag field layouts. Again, these follow similar
+semantics as other JSON files exposed by the API
+api/resources/models - only can provide a list of models found in the directory,
+the weights themselves cannot be accessed
 
-Client: the client dashboard will be an SPA. I haven’t decided on a framework, but I am leaning towards React + Typescript. Until the client is ready, curl + the raw REST API will serve as a stopgap.
+Client: the client dashboard will be an SPA. I haven’t decided on a framework,
+but I am leaning towards React + Typescript. Until the client is ready, curl +
+the raw REST API will serve as a stopgap.
 
 docs/ will expose the markdown documentation over HTTP, which will be rendered and prettified on the front end
 
-J
-wfctl: a client-side command line utility that will support transactions. wfctl will be passed the host of the web server as a command line argument, and will start a REPL in the shell. The wfctl REPL will support various commands:
-quit: exit the wfctl REPL
-post: send a POST request to the server
-get: send a GET request to the server (not enabled in a transaction)
-put: send a PUT request to the server
-delete: send a DELETE request to the server
+
+wfcli: a client-side command line utility that will support transactions.
+wfcli will be passed the host of the web server as a command line argument,
+and will start a REPL in the shell. The wfcli REPL will support various commands/keywords:
+
+quit: exits the wfcli REPL
+post [resource] [body]: send a POST request to the server
+postf [resource] [file path]: send a POST request to the server with the file content as the body
+get [resource]: send a GET request to the server (will always be executed immediately, even in transactions). Also supports a ptr query to retrieve individual fields
+put [resource] [body]: send a PUT request to the server, prints response to stdout
+putf [resource] [file path]: send a PUT request to the server with the file content as the body, prints respose to stdout
+patch [resource] [body]: send a PATCH request to the server
+patchf [resource] [body]: send a PATCH request to the server with the file content as the body
+delete [resource]: send a DELETE request to the server
 transact: begin a transaction
+jp [resource] [op] [json pointer] [body]: Applies an RFC 6902 JSON patch. Supported ops: add, remove, replace, test (move and copy not supported)
+jpf [resource] [op] [json pointer] [file path]: Applies an RFC 6902 JSON patch with the file content as the body
 diff: print all changes that would be caused by the current transaction to the console
 commit: commit a transaction
 abort: abort a transaction
-source: execute a wfctl script (usage: source foo.wfctl) will execute the foo.wfctl script
+exec [file path] [args...]: execute a wfcli script (usage: exec foo.wfcli) will execute the foo.wfcli script. The host will be propagated to the child script
 
-wfctl commands only require the path to the resource being requested (with the `api` root truncated), optionally a query to specify fields within a resource, and optionally a data field. Wfctl will handle HTTP headers internally. If a command is invoked with the -f flag (e.g. post -f /local/hardware/cam0.json foo/new_camera_config.json), a path to a file should be passed in instead of the data field, and the contents of that file will be copied verbatim as the data field
+wfcli resources should have the api/ root truncated
+The wfcli program can be invoked with the repl subcommand, which will start a REPL
+session, or it can be invoked with the exec subcommand, which will execute a .wfcli
+script.
+HTTP errors will cause wfcli to immediately print to stderr and exit with nonzero return codes
+In exec and batch mode, wfcli will be in quiet mode, meaning it only prints the result of get operations and diff commands to stdout
+wfcli command formats:
+wfcli repl [hostname] [args...]
+wfcli exec [hostname] [path] [args...]
+wfcli batch [hostname] [number of commands] [commands] [args...]
 
-The wfctl program can be invoked with the repl subcommand, which will start a REPL session, the batch subcommand, which will execute an arbitrary number of wfctl commands passed in after it, separated by &&, or it can be invoked with the exec subcommand, which will execute a wfctl script whose path is passed in as the next argument
+wfcli can access args passed through the command line with $0, $1, $2, etc...
+
+
+example REPL wfcli usage:
+
+$ wfcli repl http://10.12.34.11:8080 
+Connecting to 10.12.34.11:8080...
+Connection OK
+Connected to Wayfinder @ 10.12.34.11:8080
+wfcli> transact
+wfcli> get local/hardware/camera0?ptr=/controls/AUTO_EXPOSURE
+1
+wfcli> jp local/hardware/camera0 replace /controls/AUTO_EXPOSURE 0
+wfcli> jp local/hardware/camera0 replace /backend "CSCORE"
+wfcli> jp local/pipelines/pipeline0 add /pipelineConfig/detConfig/numThreads 4
+wfcli> diff 
+Staged changes:
+local/hardware/camera0:
+    /controls/AUTO_EXPOSURE: 1 -> 0
+    /backend: "GTSAM" -> "CSCORE"
+local/pipelines/pipeline0:
+    [NEW] /pipelineConfig/detConfig/numThreads: NULL -> 4
+wfcli> putf local/pipelines/camera1 camera_1_config.json
+wfcli> diff
+Staged changes:
+local/hardware/camera0:
+    /controls/AUTO_EXPOSURE: 1 -> 0
+    /backend: "GTSAM" -> "CSCORE"
+local/pipelines/pipeline0:
+    [NEW] /pipelineConfig/detConfig/numThreads: NULL -> 4
+[NEW] local/pipelines/camera1:
+    /: NULL -> {
+        "devpath": "/dev/video1",
+        "backend": "CSCORE",
+        "format": {
+            "fps": 60,
+            "frameFormat": {
+                "width": 1280,
+                "height": 720,
+                "encoding": "YUYV"
+            }
+        },
+        "controlAliases": {}
+    }
+wfcli> commit
+wfcli> quit
+
+
 
 Wayfinder has a four layer configuration system, 
 each layer more powerful but less user friendly 
@@ -62,8 +144,8 @@ through misuse, but also limits how powerful it is.
 It only exposes a subset of the API. Most teams will
 likely only use this
 
-2: wfctl: Powerful transactional CLI utility, exposes
-the entire HTTP API, meant for advanced teams, can also
+2: wfcli: CLI for wayfinder configuration,
+exposes the entire HTTP API, meant for advanced teams, can also
 be used in automated workflows
 
 3: HTTP API: very powerful, but not user friendly at all,
@@ -81,3 +163,8 @@ Misuse can easily render wayfinder inoperable. Can also be
 used by very advanced users who know what they are doing,
 if they want an advanced configuration not supported by
 the HTTP API
+
+Note: The server response from any requests on api/summary
+will define a unique header called X-Clacks-Overhead. 
+This is an internal detail and can safely be ignored
+for all practical intents and purposes
