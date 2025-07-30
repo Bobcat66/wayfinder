@@ -98,7 +98,7 @@ class ResourceCaps:
     specialCases: Dict[str,Set[str]]
 
 class Session:
-    def __init__(self, hostname: str, port: int, quiet: bool, globargs: List[str]):
+    def __init__(self, hostname: str, port: int, quiet: bool, keepgoing: bool, globargs: List[str]):
         self.quiet = quiet
         self.printout(f"Connecting to {hostname}:{port}")
         self.conn = HTTPConnection(hostname,port)
@@ -106,6 +106,7 @@ class Session:
         self.hostname = hostname
         self.port = port
         self.globargs = globargs
+        self.keepgoing = keepgoing # Determines whether or not the session should terminate on an error
         # Top level collection capabilities
         self.topLevelCapabilities: Dict[str,ResourceCaps] = {}
         # Resource capabilities
@@ -115,9 +116,9 @@ class Session:
         self.commands: Dict[str,Callable[[List[str]],Tuple[int,Union[HTTPResponse,None]]]] = {
             "quit": self.quit
         }
-        self.transactCommands: List[deferredCmd] = {}
+        self.transactCommands: List[deferredCmd] = []
         connerr = self.checkConnection()
-        if connerr is nominal:
+        if connerr == nominal:
             error, devname = self.getDevname()
             if error:
                 sys.exit(error)
@@ -127,7 +128,7 @@ class Session:
     
     def checkConnection(self) -> int:
         try:
-            self.conn.request("HEAD", "/",headers={"X-Clacks-Overhead","GNU Terry Pratchett"})
+            self.conn.request("HEAD", "/",headers={"X-Clacks-Overhead": "GNU Terry Pratchett"})
             response = self.conn.getresponse()
             if 200 <= response.status < 400:
                 self.printout("Connection OK")
@@ -145,7 +146,7 @@ class Session:
     
     def getDevname(self) -> Tuple[int,Union[str,None]]:
         err,name_response = self.request("GET","env/devname",suppress_status=True)
-        if err is not nominal:
+        if err != nominal:
             return err, None
         name = name_response.read().decode('utf-8')
         return nominal, name
@@ -163,7 +164,7 @@ class Session:
     ) -> Tuple[int, Union[HTTPResponse,None]]:
         headers = dict(headers) if headers else {}
         headers["User-Agent"] = "wfcli/1.0"
-        # The wayfinder API *always* expects and responds in JSON
+        # The wayfinder API *always* responds in JSON
         headers["Accept"] = "application/json"
         headers["Content-Type"] = content_type
         try:
@@ -216,8 +217,7 @@ class Session:
         stripCommand = command.strip()
         if not stripCommand:
             return "", ""
-        char : str = stripCommand[0]
-        while (not char.isspace()) and len(stripCommand) >= 1:
+        while stripCommand and not stripCommand[0].isspace():
             word += stripCommand[0]
             stripCommand = stripCommand[1:]
         stripCommand = stripCommand.strip()
@@ -238,7 +238,7 @@ class Session:
         resource = args[0]
         body = args[1]
         caperr,caps = self.getCapabilities(resource)
-        if caperr is not nominal:
+        if caperr != nominal:
             # error while getting capabilities, give up
             return caperr,None
         if "PUT" not in caps:
@@ -294,10 +294,10 @@ class Session:
     # allow404 determines whether or not the resource can be created if it isn't found
     def _cacheResourceDiff(self,resource: str,*,staged: Any=None,allow404: bool = True) -> int:
             err,response = self.request("GET",resource,suppress_status=True)
-            if err is bad_status and response is not None and response.status is 404 and allow404:
+            if err == bad_status and response is not None and response.status == 404 and allow404:
                 self.diffs[resource] = diff(None,staged)
                 return nominal
-            elif err is not nominal:
+            elif err != nominal:
                 # Got some other error from the server, give up and propagate return code
                 if response is not None:
                     printBadResponse(response)
@@ -314,7 +314,7 @@ class Session:
     def delete(self,args: List[str]) -> Tuple[int,Union[HTTPResponse,None]]:
         resource = args[0]
         caperr,caps = self.getCapabilities(resource)
-        if caperr is not nominal:
+        if caperr != nominal:
             # error while getting capabilities, give up
             return caperr,None
         if "DELETE" not in caps:
@@ -325,7 +325,7 @@ class Session:
             # Cache the resource if it isn't already cached
             if resource not in self.diffs:
                 cache_err = self._cacheResourceDiff(resource,staged=None,allow404=False)
-                if cache_err is nominal:
+                if cache_err == nominal:
                     self.transactCommands.append(deferredCmd("delete",args))
                 return cache_err, None # Diffs are already cached, no need to do any more processing
             # Resource is cached in diffs
@@ -341,7 +341,7 @@ class Session:
         json_pointer = args[2]
         body = args[3]
         caperr,caps = self.getCapabilities(resource)
-        if caperr is not nominal:
+        if caperr != nominal:
             # error while getting capabilities, give up
             return caperr,None
         if "PATCH" not in caps:
@@ -350,7 +350,7 @@ class Session:
         if self.transaction:
             if resource not in self.diffs:
                 cache_err = self._cacheResourceDiff(resource,staged=None,allow404=False)
-                if cache_err is not nominal:
+                if cache_err != nominal:
                     return cache_err, None
                 self.diffs[resource].staged = self.diffs[resource].orig
             # resource should be cached now, generate JSON patch
@@ -402,10 +402,79 @@ class Session:
         try:
             with open(filepath,'r') as f:
                 content = f.read()
-                return self._push_impl([resource,op,json_pointer,content],cmdword="jpf")
+                return self._jp_impl([resource,op,json_pointer,content],cmdword="jpf")
         except (OSError) as e:
             printerr(f"Error while opening file '{filepath}': {e}")
             return bad_file, None
+    
+    def exist(self,args: List[str]) -> Tuple[int,Union[HTTPResponse,None]]:
+        resource = args[0]
+        json_pointer = args[1]
+        hres,hresponse = self.request("HEAD",f"{resource}?ptr={json_pointer}",suppress_status=True)
+        if hres == bad_connection:
+            return bad_connection,None
+        if self.quiet:
+            if hres == nominal:
+                # We want to guarantee all nominal statuses map to 200
+                # Yes, this does mean what is printed isn't technically the actual HTTP status
+                println("200")
+            else:
+                println(hresponse.status)
+            return nominal,hresponse
+        else:
+            if hres == nominal:
+                println("200: JSON Element Exists")
+                return nominal,hresponse
+            # Filter out expected bad statuses (404,422), from the actually bad statuses
+            match hresponse.status:
+                case 404:
+                    println("404: Resource not found")
+                    return nominal,hresponse
+                case 422:
+                    println("422: JSON Field not found")
+                    return nominal,hresponse
+                case _:
+                    println(f"{hresponse.status}: Imma be fr wu rn gng, I have no idea how you did this")
+                    return bad_status,hresponse
+    
+    def test_impl(self,args: List[str],*,cmdword="test") -> Tuple[int,Union[HTTPResponse,None]]:
+        resource = args[0]
+        json_pointer = args[1]
+        test_value = args[2]
+        caperr,caps = self.getCapabilities(resource)
+        if caperr != nominal:
+            # error while getting capabilities, give up
+            return caperr,None
+        if "PATCH" not in caps:
+            printerr(f"{cmdword} is forbidden for '{resource}'")
+            return bad_command,None
+        
+        patch_jobject: List[Dict]
+        try:
+            patch_jobject = [{"op": "test", "path": json_pointer, "value": json.loads(test_value)}]
+        except json.JSONDecodeError as e:
+            # JSON parse error, give up
+            printerr(f"JSON Error: {e}")
+            return bad_json, None
+        res,response = self.request("PATCH",resource,json.dumps(patch_jobject),suppress_status=True)
+        if res == nominal:
+            if self.quiet:
+                print("200")
+            else:
+                print("200: Test succeeded")
+            return nominal,response
+        elif res == bad_status and response.status == 422:
+            if self.quiet:
+                print("422")
+            else:
+                print("422: Test failed")
+            return nominal,response
+        else:
+            if response:
+                printBadResponse(response)
+            return res,response
+        
+            
 
         
     
@@ -416,7 +485,7 @@ class Session:
             if topLevel not in self.topLevelCapabilities:
                 # top level capabilities not cached, request them
                 err,response = self.request("OPTIONS",topLevel,suppress_status=True)
-                if err is not nominal:
+                if err != nominal:
                     # Request failed, give up
                     if response is not None:
                         printBadResponse(response)

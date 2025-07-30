@@ -74,28 +74,55 @@ and will start a REPL in the shell. The wfctl REPL will support various commands
 NOTE: editing a file referenced in a wfctl transaction while the transaction is still ongoing is undefined behavior
 
 quit: exits the wfctl REPL
+
 fetch [resource]: send a GET request to the server (will always be executed immediately, even in transactions). Also supports a ptr query to retrieve individual fields
+
 push [resource] [body]: send a PUT request to the server, prints response to stdout
+
 pushf [resource] [file path]: send a PUT request to the server with the file content as the body, prints respose to stdout
+
 delete [resource]: send a DELETE request to the server
+
 transact: begin a transaction
-jp [resource] [op] [json pointer] [body]: Applies an RFC 6902 JSON patch. Supported ops: add, remove, replace (move and copy not supported, test patches should be done with the test command)
+
+jp [resource] [op] [json pointer] [body]: Applies an RFC 6902 JSON patch. Supported ops: add, remove, replace 
+(move and copy not supported, test patches should be done with the test command)
+
 jpf [resource] [op] [json pointer] [file path]: Applies an RFC 6902 JSON patch with the file content as the body
-exist [resource] [json pointer]: Tests if the specified JSON field exists. Always executes immediately, even in transactions
-test [resource] [json pointer] [test value]: Sends an RFC 6902 test request to the server. Always executes immediately, even in transactions.
-testf [resource] [json pointer] [file path]: Sends an RFC 6902 test request to the server, with the file content as the test value. Always executes immediately, even in transactions
-diff: print all changes that would be caused by the current transaction to the console. NOTE: diff will ONLY display differences made by PUT, DELETE, and PATCH requests,
+
+exist [resource] [json pointer]: Tests if the specified JSON field exists. Always executes immediately, even in transactions.
+Will print to stdout either 200 (JSON field exists), 404 (Resource doesn't exist), or 422 (Resource does exist but does not have specified JSON field)
+When not in quiet mode, it will also print a human readable explanation of the return code. It will NOT fail on 404 responses
+
+test [resource] [json pointer] [test value]: Sends an RFC 6902 test request to the server. Always executes immediately, even in transactions. Will fail on 404 responses.
+Prints 200 on success, and 422 on failure
+
+testf [resource] [json pointer] [file path]: Sends an RFC 6902 test request to the server, with the file content as the test value. Will fail on 404 responses
+Always executes immediately, even in transactions
+
+diff: print all changes that would be caused by the current transaction to the console. 
+NOTE: diff will ONLY display differences made by PUT, DELETE, and PATCH requests,
 as diffs are only well-defined for them
+
 commit: commit a transaction
+
 abort: abort a transaction
+
 summary: prints a prettified summary to the console (api/summary returns a JSON object)
-exec [file path] [args...]: execute a wfctl script (usage: exec foo.wfctl) will execute the foo.wfctl script. The host will be propagated to the child script. Disallowed in transactions
+
+exec [file path] [args...]: execute a wfctl script (usage: exec foo.wfctl) will execute the
+foo.wfctl script. The host will be propagated to the child script. Disallowed in transactions
+
 start [pipeline name]: activate a pipeline. disallowed in transactions
+
 stop [pipeline name]: deactivate a pipeline. disallowed in transactions
 
 shutdown: send a shutdown request to wayfinder. Disallowed in transactions
+
 reload: send an environment reload request to wayfinder. Disallowed in transactions
+
 restart: send a restart request to wayfinder. Disallowed in transactions
+
 reboot: send a reboot request to wayfinder. Disallowed in transactions
 
 actions are disallowed in transactions to preserve strict atomic behavior
@@ -112,6 +139,14 @@ wfctl exec [hostname] [path] [args...]
 wfctl batch [hostname] [args...] << [commands...]
 
 in batch mode, commands must be separated by newlines, and the commands must start and end with EOF
+when started in batch or exec mode, wfctl will be in quiet mode. Additionally, when started in exec or batch mode,
+wfctl will be in fail-fast mode, meaning that any errors will immediately cause the process to stop. (in REPL mode,
+failures will be logged to stderr but the session will continue). Fail-fast mode can be disabled in batch or exec mode by
+invoking them with the --keep-going flag (e.g. wfctl exec --keep-going 10.12.34.11:8080 foo.wfctl) (can be shortened to -k). Additionally,
+fail-fast behavior can be enabled in REPL mode with the --fail-fast flag (can be shortened to -f). Quiet mode can be disabled on exec and batch mode
+with the --verbose flag (can be shortened to -v), and quiet mode can be enabled in the REPL with the --shh or --quiet flag
+(can be shortened to -q)
+
 
 example REPL wfctl usage:
 
