@@ -127,10 +127,7 @@ def sethost() -> int:
     subprocess.run(["hostnamectl","set-hostname",hostname],check=True)
     return 0
 
-def restart_networkd() -> None:
-    subprocess.run(["systemctl","restart","networkd"])
-    subprocess.run(["systemctl","restart","resolved"])
-
+# A restart is required for changes to take effect
 def ipctl(ip: Union[str,None], static: bool):
     hres = sethost()
     if hres != 0:
@@ -144,7 +141,6 @@ def ipctl(ip: Union[str,None], static: bool):
     else:
         uncomment_key(networkfile,"DHCP")
         comment_key(networkfile,"Address")
-    restart_networkd()
     return 0
 
 def putenv_cli(args) -> int:

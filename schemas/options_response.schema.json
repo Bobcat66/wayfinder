@@ -1,0 +1,27 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "title": "options_response",
+    "properties": {
+        "supportedMethods": {
+            "type": "array",
+            "items": { "type": "string" }
+        },
+        "specialCases": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "url": {"type": "string"},
+                    "supportedMethods": {
+                        "type": "array",
+                        "items": { "type": "string" }
+                    }
+                },
+                "required": ["url","supportedMethods"],
+                "additionalProperties": false
+            }
+        }
+    },
+    "required": ["supportedMethods"],
+    "additionalProperties": false
+}

@@ -1,0 +1,18 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "title": "batch_request",
+    "type": "object",
+    "properties": {
+        "method": {
+            "type": "string",
+            "enum": ["GET", "POST", "PUT", "DELETE", "PATCH"]
+        },
+        "body": {},
+        "headers": {
+            "type": "object",
+            "additionalProperties": { "type": "string" }
+        }
+    },
+    "required": ["method", "body", "headers"],
+    "additionalProperties": false
+}

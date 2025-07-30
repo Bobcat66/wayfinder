@@ -1,36 +1,45 @@
+##### HTTP API #####
 
-api/ - Root
+Each top-level collection in the API will support OPTIONS which returns the capabilities
 
-api/summary - Returns a short JSON object describing overall wayfinder status
+/api/ - Root
 
-api/env/ - System Environment
+/api/batch - Special endpoint that allows clients to perform multiple operations atomically.
+
+/api/actions/ - resource collection for non-CRUD actions, only supports POST
+/api/actions/shutdown - request a shutdown
+/api/actions/reload - request an environment reload
+/api/actions/restart - request a restart (restarts the wayfinder program)
+/api/actions/reboot - request a reboot (performs a full system reboot)
+
+/api/summary - Returns a short JSON object describing overall wayfinder status
+
+/api/env/ - System Environment, only supports PUT and GET
 [there will be resources corresponding 
 to some (but not all) environment
-variables under the api/env/ collection]
-api/env/team - Team number
-api/env/devname - Device name/hostname
-api/env/slam - whether or not SLAM is enabled
+variables under the /api/env/ collection]
+/api/env/team - Team number
+/api/env/devname - Device name/hostname
+/api/env/slam - whether or not SLAM is enabled
 (Not an exhaustive list)
 
-api/network/ - Network Configuration
-api/network/dhcp - whether or not DHCP is enabled
-api/network/ip - Static IP address
-api/network/summary - JSON string with summary of network configuration
 
-api/sftp - SFTP file transfer proxy
-TBA, will be used for loading custom vision models and Apriltag fields
+/api/network/ - Network Configuration, only supports PUT and GET
+/api/network/dhcp - whether or not DHCP is enabled
+/api/network/ip - Static IP address
+/api/network/summary - JSON string with summary of network configuration, only supports GET
 
-api/local - Local configuration directory
-api/local/hardware - Hardware configuration subdirectory
-api/local/pipelines - Pipeline configuration subdirectory
-api/local/graphs - Graph configuration subdirectory(TBA)
+/api/local/ - Local configuration directory
+/api/local/hardware - Hardware configuration subdirectory. Sending GET returns an enum of all pipeline config files
+/api/local/pipelines - Pipeline configuration subdirectory. Sending GET returns an enum of all pipeline config files
+/api/local/graphs - Graph configuration subdirectory(TBA).
 Each config file will be referenced by its name
 (e.g. a pipline configuration file named pipeline0.json would
 be referenced as api/local/pipelines/pipeline0.json)
 GET requests will also support queries that can reference
 individual fields in the config files with JSON pointers. ?ptr=[json pointer]
 
-api/live - Live configuration
+/api/live/ - Live configuration, only supports PUT, PATCH and DELETE. Also does NOT support creating new resources
 This differs from api/local in that api/local accesses
 the persisted configurations stored on disk, while api/live
 accessed the actual runtime configuration of the system.
@@ -38,85 +47,142 @@ Otherwise, it has a very similar layout as api/local.
 However, .json suffixes are stripped (as these resources do
 not reference literal JSON files anymore), and the api refers
 to objects by their programmatic name, not the name of their config file
+api/live/pipelines/running - special endpoint for activating and deactivating pipelines.
+sending a GET request will return an enumeration of active pipelines, sending a
+POST request with a json body of the format { pipeline: [pipeline name], active: [bool] }
+will activate/deactivate the pipeline accordingly
 
-api/resources - global Resource directory. This is Read-only (modification
-to the system resources should be done through api/sftp).
-api/resources/fields - Apriltag field layouts. Again, these follow similar
-semantics as other JSON files exposed by the API
-api/resources/models - only can provide a list of models found in the directory,
+/api/resources/ - global resource directory. Only supports GET, modification should be done through sftp
+/api/resources/fields - Apriltag field layouts. Again, these follow similar
+semantics as other JSON files exposed by the API (but read only)
+/api/resources/models - only can provide a list of models found in the directory,
 the weights themselves cannot be accessed
 
 Client: the client dashboard will be an SPA. I haven’t decided on a framework,
 but I am leaning towards React + Typescript. Until the client is ready, curl +
 the raw REST API will serve as a stopgap.
 
-docs/ will expose the markdown documentation over HTTP, which will be rendered and prettified on the front end
+/docs/ will expose the markdown documentation over HTTP, which will be rendered and prettified on the front end
 
 
-wfcli: a client-side command line utility that will support transactions.
-wfcli will be passed the host of the web server as a command line argument,
-and will start a REPL in the shell. The wfcli REPL will support various commands/keywords:
+##### WFCTL #####
 
-quit: exits the wfcli REPL
-post [resource] [body]: send a POST request to the server
-postf [resource] [file path]: send a POST request to the server with the file content as the body
-get [resource]: send a GET request to the server (will always be executed immediately, even in transactions). Also supports a ptr query to retrieve individual fields
-put [resource] [body]: send a PUT request to the server, prints response to stdout
-putf [resource] [file path]: send a PUT request to the server with the file content as the body, prints respose to stdout
-patch [resource] [body]: send a PATCH request to the server
-patchf [resource] [body]: send a PATCH request to the server with the file content as the body
+wfctl: a client-side command line utility that will support transactions.
+wfctl will be passed the host of the web server as a command line argument,
+and will start a REPL in the shell. The wfctl REPL will support various commands/keywords:
+
+NOTE: editing a file referenced in a wfctl transaction while the transaction is still ongoing is undefined behavior
+
+quit: exits the wfctl REPL
+fetch [resource]: send a GET request to the server (will always be executed immediately, even in transactions). Also supports a ptr query to retrieve individual fields
+push [resource] [body]: send a PUT request to the server, prints response to stdout
+pushf [resource] [file path]: send a PUT request to the server with the file content as the body, prints respose to stdout
 delete [resource]: send a DELETE request to the server
 transact: begin a transaction
-jp [resource] [op] [json pointer] [body]: Applies an RFC 6902 JSON patch. Supported ops: add, remove, replace, test (move and copy not supported)
+jp [resource] [op] [json pointer] [body]: Applies an RFC 6902 JSON patch. Supported ops: add, remove, replace (move and copy not supported, test patches should be done with the test command)
 jpf [resource] [op] [json pointer] [file path]: Applies an RFC 6902 JSON patch with the file content as the body
-diff: print all changes that would be caused by the current transaction to the console
+exist [resource] [json pointer]: Tests if the specified JSON field exists. Always executes immediately, even in transactions
+test [resource] [json pointer] [test value]: Sends an RFC 6902 test request to the server. Always executes immediately, even in transactions.
+testf [resource] [json pointer] [file path]: Sends an RFC 6902 test request to the server, with the file content as the test value. Always executes immediately, even in transactions
+diff: print all changes that would be caused by the current transaction to the console. NOTE: diff will ONLY display differences made by PUT, DELETE, and PATCH requests,
+as diffs are only well-defined for them
 commit: commit a transaction
 abort: abort a transaction
-exec [file path] [args...]: execute a wfcli script (usage: exec foo.wfcli) will execute the foo.wfcli script. The host will be propagated to the child script
+summary: prints a prettified summary to the console (api/summary returns a JSON object)
+exec [file path] [args...]: execute a wfctl script (usage: exec foo.wfctl) will execute the foo.wfctl script. The host will be propagated to the child script. Disallowed in transactions
+start [pipeline name]: activate a pipeline. disallowed in transactions
+stop [pipeline name]: deactivate a pipeline. disallowed in transactions
 
-wfcli resources should have the api/ root truncated
-The wfcli program can be invoked with the repl subcommand, which will start a REPL
-session, or it can be invoked with the exec subcommand, which will execute a .wfcli
+shutdown: send a shutdown request to wayfinder. Disallowed in transactions
+reload: send an environment reload request to wayfinder. Disallowed in transactions
+restart: send a restart request to wayfinder. Disallowed in transactions
+reboot: send a reboot request to wayfinder. Disallowed in transactions
+
+actions are disallowed in transactions to preserve strict atomic behavior
+
+
+wfctl resources should have the api/ root truncated
+The wfctl program can be invoked with the repl subcommand, which will start a REPL
+session, or it can be invoked with the exec subcommand, which will execute a .wfctl
 script.
-HTTP errors will cause wfcli to immediately print to stderr and exit with nonzero return codes
-In exec and batch mode, wfcli will be in quiet mode, meaning it only prints the result of get operations and diff commands to stdout
-wfcli command formats:
-wfcli repl [hostname] [args...]
-wfcli exec [hostname] [path] [args...]
-wfcli batch [hostname] [number of commands] [commands] [args...]
 
-wfcli can access args passed through the command line with $0, $1, $2, etc...
+wfctl command formats:
+wfctl repl [hostname] [args...]
+wfctl exec [hostname] [path] [args...]
+wfctl batch [hostname] [args...] << [commands...]
 
+in batch mode, commands must be separated by newlines, and the commands must start and end with EOF
 
-example REPL wfcli usage:
+example REPL wfctl usage:
 
-$ wfcli repl http://10.12.34.11:8080 
+$ wfctl repl http://10.12.34.11:8080 
 Connecting to 10.12.34.11:8080...
 Connection OK
 Connected to Wayfinder @ 10.12.34.11:8080
-wfcli> transact
-wfcli> get local/hardware/camera0?ptr=/controls/AUTO_EXPOSURE
+wfctl> transact
+wfctl> fetch local/hardware/camera0?ptr=/controls/AUTO_EXPOSURE
 1
-wfcli> jp local/hardware/camera0 replace /controls/AUTO_EXPOSURE 0
-wfcli> jp local/hardware/camera0 replace /backend "CSCORE"
-wfcli> jp local/pipelines/pipeline0 add /pipelineConfig/detConfig/numThreads 4
-wfcli> diff 
+wfctl> jp local/hardware/camera0 replace /controls/AUTO_EXPOSURE 0
+wfctl> jp local/hardware/camera0 replace /backend "CSCORE"
+wfctl> jp local/pipelines/pipeline0 add /pipelineConfig/detConfig/numThreads 4
+wfctl> diff 
 Staged changes:
 local/hardware/camera0:
     /controls/AUTO_EXPOSURE: 1 -> 0
     /backend: "GTSAM" -> "CSCORE"
 local/pipelines/pipeline0:
     [NEW] /pipelineConfig/detConfig/numThreads: NULL -> 4
-wfcli> putf local/pipelines/camera1 camera_1_config.json
-wfcli> diff
+wfctl> pushf local/pipelines/camera1.json camera_1_config.json
+wfctl> delete local/pipelines/camera2.json
+wfctl> fetch live/pipelines/running
+pipeline0
+pipeline1
+pipeline2
+wfctl> summary
+Wayfinder @ 10.12.34.11:8080
+---  General  ---
+uptime: 00:14:02.329
+team: 1234
+SLAM: Off
+---  Cameras  ---
+camera0 @ /dev/video0
+camera2 @ /dev/video2
+--- Pipelines ---
+pipeline0: running
+pipeline1: running
+pipeline2: running
+pipeline3: stopped
+wfctl> fetch summary
+{
+    "devname": "Wayfinder",
+    "host": "10.12.34.11:8080"
+    "general": {
+        "uptime": 843291,
+        "team": 1234,
+        "SLAM": false
+    },
+    "cameras": {
+        "camera0": "/dev/video0",
+        "camera2": "/dev/video2",
+    },
+    "pipelines": {
+        "pipeline0": true,
+        "pipeline1": true,
+        "pipeline2": true,
+        "pipeline3": false,
+    }
+}
+wfctl> jp local/hardware/camera0 replace /backend "LIBCAMERA"
+wfctl> diff
 Staged changes:
 local/hardware/camera0:
     /controls/AUTO_EXPOSURE: 1 -> 0
-    /backend: "GTSAM" -> "CSCORE"
+    /backend: "GTSAM" -> "LIBCAMERA"
 local/pipelines/pipeline0:
     [NEW] /pipelineConfig/detConfig/numThreads: NULL -> 4
 [NEW] local/pipelines/camera1:
     /: NULL -> {
+        "nickname": "camera1"
         "devpath": "/dev/video1",
         "backend": "CSCORE",
         "format": {
@@ -129,8 +195,24 @@ local/pipelines/pipeline0:
         },
         "controlAliases": {}
     }
-wfcli> commit
-wfcli> quit
+[DELETE] local/pipelines/camera2.json
+    /: {
+            "nickname": "camera2"
+            "devpath": "/dev/video2",
+            "backend": "GTSAM",
+            "format": {
+                "fps": 30,
+                "frameFormat": {
+                    "width": 1280,
+                    "height": 720,
+                    "encoding": "Y8"
+                }
+            },
+            "controlAliases": {}
+        } -> NULL
+wfctl> commit
+SUCCESS: Server responded with status 200
+wfctl> quit
 
 
 
@@ -144,7 +226,7 @@ through misuse, but also limits how powerful it is.
 It only exposes a subset of the API. Most teams will
 likely only use this
 
-2: wfcli: CLI for wayfinder configuration,
+2: wfctl: CLI for wayfinder configuration,
 exposes the entire HTTP API, meant for advanced teams, can also
 be used in automated workflows
 
@@ -163,8 +245,3 @@ Misuse can easily render wayfinder inoperable. Can also be
 used by very advanced users who know what they are doing,
 if they want an advanced configuration not supported by
 the HTTP API
-
-Note: The server response from any requests on api/summary
-will define a unique header called X-Clacks-Overhead. 
-This is an internal detail and can safely be ignored
-for all practical intents and purposes
