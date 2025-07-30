@@ -15,6 +15,9 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+# TODO: Right now this is sort of a god class, should modularize and refactor in the future
+# TODO: More robust input validation
+
 from http.client import HTTPConnection, RemoteDisconnected, HTTPResponse, _DataType, _HeaderValue
 import socket
 from typing import Union, Mapping, Tuple, List, Dict, Callable, Any, Set
@@ -59,6 +62,8 @@ bad_pointer: int = 7
 # 1 = Connection failed
 # 2 = Bad HTTP status
 # 3 = Filesystem error
+
+# TODO: Maybe switch from sys.exit to exceptions
 
 # Number of args expected by a command
 # Excluding the implicit body arg at the end
@@ -144,7 +149,17 @@ class Session:
             "exist": self.exist,
             "jtest": self.jtest,
             "jtestf": self.jtestf,
-            "diff": self.diff
+            "diff": self.diff,
+            "commit": self.commit,
+            "abort": self.abort,
+            "exec": self.exec,
+            "summary": self.summary,
+            "start": self.start,
+            "stop": self.stop,
+            "shutdown": self.shutdown,
+            "reload": self.reload,
+            "reboot": self.reboot,
+            "restart": self.restart
         }
         self.transactCommands: List[deferredCmd] = []
         connerr = self.checkConnection()
@@ -225,22 +240,31 @@ class Session:
             return ""
         return word
         
-    def parseCommand(self,command: str) -> Union[None,List[str]]:
+    def parseCommand(self,command: str) -> Tuple[str,Union[None,List[str]]]:
         cmdword,argstr = self.popFirstWord(command)
         numargs = cmdWordArgs.get(cmdword)
         if numargs is None:
-            printerr(f"Error: '{cmdword}' is not a recognized wfcli command")
-            return None
+            printerr(f"Error: '{cmdword}' is not a recognized wfctl command")
+            return cmdword,None
         args: List[str] = []
         for i in range(numargs):
             # Process positional arguments
             if argstr == "":
                 printerr(f"Error: not enough positional args")
-                return None
+                return cmdword,None
             arg, argstr = self.popFirstWord(argstr)
             args.append(self.resolveVar(arg))
         args.append(self.resolveVar(argstr)) # Process body
-        return args
+        return cmdword,args
+    
+    def processCommand(self,command: str) -> int:
+        cmdword,args = self.parseCommand(command)
+        res, request = self.commands[cmdword](args)
+        # TODO: Figure out if we want to do anything with the request
+        if res != nominal and not self.keepgoing:
+            sys.exit(res)
+        return res
+        
 
     
     # Returns the first word, and the string with the first word popped
@@ -758,9 +782,24 @@ class Session:
         if self.transaction:
             printerr("ERROR: exec is disabled in transactions")
             return bad_command, None
-        # TBA
+        filepath = Path(args[0])
+        if not filepath.exists():
+            printerr(f"File '{filepath}' does not exist")
+            return bad_file, None
+        if not filepath.is_file():
+            printerr(f"Path '{filepath}' is not a file")
+            return bad_file, None
+        try:
+            with open(filepath,'r') as f:
+                # TODO: error propagation from the child process
+                child = Session(self.hostname,self.port,self.quiet,self.keepgoing,self.globargs)
+                for line in f:
+                    child.processCommand(line.rstrip())
+            return nominal, None
+        except (OSError) as e:
+            printerr(f"Error while opening file '{filepath}': {e}")
+            return bad_file, None
         
-        return nominal, None
     
     def start(self,args: List[str]) -> Tuple[int,Union[HTTPResponse,None]]:
         if self.transaction:

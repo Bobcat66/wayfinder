@@ -47,21 +47,20 @@ namespace wf {
         norm_corners_buffer.reserve(4);
     }
 
-    WFResult<std::unique_ptr<CPUInferenceEngineYOLO>> CPUInferenceEngineYOLO::creator_impl(
+    WFResult<std::unique_ptr<InferenceEngine>> CPUInferenceEngineYOLO::creator_impl(
         std::filesystem::path modelPath,
         TensorParameters tensorParams,
         IEFilteringParams filterParams
     ) {
         try {
-            return WFResult<std::unique_ptr<CPUInferenceEngineYOLO>>::success(
-                std::move(std::make_unique<CPUInferenceEngineYOLO>(
-                    std::move(modelPath),
-                    std::move(tensorParams),
-                    std::move(filterParams)
-                ))
+            std::unique_ptr<InferenceEngine> ptr = std::make_unique<CPUInferenceEngineYOLO>(
+                std::move(modelPath),
+                std::move(tensorParams),
+                std::move(filterParams)
             );
+            return WFResult<std::unique_ptr<InferenceEngine>>::success(std::move(ptr));
         } catch (const wfexception& e) {
-            return WFResult<std::unique_ptr<CPUInferenceEngineYOLO>>::failure(
+            return WFResult<std::unique_ptr<InferenceEngine>>::failure(
                 e.status(),
                 e.what()
             );

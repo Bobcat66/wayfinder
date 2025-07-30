@@ -53,7 +53,6 @@
         logger->info("Detector QTPs set to: {}",detector.getQuadThresholdParams().string());                    \
         logger->info("Adding tag family {}", tagfamily);                                                        \
         auto err = detector.addFamily(tagfamily);                                                               \
-        logger->info("Add family op returned {}",err);                                                          \
         auto resres = detector.detect(gray);                                                                    \
         ASSERT_TRUE(resres);                                                                                    \
         auto res = resres.value();                                                                              \

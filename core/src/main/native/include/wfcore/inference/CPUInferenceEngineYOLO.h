@@ -41,7 +41,7 @@ namespace wf {
         void setFilteringParameters(IEFilteringParams params) override { this->filterParams = std::move(params); }
         void setTensorParameters(TensorParameters params) override;
         WFStatusResult infer(const cv::Mat& data, const FrameMetadata& meta, std::vector<RawBbox>& output) noexcept override;
-        static WFResult<std::unique_ptr<CPUInferenceEngineYOLO>> creator_impl(
+        static WFResult<std::unique_ptr<InferenceEngine>> creator_impl(
             std::filesystem::path modelPath,
             TensorParameters tensorParams,
             IEFilteringParams filterParams

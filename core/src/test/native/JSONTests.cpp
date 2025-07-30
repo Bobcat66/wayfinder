@@ -17,6 +17,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+#include "wfcore/hardware/CameraConfiguration.h"
 #include "wfcore/configuration/ResourceManager.h"
 #include "wfcore/video/video_types.h"
 #include <gtest/gtest.h>

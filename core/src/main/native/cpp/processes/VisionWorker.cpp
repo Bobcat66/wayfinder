@@ -77,28 +77,28 @@ namespace wf {
             std::lock_guard<std::mutex> lock(pipeGuard);
             auto rawmeta = frameProvider.getFrame(rawFrameBuffer);
             if (!(frameProvider.ok())) {
-                const auto errmsg(frameProvider.getError().value());
-                this->reportError(ProviderError,errmsg);
+                //const auto errmsg(frameProvider.getError().value());
+                //this->reportError(ProviderError,errmsg);
                 continue;
             }
             // The expected frame formats are negotiated during configuration, all we need during runtime is a simple sanity check
             if (!impl::validateFrame(rawFrameBuffer,rawmeta)) {
-                this->reportError(InvalidFrame,"Invalid frame received from frame provider");
+                //this->reportError(InvalidFrame,"Invalid frame received from frame provider");
                 continue;
             }
             auto ppmeta = preprocesser.processFrame(rawFrameBuffer,ppFrameBuffer,rawmeta);
             if (!impl::validateFrame(ppFrameBuffer,ppmeta)) {
-                this->reportError(InvalidFrame,"Invalid frame received from preprocesser");
+                //this->reportError(InvalidFrame,"Invalid frame received from preprocesser");
                 continue;
             }
             auto res = pipeline->process(ppFrameBuffer,ppmeta);
             if (!(pipeline->ok())) {
                 // TODO: More robust error handling
-                const auto errmsg(pipeline->getError().value());
-                this->reportError(
-                    VisionWorkerStatus::PipelineError,
-                    "Error in pipeline: {}", errmsg
-                );
+                //const auto errmsg(pipeline->getError().value());
+                //this->reportError(
+                //    VisionWorkerStatus::PipelineError,
+                //    "Error in pipeline: {}", errmsg
+                //);
                 continue;
             }
             outputConsumer->accept(ppFrameBuffer,ppmeta,res);

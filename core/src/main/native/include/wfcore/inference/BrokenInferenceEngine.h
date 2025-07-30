@@ -36,12 +36,12 @@ namespace wf {
         WFStatusResult infer(const cv::Mat& data, const FrameMetadata& meta, std::vector<RawBbox>& output) noexcept override {
             return WFStatusResult::failure(WFStatus::NOT_IMPLEMENTED);
         }
-        static WFResult<std::unique_ptr<BrokenInferenceEngine>> creator_impl(
+        static WFResult<std::unique_ptr<InferenceEngine>> creator_impl(
             std::filesystem::path modelPath,
             TensorParameters tensorParams,
             IEFilteringParams filterParams
         ) {
-            return WFResult<std::unique_ptr<BrokenInferenceEngine>>::failure(WFStatus::NOT_IMPLEMENTED);
+            return WFResult<std::unique_ptr<InferenceEngine>>::failure(WFStatus::NOT_IMPLEMENTED);
         }
         InferenceEngineType getEngineType() const noexcept override { return InferenceEngineType::Unknown; }
         ModelArch getModelArch() const noexcept override { return ModelArch::Unknown; }

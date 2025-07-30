@@ -45,7 +45,9 @@ int main() {
             break;
         }
         preprocessor.processDirect(frame,grayFrame);
-        auto detections = detector.detect(grayFrame);
+        auto detres = detector.detect(grayFrame);
+        if (!detres) break;
+        auto detections = std::move(detres.value());
         for (auto detection : detections) {
             wf::drawTag(frame,detection);
         }

@@ -26,24 +26,25 @@
 
 namespace impl {
     using namespace wf;
-    using InferenceEngineCreatorCreator = std::function<InferenceEngineCreator(void)>;
 
-    static const std::unordered_map<ModelArch,std::unordered_map<InferenceEngineType,InferenceEngineCreatorCreator>> creatorMap = {
-        {ModelArch::YOLO, {
-            {InferenceEngineType::CV_CPU, InferenceEngineCreator::getCreator<CPUInferenceEngineYOLO>}
-        }}
+    static const std::unordered_map<InferenceEngineType, InferenceEngineCreatorFactory> yoloEngines = {
+        { InferenceEngineType::CV_CPU, InferenceEngineCreator::getFactory<CPUInferenceEngineYOLO>() }
+    };
+
+    static const std::unordered_map<ModelArch, std::unordered_map<InferenceEngineType, InferenceEngineCreatorFactory>> creatorMap = {
+        { ModelArch::YOLO, yoloEngines }
     };
 
     static InferenceEngineCreator getInferenceEngineCreator(ModelArch modelArch, InferenceEngineType engineType) {
         auto archit = creatorMap.find(modelArch);
         if (archit == creatorMap.end()) {
             // Not implemented
-            return InferenceEngineCreator::getCreator<BrokenInferenceEngine>();
+            return InferenceEngineCreator::getFactory<BrokenInferenceEngine>()();
         }
         auto etypeit = archit->second.find(engineType);
         if (etypeit == archit->second.end()) {
             // Not implemented
-            return InferenceEngineCreator::getCreator<BrokenInferenceEngine>();
+            return InferenceEngineCreator::getFactory<BrokenInferenceEngine>()();
         }
         return (etypeit->second)();
     }

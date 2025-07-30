@@ -119,6 +119,7 @@ summary: prints a prettified summary to the console (api/summary returns a JSON 
 
 exec [file path] [args...]: execute a wfctl script (usage: exec foo.wfctl) will execute the
 foo.wfctl script. The host will be propagated to the child script. Disallowed in transactions
+Positional command line arguments are propagated to the child process
 
 start [pipeline name]: activate a pipeline. disallowed in transactions
 

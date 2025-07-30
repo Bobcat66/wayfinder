@@ -65,10 +65,6 @@ namespace wf {
         if (auto shared = ntpub.lock()) {
             shared->publishPipelineResult(result);
         } else {
-            this->reportError(
-                PipelineOutputConsumerStatus::NTDisconnected,
-                "Failed to acquire lock on NT publisher"
-            );
             return false;
         }
         if (this->streamingEnabled_) {
@@ -86,7 +82,6 @@ namespace wf {
             }
             processedServer.acceptFrame(pp_procbuf,rmeta);
         }
-        this->reportOk();
         return true;
     }
 }

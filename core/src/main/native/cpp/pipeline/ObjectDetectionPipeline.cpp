@@ -26,39 +26,7 @@
 #include <opencv2/calib3d.hpp>
 
 namespace wf {
-    std::unique_ptr<InferenceEngine> ObjectDetectionPipeline::buildInferenceEngine(const ObjectDetectionPipelineConfiguration& config) {
-        using enum InferenceEngineType;
-        using enum ModelArch;
-        switch (config.engineType) {
-            case CV_CPU:
-                switch (config.modelArch) {
-                    case YOLO: {
-                        auto engine = std::make_unique<CPUInferenceEngineYOLO>();
-                        engine->setFilteringParameters(config.filterParams);
-                        engine->setTensorParameters(config.tensorParams);
-                        if (!engine->loadModel(config.modelPath)) {
-                            throw model_not_loaded();
-                        }
-                        return std::move(engine);
-                    }
-                    case SSD: throw invalid_model_arch("SSD models are not supported on CV CPU inference engines");
-                    case RETINA_NET: throw invalid_model_arch("RETINA_NET models are not supported on CV CPU inference engines");
-                    case RCNN: throw invalid_model_arch("RCNN models are not supported on CV CPU inference engines");
-                    default: throw invalid_model_arch("Unknown model architecture specified. How did you even do this?");
-                }
-            case CV_OPENCL: throw invalid_engine_type("CV OpenCL inference engines are not supported at the moment.");
-            case CV_VULKAN: throw invalid_engine_type("CV Vulkan inference engines are not supported at the moment.");
-            case CUDA: throw invalid_engine_type("CUDA inference engines are not supported at the moment.");
-            case OpenVINO: throw invalid_engine_type("OpenVINO inference engines are not supported at the moment.");
-            case RKNN: throw invalid_engine_type("RKNN inference engines are not supported at the moment.");
-            case CoreML: throw invalid_engine_type("CoreML inference engines are not supported at the moment.");
-            case ROCm: throw invalid_engine_type("ROCm inference engines are not supported at the moment.");
-            case EdgeTPU: throw invalid_engine_type("EdgeTPU inference engines are not supported at the moment.");
-            case HailoRT: throw invalid_engine_type("HailoRT inference engines are not supported at the moment.");
-            default: throw invalid_engine_type("Unknown engine type specified. How did you even do this?");
-        }
-    }
-    
+
     ObjectDetectionPipeline::ObjectDetectionPipeline(ImageEncoding modelColorSpace_, std::unique_ptr<InferenceEngine> engine_, CameraIntrinsics intrinsics_)
     : modelColorSpace(modelColorSpace_), engine(std::move(engine_)), intrinsics(std::move(intrinsics_)) {
         updatePostprocParams();

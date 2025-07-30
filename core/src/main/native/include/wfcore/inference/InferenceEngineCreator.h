@@ -23,8 +23,13 @@
 #include <concepts>
 #include <filesystem>
 #include <memory>
+#include <functional>
 
 namespace wf {
+
+    class InferenceEngineCreator;
+
+    using InferenceEngineCreatorFactory = std::function<InferenceEngineCreator()>;
 
     template <typename T>
     concept HasCreatorImpl = requires (
@@ -78,9 +83,10 @@ namespace wf {
 
         template <typename T>
             requires HasCreatorImpl<T>
-        static InferenceEngineCreator getCreator() {
-            return InferenceEngineCreator(TypeTag<T>());
+        static InferenceEngineCreatorFactory getFactory() {
+            return [] { return InferenceEngineCreator(TypeTag<T>()); };
         }
+
     private:
         std::shared_ptr<const InferenceEngineCreatorBase> self;
     };

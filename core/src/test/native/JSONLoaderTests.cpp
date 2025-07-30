@@ -18,6 +18,7 @@
  */
 
 #include "wfcore/configuration/ResourceManager.h"
+#include "wfcore/hardware/CameraConfiguration.h"
 #include <gtest/gtest.h>
 #include <filesystem>
 #include "wfcore/common/logging.h"
