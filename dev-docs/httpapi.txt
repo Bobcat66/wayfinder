@@ -90,15 +90,21 @@ jp [resource] [op] [json pointer] [body]: Applies an RFC 6902 JSON patch. Suppor
 
 jpf [resource] [op] [json pointer] [file path]: Applies an RFC 6902 JSON patch with the file content as the body
 
-exist [resource] [json pointer]: Tests if the specified JSON field exists. Always executes immediately, even in transactions.
-Will print to stdout either 200 (JSON field exists), 404 (Resource doesn't exist), or 422 (Resource does exist but does not have specified JSON field)
-When not in quiet mode, it will also print a human readable explanation of the return code. It will NOT fail on 404 responses
+exist [resource] [json pointer]: Tests if the specified JSON element exists. Always executes immediately, even in transactions.
+Will print to stdout either 200 OK, 404 Not Found, or 422 Failed (Resource exists but does not contain specified JSON element)
+It will NOT fail on 404 responses
 
-test [resource] [json pointer] [test value]: Sends an RFC 6902 test request to the server. Always executes immediately, even in transactions. Will fail on 404 responses.
-Prints 200 on success, and 422 on failure
+jtest [resource] [json pointer] [test value]: Sends an RFC 6902 test request to the server. Always executes immediately, even in transactions. Will not fail on 404 responses.
+Prints 200 OK on success, 404 Not Found if the resource isn't found, and 422 Failed on failure
 
-testf [resource] [json pointer] [file path]: Sends an RFC 6902 test request to the server, with the file content as the test value. Will fail on 404 responses
+jtestf [resource] [json pointer] [file path]: Sends an RFC 6902 test request to the server, with the file content as the test value. Will not fail on 404 responses
+Always executes immediately, even in transactions Prints 200 OK on success, 404 Not Found if the resource isn't found, and 422 Failed on failure
+
+test [resource] [test value]: Tests an entire resource, can be used on resources that do not support PATCH. Prints 200 OK on success,
+404 Not Found if resource isn't found, and 422 Failed if the values don't match. Will NOT fail on 404 responses
 Always executes immediately, even in transactions
+
+testf [resource] [file path]: Tests an entire resource against the content of the file. Will NOT fail on 404 responses
 
 diff: print all changes that would be caused by the current transaction to the console. 
 NOTE: diff will ONLY display differences made by PUT, DELETE, and PATCH requests,
@@ -166,7 +172,7 @@ local/hardware/camera0:
     /controls/AUTO_EXPOSURE: 1 -> 0
     /backend: "GTSAM" -> "CSCORE"
 local/pipelines/pipeline0:
-    [NEW] /pipelineConfig/detConfig/numThreads: NULL -> 4
+    [NEW] /pipelineConfig/detConfig/numThreads: 4
 wfctl> pushf local/pipelines/camera1.json camera_1_config.json
 wfctl> delete local/pipelines/camera2.json
 wfctl> fetch live/pipelines/running
@@ -214,9 +220,9 @@ local/hardware/camera0:
     /controls/AUTO_EXPOSURE: 1 -> 0
     /backend: "GTSAM" -> "LIBCAMERA"
 local/pipelines/pipeline0:
-    [NEW] /pipelineConfig/detConfig/numThreads: NULL -> 4
-[NEW] local/pipelines/camera1:
-    /: NULL -> {
+    [NEW] /pipelineConfig/detConfig/numThreads: 4
+local/pipelines/camera1:
+    [NEW] /: {
         "nickname": "camera1"
         "devpath": "/dev/video1",
         "backend": "CSCORE",
@@ -230,8 +236,8 @@ local/pipelines/pipeline0:
         },
         "controlAliases": {}
     }
-[DELETE] local/pipelines/camera2.json
-    /: {
+local/pipelines/camera2.json
+    [DELETE] /: {
             "nickname": "camera2"
             "devpath": "/dev/video2",
             "backend": "GTSAM",
@@ -244,7 +250,7 @@ local/pipelines/pipeline0:
                 }
             },
             "controlAliases": {}
-        } -> NULL
+        }
 wfctl> commit
 SUCCESS: Server responded with status 200
 wfctl> quit

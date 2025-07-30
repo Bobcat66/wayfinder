@@ -25,6 +25,8 @@ import json
 from dataclasses import dataclass
 import jsonpatch
 import jsonpointer
+from deepdiff import DeepDiff
+from deepdiff.model import DiffLevel
 
 varpattern = re.compile(r"^\$(\d+)$")
 
@@ -67,11 +69,15 @@ cmdWordArgs: Dict[str,int] = {
     "transact": 0,
     "jp": 3,
     "jpf": 4,
+    "exist": 2,
+    "jtest": 2,
+    "jtestf": 3,
+    "test": 1,
+    "testf": 2,
     "diff": 0,
     "commit": 0,
     "abort": 0,
     "exec": 1,
-    "upload": 3,
     "summary": 0,
     "start": 1,
     "stop": 1,
@@ -114,7 +120,17 @@ class Session:
         # Generic differences
         self.diffs: Dict[str,diff] = {} # dictionary of resources, each one mapped to an object keeping track of transaction differences
         self.commands: Dict[str,Callable[[List[str]],Tuple[int,Union[HTTPResponse,None]]]] = {
-            "quit": self.quit
+            "quit": self.quit,
+            "fetch": self.fetch,
+            "push": self.push,
+            "pushf": self.pushf,
+            "delete": self.delete,
+            "transact": self.transact,
+            "jp": self.jp,
+            "jpf": self.jpf,
+            "exist": self.exist,
+            "jtest": self.jtest,
+            "jtestf": self.jtestf
         }
         self.transactCommands: List[deferredCmd] = []
         connerr = self.checkConnection()
@@ -333,6 +349,12 @@ class Session:
             self.transactCommands.append(deferredCmd("delete",args))
         else:
             return self.request("DELETE",resource)
+        
+    def transact(self,args: List[str]) -> Tuple[int,Union[HTTPResponse,None]]:
+        if self.transaction:
+            printerr("Warning: Already in a transaction")
+        self.transaction = True
+        return nominal, None
     
     # TODO: Maybe make my own RFC 6902 implementation eventually, and rely only on the stdlib
     def _jp_impl(self,args: List[str],*,cmdword: str="jp") -> Tuple[int,Union[HTTPResponse,None]]:
@@ -413,31 +435,22 @@ class Session:
         hres,hresponse = self.request("HEAD",f"{resource}?ptr={json_pointer}",suppress_status=True)
         if hres == bad_connection:
             return bad_connection,None
-        if self.quiet:
-            if hres == nominal:
-                # We want to guarantee all nominal statuses map to 200
-                # Yes, this does mean what is printed isn't technically the actual HTTP status
-                println("200")
-            else:
-                println(hresponse.status)
+        if hres == nominal:
+            println("200 OK")
             return nominal,hresponse
-        else:
-            if hres == nominal:
-                println("200: JSON Element Exists")
+        # Filter out expected bad statuses (404,422), from the actually bad statuses
+        match hresponse.status:
+            case 404:
+                println("404 Not Found")
                 return nominal,hresponse
-            # Filter out expected bad statuses (404,422), from the actually bad statuses
-            match hresponse.status:
-                case 404:
-                    println("404: Resource not found")
-                    return nominal,hresponse
-                case 422:
-                    println("422: JSON Field not found")
-                    return nominal,hresponse
-                case _:
-                    println(f"{hresponse.status}: Imma be fr wu rn gng, I have no idea how you did this")
-                    return bad_status,hresponse
+            case 422:
+                println("422 Failed")
+                return nominal,hresponse
+            case _:
+                printBadResponse(hresponse)
+                return bad_status,hresponse
     
-    def test_impl(self,args: List[str],*,cmdword="test") -> Tuple[int,Union[HTTPResponse,None]]:
+    def _jtest_impl(self,args: List[str],*,cmdword="jtest") -> Tuple[int,Union[HTTPResponse,None]]:
         resource = args[0]
         json_pointer = args[1]
         test_value = args[2]
@@ -458,25 +471,162 @@ class Session:
             return bad_json, None
         res,response = self.request("PATCH",resource,json.dumps(patch_jobject),suppress_status=True)
         if res == nominal:
-            if self.quiet:
-                print("200")
-            else:
-                print("200: Test succeeded")
+            println("200 OK")
             return nominal,response
         elif res == bad_status and response.status == 422:
-            if self.quiet:
-                print("422")
-            else:
-                print("422: Test failed")
+            println("422 Failed")
+            return nominal,response
+        elif res == bad_status and response.status == 404:
+            println("404 Not Found")
             return nominal,response
         else:
             if response:
                 printBadResponse(response)
             return res,response
-        
-            
+    
+    def jtest(self,args: List[str]) -> Tuple[int,Union[HTTPResponse,None]]:
+        return self._jtest_impl(args,cmdword="jtest")
+    
+    def jtestf(self,args: List[str]) -> Tuple[int,Union[HTTPResponse,None]]:
+        resource = args[0]
+        json_pointer = args[1]
+        filepath = Path(args[2])
+        if not filepath.exists():
+            printerr(f"File '{filepath}' does not exist")
+            return bad_file, None
+        if not filepath.is_file():
+            printerr(f"Path '{filepath}' is not a file")
+            return bad_file, None
+        try:
+            with open(filepath,'r') as f:
+                content = f.read()
+                return self._jtest_impl([resource,json_pointer,content],cmdword="jtestf")
+        except (OSError) as e:
+            printerr(f"Error while opening file '{filepath}': {e}")
+            return bad_file, None
 
+    def _test_impl(self,args: List[str],*,cmdword="test") -> Tuple[int,Union[HTTPResponse,None]]:
+        resource = args[0]
+        body = args[1]
+        caperr,caps = self.getCapabilities(resource)
+        if caperr != nominal:
+            # error while getting capabilities, give up
+            return caperr,None
+        if "GET" not in caps:
+            printerr(f"{cmdword} is forbidden for '{resource}'")
+            return bad_command,None
+        err,response = self.request("GET",resource,suppress_status=True)
+        if err is not nominal:
+            if response and response.status == 404:
+                # Resource not found, nominal
+                println("404 Not Found")
+                return nominal,response
+            elif response:
+                # Bad response
+                printBadResponse(response)
+                return err,response
+            else:
+                # No response
+                return err, None
+        # Response was nominal
+
+        test_jobject: Any
+        resource_jobject: Any
+        try:
+            resource_jobject = json.loads(response.read().decode('utf-8'))
+        except json.JSONDecodeError as e:
+            printerr(f"Server responded with malformed JSON: {e}")
+            return bad_json,None
         
+        try:
+            test_jobject = json.loads(body)
+        except json.JSONDecodeError as e:
+            printerr(f"Body contained malformed JSON: {e}")
+            return bad_json,None
+        
+        if test_jobject == resource_jobject:
+            println("200 OK")
+            return nominal, response
+        else:
+            println("422 Failed")
+            return nominal, response
+    
+    def test(self,args: List[str]) -> Tuple[int,Union[HTTPResponse,None]]:
+        return self._test_impl(args,cmdword="test")
+    
+    def testf(self,args: List[str]) -> Tuple[int,Union[HTTPResponse,None]]:
+        resource = args[0]
+        filepath = Path(args[1])
+        if not filepath.exists():
+            printerr(f"File '{filepath}' does not exist")
+            return bad_file, None
+        if not filepath.is_file():
+            printerr(f"Path '{filepath}' is not a file")
+            return bad_file, None
+        try:
+            with open(filepath,'r') as f:
+                content = f.read()
+                return self._test_impl([resource,content],cmdword="testf")
+        except (OSError) as e:
+            printerr(f"Error while opening file '{filepath}': {e}")
+            return bad_file, None
+    
+    # TODO: Pretty printing
+    def diff(self,args: List[str]) -> Tuple[int,Union[HTTPResponse,None]]:
+        if not self.transaction:
+            return nominal, None
+        if len(self.diffs.items()) > 0:
+            println("Staged Diffs:")
+        for diffedResource in self.diffs.items():
+            resource = diffedResource[0]
+            diffs = diffedResource[1]
+            deltas = DeepDiff(diffs.orig,diffs.staged,view='tree')
+            if deltas:
+                println(f"{resource}:")
+                if 'type_changes' in deltas:
+                    type_changes: List[DiffLevel] = deltas['type_changes']
+                    for delta in type_changes:
+                        path = delta.path(output_format="list")
+                        ptr = '/' + '/'.join(path)
+                        println(f"  {ptr}: {delta.t1} -> {delta.t2}")
+                if 'value_changes' in deltas:
+                    value_changes: List[DiffLevel] = deltas['value_changes']
+                    for delta in value_changes:
+                        path=delta.path(output_format="list")
+                        ptr = '/' + '/'.join(path)
+                        if delta.t1 is None:
+                            println(f"  [NEW] {ptr}: {delta.t2}")
+                        elif delta.t2 is None:
+                            println(f"  [DELETE] {ptr}: {delta.t1}")
+                        else:
+                            println(f"  {ptr}: {delta.t1} -> {delta.t2}")
+                if 'dictionary_item_added' in deltas:
+                    dictionary_item_added: List[DiffLevel] = deltas["dictionary_item_added"]
+                    for delta in dictionary_item_added:
+                        path = delta.path(output_format="list")
+                        ptr = '/' + '/'.join(path)
+                        println(f"  [NEW] {ptr}: {delta.t2}")
+                if 'dictionary_item_removed' in deltas:
+                    dictionary_item_removed: List[DiffLevel] = deltas["dictionary_item_removed"]
+                    for delta in dictionary_item_removed:
+                        path = delta.path(output_format="list")
+                        ptr = '/' + '/'.join(path)
+                        println(f"  [DELETE] {ptr}: {delta.t1}")
+                if 'iterable_item_added' in deltas:
+                    iterable_item_added: List[DiffLevel] = deltas["iterable_item_added"]
+                    for delta in iterable_item_added:
+                        path = delta.path(output_format="list")
+                        ptr = '/' + '/'.join(path)
+                        println(f"  [NEW] {ptr}: {delta.t2}")
+                if 'iterable_item_removed' in deltas:
+                    iterable_item_removed: List[DiffLevel] = deltas["iterable_item_removed"]
+                    for delta in iterable_item_removed:
+                        path = delta.path(output_format="list")
+                        ptr = '/' + '/'.join(path)
+                        println(f"  [DELETE] {ptr}: {delta.t1}")
+        return nominal,None
+                    
+            
     
     def getCapabilities(self,resource: str) -> Tuple[int,Union[Set[str],None]]:
         if resource not in self.resourceCapabilities:
