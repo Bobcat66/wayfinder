@@ -22,13 +22,15 @@ from pathlib import Path
 import sys
 import re
 import json
-from dataclasses import dataclass
+from dataclasses import dataclass, asdict
 import jsonpatch
 import jsonpointer
 from deepdiff import DeepDiff
 from deepdiff.model import DiffLevel
 
 varpattern = re.compile(r"^\$(\d+)$")
+
+agentname: str = "wfcli/1.0"
 
 def println(msg: str) -> None:
     print(msg,file=sys.stdout)
@@ -92,6 +94,10 @@ class diff:
     orig: Any
     staged: Any
 
+# Deferable commands:
+# push
+# jp
+# delete
 @dataclass
 class deferredCmd:
     cmdword: str
@@ -102,6 +108,13 @@ class deferredCmd:
 class ResourceCaps:
     supportedMethods: Set[str]
     specialCases: Dict[str,Set[str]]
+
+@dataclass
+class BatchRequest:
+    method: str
+    url: str
+    body: str
+    headers: Dict[str,str]
 
 class Session:
     def __init__(self, hostname: str, port: int, quiet: bool, keepgoing: bool, globargs: List[str]):
@@ -130,7 +143,8 @@ class Session:
             "jpf": self.jpf,
             "exist": self.exist,
             "jtest": self.jtest,
-            "jtestf": self.jtestf
+            "jtestf": self.jtestf,
+            "diff": self.diff
         }
         self.transactCommands: List[deferredCmd] = []
         connerr = self.checkConnection()
@@ -144,7 +158,7 @@ class Session:
     
     def checkConnection(self) -> int:
         try:
-            self.conn.request("HEAD", "/",headers={"X-Clacks-Overhead": "GNU Terry Pratchett"})
+            self.conn.request("HEAD", "/",headers={"X-Clacks-Overhead": "GNU Terry Pratchett","User-Agent": agentname})
             response = self.conn.getresponse()
             if 200 <= response.status < 400:
                 self.printout("Connection OK")
@@ -179,10 +193,12 @@ class Session:
         content_type: str = "application/json"
     ) -> Tuple[int, Union[HTTPResponse,None]]:
         headers = dict(headers) if headers else {}
-        headers["User-Agent"] = "wfcli/1.0"
+        headers["User-Agent"] = agentname
         # The wayfinder API *always* responds in JSON
         headers["Accept"] = "application/json"
         headers["Content-Type"] = content_type
+        if body is not None and not encode_chunked:
+            headers["Content-Length"] = len(body)
         try:
             self.conn.request(method,"/api/" + url,body,headers,encode_chunked=encode_chunked)
             response = self.conn.getresponse()
@@ -283,7 +299,7 @@ class Session:
                 return bad_json,None
             
         else:
-            return self.request("PUT",resource,body,{"Content-Length":len(body)})
+            return self.request("PUT",resource,body)
 
     
     # push [resource] [body]. 
@@ -400,7 +416,7 @@ class Session:
             # Not in transaction, apply operation immediately
             try:
                 patch_jobject = [{"op": op, "path": json_pointer, "value": json.loads(body)}]
-                return self.request("PATCH",resource,json.dumps(patch_jobject))
+                return self.request("PATCH",resource,json.dumps(patch_jobject),content_type="application/json-patch+json")
             except json.JSONDecodeError as e:
                 # JSON parse error, give up
                 printerr(f"JSON Error: {e}")
@@ -469,7 +485,7 @@ class Session:
             # JSON parse error, give up
             printerr(f"JSON Error: {e}")
             return bad_json, None
-        res,response = self.request("PATCH",resource,json.dumps(patch_jobject),suppress_status=True)
+        res,response = self.request("PATCH",resource,json.dumps(patch_jobject),suppress_status=True,content_type="application/json-patch+json")
         if res == nominal:
             println("200 OK")
             return nominal,response
@@ -625,8 +641,167 @@ class Session:
                         ptr = '/' + '/'.join(path)
                         println(f"  [DELETE] {ptr}: {delta.t1}")
         return nominal,None
-                    
-            
+    
+    def commit(self,args: List[str]) -> Tuple[int,Union[HTTPResponse,None]]:
+        if not self.transaction:
+            return nominal,None
+        self.transaction = False
+        batch_requests: List[BatchRequest] = []
+        # These two variables are for batching consecutive patches to the same resource
+        makingPatch: bool = False
+        previousPatchResource: str
+        patchlist: List[Dict[str,Any]] = []
+        # This will batch all of the patches in patchlist into a single HTTP request, then add
+        # the entire request to the request batch, and it will clear the patchlist
+        # TODO: Maybe add JSON error handling???
+        def _flush_patches() -> None:
+            nonlocal patchlist
+            nonlocal batch_requests
+            nonlocal previousPatchResource
+            nonlocal self
+            body = json.dumps(patchlist)
+            batch_requests.append(
+                BatchRequest(
+                    method="PATCH",
+                    url='/api/' + previousPatchResource,
+                    body=body,
+                    headers={
+                        "Content-Type": "application/json-patch+json",
+                        "Accept": "application/json",
+                        "User-Agent": agentname,
+                        "Host": f"{self.conn.host}:{self.conn.port}",
+                        "Content-Length": f"{len(body)}"
+                    }
+                )
+            )
+            patchlist = []
+            previousPatchResource = ""
+            return     
+
+        for cmd in self.transactCommands:
+            if cmd.patch:
+                makingPatch = True
+                resource = cmd.args[0]
+                op = cmd.args[1]
+                json_pointer = cmd.args[2]
+                body = cmd.args[3]
+                if resource == previousPatchResource:
+                    patchlist.append({"op": op, "path": json_pointer, "value": json.loads(body)})
+                    continue
+                else:
+                    # This patch is directed to a different resource than the last one,
+                    # Or this is the first patch in a sequence, flush patch batch
+                    if len(patchlist) > 0:
+                        _flush_patches()
+                    previousPatchResource = resource
+                    patchlist.append({"op": op, "path": json_pointer, "value": json.loads(body)})
+                    continue
+            # Command is not a patch
+            if makingPatch:
+                # Just ended a series of consecutive patches, flush patches
+                if len(patchlist) > 0:
+                    _flush_patches()
+                previousPatchResource = ""
+                makingPatch = False
+            match cmd.cmdword:
+                case "push":
+                    resource = cmd.args[0]
+                    body = cmd.args[1]
+                    request = BatchRequest(
+                        method="PUT",
+                        url='/api/' + resource,
+                        body=body,
+                        headers={
+                            "Content-Type": "application/json",
+                            "Accept": "application/json",
+                            "User-Agent": agentname,
+                            "Host": f"{self.conn.host}:{self.conn.port}",
+                            "Content-Length": f"{len(body)}"
+                        }
+                    )
+                    batch_requests.append(request)
+                    continue
+                case "delete":
+                    resource = cmd.args[0]
+                    request = BatchRequest(
+                        method="DELETE",
+                        url='/api/' + resource,
+                        headers={
+                            "Content-Type": "application/json",
+                            "Accept": "application/json",
+                            "User-Agent": agentname,
+                            "Host": f"{self.conn.host}:{self.conn.port}"
+                        }
+                    )
+                    batch_requests.append(request)
+                    continue
+        # All transaction commands have been processed into BatchRequests, build the final batch request
+        self.transactCommands = []
+        self.diffs = {}
+        batched_requests_jobject: List[str] = [asdict(req) for req in batch_requests]
+        batch_body = json.dumps(batched_requests_jobject)
+        return self.request("POST","batch",batch_body)
+    
+    def abort(self,args: List[str]) -> Tuple[int,Union[HTTPResponse,None]]:
+        if not self.transaction:
+            return nominal,None
+        self.transaction = False
+        self.transactCommands = []
+        self.diffs = {}
+        return nominal,None
+    
+    def summary(self,args: List[str]) -> Tuple[int,Union[HTTPResponse,None]]:
+        # TBA
+        return nominal, None
+    
+    def exec(self,args: List[str]) -> Tuple[int,Union[HTTPResponse,None]]:
+        if self.transaction:
+            printerr("ERROR: exec is disabled in transactions")
+            return bad_command, None
+        # TBA
+        
+        return nominal, None
+    
+    def start(self,args: List[str]) -> Tuple[int,Union[HTTPResponse,None]]:
+        if self.transaction:
+            printerr("ERROR: start is disabled in transactions")
+            return bad_command, None
+        pipeline_name = args[0]
+        body = json.dumps({"pipeline": pipeline_name,"active": True})
+        return self.request("POST","live/pipelines/running",body)
+    
+    def stop(self,args: List[str]) -> Tuple[int,Union[HTTPResponse,None]]:
+        if self.transaction:
+            printerr("ERROR: stop is disabled in transactions")
+            return bad_command, None
+        pipeline_name = args[0]
+        body = json.dumps({"pipeline": pipeline_name,"active": False})
+        return self.request("POST","live/pipelines/running",body)
+    
+    def reload(self,args: List[str]) -> Tuple[int,Union[HTTPResponse,None]]:
+        if self.transaction:
+            printerr("ERROR: stop is disabled in transactions")
+            return bad_command, None
+        return self.request("POST","actions/reload")
+    
+    def restart(self,args: List[str]) -> Tuple[int,Union[HTTPResponse,None]]:
+        if self.transaction:
+            printerr("ERROR: stop is disabled in transactions")
+            return bad_command, None
+        return self.request("POST","actions/restart")
+    
+    def reboot(self,args: List[str]) -> Tuple[int,Union[HTTPResponse,None]]:
+        if self.transaction:
+            printerr("ERROR: stop is disabled in transactions")
+            return bad_command, None
+        return self.request("POST","actions/reboot")
+    
+    def shutdown(self,args: List[str]) -> Tuple[int,Union[HTTPResponse,None]]:
+        if self.transaction:
+            printerr("ERROR: stop is disabled in transactions")
+            return bad_command, None
+        return self.request("POST","actions/shutdown")
+ 
     
     def getCapabilities(self,resource: str) -> Tuple[int,Union[Set[str],None]]:
         if resource not in self.resourceCapabilities:

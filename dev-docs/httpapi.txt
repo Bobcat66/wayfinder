@@ -27,7 +27,8 @@ variables under the /api/env/ collection]
 /api/network/ - Network Configuration, only supports PUT and GET
 /api/network/dhcp - whether or not DHCP is enabled
 /api/network/ip - Static IP address
-/api/network/summary - JSON string with summary of network configuration, only supports GET
+/api/network/livesummary - JSON string with summary of network configuration, only supports GET. This returns the ACTIVE
+network configuration, so if dhcp or ip were edited, those changes will not be reflected until wayfinder is rebooted
 
 /api/local/ - Local configuration directory
 /api/local/hardware - Hardware configuration subdirectory. Sending GET returns an enum of all pipeline config files
