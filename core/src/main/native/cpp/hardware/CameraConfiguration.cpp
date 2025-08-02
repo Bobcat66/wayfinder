@@ -224,6 +224,7 @@ namespace wf {
     const JSONValidationFunctor* CameraConfiguration::getValidator_impl() {
         static JSONStructValidator validator(
             {
+                {"nickname", getPrimitiveValidator<std::string>()},
                 {"devpath", getPrimitiveValidator<std::string>()},
                 {"backend", impl::getBackendValidator()},
                 {"format", StreamFormat::getValidator()},
@@ -231,7 +232,7 @@ namespace wf {
                 {"calibrations",impl::getCalibrationsValidator()},
                 {"controls",impl::getControlsValidator()}
             },
-            {"devpath","backend","format","controlAliases"}
+            {"nickname","devpath","backend","format","controlAliases"}
         );
         return static_cast<JSONValidationFunctor*>(&validator);
     }
@@ -285,6 +286,7 @@ namespace wf {
 
         try {
             JSON jobject = {
+                {"nickname",object.nickname},
                 {"devpath",object.devpath},
                 {"backend",std::move(backendStr)},
                 {"format",std::move(format_jobject)},
@@ -336,6 +338,7 @@ namespace wf {
 
         return WFResult<CameraConfiguration>::success(
             std::in_place,
+            jobject["nickname"].get<std::string>(),
             jobject["devpath"].get<std::string>(),
             impl::backendMap.at(jobject["backend"].get<std::string>()),
             std::move(format),

@@ -20,44 +20,59 @@
 #pragma once
 
 #include "wfcore/hardware/CameraHandler.h"
-#include "wfcore/video/CSCameraSink.h"
+#include "wfcore/hardware/CSCameraSink.h"
 #include <unordered_set>
 #include <cscore_oo.h>
 #include <cscore_cv.h>
 
 namespace wf {
-    class CSCameraHandler : public CameraHandler {
+
+    class CSCameraHandler : public CameraHandler, private std::enable_shared_from_this<CSCameraHandler> {
+        friend void CSCameraSink::acquireSource(std::shared_ptr<CSCameraHandler>& handler);
     public:
-        CSCameraHandler(const CameraConfiguration& config);
 
         CameraBackend getBackend() const noexcept { return CameraBackend::CSCORE; }
 
-        FrameProvider& getFrameProvider(const std::string& name) override;
+        WFResult<std::shared_ptr<FrameProvider>> getFrameProvider(const std::string& name) override;
 
-        int setStreamFormat(const StreamFormat& format) override;
+        std::string getDevPath() const { return devpath_; }
 
-        const std::unordered_set<CamControl>& getSupportedControls() override { return supportedControls; }
+        std::string getNickname() const override { return name_; }
 
-        const std::vector<StreamFormat>& getSupportedFormats() override { return supportedFormats; }
+        WFStatusResult setStreamFormat(const StreamFormat& format) override;
 
-        const StreamFormat& getStreamFormat() override;
+        const std::unordered_set<CamControl>* getSupportedControls() override { return &supportedControls_; }
+
+        const std::vector<StreamFormat>* getSupportedFormats() override { return &supportedFormats_; }
+
+        StreamFormat getStreamFormat() override;
+
+        // Performs periodic system health checks and monitoring
+        void periodic() override;
 
         std::optional<CameraIntrinsics> getIntrinsics() override;
 
-        void setControl(CamControl control, int value) override;
+        WFStatusResult setControl(CamControl control, int value) override;
 
-        int getControl(CamControl control) override;
+        WFResult<int> getControl(CamControl control) override;
 
-        int getError() override { return error; }
+        CameraConfiguration getConfiguration() override;
+
+        static std::shared_ptr<CSCameraHandler> create(const CameraConfiguration& config) {
+            return std::shared_ptr<CSCameraHandler>(new CSCameraHandler(config));
+        }
+
     private:
-        std::unordered_map<std::string,CSCameraSink> sinks;
-        cs::UsbCamera camera;
-        std::string devpath;
-        StreamFormat format;
-        std::vector<StreamFormat> supportedFormats;
-        std::vector<CameraIntrinsics> calibrations;
-        std::unordered_set<CamControl> supportedControls;
-        std::unordered_map<CamControl,std::string> controlAliases;
-        int error = 0;
+        CSCameraHandler(const CameraConfiguration& config);
+        std::unordered_map<std::string,std::weak_ptr<CSCameraSink>> sinks_;
+        cs::UsbCamera camera_;
+        std::string name_;
+        std::string devpath_;
+        StreamFormat format_;
+        std::vector<StreamFormat> supportedFormats_;
+        std::vector<CameraIntrinsics> calibrations_;
+        std::unordered_set<CamControl> supportedControls_;
+        std::unordered_map<CamControl,std::string> controlAliases_;
+        std::unordered_map<CamControl,int> controls_;
     };
 }

@@ -51,7 +51,8 @@ to objects by their programmatic name, not the name of their config file
 api/live/pipelines/running - special endpoint for activating and deactivating pipelines.
 sending a GET request will return an enumeration of active pipelines, sending a
 POST request with a json body of the format { pipeline: [pipeline name], active: [bool] }
-will activate/deactivate the pipeline accordingly
+will activate/deactivate the pipeline accordingly. Additionally, each Camera in /api/live/hardware
+also has a /formats resource which supports GET and enumerates all stream formats supported by the camera
 
 /api/resources/ - global resource directory. Only supports GET, modification should be done through sftp
 /api/resources/fields - Apriltag field layouts. Again, these follow similar

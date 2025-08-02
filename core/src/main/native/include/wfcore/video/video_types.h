@@ -50,11 +50,11 @@ namespace wf {
         int width;
         int height;
 
-        FrameFormat() : encoding(ImageEncoding::UNKNOWN), width(0) , height(0) {}
+        constexpr FrameFormat() noexcept : encoding(ImageEncoding::UNKNOWN), width(0) , height(0) {}
 
-        FrameFormat(ImageEncoding encoding_,int width_,int height_) : encoding(encoding_), width(width_), height(height_) {}
+        constexpr FrameFormat(ImageEncoding encoding_,int width_,int height_) noexcept : encoding(encoding_), width(width_), height(height_) {}
 
-        bool operator==(const FrameFormat& other) const {
+        bool operator==(const FrameFormat& other) const noexcept {
             return encoding == other.encoding
                 && width == other.width 
                 && height == other.height;
@@ -63,7 +63,6 @@ namespace wf {
         cv::Size size() const {
             return cv::Size(width,height);
         }
-
 
         static WFResult<JSON> toJSON_impl(const FrameFormat& object);
         static WFResult<FrameFormat> fromJSON_impl(const JSON& jobject);
@@ -74,9 +73,9 @@ namespace wf {
         int fps;
         FrameFormat frameFormat;
 
-        StreamFormat() : fps(0), frameFormat() {}
+        StreamFormat() noexcept : fps(0), frameFormat() {}
 
-        StreamFormat(int fps_,FrameFormat frameFormat_) : fps(fps_), frameFormat(frameFormat_) {}
+        StreamFormat(int fps_,FrameFormat frameFormat_) noexcept : fps(fps_), frameFormat(frameFormat_) {}
         
         bool operator==(const StreamFormat& other) const {
             return fps == other.fps && frameFormat == other.frameFormat;
@@ -90,7 +89,27 @@ namespace wf {
     struct FrameMetadata {
         uint64_t micros;
         FrameFormat format;
+        const WFStatus status;
 
-        constexpr bool err() const { return !(static_cast<bool>(micros)); }
+        constexpr FrameMetadata(uint64_t micros_,FrameFormat format_, WFStatus status_) noexcept
+        : micros(micros_), format(std::move(format_)), status(status_) {}
+
+        constexpr FrameMetadata(uint64_t micros_,FrameFormat format_) noexcept
+        : micros(micros_), format(std::move(format_)), status(WFStatus::OK) {}
+
+        // TODO: Replace this with ok() and boolean casts
+        constexpr bool err() const noexcept { return !(status == WFStatus::OK); }
+
+        constexpr bool ok() const noexcept { return status == WFStatus::OK; }
+
+        constexpr explicit operator bool() const noexcept { return ok(); }
+
+        static constexpr FrameMetadata badFrame() noexcept {
+            return FrameMetadata(0,FrameFormat(),WFStatus::UNKNOWN);
+        }
+
+        static constexpr FrameMetadata badFrame(WFStatus status) noexcept {
+            return FrameMetadata(0,FrameFormat(),WFStatus::UNKNOWN);
+        }
     };
 }

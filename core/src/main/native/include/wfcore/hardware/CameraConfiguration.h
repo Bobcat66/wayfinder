@@ -75,14 +75,16 @@ namespace wf {
     struct CameraConfiguration : public JSONSerializable<CameraConfiguration> {
 
         CameraConfiguration(
+            std::string nickname_,
             std::string devpath_,
             CameraBackend backend_,StreamFormat format_,
             std::unordered_map<CamControl,std::string> controlAliases_,
             std::vector<CameraIntrinsics> calibrations_,
             std::unordered_map<CamControl,int> controls_
-        ) : devpath(std::move(devpath_)), backend(backend_), format(std::move(format_)),
+        ) : nickname(std::move(nickname_)), devpath(std::move(devpath_)), backend(backend_), format(std::move(format_)),
         controlAliases(std::move(controlAliases_)), calibrations(std::move(calibrations_)),
         controls(std::move(controls_)) {}
+        std::string nickname;
         std::string devpath;
         CameraBackend backend;
         StreamFormat format;

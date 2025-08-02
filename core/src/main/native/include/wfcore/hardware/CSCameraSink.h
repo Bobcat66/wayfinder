@@ -21,29 +21,28 @@
 #pragma once
 
 #include "wfcore/video/FrameProvider.h"
-#include <cscore_oo.h>
-#include <cscore_cv.h>
+#include <cscore_raw.h>
+#include <cscore_cpp.h>
+#include <wpi/RawFrame.h>
 #include <memory>
 #include <mutex>
-
+#include "wfcore/common/wfdef.h"
 // A CSCore-based implementation of FrameProvider, which pulls frames from a USB camera 
 namespace wf {
     class CSCameraHandler;
 
-    class CSCameraSink : public FrameProvider {
+    class CSCameraSink : public FrameProvider, private cs::RawSink {
         friend class CSCameraHandler;
     public:
-        CSCameraSink(std::string name_,std::string devPath_, cs::CvSink appSink_, StreamFormat format_);
+        CSCameraSink(std::shared_ptr<CSCameraHandler> handler, std::string name);
         FrameMetadata getFrame(cv::Mat& data) noexcept override;
-        const std::string& getName() const noexcept override { return name; }
-        const std::string& getDevPath() const noexcept { return devPath; }
-        const StreamFormat& getStreamFormat() const noexcept override;
+        std::string getName() const override;
+        WFResult<std::string> getDevPath() const;
+        WFResult<StreamFormat> getStreamFormat() const noexcept override;
     private:
-        void setStreamFormat(StreamFormat format);
-        mutable std::mutex camera_guard;
-        cs::CvSink appSink;
-        std::string devPath;
-        std::string name;
-        StreamFormat format;
+        void acquireSource(std::shared_ptr<CSCameraHandler>& handler);
+        //mutable std::mutex camera_guard_;
+        std::weak_ptr<CSCameraHandler> handler_;
+        wpi::RawFrame raw_buffer_;
     };
 }

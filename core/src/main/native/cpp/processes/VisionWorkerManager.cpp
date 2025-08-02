@@ -50,13 +50,14 @@ namespace wf {
                     if (!std::holds_alternative<ApriltagPipelineConfiguration>(config.pipelineConfig)) {
                         throw invalid_pipeline_configuration(std::format("Pipeline {} is declared as Apriltag Pipeline yet specifies an incompatible configuration!",config.name));
                     }
-                    if (!hardwareManager.getIntrinsics(config.devpath).has_value()) {
+                    auto intrinsics = hardwareManager.getIntrinsics(config.devpath);
+                    if (!intrinsics) {
                         throw intrinsics_not_found(std::format("Attempted to create apriltag PnP pipeline, but no camera intrinsics were specified for camera {} at the given resolution!",config.devpath));
                     }
 
                     // Fetch frame provider from the hardware manager
-                    FrameProvider& frameProvider = hardwareManager.getFrameProvider(config.devpath,std::format("{}_frameprovider",config.name));
-                    StreamFormat hardwareFormat = frameProvider.getStreamFormat();
+                    auto frameProvider = hardwareManager.getFrameProvider(config.devpath,std::format("{}_frameprovider",config.name));
+                    StreamFormat hardwareFormat = frameProvider->getStreamFormat();
 
                     // Build preprocesser
                     std::vector<std::unique_ptr<CVProcessNode<cv::Mat>>> nodes;

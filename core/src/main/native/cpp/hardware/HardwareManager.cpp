@@ -20,94 +20,151 @@
 #include "wfcore/hardware/HardwareManager.h"
 #include "wfcore/hardware/CSCameraHandler.h"
 #include "wfcore/common/logging/LoggerManager.h"
+#include "wfcore/common/logging.h"
 
 namespace wf {
+    using enum WFStatus;
 
-    static loggerPtr logger = LoggerManager::getInstance().getLogger("HardwareManager",LogGroup::Config);
-
-    // Tries to get a camera, throws exception if it doesn't exist
-    const std::unique_ptr<CameraHandler>& HardwareManager::getCCamera(const std::string& devpath) const {
-        auto it = cameras.find(devpath);
+    // This is only for TEMPORARY VIEWS
+    const CameraHandler* HardwareManager::getCamera_(const std::string& nickname) const {
+        auto it = cameras.find(nickname);
         if (it == cameras.end()) {
-            // TODO: refactor this
-            throw std::runtime_error(std::format("Camera {} does not exist!",devpath));
+            // The camera's presence should be checked externally
+            WF_DEBUGLOG(logger(),"Camera {} not found",nickname);
+            return nullptr;
         }
-        return it->second;
+        return it->second.get();
     }
 
-    std::unique_ptr<CameraHandler>& HardwareManager::getCamera(const std::string& devpath) {
-        auto it = cameras.find(devpath);
+    // This is only for TEMPORARY VIEWS
+    CameraHandler* HardwareManager::getCamera_(const std::string& nickname) {
+        auto it = cameras.find(nickname);
         if (it == cameras.end()) {
-            // TODO: refactor this
-            throw std::runtime_error(std::format("Camera {} does not exist!",devpath));
+            // The camera's presence should be checked externally
+            WF_DEBUGLOG(logger(),"Camera {} not found",nickname);
+            return nullptr;
         }
-        return it->second;
+        return it->second.get();
     }
 
     // TODO: Move error handling to exceptions for consistency
-    int HardwareManager::registerCamera(const CameraConfiguration& config) {
+    WFStatusResult HardwareManager::registerCamera(const CameraConfiguration& config) {
         switch (config.backend) {
             case CameraBackend::CSCORE:
-                {
-                    auto handlerPtr = std::make_unique<CSCameraHandler>(config);
-                    if (handlerPtr->getError()) {
-                        throw std::runtime_error(std::format("Error: Invalid cscore configuration for {}, Error code {}",config.devpath,handlerPtr->getError())); // TODO, make this better
+                {   
+                    try {
+                        auto handlerPtr = CSCameraHandler::create(config);
+                        cameras.emplace(config.devpath,std::move(handlerPtr));
+                        return WFStatusResult::success();
+                    } catch (const wfexception& e) {
+                        logger()->error(e.what());
+                        return WFStatusResult::failure(e.status());
                     }
-                    cameras.emplace(config.devpath,std::move(handlerPtr));
-                    return 0;
                 }
             case CameraBackend::REALSENSE: 
-                logger->warn("Realsense is not supported yet. Camera {} not configured",config.devpath);
-                return 2;
+                logger()->error("Realsense is not supported yet. Failed to register camera {}.",config.nickname);
+                return WFStatusResult::failure(NOT_IMPLEMENTED);
             case CameraBackend::LIBCAMERA:
-                logger->warn("Realsense is not supported yet. Camera {} not configured",config.devpath);
-                return 2;
+                logger()->error("Libcamera is not supported yet. Failed to register camera {}.",config.nickname);
+                return WFStatusResult::failure(NOT_IMPLEMENTED);
             case CameraBackend::GSTREAMER: 
-                logger->warn("Realsense is not supported yet. Camera {} not configured",config.devpath);
-                return 2;
+                logger()->error("GStreamer is not supported yet. Failed to register camera {}.",config.nickname);
+                return WFStatusResult::failure(NOT_IMPLEMENTED);
             default: 
-                logger->error("Unrecognized backend specified for {}",config.devpath);
-                return 3;
+                logger()->error("Unrecognized backend specified. Failed to register camera {}",config.nickname);
+                return WFStatusResult::failure(HARDWARE_BAD_BACKEND);
         }
     }
 
-    bool HardwareManager::cameraRegistered(const std::string& devpath) const noexcept {
-        auto it = cameras.find(devpath);
+    bool HardwareManager::cameraRegistered(const std::string& nickname) const noexcept {
+        auto it = cameras.find(nickname);
         return (it != cameras.end());
     }
 
-    CameraBackend HardwareManager::getBackend(const std::string& devpath) const {
-        return getCCamera(devpath)->getBackend();
+    WFResult<CameraBackend> HardwareManager::getBackend(const std::string& nickname) const {
+        if (!cameraRegistered(nickname)) {
+            logger()->warn("Camera '{}' is not registered",nickname);
+            return WFResult<CameraBackend>::failure(HARDWARE_BAD_CAMERA);
+        }
+        return getCamera_(nickname)->getBackend();
     }
 
-    FrameProvider& HardwareManager::getFrameProvider(const std::string& devpath, const std::string& name) {
-        return getCamera(devpath)->getFrameProvider(name);
-    }
-
-    void HardwareManager::setStreamFormat(const std::string& devpath, const StreamFormat& format) {
-        auto err = getCamera(devpath)->setStreamFormat(format);
-        if (err) {
-            throw std::runtime_error(std::format("Attempted to configure {} with invalid stream format!",devpath));
+    WFResult<std::shared_ptr<FrameProvider>> HardwareManager::getFrameProvider(const std::string& nickname, const std::string& name) {
+        if (!cameraRegistered(nickname)) {
+            logger()->warn("Camera '{}' is not registered",nickname);
+            return WFResult<std::shared_ptr<FrameProvider>>::failure(HARDWARE_BAD_CAMERA);
+        }
+        if (auto res = getCamera_(nickname)->getFrameProvider(name)) {
+            return res;
+        } else {
+            logger()->error(res.what());
+            return res;
         }
     }
 
-    StreamFormat HardwareManager::getStreamFormat(const std::string& devpath) {
-        return getCamera(devpath)->getStreamFormat();
+    WFStatusResult HardwareManager::setStreamFormat(const std::string& nickname, const StreamFormat& format) {
+        if (!cameraRegistered(nickname)) {
+            logger()->warn("Camera '{}' is not registered",nickname);
+            return WFStatusResult::failure(HARDWARE_BAD_CAMERA);
+        }
+        if (auto res = getCamera_(nickname)->setStreamFormat(format)) {
+            return res;
+        } else {
+            logger()->error(res.what());
+            return res;
+        }
     }
 
-    std::optional<CameraIntrinsics> HardwareManager::getIntrinsics(const std::string& devpath) {
-        return getCamera(devpath)->getIntrinsics();
+    WFResult<StreamFormat> HardwareManager::getStreamFormat(const std::string& nickname) {
+        if (!cameraRegistered(nickname)) {
+            logger()->warn("Camera '{}' is not registered",nickname);
+            return WFResult<StreamFormat>::failure(HARDWARE_BAD_CAMERA);
+        }
+        return getCamera_(nickname)->getStreamFormat();
     }
 
-    void HardwareManager::setControl(const std::string& devpath, CamControl control, int value) {
-        getCamera(devpath)->setControl(control,value);
+    WFResult<CameraIntrinsics> HardwareManager::getIntrinsics(const std::string& nickname) {
+        if (!cameraRegistered(nickname)) {
+            logger()->warn("Camera '{}' is not registered",nickname);
+            return WFResult<CameraIntrinsics>::failure(HARDWARE_BAD_CAMERA);
+        }
+        auto opt = getCamera_(nickname)->getIntrinsics();
+        return opt 
+            ? WFResult<CameraIntrinsics>::success(std::move(opt.value()))
+            : WFResult<CameraIntrinsics>::failure(HARDWARE_NO_CALIB);
     }
 
-    int HardwareManager::getControl(const std::string& devpath, CamControl control) {
-        return getCamera(devpath)->getControl(control);
+    WFStatusResult HardwareManager::setControl(const std::string& nickname, CamControl control, int value) {
+        if (!cameraRegistered(nickname)) {
+            logger()->warn("Camera '{}' is not registered",nickname);
+            return WFStatusResult::failure(HARDWARE_BAD_CAMERA);
+        }
+        if (auto res = getCamera_(nickname)->setControl(control,value)) {
+            return res;
+        } else {
+            logger()->error(res.what());
+            return res;
+        }
     }
 
-    const std::unordered_set<CamControl>& HardwareManager::getSupportedControls(const std::string& devpath) {
-        return getCamera(devpath)->getSupportedControls();
+    WFResult<int> HardwareManager::getControl(const std::string& nickname, CamControl control) {
+        if (!cameraRegistered(nickname)) {
+            logger()->warn("Camera '{}' is not registered",nickname);
+            return WFResult<int>::failure(HARDWARE_BAD_CAMERA);
+        }
+        if (auto res = getCamera_(nickname)->getControl(control)) {
+            return res;
+        } else {
+            logger()->error(res.what());
+            return res;
+        }
+    }
+
+    WFResult<const std::unordered_set<CamControl>*> HardwareManager::getSupportedControls(const std::string& nickname) {
+        if (!cameraRegistered(nickname)) {
+            logger()->warn("Camera '{}' is not registered",nickname);
+            return WFResult<const std::unordered_set<CamControl>*>::failure(HARDWARE_BAD_CAMERA);
+        }
+        return getCamera_(nickname)->getSupportedControls();
     }
 }

@@ -59,6 +59,7 @@ namespace wf {
             this->status_ = nominal_status;
             this->errorMsg_.clear();
         }
+
     protected:
         mutable std::mutex status_mtx;
         // error message is only meaningful when the status code isn't nominal

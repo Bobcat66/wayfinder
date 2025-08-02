@@ -59,6 +59,7 @@
         }
     },
     "properties": {
+        "nickname": { "type": "string" },
         "devpath": { "type": "string" },
         "backend": { 
             "type": "string", 
@@ -86,6 +87,7 @@
         }
     },
     "required": [
+        "nickname",
         "devpath",
         "backend",
         "format",

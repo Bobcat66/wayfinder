@@ -48,6 +48,7 @@ namespace wf {
         FILE_NOT_OPENED =           0x00000005,
         FILE_NOT_FOUND =            0x00000006,
         NOT_IMPLEMENTED =           0x00000007,
+        BAD_ACQUIRE =               0x00000008,
         UNKNOWN =                   0x000fffff,
 
         PIPELINE_BASE =             0x00100000,
@@ -64,6 +65,13 @@ namespace wf {
         INFERENCE_UNKNOWN =         0x003fffff,
 
         HARDWARE_BASE =             0x00400000,
+        HARDWARE_BAD_CONTROL =      0x00400001,
+        HARDWARE_BAD_FORMAT =       0x00400002,
+        HARDWARE_CSCORE =           0x00400003,
+        HARDWARE_DISCONNECT =       0x00400004,
+        HARDWARE_BAD_BACKEND =      0x00400005,
+        HARDWARE_BAD_CAMERA =       0x00400006,
+        HARDWARE_NO_CALIB =         0x00400007,
         HARDWARE_UNKNOWN =          0x004fffff,
 
         NETWORK_BASE =              0x00500000,
@@ -115,6 +123,7 @@ namespace wf {
             case WFStatus::FILE_NOT_OPENED:             return "FILE_NOT_OPENED";
             case WFStatus::FILE_NOT_FOUND:              return "FILE_NOT_FOUND";
             case WFStatus::NOT_IMPLEMENTED:             return "NOT_IMPLEMENTED";
+            case WFStatus::BAD_ACQUIRE:                 return "BAD_ACQUIRE";
             case WFStatus::UNKNOWN:                     return "UNKNOWN";
 
             case WFStatus::PIPELINE_BASE:               return "PIPELINE_BASE";
@@ -131,6 +140,13 @@ namespace wf {
             case WFStatus::INFERENCE_UNKNOWN:           return "INFERENCE_UNKNOWN";
 
             case WFStatus::HARDWARE_BASE:               return "HARDWARE_BASE";
+            case WFStatus::HARDWARE_BAD_CONTROL:        return "HARDWARE_BAD_CONTROL";
+            case WFStatus::HARDWARE_BAD_FORMAT:         return "HARDWARE_BAD_FORMAT";
+            case WFStatus::HARDWARE_CSCORE:             return "HARDWARE_CSCORE";
+            case WFStatus::HARDWARE_DISCONNECT:         return "HARDWARE_DISCONNECT";
+            case WFStatus::HARDWARE_BAD_BACKEND:        return "HARDWARE_BAD_BACKEND";
+            case WFStatus::HARDWARE_BAD_CAMERA:         return "HARDWARE_BAD_CAMERA";
+            case WFStatus::HARDWARE_NO_CALIB:           return "HARDWARE_NO_CALIB";
             case WFStatus::HARDWARE_UNKNOWN:            return "HARDWARE_UNKNOWN";
 
             case WFStatus::NETWORK_BASE:                return "NETWORK_BASE";

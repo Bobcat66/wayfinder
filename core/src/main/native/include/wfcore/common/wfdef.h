@@ -23,6 +23,7 @@
 #define WF_TOSTRING_IMPL(x) #x
 #define WF_TOSTRING(x) WF_TOSTRING_IMPL(x)
 
+
 // Cross-platform GCC macros
 #ifdef __GNUC__
 #define WF_FORCEINLINE __attribute__((always_inline))

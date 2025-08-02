@@ -25,38 +25,46 @@
 #include "wfcore/video/video_types.h"
 #include "wfcore/video/FrameProvider.h"
 #include "wfcore/hardware/CameraHandler.h"
+#include "wfcore/common/status.h"
 #include <memory>
 #include <optional>
 
+// Camera Handlers WILL NOT be destroyed once created. They effectively have unlimited lifetime
+// This rule applies even if the camera is disconnected or has some other persistent fault.
+// They can be deactivated, but never deallocated
+// This allows us to access them by reference without worrying about lifetime management
 namespace wf {
-    class HardwareManager {
+    class HardwareManager : public WFConcurrentLoggedStatusfulObject {
     public:
+        HardwareManager() : WFConcurrentLoggedStatusfulObject("HardwareManager",LogGroup::General) {}
         // TODO: Refactor exception handling
-        int registerCamera(const CameraConfiguration& config);
+        WFStatusResult registerCamera(const CameraConfiguration& config);
 
-        bool cameraRegistered(const std::string& devpath) const noexcept;
+        bool cameraRegistered(const std::string& nickname) const noexcept;
 
-        CameraBackend getBackend(const std::string& devpath) const;
+        WFResult<CameraBackend> getBackend(const std::string& nickname) const;
 
-        FrameProvider& getFrameProvider(const std::string& devpath, const std::string& name);
+        WFResult<std::shared_ptr<FrameProvider>> getFrameProvider(const std::string& nickname, const std::string& provider_name);
 
-        void setStreamFormat(const std::string& devpath, const StreamFormat& format);
+        WFStatusResult setStreamFormat(const std::string& nickname, const StreamFormat& format);
 
-        StreamFormat getStreamFormat(const std::string& devpath);
+        WFResult<StreamFormat> getStreamFormat(const std::string& nickname);
 
-        std::optional<CameraIntrinsics> getIntrinsics(const std::string& devpath);
+        WFResult<CameraIntrinsics> getIntrinsics(const std::string& nickname);
 
-        void setControl(const std::string& devpath, CamControl control, int value);
+        WFStatusResult setControl(const std::string& nickname, CamControl control, int value);
 
-        int getControl(const std::string& devpath, CamControl control);
+        WFResult<int> getControl(const std::string& nickname, CamControl control);
 
-        const std::unordered_set<CamControl>& getSupportedControls(const std::string& devpath);
+        WFResult<const std::unordered_set<CamControl>*> getSupportedControls(const std::string& nickname);
 
-        // TODO: Add method to query supported stream formats
+        WFResult<const std::vector<StreamFormat>*> getSupportedFormats(const std::string& nickname);
+
+        WFResult<CameraConfiguration> getCameraConfiguration(const std::string& nickname);
 
     private:
-        const std::unique_ptr<CameraHandler>& getCCamera(const std::string& devpath) const;
-        std::unique_ptr<CameraHandler>& getCamera(const std::string& devpath);
-        std::unordered_map<std::string,std::unique_ptr<CameraHandler>> cameras;
+        const CameraHandler* getCamera_(const std::string& devpath) const;
+        CameraHandler* getCamera_(const std::string& devpath);
+        std::unordered_map<std::string,std::shared_ptr<CameraHandler>> cameras;
     };
 }

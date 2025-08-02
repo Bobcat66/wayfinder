@@ -62,6 +62,8 @@ namespace wf {
             this->status_ = nominal_status;
             this->errorMsg_.clear();
         }
+
+
     protected:
 
         ConcurrentLoggedStatusfulObject(const std::string& name, const spdlog::level::level_enum logLevel) {

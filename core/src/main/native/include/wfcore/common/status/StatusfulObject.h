@@ -50,6 +50,7 @@ namespace wf {
     template <status_code status_type, status_type nominal_status, const char* (*StringMapper) (status_type)>
     class StatusfulObject {
     public:
+    
         virtual ~StatusfulObject() = default;
 
         [[nodiscard]]

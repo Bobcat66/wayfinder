@@ -32,11 +32,12 @@ namespace wf {
         Ok
     };
 
-    class FrameProvider : public WFConcurrentStatusfulObject {
+    // FrameProvider does not fully subclass StatusfulObject because they can also just act as proxies for the status of their handlers
+    class FrameProvider {
     public:
         virtual FrameMetadata getFrame(cv::Mat& mat) = 0;
         virtual ~FrameProvider() noexcept = default;
-        virtual const std::string& getName() const noexcept = 0;
-        virtual const StreamFormat& getStreamFormat() const noexcept = 0;
+        virtual std::string getName() const = 0;
+        virtual WFResult<StreamFormat> getStreamFormat() const noexcept = 0;
     };
 }

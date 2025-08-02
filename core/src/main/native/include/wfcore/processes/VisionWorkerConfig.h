@@ -10,7 +10,7 @@
 
 namespace wf {
     struct VisionWorkerConfig : public JSONSerializable<VisionWorkerConfig> {
-        std::string devpath;
+        std::string camera_nickname;
         std::string name;
         StreamFormat inputFormat; // Format of the input stream
         StreamFormat outputFormat; // Format of the output stream
@@ -24,7 +24,7 @@ namespace wf {
         > pipelineConfig;
 
         VisionWorkerConfig(
-            std::string devpath_, std::string name_,
+            std::string camera_nickname_, std::string name_,
             StreamFormat inputFormat_, StreamFormat outputFormat_,
             bool stream_,
             int raw_port_, int processed_port_,
@@ -33,7 +33,7 @@ namespace wf {
                 ApriltagPipelineConfiguration,
                 ObjectDetectionPipelineConfiguration
             > pipelineConfig_
-        ) : devpath(std::move(devpath_)), name(std::move(name_))
+        ) : camera_nickname(std::move(camera_nickname_)), name(std::move(name_))
         , inputFormat(std::move(inputFormat_)), outputFormat(std::move(outputFormat_))
         , stream(stream_), raw_port(raw_port_), processed_port(processed_port_)
         , pipelineConfig(std::move(pipelineConfig_)) {}

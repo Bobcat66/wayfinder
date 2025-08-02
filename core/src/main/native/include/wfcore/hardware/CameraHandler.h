@@ -22,6 +22,7 @@
 #include "wfcore/video/FrameProvider.h"
 #include "wfcore/video/video_types.h"
 #include "wfcore/hardware/CameraConfiguration.h"
+#include "wfcore/common/status.h"
 #include <memory>
 #include <vector>
 #include <unordered_set>
@@ -30,29 +31,33 @@
 
 namespace wf {
 
-    class CameraHandler {
+    class CameraHandler : public WFConcurrentStatusfulObject {
     public:
         virtual ~CameraHandler() noexcept = default;
 
         virtual CameraBackend getBackend() const noexcept = 0;
 
-        virtual FrameProvider& getFrameProvider(const std::string& name) = 0;
+        virtual WFResult<std::shared_ptr<FrameProvider>> getFrameProvider(const std::string& name) = 0;
 
-        virtual int setStreamFormat(const StreamFormat& format) = 0;
+        virtual WFStatusResult setStreamFormat(const StreamFormat& format) = 0;
 
-        virtual const StreamFormat& getStreamFormat() = 0;
+        virtual StreamFormat getStreamFormat() = 0;
+
+        // Performs periodic system health checks and monitoring
+        virtual void periodic() = 0;
 
         virtual std::optional<CameraIntrinsics> getIntrinsics() = 0;
 
-        virtual void setControl(CamControl control, int value) = 0;
+        virtual WFStatusResult setControl(CamControl control, int value) = 0;
 
-        virtual int getControl(CamControl control) = 0;
+        virtual WFResult<int> getControl(CamControl control) = 0;
 
-        virtual const std::unordered_set<CamControl>& getSupportedControls() = 0;
+        virtual const std::unordered_set<CamControl>* getSupportedControls() = 0;
 
-        virtual const std::vector<StreamFormat>& getSupportedFormats() = 0;
+        virtual const std::vector<StreamFormat>* getSupportedFormats() = 0;
 
-        [[ deprecated ]]
-        virtual int getError() = 0;
+        virtual std::string getNickname() const = 0;
+
+        virtual CameraConfiguration getConfiguration() = 0;
     };
 }

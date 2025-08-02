@@ -40,6 +40,11 @@ namespace wf {
         constexpr StatusfulResult(status_type status, std::optional<T> val = std::nullopt) noexcept
         : status_(status), optval(std::move(val)), msg_(std::nullopt) {}
 
+        // Syntactic sugar for successful cases
+        template <typename U, typename = std::enable_if_t<std::is_convertible_v<U, T>>>
+        StatusfulResult(U&& val)
+        : status_(nominal_status), optval(std::forward<U>(val)), msg_(std::nullopt) {}
+
         StatusfulResult(status_type status, std::string msg, std::optional<T> val = std::nullopt) noexcept
         : status_(status), optval(std::move(val)), msg_(std::move(msg)) {}
 
