@@ -189,6 +189,7 @@ TEST(JSONTests,validatorTest) {
     // Control, should pass validation
     std::string control_json
 = R"({
+    "nickname": "test_camera",
     "devpath": "/dev/video0",
     "backend": "CSCORE",
     "format": {
@@ -240,6 +241,7 @@ TEST(JSONTests,validatorTest) {
     // /backend is missing
     std::string bad_json_0
 = R"({
+    "nickname": "test_camera",
     "devpath": "/dev/video0",
     "format": {
         "fps": 10,
@@ -290,6 +292,7 @@ TEST(JSONTests,validatorTest) {
     // /format/frameFormat/height is missing
     std::string bad_json_1
 = R"({
+    "nickname": "test_camera",
     "devpath": "/dev/video0",
     "backend": "CSCORE",
     "format": {
@@ -340,6 +343,7 @@ TEST(JSONTests,validatorTest) {
     // /calibrations/0/matrix/fx is a string
     std::string bad_json_2
 = R"({
+    "nickname": "test_camera",
     "devpath": "/dev/video0",
     "backend": "CSCORE",
     "format": {
@@ -391,6 +395,7 @@ TEST(JSONTests,validatorTest) {
     // /calibrations/0/distortion is 4 elements long
     std::string bad_json_3
 = R"({
+    "nickname": "test_camera",
     "devpath": "/dev/video0",
     "backend": "CSCORE",
     "format": {
@@ -441,6 +446,7 @@ TEST(JSONTests,validatorTest) {
     // /calibrations/0/distortion/3 is a string
     std::string bad_json_4
 = R"({
+    "nickname": "test_camera",
     "devpath": "/dev/video0",
     "backend": "CSCORE",
     "format": {
@@ -492,6 +498,7 @@ TEST(JSONTests,validatorTest) {
     // /backend is misspelled
     std::string bad_json_5
 = R"({
+    "nickname": "test_camera",
     "devpath": "/dev/video0",
     "backend": "CSCOR",
     "format": {
@@ -543,6 +550,7 @@ TEST(JSONTests,validatorTest) {
     // /controlAliases/SHARPNES is misspelled
     std::string bad_json_6
 = R"({
+    "nickname": "test_camera",
     "devpath": "/dev/video0",
     "backend": "CSCORE",
     "format": {

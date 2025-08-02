@@ -1,4 +1,5 @@
 {
+    "nickname": "mock_camera",
     "devpath": "/dev/video0",
     "backend": "CSCORE",
     "format": {

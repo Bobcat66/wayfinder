@@ -72,6 +72,7 @@ TEST(JSONLoaderTests,localLoadTest) {
 
     wf::globalLogger()->info("Validating parsed camera configuration");
     auto mockconf = std::move(mkcfRes.value());
+    EXPECT_EQ("mock_camera",mockconf.nickname);
     EXPECT_EQ("/dev/video0",mockconf.devpath);
     EXPECT_EQ(wf::CameraBackend::CSCORE,mockconf.backend);
     EXPECT_EQ(wf::StreamFormat(10,{wf::ImageEncoding::YUYV,1280,720}),mockconf.format);
