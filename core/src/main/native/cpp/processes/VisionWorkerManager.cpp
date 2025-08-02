@@ -44,21 +44,33 @@ namespace wf {
             case PipelineType::Apriltag:
                 {
                     // Check to make sure the configuration passed is valid
-                    if (!hardwareManager.cameraRegistered(config.devpath)) {
-                        throw camera_not_found(std::format("Camera {} not found",config.devpath));
-                    }
-                    if (!std::holds_alternative<ApriltagPipelineConfiguration>(config.pipelineConfig)) {
-                        throw invalid_pipeline_configuration(std::format("Pipeline {} is declared as Apriltag Pipeline yet specifies an incompatible configuration!",config.name));
-                    }
-                    auto intrinsics = hardwareManager.getIntrinsics(config.devpath);
-                    if (!intrinsics) {
-                        throw intrinsics_not_found(std::format("Attempted to create apriltag PnP pipeline, but no camera intrinsics were specified for camera {} at the given resolution!",config.devpath));
-                    }
+                    if (!hardwareManager.cameraRegistered(config.camera_nickname))
+                        throw camera_not_found(std::format("Camera {} not found",config.camera_nickname));
+                    if (!std::holds_alternative<ApriltagPipelineConfiguration>(config.pipelineConfig))
+                        throw invalid_pipeline_configuration(
+                            std::format("Pipeline {} is declared as Apriltag Pipeline yet specifies an incompatible configuration!",config.camera_nickname)
+                        );
+                    auto intrinsics = hardwareManager.getIntrinsics(config.camera_nickname);
+                    if (!intrinsics)
+                        throw intrinsics_not_found(
+                            std::format("Attempted to create apriltag PnP pipeline, but no camera intrinsics were specified for camera {} at the given resolution!",config.camera_nickname)
+                        );
 
                     // Fetch frame provider from the hardware manager
-                    auto frameProvider = hardwareManager.getFrameProvider(config.devpath,std::format("{}_frameprovider",config.name));
-                    StreamFormat hardwareFormat = frameProvider->getStreamFormat();
-
+                    auto frameProviderRes = hardwareManager.getFrameProvider(
+                        config.camera_nickname,
+                        std::format("{}_frameprovider",config.camera_nickname)
+                    );
+                    if (!frameProviderRes)
+                        throw wf_result_error(frameProviderRes);
+                    
+                    auto frameProvider = std::move(frameProviderRes.value());
+                        
+                    auto hardwareFormatRes = frameProvider->getStreamFormat();
+                    if (!hardwareFormatRes)
+                        throw wf_result_error(hardwareFormatRes);
+                    
+                    auto hardwareFormat = std::move(hardwareFormatRes.value());
                     // Build preprocesser
                     std::vector<std::unique_ptr<CVProcessNode<cv::Mat>>> nodes;
                     if (config.inputFormat.frameFormat == hardwareFormat.frameFormat) {
@@ -68,7 +80,7 @@ namespace wf {
                             config.inputFormat.frameFormat.height != hardwareFormat.frameFormat.height
                             || config.inputFormat.frameFormat.width != hardwareFormat.frameFormat.width
                         ) {
-                            this->logger()->warn("Resolution for pipeline {} differs from native resolution for camera {}. This could cause issues with calibration",config.name,config.devpath);
+                            this->logger()->warn("Resolution for pipeline {} differs from native resolution for camera {}. This could cause issues with calibration",config.name,config.camera_nickname);
                             nodes.push_back(std::move(std::make_unique<ResizeNode<cv::Mat>>(
                                 config.inputFormat.frameFormat.width,
                                 config.inputFormat.frameFormat.height
@@ -83,15 +95,15 @@ namespace wf {
                     CVProcessPipe preprocesser(hardwareFormat.frameFormat,std::move(nodes));
                     auto pipeline = std::make_unique<ApriltagPipeline>(
                         std::get<ApriltagPipelineConfiguration>(config.pipelineConfig),
-                        hardwareManager.getIntrinsics(config.devpath).value(),
+                        intrinsics.value(),
                         atagConfig,
                         atagField
                     );
 
                     // Build output consumer
                     auto outputConsumer = std::make_unique<ApriltagPipelineConsumer>(
-                        config.name, config.devpath,
-                        hardwareManager.getIntrinsics(config.devpath).value(), 
+                        config.name, config.camera_nickname,
+                        intrinsics.value(), 
                         config.inputFormat.frameFormat, 
                         config.raw_port, config.processed_port,
                         config.outputFormat,

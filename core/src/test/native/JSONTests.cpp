@@ -151,6 +151,7 @@ TEST(JSONTests,hardwareTypesTest) {
     std::cout << "Test intrinsics 2 decode: " << test_intrinsics_2_decode.dump() << std::endl;
 
     wf::CameraConfiguration test_camconfig_orig(
+        "test_camera",
         "/dev/video0",
         wf::CameraBackend::CSCORE,
         {30,{wf::ImageEncoding::YUYV,1920,1080}},

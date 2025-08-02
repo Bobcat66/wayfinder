@@ -24,6 +24,7 @@
 #include <format>
 #include "wfcore/common/wfdef.h"
 #include <iostream>
+#include <cstdlib>
 
 // This assertion macro should only be used OUTSIDE of the common directory.
 // Inside the common directory, use regular C-style assertions, to avoid circular
@@ -31,7 +32,7 @@
 #ifndef NDEBUG
 #define WF_Assert(expr)                                                     \
     do {                                                                    \
-        if (!expr) {                                                        \
+        if (!(expr)) {                                                      \
             std::string msg                                                 \
                 = std::format(                                              \
                     "Assertion failed: {} at {}:{} in function {}",         \
@@ -49,13 +50,34 @@
             throw wf::bad_assert(msg);                                      \
         }                                                                   \
     } while (0)
+#define WF_FatalAssert(expr)                                                \
+    do {                                                                    \
+        if (!(expr)) {                                                      \
+            std::string msg                                                 \
+                = std::format(                                              \
+                    "Assertion failed: {} at {}:{} in function {}",         \
+                    WF_TOSTRING(expr),                                      \
+                    __FILE__,                                               \
+                    __LINE__,                                               \
+                    __func__                                                \
+                );                                                          \
+            auto& logger = globalLogger();                                  \
+            if (logger){                                                    \
+                logger->error(msg);                                         \
+            } else {                                                        \
+                std::cerr << msg << std::endl;                              \
+            }                                                               \
+            std::abort();                                                   \
+        }                                                                   \
+    } while (0)
 #else
 #define WF_Assert(expr)
+#define WF_FatalAssert(expr)
 #endif
 
 #define WF_AssertAlways(expr)                                               \
     do {                                                                    \
-        if (!expr) {                                                        \
+        if (!(expr)) {                                                      \
             std::string msg                                                 \
                 = std::format(                                              \
                     "Runtime Assertion failed: {} at {}:{} in function {}", \
@@ -71,5 +93,26 @@
                 std::cerr << msg << std::endl;                              \
             }                                                               \
             throw wf::bad_assert(msg);                                      \
+        }                                                                   \
+    } while (0)
+
+#define WF_FatalAssertAlways(expr)                                          \
+    do {                                                                    \
+        if (!(expr)) {                                                      \
+            std::string msg                                                 \
+                = std::format(                                              \
+                    "Assertion failed: {} at {}:{} in function {}",         \
+                    WF_TOSTRING(expr),                                      \
+                    __FILE__,                                               \
+                    __LINE__,                                               \
+                    __func__                                                \
+                );                                                          \
+            auto& logger = globalLogger();                                  \
+            if (logger){                                                    \
+                logger->error(msg);                                         \
+            } else {                                                        \
+                std::cerr << msg << std::endl;                              \
+            }                                                               \
+            std::abort();                                                   \
         }                                                                   \
     } while (0)

@@ -50,13 +50,13 @@ namespace wf {
 
         auto format = locked->getStreamFormat().frameFormat;
         int cvType = getCVTypeFromEncoding(format.encoding);
-        WF_Assert(format.height == raw_buffer_.height && format.width == raw_buffer_.width);
+        WF_FatalAssert(format.height == raw_buffer_.height && format.width == raw_buffer_.width);
 
         data.create(format.height, format.width, cvType);
 
-        WF_Assert(data.step == raw_buffer_.stride);
+        WF_FatalAssert(data.step == raw_buffer_.stride);
         size_t totalBytes = format.height * raw_buffer_.stride;
-        WF_Assert(data.isContinuous());
+        WF_FatalAssert(data.isContinuous());
         std::memcpy(data.data, raw_buffer_.data, totalBytes);
 
         return FrameMetadata(micros, format);

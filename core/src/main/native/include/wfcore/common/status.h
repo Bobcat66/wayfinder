@@ -52,6 +52,7 @@ namespace wf {
         UNKNOWN =                   0x000fffff,
 
         PIPELINE_BASE =             0x00100000,
+        PIPELINE_BAD_FRAME =        0x00100001,
         PIPELINE_UNKNOWN =          0x001fffff,
 
         APRILTAG_BASE =             0x00200000,
@@ -127,6 +128,7 @@ namespace wf {
             case WFStatus::UNKNOWN:                     return "UNKNOWN";
 
             case WFStatus::PIPELINE_BASE:               return "PIPELINE_BASE";
+            case WFStatus::PIPELINE_BAD_FRAME:          return "PIPELINE_BAD_FRAME";
             case WFStatus::PIPELINE_UNKNOWN:            return "PIPELINE_UNKNOWN";
 
             case WFStatus::APRILTAG_BASE:               return "APRILTAG_BASE";

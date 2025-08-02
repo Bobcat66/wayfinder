@@ -38,23 +38,11 @@
 
 namespace wf {
 
-    enum class VisionWorkerStatus {
-        Ok,
-        ProviderError,
-        PreprocesserError,
-        PipelineError,
-        OutputError,
-        CameraDisconnected,
-        ProviderTimedOut,
-        InvalidFrame,
-        Unknown
-    };
-
     class VisionWorker : public WFConcurrentLoggedStatusfulObject {
     public:
         VisionWorker(
             std::string name_,
-            FrameProvider& frameProvider_, 
+            std::shared_ptr<FrameProvider> frameProvider_, 
             CVProcessPipe<cv::Mat> preprocessor_,
             std::unique_ptr<Pipeline> pipeline_,
             std::unique_ptr<PipelineOutputConsumer> outputConsumer_
@@ -72,7 +60,7 @@ namespace wf {
         CVProcessPipe<cv::Mat> preprocesser;
         std::unique_ptr<Pipeline> pipeline;
         std::unique_ptr<PipelineOutputConsumer> outputConsumer;
-        FrameProvider& frameProvider;
+        std::shared_ptr<FrameProvider> frameProvider;
         cv::Mat rawFrameBuffer;
         cv::Mat ppFrameBuffer;
     };

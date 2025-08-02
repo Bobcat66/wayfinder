@@ -31,13 +31,12 @@ namespace wf {
     : modelColorSpace(modelColorSpace_), engine(std::move(engine_)), intrinsics(std::move(intrinsics_)) {
         updatePostprocParams();
     }
-    PipelineResult ObjectDetectionPipeline::process(const cv::Mat& data, const FrameMetadata& meta) noexcept {
-        WF_Assert(data.rows == engine->getTensorParameters().height && data.cols == engine->getTensorParameters().width);
+    WFResult<PipelineResult> ObjectDetectionPipeline::process(const cv::Mat& data, const FrameMetadata& meta) noexcept {
+        WF_FatalAssert(data.rows == engine->getTensorParameters().height && data.cols == engine->getTensorParameters().width);
         auto infres = engine->infer(data,meta,bbox_buffer);
-        if (!infres) {
-            this->reportError(infres);
-            return PipelineResult::NullResult();
-        }
+        if (!infres)
+            return WFResult<PipelineResult>::propagateFail(infres);
+        
         std::vector<ObjectDetection> detections;
         detections.reserve(bbox_buffer.size());
         pixelCorner_buffer.clear();
@@ -89,7 +88,6 @@ namespace wf {
             );
         }
 
-        reportOk();
         return PipelineResult::ObjectDetectionResult(
             meta.micros,
             std::move(detections)

@@ -33,11 +33,11 @@ namespace impl {
 
 namespace wf {
 
-    using enum VisionWorkerStatus;
+    using enum WFStatus;
     
     VisionWorker::VisionWorker(
         std::string name_,
-        FrameProvider& frameProvider_,
+        std::shared_ptr<FrameProvider> frameProvider_,
         CVProcessPipe<cv::Mat> preprocesser_, 
         std::unique_ptr<Pipeline> pipeline_,
         std::unique_ptr<PipelineOutputConsumer> outputConsumer_
@@ -48,7 +48,10 @@ namespace wf {
     , pipeline(std::move(pipeline_))
     , outputConsumer(std::move(outputConsumer_)) 
     , WFConcurrentLoggedStatusfulObject(name,LogGroup::General) {
-        auto& rawformat = frameProvider.getStreamFormat().frameFormat;
+        auto sfres = frameProvider->getStreamFormat();
+        if (!sfres)
+            throw wf_result_error(sfres);
+        auto rawformat = sfres.value().frameFormat;
         rawFrameBuffer.create(
             rawformat.width,
             rawformat.height,
@@ -75,34 +78,29 @@ namespace wf {
     void VisionWorker::run() noexcept {
         while (running.load()) {
             std::lock_guard<std::mutex> lock(pipeGuard);
-            auto rawmeta = frameProvider.getFrame(rawFrameBuffer);
-            if (!(frameProvider.ok())) {
+            if (!ok()) continue;
+            auto rawmeta = frameProvider->getFrame(rawFrameBuffer);
+            if (!rawmeta) {
                 //const auto errmsg(frameProvider.getError().value());
-                //this->reportError(ProviderError,errmsg);
+                this->reportError(rawmeta.status);
                 continue;
             }
             // The expected frame formats are negotiated during configuration, all we need during runtime is a simple sanity check
             if (!impl::validateFrame(rawFrameBuffer,rawmeta)) {
-                //this->reportError(InvalidFrame,"Invalid frame received from frame provider");
+                this->reportError(PIPELINE_BAD_FRAME,"Bad frame received from source");
                 continue;
             }
             auto ppmeta = preprocesser.processFrame(rawFrameBuffer,ppFrameBuffer,rawmeta);
             if (!impl::validateFrame(ppFrameBuffer,ppmeta)) {
-                //this->reportError(InvalidFrame,"Invalid frame received from preprocesser");
+                this->reportError(PIPELINE_BAD_FRAME,"Bad frame received from preprocesser");
                 continue;
             }
             auto res = pipeline->process(ppFrameBuffer,ppmeta);
-            if (!(pipeline->ok())) {
-                // TODO: More robust error handling
-                //const auto errmsg(pipeline->getError().value());
-                //this->reportError(
-                //    VisionWorkerStatus::PipelineError,
-                //    "Error in pipeline: {}", errmsg
-                //);
+            if (!res) {
+                this->reportError(res);
                 continue;
             }
-            outputConsumer->accept(ppFrameBuffer,ppmeta,res);
-            this->reportOk();
+            outputConsumer->accept(ppFrameBuffer,ppmeta,res.value());
         }
     }
 }

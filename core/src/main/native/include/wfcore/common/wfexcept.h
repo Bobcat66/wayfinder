@@ -87,6 +87,18 @@ namespace wf {
     WF_DEFEXCEPT(failed_resource_acquisition,UNKNOWN,"Failed resource acquisition")
     WF_DEFEXCEPT(json_error,UNKNOWN,"JSON Error")
     WF_DEFEXCEPT(unknown_exception,UNKNOWN,"Unknown exception")
+
+    class wf_result_error : public wfexception {
+    public:
+        template <typename T>
+        wf_result_error(WFResult<T> result) 
+        : status_(result.status()), msg_(result.what()) {}
+        const char* what() const noexcept override { return msg_.c_str(); }
+        WFStatus status() const noexcept override { return status_; }
+    private:
+        std::string msg_;
+        WFStatus status_;
+    };
 }
 
 #undef WF_DEFEXCEPT

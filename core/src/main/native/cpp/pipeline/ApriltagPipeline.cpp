@@ -67,17 +67,17 @@ namespace wf {
         }
     }
 
-    PipelineResult ApriltagPipeline::process(const cv::Mat& data, const FrameMetadata& meta) noexcept {
-        WF_Assert(data.type() == CV_8UC1);
+    WFResult<PipelineResult> ApriltagPipeline::process(const cv::Mat& data, const FrameMetadata& meta) noexcept {
+        WF_FatalAssert(data.type() == CV_8UC1);
         auto detectres = detector.detect(data);
-        if (!detectres){
-            this->reportError(detectres);
-            return PipelineResult::NullResult();
-        }
+        if (!detectres)
+            return WFResult<PipelineResult>::propagateFail(detectres);
+        
         auto detections = std::move(detectres.value());
         std::erase_if(detections, [this](ApriltagDetection detection) {
             return this->config.detectorExcludes.contains(detection.id);
         });
+
         std::vector<ApriltagRelativePoseObservation> atagPoses;
         if (config.solveTagRelative) {
             for (auto detection : detections) {
@@ -98,7 +98,6 @@ namespace wf {
             intrinsics,
             config.SolvePNPExcludes
         );
-        this->reportOk();
         return PipelineResult::ApriltagResult(
             meta.micros,
             std::move(detections),

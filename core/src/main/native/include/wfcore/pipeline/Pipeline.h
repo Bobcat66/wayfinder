@@ -30,10 +30,10 @@
 
 namespace wf {
 
-    class Pipeline : public WFStatusfulObject {
+    class Pipeline {
     public:
         [[nodiscard]] 
-        virtual PipelineResult process(const cv::Mat& data, const FrameMetadata& meta) noexcept = 0;
+        virtual WFResult<PipelineResult> process(const cv::Mat& data, const FrameMetadata& meta) noexcept = 0;
         virtual ~Pipeline() = default;
     };
     

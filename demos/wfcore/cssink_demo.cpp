@@ -17,24 +17,44 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "wfcore/video/CSCameraSink.h"
+#include "wfcore/hardware/CSCameraSink.h"
+#include "wfcore/hardware/CSCameraHandler.h"
+#include "wfcore/hardware/HardwareManager.h"
 #include "wfcore/video/video_utils.h"
 #include <opencv2/opencv.hpp>
 #include <format>
+#include <cstdlib>
 
 int main() {
     cv::Mat frame;
     cs::UsbCamera cs_source("test_camera","/dev/video0");
-    cs::CvSink cs_sink("test_sink",cs::VideoMode::PixelFormat::kBGR);
-    cs_sink.SetSource(cs_source);
-    wf::CSCameraSink wfsink(
-        "test_sink","/dev/video0",std::move(cs_sink),
-        wf::getStreamFormatFromVideoMode(cs_source.GetVideoMode())
+    wf::HardwareManager manager;
+    manager.registerCamera(
+        {
+            "test_camera",
+            "/dev/video0",
+            wf::CameraBackend::CSCORE,
+            {
+                30,
+                {
+                    wf::ImageEncoding::YUYV,
+                    640,
+                    480
+                }
+            },
+            {},
+            {},
+            {}
+        }
     );
+    auto sinkres = manager.getFrameProvider("test_camera","test_sink");
+    if (!sinkres)
+        throw wf::wf_result_error(sinkres);
+    auto sink = std::move(sinkres.value());
     std::cout << "Entering loop" << std::endl;
     while (true) {
         std::cout << "Getting frame" << std::endl;
-        auto meta = wfsink.getFrame(frame);
+        auto meta = sink->getFrame(frame);
         std::cout << "OpenCV Mat type: " << frame.type() << std::endl;
         std::cout << "Channels: " << frame.channels() << std::endl;
         std::cout << "Depth: " << frame.depth() << std::endl;

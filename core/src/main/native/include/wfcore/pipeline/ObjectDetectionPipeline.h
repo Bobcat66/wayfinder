@@ -36,7 +36,7 @@ namespace wf {
     public:
         ObjectDetectionPipeline(ImageEncoding modelColorSpace_, std::unique_ptr<InferenceEngine> engine_, CameraIntrinsics intrinsics_);
         [[nodiscard]] 
-        PipelineResult process(const cv::Mat& data, const FrameMetadata& meta) noexcept override;
+        WFResult<PipelineResult> process(const cv::Mat& data, const FrameMetadata& meta) noexcept override;
         InferenceEngineType getEngineType() const noexcept { return engine->getEngineType(); }
         ModelArch getModelArch() const noexcept { return engine->getModelArch(); }
         ImageEncoding getModelColorSpace() const noexcept { };

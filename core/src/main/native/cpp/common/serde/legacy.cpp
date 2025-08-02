@@ -235,7 +235,7 @@ namespace impl {
             object_detections_data[i] = wfcore2wips_object_detection_shim(pipelineResult.objectDetections[i]);
         }
         return {
-            pipelineResult.captimeMicros,
+            pipelineResult.micros,
             static_cast<wips_u8_t>(pipelineResult.type),
             static_cast<wips_u32_t>(pipelineResult.aprilTagDetections.size()),
             detections_data,

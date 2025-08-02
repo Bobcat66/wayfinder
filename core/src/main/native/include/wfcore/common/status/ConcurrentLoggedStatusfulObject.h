@@ -92,7 +92,7 @@ namespace wf {
         void reportError(status_type status) {
             std::lock_guard lock(status_mtx);
             this->status_ = status;
-            logger->error(this->getError());
+            logger_->error(this->getError());
         }
 
         // scuffed, fix later
@@ -101,7 +101,7 @@ namespace wf {
             std::lock_guard lock(status_mtx);
             this->status_ = result.status();
             this->errorMsg_ = result.what();
-            logger->error(getError());
+            logger_->error(getError());
         }
 
         virtual void reportOk() const noexcept {

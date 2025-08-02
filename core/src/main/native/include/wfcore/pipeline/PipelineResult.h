@@ -28,7 +28,7 @@
 namespace wf {
 
     struct PipelineResult {
-        uint64_t captimeMicros;
+        uint64_t micros;
         PipelineType type;
         std::vector<ApriltagDetection> aprilTagDetections;
         std::vector<ApriltagRelativePoseObservation> aprilTagPoses;
@@ -42,25 +42,25 @@ namespace wf {
         PipelineResult& operator=(const PipelineResult&) = default;
 
         PipelineResult(
-            uint64_t captime_,
+            uint64_t micros_,
             PipelineType type_,
             std::vector<ApriltagDetection> aprilTagDetections_,
             std::vector<ApriltagRelativePoseObservation> aprilTagPoses_,
             std::optional<ApriltagFieldPoseObservation> cameraPose_,
             std::vector<ObjectDetection> objectDetections_
         ) 
-        : captimeMicros(captime_), type(type_)
+        : micros(micros_), type(type_)
         , aprilTagDetections(std::move(aprilTagDetections_)), aprilTagPoses(std::move(aprilTagPoses_))
         , cameraPose(std::move(cameraPose_)), objectDetections(std::move(objectDetections_)) {}
         
         static PipelineResult ApriltagResult(
-            uint64_t captimeMicros,
+            uint64_t micros,
             std::vector<ApriltagDetection> aprilTagDetections_,
             std::vector<ApriltagRelativePoseObservation> aprilTagPoses_,
             std::optional<ApriltagFieldPoseObservation> cameraPose_
         ) {
             return PipelineResult(
-                captimeMicros,
+                micros,
                 PipelineType::Apriltag,
                 std::move(aprilTagDetections_),
                 std::move(aprilTagPoses_),
@@ -70,22 +70,17 @@ namespace wf {
         }
 
         static PipelineResult ObjectDetectionResult(
-            uint64_t captimeMicros,
+            uint64_t micros,
             std::vector<ObjectDetection> detections_
         ) {
             return PipelineResult(
-                captimeMicros,
+                micros,
                 PipelineType::ObjDetect,
                 {},
                 {},
                 {},
                 std::move(detections_)
             );
-        }
-
-        // A null result for errors
-        static PipelineResult NullResult() {
-            return PipelineResult(0,PipelineType::NullType,{},{},{},{});
         }
     };
 
