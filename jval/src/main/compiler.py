@@ -180,7 +180,7 @@ def unpackSchemaDict(schemaDict: Dict,refs: Dict[str,str], path: List[str], mang
                 enumValues = set(raw_enumValues)
             return DeepSchema(
                 name,
-                schemaDict,
+                schema_type,
                 None,None,None,
                 enumValues,
                 None,None,None,
@@ -254,6 +254,7 @@ def buildTree(schema: DeepSchema) -> SchemaTree:
 
     flatProperties: Union[Dict[str,str],None] = None
     if schema.properties is not None:
+        flatProperties = {}
         for property,value in schema.properties.items():
             if isinstance(value,DeepSchema):
                 deepChildren.append(value)
@@ -331,7 +332,7 @@ def getAnonymousSchemas(schema: SchemaTree,isAnonymous: bool = True) -> List[Ano
             fwd_decls
         ))
     for child in schema.children:
-        res.append(getAnonymousSchemas(child))
+        res.extend(getAnonymousSchemas(child))
     return res
 
 def compileSchemas(schemas: List[Dict]) -> List[SchemaModule]:
@@ -339,7 +340,7 @@ def compileSchemas(schemas: List[Dict]) -> List[SchemaModule]:
     modules: List[SchemaModule] = []
     # build reference table
     for schema in schemas:
-        refs[schema] = f"get_{schema["$name"]}_validator()"
+        refs[schema["$name"]] = f"get_{schema["$name"]}_validator()"
     
     for schema in schemas:
         schema_obj,schema_refs = unpackSchemaDict(schema,refs,["root"],mangledName=False)
@@ -354,4 +355,6 @@ def compileSchemas(schemas: List[Dict]) -> List[SchemaModule]:
         else:
             modules.append(SchemaModule(schema_obj,[],[]))
             continue
+    
+    return modules
 
