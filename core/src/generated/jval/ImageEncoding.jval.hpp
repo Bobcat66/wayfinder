@@ -34,23 +34,10 @@
 
 #pragma once
 
-#include <stdint.h>
+#include "jvruntime.hpp"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+namespace jval {
 
-// The caller is responsible for destroying jval_res_t
-typedef struct jval_res jval_res_t;
-
-void jval_res_destroy(jval_res_t* res_handle);
-
-const char* jval_res_msg(const jval_res_t* res_handle);
-
-uint8_t jval_res_status(const jval_res_t* res_handle);
-
-bool jval_res_ok(const jval_res_t* res_handle);
-
-#ifdef __cplusplus
+    // Returns a const static pointer to a singleton validator. The returned pointer should NOT be destroyed or freed
+    const JSONValidationFunctor* get_ImageEncoding_validator();
 }
-#endif

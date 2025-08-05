@@ -34,10 +34,15 @@
 
 #pragma once
 
-#include "jvruntime.hpp"
+#include "jv_capi.h"
 
-namespace jval {
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-    // Returns a const static pointer to a singleton validator. The returned pointer should NOT be destroyed or freed
-    const JSONValidationFunctor* get_{{ schema.name }}_validator();
+// Returns a dynamically allocated result pointer. The caller is responsible for its destruction
+jval_res_t* jval_validate_FilteringParameters(const char* json_str);
+
+#ifdef __cplusplus
 }
+#endif

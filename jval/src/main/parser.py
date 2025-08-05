@@ -16,4 +16,30 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import json
-import jsonschema
+from jsonschema import Draft7Validator, ValidationError
+from pathlib import Path
+from typing import List, Dict
+import sys
+home_path = Path(__file__).resolve() # Full absolute path to where the compiler lives, not necessarily the CWD
+
+with open(home_path.parent.parent.parent / "jval_schema.schema.json","r") as f:
+    metaschema = json.load(f)
+
+metavalidator = Draft7Validator(metaschema)
+
+def loadSchemas(paths: List[Path]) -> List[Dict]:
+    schemas: List[Dict] = []
+    for path in paths:
+        with open(path,"r") as f:
+            schema = json.load(f)
+        errors = sorted(metavalidator.iter_errors(schema), key=lambda e: e.path)
+        if errors:
+            for error in errors:
+                print(f"Validation error: {error.message}")
+            sys.exit(1)
+        schemas.append(schema)
+    return schemas
+        
+        
+        
+

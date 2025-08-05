@@ -76,10 +76,10 @@ class AnonymousSchema:
     schema: FlatSchema
     fwd_decls: List[str]
 
-# A schema module is an intermediate representation of a single
+# A Render Unit is an intermediate representation of a single
 # JVal schema file, with all anonymous schemas and references resolved
 @dataclass
-class SchemaModule:
+class RenderUnit:
     schema: Union[FlatSchema,Primitive,Reference]
     anonymousSchemas: List[AnonymousSchema]
     includes: List[str]
@@ -89,8 +89,6 @@ class SchemaTree:
     schema: FlatSchema
     children: List[Self]
     
-home_path = Path(__file__).resolve() # Full absolute path to where the compiler lives, not necessarily the CWD
-
 def manglePath(path: List[str]) -> str:
     # _z42D is a special identifier that marks a name mangled by JVal
     return "_z42D" + "_".join(path)
@@ -210,7 +208,7 @@ def unpackSchemaDict(schemaDict: Dict,refs: Dict[str,str], path: List[str], mang
             # process mapKeys and mapValues
             mapValues: Union[DeepSchema,Reference,Primitive,None] = None
             if raw_mapValues is not None:
-                mapValues,temprefs = unpackSchemaDict(mapValues,refs,path+["mapValues"])
+                mapValues,temprefs = unpackSchemaDict(raw_mapValues,refs,path+["mapValues"])
                 localRefs += temprefs
             return DeepSchema(
                 name,
@@ -335,9 +333,10 @@ def getAnonymousSchemas(schema: SchemaTree,isAnonymous: bool = True) -> List[Ano
         res.extend(getAnonymousSchemas(child))
     return res
 
-def compileSchemas(schemas: List[Dict]) -> List[SchemaModule]:
+def compileSchemas(schemas: List[Dict]) -> List[RenderUnit]:
+    print("Starting compilation...")
     refs: Dict[str,str] = {}
-    modules: List[SchemaModule] = []
+    modules: List[RenderUnit] = []
     # build reference table
     for schema in schemas:
         refs[schema["$name"]] = f"get_{schema["$name"]}_validator()"
@@ -347,13 +346,13 @@ def compileSchemas(schemas: List[Dict]) -> List[SchemaModule]:
         if isinstance(schema_obj,DeepSchema):
             schema_tree = buildTree(schema_obj)
             anons = getAnonymousSchemas(schema_tree,isAnonymous=False)
-            modules.append(SchemaModule(schema_tree.schema,anons,[ref.name for ref in schema_refs]))
+            modules.append(RenderUnit(schema_tree.schema,anons,[ref.name for ref in schema_refs]))
             continue
         elif isinstance(schema_obj,Reference):
-            modules.append(SchemaModule(schema_obj,[],[schema_obj.name]))
+            modules.append(RenderUnit(schema_obj,[],[schema_obj.name]))
             continue
         else:
-            modules.append(SchemaModule(schema_obj,[],[]))
+            modules.append(RenderUnit(schema_obj,[],[]))
             continue
     
     return modules

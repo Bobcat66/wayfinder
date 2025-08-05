@@ -39,5 +39,5 @@
 namespace jval {
 
     // Returns a const static pointer to a singleton validator. The returned pointer should NOT be destroyed or freed
-    const JSONValidationFunctor* get_{{ schema.name }}_validator();
+    const JSONValidationFunctor* get_FilteringParameters_validator();
 }

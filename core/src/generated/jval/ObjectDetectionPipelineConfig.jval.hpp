@@ -34,14 +34,10 @@
 
 #pragma once
 
-#include "jvcrt.h"
+#include "jvruntime.hpp"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
+namespace jval {
 
-jval_res_t* jval_validate_{{ name }}(const char* json_str);
-
-#ifdef __cplusplus
+    // Returns a const static pointer to a singleton validator. The returned pointer should NOT be destroyed or freed
+    const JSONValidationFunctor* get_ObjectDetectionPipelineConfig_validator();
 }
-#endif
