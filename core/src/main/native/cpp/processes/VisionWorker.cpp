@@ -21,6 +21,7 @@
 #include "wfcore/video/video_utils.h"
 #include "wfcore/common/logging.h"
 #include "wfcore/video/video_types.h"
+#include <pthread.h>
 
 namespace impl {
     [[ nodiscard ]]
@@ -28,6 +29,12 @@ namespace impl {
         return (frame.rows == meta.format.height) 
             && (frame.cols == meta.format.width) 
             && (frame.type() == wf::getCVTypeFromEncoding(meta.format.encoding));
+    }
+
+    const char* setThreadName(const std::string& name) {
+        // pthread_setname_np limits names to 16 characters including null terminator
+        pthread_setname_np(pthread_self(), name.substr(0, 15).c_str());
+        return name.substr(0, 15).c_str();
     }
 }
 
@@ -63,21 +70,25 @@ namespace wf {
     }
 
     void VisionWorker::start() {
-        running = true;
-        thread = std::thread(&VisionWorker::run,this);
+        if (running.load()) return;
+        running.store(true);
+        thread = std::jthread([this](std::stop_token stoken){
+            this->run(stoken);
+        });
     }
 
     void VisionWorker::stop() {
-        if (running) {
-            running = false;
-            thread.join();
+        if (thread.joinable()) {
+            thread.request_stop(); // cooperative stop
+            thread.join();         // waits for thread to exit
         }
+        running.store(false);
     }
 
     // TODO: Add more robust error handling
-    void VisionWorker::run() noexcept {
-        while (running.load()) {
-            std::lock_guard<std::mutex> lock(pipeGuard);
+    void VisionWorker::run(std::stop_token stoken) noexcept {
+        threadName = impl::setThreadName(name);
+        while (!stoken.stop_requested()) {
             if (!ok()) continue;
             auto rawmeta = frameProvider->getFrame(rawFrameBuffer);
             if (!rawmeta) {
@@ -102,5 +113,6 @@ namespace wf {
             }
             outputConsumer->accept(ppFrameBuffer,ppmeta,res.value());
         }
+        running.store(false);
     }
 }

@@ -30,10 +30,13 @@ namespace wf {
         if (!jobject.is_object()) 
             return WFStatusResult::failure(JSON_INVALID_TYPE);
 
+        // Required fields, dynamically built from the strict requirements as well as the dependencies
+        std::unordered_set<std::string> required_fields = required;
+
         for (const auto& [property,validator] : properties) {
             auto it = jobject.find(property);
             if (it == jobject.end()) {
-                if (required.contains(property))
+                if (required_fields.contains(property))
                     return WFStatusResult::failure(JSON_PROPERTY_NOT_FOUND,"/{}: {}",property,wfstatus_name_view(JSON_PROPERTY_NOT_FOUND));
                 continue;
             }
@@ -42,6 +45,12 @@ namespace wf {
                 return res.hasMsg()
                     ? WFStatusResult::failure(res.status(),"/{}{}",property,res.what())
                     : WFStatusResult::failure(res.status(),"/{}: {}",property,wfstatus_name_view(res.status()));
+            auto depit = dependencies.find(property);
+            if (depit != dependencies.end()) {
+                auto deps = depit->second;
+                required_fields.insert(deps.begin(),deps.end());
+            }
+
         }
         return WFStatusResult::success();
     }
@@ -96,5 +105,14 @@ namespace wf {
             if (auto res = (*validator)(jobject)) return WFStatusResult::success();
         }
         return WFStatusResult::failure(JSON_SCHEMA_VIOLATION);
+    }
+
+    WFStatusResult JSONPatternValidator::operator()(const JSON& jobject) const {
+        if (!jobject.is_string())
+            return WFStatusResult::failure(JSON_INVALID_TYPE);
+        std::string value = jobject.get<std::string>();
+        if (!std::regex_match(value,patternMatcher))
+            return WFStatusResult::failure(JSON_SCHEMA_VIOLATION);
+        return WFStatusResult::success();
     }
 }

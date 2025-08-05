@@ -1,8 +1,9 @@
 {
-    "$schema": "https://json-schema.org/draft/2020-12/schema",
-    "title": "objdetect_pipeline_configuration",
+    "$schema": "https://json-schema.org/draft-07/schema#",
+    "$id": "objdetect_pipeline_configuration.schema.json",
+    "title": "Object Detection Pipeline Configuration",
     "type": "object",
-    "$defs": {
+    "definitions": {
         "inference_engine_type": {
             "type": "string",
             "enum": [
@@ -63,11 +64,11 @@
     },
     "properties": {
         "modelFile": { "type": "string" },
-        "modelArch": { "$ref": "#/$defs/model_architecture" },
-        "engineType": { "$ref": "#/$defs/inference_engine_type" },
-        "tensorParams": { "$ref": "#/$defs/tensor_parameters" },
-        "modelColorSpace": { "$ref": "frame_format.schema.json#/$defs/image_encoding" },
-        "filterParams": { "$ref": "#/$defs/ie_filtering_parameters" }
+        "modelArch": { "$ref": "#/definitions/model_architecture" },
+        "engineType": { "$ref": "#/definitions/inference_engine_type" },
+        "tensorParams": { "$ref": "#/definitions/tensor_parameters" },
+        "modelColorSpace": { "$ref": "frame_format.schema.json#/definitions/image_encoding" },
+        "filterParams": { "$ref": "#/definitions/ie_filtering_parameters" }
     },
     "additionalProperties": false
 }

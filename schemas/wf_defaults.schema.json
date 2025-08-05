@@ -1,0 +1,34 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "title": "wf_defaults",
+    "type": "object",
+    "properties": {
+        "engineType": { "$ref": "objdetect_pipeline_configuration.schema.json#/$defs/inference_engine_type"},
+        "modelArch": { "$ref": "objdetect_pipeline_configuration.schema.json#/$defs/model_architecture"},
+        "tensorParams": { "$ref": "objdetect_pipeline_configuration.schema.json#/$defs/tensor_parameters"},
+        "nmsThreshold": { "type": "number" },
+        "confidenceThreshold": { "type": "number" },
+        "modelFile": { "type": "string" },
+        "modelColorSpace": { "$ref": "frame_format.schema.json#/$defs/image_encoding" },
+        "qtps": { "$ref": "apriltag_pipeline_configuration.schema.json#/$defs/quad_threshold_parameters"},
+        "tagDetectorConfig": { "$ref": "apriltag_pipeline_configuration.schema.json#/$defs/apriltag_detector_config" },
+        "tagSize": { "type": "number" },
+        "tagFamily": { "type": "string" },
+        "tagField": { "type": "string" }
+    },
+    "required": [
+        "engineType",
+        "modelArch",
+        "tensorParams",
+        "nmsThreshold",
+        "confidenceThreshold",
+        "modelFile",
+        "modelColorSpace",
+        "qtps",
+        "tagDetectorConfig",
+        "tagSize",
+        "tagFamily",
+        "tagField"
+    ],
+    "additionalProperties": false
+}

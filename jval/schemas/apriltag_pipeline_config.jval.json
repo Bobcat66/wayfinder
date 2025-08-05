@@ -1,0 +1,22 @@
+{
+    "$schema": "../jval_schema.schema.json",
+    "$name": "ApriltagPipelineConfig",
+    "type": "struct",
+    "properties": {
+        "solvePnP": { "type": "boolean" },
+        "detConfig": { "$ref": "ApriltagDetectorConfig" },
+        "qtps": { "$ref": "QuadThresholdParams" },
+        "tagField": { "type": "string" },
+        "tagFamily": { "type": "string" },
+        "tagSize": { "type": "number" },
+        "detectorExcludes": {
+            "type": "array",
+            "items": { "type": "integer" }
+        },
+        "solvePnPExcludes": {
+            "type": "array",
+            "items": { "type": "integer" }
+        },
+        "solveTagRelative": { "type": "boolean" }
+    }
+}

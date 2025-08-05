@@ -1,0 +1,13 @@
+{
+    "$schema": "../jval_schema.schema.json",
+    "$name": "FilteringParameters",
+    "type": "struct",
+    "properties": {
+        "nmsThreshold": { "type": "number" },
+        "confidenceThreshold": { "type": "number" }
+    },
+    "required": [
+        "nmsThreshold",
+        "confidenceThreshold"
+    ]
+}

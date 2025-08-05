@@ -1,0 +1,33 @@
+{
+    "$schema": "../jval_schema.schema.json",
+    "$name": "WFDefaults",
+    "type": "struct",
+    "properties": {
+        "engineType": { "$ref": "InferenceEngineType"},
+        "modelArch": { "$ref": "ModelArchitecture"},
+        "tensorParams": { "$ref": "TensorParams"},
+        "nmsThreshold": { "type": "number" },
+        "confidenceThreshold": { "type": "number" },
+        "modelFile": { "type": "string" },
+        "modelColorSpace": { "$ref": "ImageEncoding" },
+        "qtps": { "$ref": "QuadThresholdParams"},
+        "tagDetectorConfig": { "$ref": "ApriltagDetectorConfig" },
+        "tagSize": { "type": "number" },
+        "tagFamily": { "type": "string" },
+        "tagField": { "type": "string" }
+    },
+    "required": [
+        "engineType",
+        "modelArch",
+        "tensorParams",
+        "nmsThreshold",
+        "confidenceThreshold",
+        "modelFile",
+        "modelColorSpace",
+        "qtps",
+        "tagDetectorConfig",
+        "tagSize",
+        "tagFamily",
+        "tagField"
+    ]
+}

@@ -87,6 +87,7 @@ namespace wf {
     WF_DEFEXCEPT(failed_resource_acquisition,UNKNOWN,"Failed resource acquisition")
     WF_DEFEXCEPT(json_error,UNKNOWN,"JSON Error")
     WF_DEFEXCEPT(unknown_exception,UNKNOWN,"Unknown exception")
+    WF_DEFEXCEPT(bad_environment,UNKNOWN,"Bad Environment")
 
     class wf_result_error : public wfexception {
     public:
@@ -97,6 +98,32 @@ namespace wf {
         WFStatus status() const noexcept override { return status_; }
     private:
         std::string msg_;
+        WFStatus status_;
+    };
+
+    class wf_status_error : public wfexception {
+    public:
+        template <typename... Args>
+        wf_status_error(WFStatus status, std::string_view fmt, Args&&... args)
+        : status_(status) {
+            try {                                                                               
+                msg_ = std::vformat(fmt, std::make_format_args(args...));                        
+            } catch (const std::format_error& e) {                                              
+                msg_ = "MSGERR bad_format";                                                      
+            }
+        }
+        wf_status_error(WFStatus status) : status_(status) {}
+        const char* what() const noexcept override { 
+            if (fullmsg_.empty())
+                fullmsg_ = msg_.empty()
+                    ? std::format("{} ({:#10x})",wfstatus_name(status_),static_cast<uint32_t>(status_))
+                    : std::format("{} ({:#10x}): {}",wfstatus_name(status_),static_cast<uint32_t>(status_),msg_);
+            return fullmsg_.c_str();
+        }
+        WFStatus status() const noexcept override { return status_; }
+    private:
+        std::string msg_;
+        mutable std::string fullmsg_;
         WFStatus status_;
     };
 }

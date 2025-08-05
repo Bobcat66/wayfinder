@@ -17,16 +17,26 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-
 #pragma once
 
 #include "wfcore/processes/VisionWorkerManager.h"
 #include "wfcore/hardware/HardwareManager.h"
 #include "wfcore/network/NetworkTablesManager.h"
+#include "wfcore/configuration/ResourceManager.h"
+#include "wfcore/configuration/WFSystemConfig.h"
 
 namespace wf {
     class WFOrchestrator {
     public:
+        WFOrchestrator(WFSystemConfig config);
+        void periodic() noexcept;
+        // Stops all wayfinder processes except for the main thread
+        void stopTheWorld();
+        static WFOrchestrator createFromEnv();
     private:
-    }
+        NetworkTablesManager ntManager_;
+        HardwareManager hardwareManager_;
+        ResourceManager resourceManager_;
+        std::unique_ptr<VisionWorkerManager> workerManager_;
+    };
 }

@@ -18,39 +18,10 @@
  */
 
 #include "wfcore/pipeline/ApriltagPipelineConfiguration.h"
+#include "wfdetail/validation/tag_detector_validators.h"
 
 namespace impl {
     using namespace wf;
-
-    static const JSONValidationFunctor* getDetectorConfigValidator() {
-        static JSONStructValidator validator(
-            {
-                {"numThreads", getPrimitiveValidator<int>()},
-                {"quadDecimate", getPrimitiveValidator<float>()},
-                {"quadSigma", getPrimitiveValidator<float>()},
-                {"refineEdges", getPrimitiveValidator<bool>()},
-                {"decodeSharpening", getPrimitiveValidator<double>()},
-                {"debug", getPrimitiveValidator<bool>()}
-            },
-            {}
-        );
-        return static_cast<JSONValidationFunctor*>(&validator);
-    }
-
-    static const JSONValidationFunctor* getDetectorQTPsValidator() {
-        static JSONStructValidator validator(
-            {
-                {"minClusterPixels", getPrimitiveValidator<int>()},
-                {"maxNumMaxima", getPrimitiveValidator<int>()},
-                {"criticalAngleRads", getPrimitiveValidator<float>()},
-                {"maxLineFitMSE", getPrimitiveValidator<float>()},
-                {"minWhiteBlackDiff", getPrimitiveValidator<int>()},
-                {"deglitch", getPrimitiveValidator<bool>()}
-            },
-            {}
-        );
-        return static_cast<JSONValidationFunctor*>(&validator);
-    }
 
     static const JSONValidationFunctor* getIntArrayValidator() {
         static JSONArrayValidator validator(getPrimitiveValidator<int>());
@@ -62,13 +33,16 @@ namespace wf {
     const JSONValidationFunctor* ApriltagPipelineConfiguration::getValidator_impl() {
         static JSONStructValidator validator(
             {
-                {"detConfig", impl::getDetectorConfigValidator()},
-                {"detQTPs", impl::getDetectorQTPsValidator()},
+                {"detConfig", detail::getDetectorConfigValidator()},
+                {"detQTPs", detail::getDetectorQTPsValidator()},
+                {"apriltagField", getPrimitiveValidator<std::string>()},
+                {"apriltagFamily", getPrimitiveValidator<std::string>()},
+                {"apriltagSize", getPrimitiveValidator<double>()},
                 {"detectorExcludes", impl::getIntArrayValidator()},
                 {"solvePnPExcludes", impl::getIntArrayValidator()},
                 {"solveTagRelative", getPrimitiveValidator<bool>()}
             },
-            {}
+            {"apriltagField","apriltagFamily","apriltagSize"}
         );
         return static_cast<JSONValidationFunctor*>(&validator);
     }

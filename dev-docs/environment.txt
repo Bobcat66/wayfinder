@@ -12,19 +12,7 @@ WF_MODELS_RSUBDIR: path to the models/ directory, relative to the resources/ dir
 WF_FIELDS_RSUBDIR: path to the fields/ directory, relative to the resources/ directory
 WF_HARDWARE_LSUBDIR: path to the hardware/ directory, relative to the local/ directory
 WF_PIPELINE_LSUBDIR: path to the pipelines/ directory, relative to the local/ directory
-WF_DEFAULT_MODEL: default model file
-WF_DEFAULT_IE: default inference engine
-WF_DEFAULT_MODEL_ARCH: default model architecture
-WF_DEFAULT_MODEL_TENSORHEIGHT: default model input height
-WF_DEFAULT_MODEL_TENSORWIDTH: default model input width
-WF_DEFAULT_MODEL_TENSORSCALE: default model tensorization scale factor
-WF_DEFAULT_MODEL_MEANS: default model tensorization means (JSON array)
-WF_DEFAULT_MODEL_STDS: default model tensorization standard deviations (JSON array)
-WF_DEFAULT_MODEL_CHANNELS: default model tensor channels
-WF_DEFAULT_MODEL_COLORSPACE: default model input color space
-WF_DEFAULT_MODEL_INTERLEAVED: whether or not model tensors are interleaved by default
-WF_DEFAULT_MODEL_NMSTHRESHOLD: default NMS threshold
-WF_DEFAULT_MODEL_CONFTHRESHOLD: default confidence threshold
+WF_NT_SERVER: whether or not the coprocessor should host a NetworkTables server
 WF_EXEC: path to the wayfinderd executable, relative to the working directory
 WF_SCRIPTS: path to wayfinder auxiliary scripts, relative to the working directory
 

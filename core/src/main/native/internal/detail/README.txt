@@ -1,1 +1,0 @@
-This directory is for private header files that should only be included in .cpp files

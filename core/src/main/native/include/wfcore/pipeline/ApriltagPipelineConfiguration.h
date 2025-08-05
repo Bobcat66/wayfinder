@@ -24,32 +24,54 @@
 
 namespace wf {
     struct ApriltagPipelineConfiguration : JSONSerializable<ApriltagPipelineConfiguration> {
+        bool solvePnP;
         ApriltagDetectorConfig detConfig;
         QuadThresholdParams detQTPs;
+        std::string apriltagField;
+        std::string apriltagFamily;
+        double apriltagSize;
         std::unordered_set<int> detectorExcludes;
         std::unordered_set<int> SolvePNPExcludes; // Does not effect tag relative solvePNP
         bool solveTagRelative; // Whether or not to solve tag relative
 
         ApriltagPipelineConfiguration(
+            bool solvePnP_,
             ApriltagDetectorConfig detConfig_,
             QuadThresholdParams detQTPs_,
+            std::string apriltagField_,
+            std::string apriltagFamily_,
+            double apriltagSize_,
             std::unordered_set<int> detectorExcludes_,
             std::unordered_set<int> SolvePNPExcludes_,
             bool solveTagRelative_
-        ) : detConfig(std::move(detConfig_))
+        ) 
+        : solvePnP(solvePnP_)
+        , detConfig(std::move(detConfig_))
         , detQTPs(std::move(detQTPs))
+        , apriltagField(std::move(apriltagField_))
+        , apriltagFamily(std::move(apriltagFamily))
+        , apriltagSize(apriltagSize_)
         , detectorExcludes(std::move(detectorExcludes_))
         , SolvePNPExcludes(std::move(SolvePNPExcludes_))
         , solveTagRelative(solveTagRelative_) {}
 
         ApriltagPipelineConfiguration(
+            bool solvePnP_,
             ApriltagDetectorConfig detConfig_,
             QuadThresholdParams detQTPs_,
+            std::string apriltagField_,
+            std::string apriltagFamily_,
+            double apriltagSize_,
             std::vector<int> detectorExcludes_,
             std::vector<int> SolvePNPExcludes_,
             bool solveTagRelative_
-        ) : detConfig(std::move(detConfig_))
+        )
+        : solvePnP(solvePnP_)
+        , detConfig(std::move(detConfig_))
         , detQTPs(std::move(detQTPs))
+        , apriltagField(std::move(apriltagField_))
+        , apriltagFamily(std::move(apriltagFamily))
+        , apriltagSize(apriltagSize_)
         , detectorExcludes(detectorExcludes_.begin(),detectorExcludes_.end())
         , SolvePNPExcludes(SolvePNPExcludes_.begin(),SolvePNPExcludes_.end())
         , solveTagRelative(solveTagRelative_) {}

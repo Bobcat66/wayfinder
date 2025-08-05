@@ -21,36 +21,12 @@
 #include "wfcore/common/wfdef.h"
 #include "wfcore/common/logging.h"
 #include "wfcore/common/envutils.h"
+#include "wfdetail/validation/video_validators.h"
+#include "wfdetail/validation/inference_validators.h"
 #include <string_view>
 
 namespace impl {
     using namespace wf;
-
-    static const JSONValidationFunctor* getModelArchValidator() {
-        static JSONEnumValidator validator({
-            "YOLO",
-            "SSD",
-            "RETINA_NET",
-            "RCNN"
-        });
-        return static_cast<JSONValidationFunctor*>(&validator);
-    }
-
-    static const JSONValidationFunctor* getInferenceEngineTypeValidator() {
-        static JSONEnumValidator validator({
-            "CV_CPU",
-            "CV_OPENCL",
-            "CV_VULKAN",
-            "CUDA",
-            "OpenVINO",
-            "RKNN",
-            "CoreML",
-            "ROCm",
-            "EdgeTPU",
-            "HailoRT"
-        });
-        return static_cast<JSONValidationFunctor*>(&validator);
-    }
 
     inline constexpr std::string_view inferenceEngineTypeToString(InferenceEngineType engine) {
         switch (engine) {
@@ -102,22 +78,6 @@ namespace impl {
         WF_UNREACHABLE;
     }
 
-    static const JSONValidationFunctor* getEncodingValidator() {
-        static JSONEnumValidator validator({
-            "BGR24",
-            "RGB24",
-            "RGB565",
-            "Y8",
-            "Y16",
-            "YUYV",
-            "UYVY",
-            "RGBA",
-            "BGRA",
-            "MJPEG"
-        });
-        return static_cast<JSONValidationFunctor*>(&validator);
-    }
-
     inline constexpr ImageEncoding parseEncoding(const std::string& name) {
         if (name == "BGR24") return ImageEncoding::BGR24;
         if (name == "RGB24") return ImageEncoding::RGB24;
@@ -149,38 +109,6 @@ namespace impl {
         }
     }   
 
-    static const JSONValidationFunctor* getMeansAndSTDsValidator() {
-        static JSONArrayValidator validator(getPrimitiveValidator<double>(),1,4);
-        return static_cast<JSONValidationFunctor*>(&validator);
-    }
-
-    static const JSONValidationFunctor* getTensorParamsValidator() {
-        static JSONStructValidator validator(
-            {
-                {"interleaved", getPrimitiveValidator<bool>()},
-                {"height", getPrimitiveValidator<int>()},
-                {"width", getPrimitiveValidator<int>()},
-                {"channels", getPrimitiveValidator<int>()},
-                {"scale", getPrimitiveValidator<double>()},
-                {"stds", getMeansAndSTDsValidator()},
-                {"means", getMeansAndSTDsValidator()}
-            },
-            {"interleaved","height","width","channels","scale","stds","means"}
-        );
-        return static_cast<JSONValidationFunctor*>(&validator);
-    }
-
-    static const JSONValidationFunctor* getFilterParamsValidator() {
-        static JSONStructValidator validator(
-            {
-                {"nmsThreshold", getPrimitiveValidator<double>()},
-                {"confidenceThreshold", getPrimitiveValidator<double>()}
-            },
-            {"nmsThreshold","confidenceThreshold"}
-        );
-        return static_cast<JSONValidationFunctor*>(&validator);
-    }
-
     template<typename T>
     cv::Scalar toScalar(const std::vector<T>& vec) {
         return cv::Scalar(
@@ -197,13 +125,16 @@ namespace wf {
         static JSONStructValidator validator(
             {
                 {"modelFile", getPrimitiveValidator<std::string>()},
-                {"modelArch", impl::getModelArchValidator()},
-                {"engineType", impl::getInferenceEngineTypeValidator()},
-                {"tensorParams", impl::getTensorParamsValidator()},
-                {"modelColorSpace", impl::getEncodingValidator()},
-                {"filterParams", impl::getFilterParamsValidator()}
+                {"modelArch", detail::getModelArchValidator()},
+                {"engineType", detail::getInferenceEngineTypeValidator()},
+                {"tensorParams", detail::getTensorParamsValidator()},
+                {"modelColorSpace", detail::getEncodingValidator()},
+                {"filterParams", detail::getFilterParamsValidator()}
             },
-            {}
+            {},
+            {
+                {"modelFile",{"modelArch","engineType","tensorParams","modelColorSpace"}}
+            }
         );
         return static_cast<JSONValidationFunctor*>(&validator);
     }

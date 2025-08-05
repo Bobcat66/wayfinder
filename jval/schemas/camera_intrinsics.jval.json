@@ -1,0 +1,36 @@
+{
+    "$schema": "../jval_schema.schema.json",
+    "$name": "CameraIntrinsics",
+    "type": "struct",
+    "properties": {
+        "resolution": {
+            "type": "struct",
+            "properties": {
+                "width": { "type": "integer" },
+                "height": { "type": "integer" }
+            },
+            "required": ["width","height"]
+        },
+        "matrix": {
+            "type": "struct",
+            "properties": {
+                "fx": { "type": "number" },
+                "fy": { "type": "number" },
+                "cx": { "type": "number" },
+                "cy": { "type": "number" }
+            },
+            "required": ["fx","fy","cx","cy"]
+        },
+        "distortion": {
+            "type": "array",
+            "items": { "type": "number" },
+            "minSize": 5,
+            "maxSize": 8
+        }
+    },
+    "required": [
+        "resolution",
+        "matrix",
+        "distortion"
+    ]
+}

@@ -1,0 +1,21 @@
+{
+    "$schema": "../jval_schema.schema.json",
+    "$name": "QuadThresholdParams",
+    "type": "struct",
+    "properties": {
+        "minClusterPixels": { "type": "integer" },
+        "maxNumMaxima": { "type": "integer" },
+        "criticalAngleRads": { "type": "number" },
+        "maxLineFitMSE": { "type": "number" },
+        "minWhiteBlackDiff": { "type": "integer" },
+        "deglitch": { "type": "boolean" }
+    },
+    "required": [
+        "minClusterPixels",
+        "maxNumMaxima",
+        "criticalAngleRads",
+        "maxLineFitMSE",
+        "minWhiteBlackDiff",
+        "deglitch"
+    ]
+}

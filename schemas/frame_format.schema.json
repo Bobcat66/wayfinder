@@ -1,8 +1,9 @@
 {
-    "$schema": "https://json-schema.org/draft/2020-12/schema",
-    "title": "frame_format",
+    "$schema": "https://json-schema.org/draft-07/schema#",
+    "$id": "frame_format.schema.json",
+    "title": "Frame Format",
     "type": "object",
-    "$defs": {
+    "definitions": {
         "image_encoding": {
             "type": "string",
             "enum": [
@@ -23,12 +24,12 @@
     "properties": {
         "width": { "type": "number" },
         "height": { "type": "number" },
-        "encoding": { "$ref": "#/$defs/image_encoding" },
+        "encoding": { "$ref": "#/definitions/image_encoding" }
+    },
     "required": [
         "width",
         "height",
         "encoding"
     ],
     "additionalProperties": false
-    }
 }

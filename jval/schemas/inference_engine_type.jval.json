@@ -1,0 +1,17 @@
+{
+    "$schema": "../jval_schema.schema.json",
+    "$name": "InferenceEngineType",
+    "type": "enum",
+    "enumValues": [
+        "CV_CPU",
+        "CV_OPENCL",
+        "CV_VULKAN",
+        "CUDA",
+        "OpenVINO",
+        "RKNN",
+        "CoreML",
+        "ROCm",
+        "EdgeTPU",
+        "HailoRT"
+    ]
+}

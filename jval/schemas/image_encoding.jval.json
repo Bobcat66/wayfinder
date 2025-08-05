@@ -1,0 +1,18 @@
+{
+    "$schema": "../jval_schema.schema.json",
+    "$name": "ImageEncoding",
+    "type": "enum",
+    "enumValues": [
+        "BGR24",
+        "RGB24",
+        "RGB565",
+        "Y8",
+        "Y16",
+        "YUYV",
+        "UYVY",
+        "RGBA",
+        "BGRA",
+        "MJPEG",
+        "UNKNOWN"
+    ]
+}

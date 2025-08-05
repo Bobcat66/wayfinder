@@ -37,41 +37,9 @@
 // Object detection postprocessing should be done in the pipeline, not the Inference Engine
 namespace wf {
 
-    // All AI stuff is designed to work with YOLO models
-    enum class InferenceEngineType {
-        CV_CPU, // OpenCV DNN-based inference engine
-        CV_OPENCL, // OpenCV-based inference engine with OpenCL acceleration (not implemented yet)
-        CV_VULKAN, // OpenCV-based inference engine with Vulkan acceleration (not implemented yet)
-        CUDA, // NVIDIA TensorRT-based inference engine, uses CUDA terminology for better brand recognition (not implemented yet)
-        OpenVINO, // Intel OpenVINO-based inference engine (not implemented yet)
-        RKNN, // Rockchip NPU-based inference engine (not implemented yet)
-        CoreML, // Apple Core ML-based inference engine (not implemented yet)
-        ROCm, // AMD MIVisionX-based inference engine, uses ROCm terminology for better brand recognition (not implemented yet),
-        EdgeTPU, // Google Edge TPU-based inference engine (not implemented yet)
-        HailoRT, // Hailo RT-based inference engine (not implemented yet)
-        Unknown
-    };
-
-    enum class ModelArch {
-        YOLO,
-        SSD, // Not implemented
-        RETINA_NET, // Not implemented
-        RCNN, // Not implemented
-        Unknown
-    };
-
     struct IEFilteringParams {
         float nmsThreshold = 0.0;
         float confidenceThreshold = 0.0;
-    };
-
-    enum class EngineStatus {
-        Ok,
-        ModelNotLoaded,
-        InvalidModelFormat,
-        ModelNotFound,
-        Unknown,
-        InvalidInput
     };
 
     // Each

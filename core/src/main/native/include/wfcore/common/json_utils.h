@@ -101,14 +101,17 @@ namespace wf {
     public:
         JSONStructValidator(
             std::unordered_map<std::string,const JSONValidationFunctor*> properties_,
-            std::unordered_set<std::string> required_
+            std::unordered_set<std::string> required_,
+            std::unordered_map<std::string,std::unordered_set<std::string>> dependencies_
         ) 
         : properties(std::move(properties_))
-        , required(std::move(required_)) {}
+        , required(std::move(required_)) 
+        , dependencies(std::move(dependencies_)) {}
         WFStatusResult operator()(const JSON& jobject) const override;
     private:
         const std::unordered_map<std::string,const JSONValidationFunctor*> properties;
         const std::unordered_set<std::string> required;
+        const std::unordered_map<std::string,std::unordered_set<std::string>> dependencies;
     };
 
     // Meant for validating objects with an indeterminate number of properties that share a type
@@ -147,6 +150,14 @@ namespace wf {
         WFStatusResult operator()(const JSON& jobject) const override;
     private:
         const std::vector<JSONValidationFunctor*> validators;
+    };
+
+    class JSONPatternValidator: public JSONValidationFunctor {
+    public:
+        JSONPatternValidator(const std::string& pattern = R"(^.*$)") : patternMatcher(pattern) {}
+        WFStatusResult operator()(const JSON& jobject) const override;
+    private:
+        const std::regex patternMatcher;
     };
 
     // Returns a primitive optional property or a default

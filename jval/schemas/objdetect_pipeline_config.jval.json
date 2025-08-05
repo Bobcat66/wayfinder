@@ -1,0 +1,21 @@
+{
+    "$schema": "../jval_schema.schema.json",
+    "$name": "ObjectDetectionPipelineConfig",
+    "type": "struct",
+    "properties": {
+        "modelFile": { "type": "string" },
+        "modelArch": { "$ref": "ModelArchitecture" },
+        "engineType": { "$ref": "InferenceEngineType" },
+        "tensorParams": { "$ref": "TensorParams" },
+        "modelColorSpace": { "$ref": "ImageEncoding" },
+        "filterParams": { "$ref": "FilteringParameters" }
+    },
+    "dependencies": {
+        "modelFile": [
+            "modelArch",
+            "engineType",
+            "tensorParams",
+            "modelColorSpace"
+        ]
+    }
+}

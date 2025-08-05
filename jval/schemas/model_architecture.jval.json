@@ -1,0 +1,11 @@
+{
+    "$schema": "../jval_schema.schema.json",
+    "$name": "ModelArchitecture",
+    "type": "enum",
+    "enumValues": [
+        "YOLO",
+        "SSD",
+        "RETINA_NET",
+        "RCNN"
+    ]
+}

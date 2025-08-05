@@ -1,0 +1,21 @@
+{
+    "$schema": "../jval_schema.schema.json",
+    "$name": "ApriltagDetectorConfig",
+    "type": "struct",
+    "properties": {
+        "numThreads": { "type": "integer" },
+        "quadDecimate": { "type": "number" },
+        "quadSigma": { "type": "number" },
+        "refineEdges": { "type": "boolean" },
+        "decodeSharpening": { "type": "number" },
+        "debug": { "type": "boolean" }
+    },
+    "required": [
+        "numThreads",
+        "quadDecimate",
+        "quadSigma",
+        "refineEdges",
+        "decodeSharpening",
+        "debug"
+    ]
+}

@@ -1,0 +1,42 @@
+{
+    "$schema": "../jval_schema.schema.json",
+    "$name": "CameraConfig",
+    "type": "struct",
+    "properties": {
+        "nickname": { "type": "string" },
+        "devpath": { "type": "string" },
+        "backend": { 
+            "type": "enum",
+            "enumValues": [
+                "CSCORE",
+                "REALSENSE",
+                "GSTREAMER",
+                "LIBCAMERA"
+            ]
+        },
+        "format": { "$ref": "StreamFormat" },
+        "controlAliases": {
+            "type": "map",
+            "mapKeys": "^(EXPOSURE|AUTO_EXPOSURE|BRIGHTNESS|ISO|SHUTTER|FOCUS|ZOOM|WHITE_BALANCE|AUTO_WHITE_BALANCE|SHARPNESS|SATURATION|CONTRAST|GAMMA|HUE)$",
+            "mapValues": { "type": "string" }
+        },
+        "calibrations": {
+            "type": "array",
+            "items": { "$ref": "CameraIntrinsics" }
+        },
+        "controls": {
+            "type": "map",
+            "mapKeys": "^(EXPOSURE|AUTO_EXPOSURE|BRIGHTNESS|ISO|SHUTTER|FOCUS|ZOOM|WHITE_BALANCE|AUTO_WHITE_BALANCE|SHARPNESS|SATURATION|CONTRAST|GAMMA|HUE)$",
+            "mapValues": { "type": "integer" }
+        }
+    },
+    "required": [
+        "nickname",
+        "devpath",
+        "backend",
+        "format"
+    ],
+    "dependencies": {
+        "controls": ["controlAliases"]
+    }
+}

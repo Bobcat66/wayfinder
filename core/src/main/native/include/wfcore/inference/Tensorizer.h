@@ -19,6 +19,7 @@
 
 #pragma once
 
+#include "wfcore/inference/inference_configs.h"
 #include <opencv2/core.hpp>
 #include <vector>
 
@@ -26,18 +27,6 @@
 // As channel reordering (in the form of color space conversion), cropping, and resizing are assumed to be done outside of this class,
 // this class focuses on the final steps of tensorization, which include centering, normalization, and standardization
 namespace wf {
-
-    // Parameters for how the inference engine should tensorize the input frame
-    // Most image preprocessing (cropping, resizing, color space conversion) is assumed to be done outside of this class
-    struct TensorParameters {
-        bool interleaved = false; // If true, the tensor image data will be in interleaved format (e.g. HWC/NHWC), otherwise it will be in planar format (e.g. CHW/NCHW)
-        int height = 0; // Height of the tensor, in pixels. This is to correctly allocate buffers for the tensorization process, images are expected to already be in this size. Improperly sized images will result in undefined behavior
-        int width = 0; // Width of the tensor, in pixels. This is to correctly allocate buffers for the tensorization process, images are expected to already be in this size. Improperly sized images will result in undefined behavior
-        int channels = 0; // number of color channels in the image
-        float scale = 1.0; // Scale factor to multiply each pixel value by. Set to 1.0 to disable normalization
-        cv::Scalar stds = {1.0, 1.0, 1.0}; // Standard deviations to divide each channel by. Set to 1.0 for each channel to disable standardization
-        cv::Scalar means = {0.0, 0.0, 0.0}; // Means to subtract from each channel. Set to 0.0 for each channel to disable mean centering
-    };
 
     class Tensorizer {
     public:

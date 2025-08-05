@@ -73,6 +73,7 @@ namespace wf {
         HARDWARE_BAD_BACKEND =      0x00400005,
         HARDWARE_BAD_CAMERA =       0x00400006,
         HARDWARE_NO_CALIB =         0x00400007,
+        HARDWARE_DISABLED =         0x00400008,
         HARDWARE_UNKNOWN =          0x004fffff,
 
         NETWORK_BASE =              0x00500000,
@@ -149,6 +150,7 @@ namespace wf {
             case WFStatus::HARDWARE_BAD_BACKEND:        return "HARDWARE_BAD_BACKEND";
             case WFStatus::HARDWARE_BAD_CAMERA:         return "HARDWARE_BAD_CAMERA";
             case WFStatus::HARDWARE_NO_CALIB:           return "HARDWARE_NO_CALIB";
+            case WFStatus::HARDWARE_DISABLED:           return "HARDWARE_DISABLED";
             case WFStatus::HARDWARE_UNKNOWN:            return "HARDWARE_UNKNOWN";
 
             case WFStatus::NETWORK_BASE:                return "NETWORK_BASE";

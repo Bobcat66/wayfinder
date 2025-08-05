@@ -1,0 +1,35 @@
+{
+    "$schema": "../jval_schema.schema.json",
+    "$name": "VisionWorkerConfig",
+    "type": "struct",
+    "properties": {
+        "camera_nickname": { "type": "string" },
+        "name": { "type": "string" },
+        "inputFormat": { "$ref": "StreamFormat" },
+        "outputFormat": { "$ref": "StreamFormat" },
+        "stream": { "type": "boolean" },
+        "raw_port": { "type": "integer" },
+        "processed_port": { "type": "integer" },
+        "pipelineType": { 
+            "type": "enum",
+            "enumValues": [
+                "Apriltag",
+                "ObjDetect"
+            ]
+        },
+        "pipelineConfig": {
+            "type": "union",
+            "schemas": [
+                { "$ref": "ObjectDetectionPipelineConfig"},
+                { "$ref": "ApriltagPipelineConfig"}
+            ]
+        }
+    },
+    "required": [
+        "camera_nickname",
+        "name",
+        "stream",
+        "pipelineType",
+        "pipelineConfig"
+    ]
+}

@@ -1,8 +1,9 @@
 {
-    "$schema": "https://json-schema.org/draft/2020-12/schema",
-    "title": "apriltag_field",
+    "$schema": "https://json-schema.org/draft-07/schema#",
+    "$id": "apriltag_field.schema.json",
+    "title": "WPILib Apriltag Field",
     "type": "object",
-    "$defs": {
+    "definitions": {
         "pose": {
             "type": "object",
             "properties": {
@@ -42,7 +43,7 @@
             "type": "object",
             "properties": {
                 "ID": { "type": "number" },
-                "pose": { "$ref": "#/$defs/pose" }
+                "pose": { "$ref": "#/definitions/pose" }
             },
             "required": ["ID","pose"],
             "additionalProperties": false
@@ -51,7 +52,7 @@
     "properties": {
         "tags": {
             "type": "array",
-            "items": { "$ref": "#/$defs/apriltag" }
+            "items": { "$ref": "#/definitions/apriltag" }
         },
         "field": {
             "type": "object",

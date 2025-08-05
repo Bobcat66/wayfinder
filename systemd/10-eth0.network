@@ -25,6 +25,11 @@
 Name=eth0
 
 [Network]
-#Address=
 DHCP=yes
-MDNS=resolve
+MulticastDNS=yes
+LinkLocalAddressing=ipv4
+IPv4LLStartAddress=169.254.42.42
+EmitLLDP=yes
+
+[Address]
+#Address=

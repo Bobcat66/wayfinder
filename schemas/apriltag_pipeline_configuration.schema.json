@@ -1,8 +1,9 @@
 {
-    "$schema": "https://json-schema.org/draft/2020-12/schema",
-    "title": "apriltag_pipeline_configuration",
+    "$schema": "https://json-schema.org/draft-07/schema#",
+    "$id": "apriltag_pipeline_configuration.schema.json",
+    "title": "Apriltag Pipeline Configuration",
     "type": "object",
-    "$defs": {
+    "definitions": {
         "apriltag_detector_config": {
             "type": "object",
             "properties": {
@@ -29,8 +30,12 @@
         }
     },
     "properties": {
-        "detConfig": { "$ref": "#/$defs/apriltag_detector_config" },
-        "detQTPs": { "$ref": "#/$defs/quad_threshold_parameters"},
+        "solvePnP": { "type": "boolean" },
+        "detConfig": { "$ref": "#/definitions/apriltag_detector_config" },
+        "detQTPs": { "$ref": "#/definitions/quad_threshold_parameters"},
+        "tagField": { "type": "string" },
+        "tagFamily": { "type": "string" },
+        "tagSize": { "type": "number" },
         "detectorExcludes": {
             "type": "array",
             "items": { "type": "number" }

@@ -1,0 +1,56 @@
+{
+    "$schema": "../jval_schema.schema.json",
+    "$name": "ApriltagField",
+    "type": "struct",
+    "properties": {
+        "tags": {
+            "type": "array",
+            "items": {
+                "type": "struct",
+                "properties": {
+                    "ID": { "type": "integer" },
+                    "pose": {
+                        "type": "struct",
+                        "properties": {
+                            "translation": {
+                                "type": "struct",
+                                "properties": {
+                                    "x": { "type": "number" },
+                                    "y": { "type": "number" },
+                                    "z": { "type": "number" }
+                                },
+                                "required": ["x","y","z"]
+                            },
+                            "rotation": {
+                                "type": "struct",
+                                "properties": {
+                                    "quaternion": {
+                                        "type": "struct",
+                                        "properties": {
+                                            "W": { "type": "number" },
+                                            "X": { "type": "number" },
+                                            "Y": { "type": "number" },
+                                            "Z": { "type": "number" }   
+                                        },
+                                        "required": ["W","X","Y","Z"]
+                                    }
+                                },
+                                "required": ["quaternion"]
+                            }
+                        },
+                        "required": ["translation","rotation"]
+                    }
+                }
+            }
+        },
+        "field": {
+            "type": "struct",
+            "properties": {
+                "length": { "type": "number" },
+                "width": { "type": "number" }
+            },
+            "required": ["length","width"]
+        }
+    },
+    "required": ["tags","field"]
+}

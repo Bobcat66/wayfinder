@@ -1,0 +1,33 @@
+{
+    "$schema": "../jval_schema.schema.json",
+    "$name": "TensorParams",
+    "type": "struct",
+    "properties": {
+        "interleaved": { "type": "boolean" },
+        "height": { "type": "integer" },
+        "width": { "type": "integer" },
+        "channels": { "type": "integer" },
+        "scale": { "type": "number" },
+        "stds": {
+            "type": "array",
+            "items": { "type": "number" },
+            "minSize": 1,
+            "maxSize": 4
+        },
+        "means": {
+            "type": "array",
+            "items": { "type": "number" },
+            "minSize": 1,
+            "maxSize": 4
+        }
+    },
+    "required": [
+        "interleaved",
+        "height",
+        "width",
+        "channels",
+        "scale",
+        "stds",
+        "means"
+    ]
+}

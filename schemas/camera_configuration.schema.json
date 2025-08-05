@@ -1,8 +1,9 @@
 {
-    "$schema": "https://json-schema.org/draft/2020-12/schema",
-    "title": "camera_configuration",
+    "$schema": "https://json-schema.org/draft-07/schema#",
+    "$id": "camera_configuration.schema.json",
+    "title": "Camera configuration",
     "type": "object",
-    "$defs": {
+    "definitions": {
         "control_name": {
             "type": "string",
             "enum": [
@@ -73,16 +74,16 @@
         "format": { "$ref": "stream_format.schema.json" },
         "controlAliases": {
             "type": "object",
-            "propertyNames": { "$ref": "#/$defs/control_name" },
+            "propertyNames": { "$ref": "#/definitions/control_name" },
             "additionalProperties": { "type": "string" }
         },
         "calibrations": {
             "type": "array",
-            "items": { "$ref": "#/$defs/camera_intrinsics" }
+            "items": { "$ref": "#/definitions/camera_intrinsics" }
         },
         "controls": {
             "type": "object",
-            "propertyNames": { "$ref": "#/$defs/control_name" },
+            "propertyNames": { "$ref": "#/definitions/control_name" },
             "additionalProperties": { "type": "number" }
         }
     },

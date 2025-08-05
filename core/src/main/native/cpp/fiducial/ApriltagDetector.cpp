@@ -90,41 +90,7 @@ namespace wf {
         {"tagCustom48h12",tagCustom48h12_destroy},
         {"tagStandard41h12",tagStandard41h12_destroy},
         {"tagStandard52h13",tagStandard52h13_destroy}
-    };
-
-    std::string ApriltagDetectorConfig::string() const {
-        return std::format(
-            "{{{}, {}, {}, {}, {}, {}}}",
-            numThreads,
-            quadDecimate,
-            quadSigma,
-            refineEdges,
-            decodeSharpening,
-            debug
-        );
-    }
-
-    std::ostream& operator<<(std::ostream& os, const ApriltagDetectorConfig& config) {
-        os << config.string();
-        return os;
-    }
-
-    std::string QuadThresholdParams::string() const {
-        return std::format(
-            "{{{}, {}, {}, {}, {}, {}}}",
-            minClusterPixels,
-            maxNumMaxima,
-            criticalAngleRads,
-            maxLineFitMSE,
-            minWhiteBlackDiff,
-            deglitch
-        );
-    }
-
-    std::ostream& operator<<(std::ostream& os, const QuadThresholdParams& qtps) {
-        os << qtps.string();
-        return os;
-    }
+    }; 
 
     ApriltagDetector::ApriltagDetector() {
         detectorHandle_ = apriltag_detector_create();

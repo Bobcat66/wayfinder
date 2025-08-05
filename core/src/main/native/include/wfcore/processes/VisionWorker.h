@@ -35,7 +35,6 @@
 #include "wfcore/video/processing/CVProcessPipe.h"
 
 #include <mutex>
-
 namespace wf {
 
     class VisionWorker : public WFConcurrentLoggedStatusfulObject {
@@ -49,14 +48,15 @@ namespace wf {
         );
         void start();
         void stop();
+        const char* getThreadName() const noexcept { return threadName; }
         const std::string& getName() const noexcept { return name; }
         const bool isRunning() const noexcept { return running.load(); }
     private:
-        void run() noexcept;
+        void run(std::stop_token stoken) noexcept;
+        const char* threadName;
         std::string name;
-        std::thread thread;
+        std::jthread thread;
         std::atomic_bool running;
-        std::mutex pipeGuard;
         CVProcessPipe<cv::Mat> preprocesser;
         std::unique_ptr<Pipeline> pipeline;
         std::unique_ptr<PipelineOutputConsumer> outputConsumer;

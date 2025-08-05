@@ -46,7 +46,7 @@ namespace wf {
             inst.SetServerTeam(team);
             this->devRootTable = inst.GetTable(std::format("wayfinder/{}",device_name));
         } else {
-            //Not implemented
+            // Server not implemented
         }
     }
 }

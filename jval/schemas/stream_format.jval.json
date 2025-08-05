@@ -1,0 +1,18 @@
+{
+    "$schema": "../jval_schema.schema.json",
+    "$name": "StreamFormat",
+    "type": "struct",
+    "properties": {
+        "fps": { "type": "number" },
+        "frameFormat": {
+            "type": "struct",
+            "properties": {
+                "width": { "type": "integer" },
+                "height": { "type": "integer" },
+                "encoding": { "$ref": "ImageEncoding" }
+            },
+            "required": ["width","height","encoding"]
+        }
+    },
+    "required": ["fps","frameFormat"]
+}

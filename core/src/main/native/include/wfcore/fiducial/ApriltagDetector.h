@@ -34,41 +34,9 @@
 #include <cstdint>
 #include <string>
 #include <optional>
+#include "wfcore/fiducial/tag_detector_configs.h"
 
 namespace wf {
-
-    enum class ApriltagDetectorStatus {
-        Ok,
-        InvalidFamily,
-        NullFamily,
-        NullDetector
-    };
-
-    struct ApriltagDetectorConfig {
-        int numThreads = 1;
-        float quadDecimate = 2.0f;
-        float quadSigma = 0.0f;
-        bool refineEdges = true;
-        double decodeSharpening = 0.25;
-        bool debug = false;
-        std::string string() const;
-        bool operator==(const ApriltagDetectorConfig&) const = default;
-    };
-
-    std::ostream& operator<<(std::ostream& os, const ApriltagDetectorConfig& config);
-
-    struct QuadThresholdParams {
-        int minClusterPixels = 5;
-        int maxNumMaxima = 10;
-        float criticalAngleRads = 0.0f;
-        float maxLineFitMSE = 10.0f;
-        int minWhiteBlackDiff = 5;
-        bool deglitch = false;
-        std::string string() const;
-        bool operator==(const QuadThresholdParams&) const = default;
-    };
-
-    std::ostream& operator<<(std::ostream& os, const QuadThresholdParams& qtps);
 
     class ApriltagDetector {
     public:

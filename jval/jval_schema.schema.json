@@ -1,0 +1,125 @@
+{
+    "$schema": "https://json-schema.org/draft-07/schema#",
+    "$id": "jval_schema.schema.json",
+    "title": "JVal metaschema",
+    "definitions": {
+        "basicType": {
+            "type": "string",
+            "enum": [
+                "integer",
+                "number",
+                "boolean",
+                "string",
+                "array",
+                "enum",
+                "struct",
+                "map",
+                "union",
+                "pattern",
+                "any"
+            ]
+        },
+        "reference": {
+            "description": "A reference to another schema in another file. The other schema file must be linked during compilation, and should be referenced by its $name",
+            "type": "object",
+            "properties": {
+                "$ref": { "$ref": "#/definitions/schemaName" }
+            },
+            "required": ["$ref"],
+            "additionalProperties": false
+        },
+        "subschema": {
+            "oneOf": [
+                { "$ref": "#" },
+                { "$ref": "#/definitions/reference" }
+            ]
+        },
+        "schemaName": {
+            "description": "A valid name for a schema",
+            "type": "string",
+            "pattern": "^([A-Za-z])\\w*$"
+        },
+        "propertyName": {
+            "description": "A valid name for a property",
+            "$ref": "#/definitions/schemaName"
+        },
+        "propertySet": {
+            "description": "A set of property names",
+            "type": "array",
+            "items": { "$ref" : "#/definitions/propertyName" },
+            "uniqueItems": true,
+            "default": []
+        }
+    },
+    "properties": {
+        "$schema": { "type": "string" },
+        "$name": { "$ref": "#/definitions/schemaName" },
+        "type": { "$ref": "#/definitions/basicType" },
+        "properties": {
+            "description": "Struct properties",
+            "type": "object",
+            "propertyNames": { "pattern": "^([A-Za-z])\\w*$" },
+            "additionalProperties": { "$ref": "#/definitions/subschema" },
+            "default": {}
+        },
+        "required": { 
+            "description": "Required struct properties",
+            "$ref": "#/definitions/propertySet"  
+        },
+        "dependencies": {
+            "description": "Dependent struct property requirements",
+            "type": "object",
+            "propertyNames": { "pattern": "^([A-Za-z])\\w*$" },
+            "additionalProperties": { "$ref": "#/definitions/propertySet" },
+            "default": {}
+        },
+        "enumValues": {
+            "description": "Enum values",
+            "type": "array",
+            "items": { "type": "string" },
+            "uniqueItems": true,
+            "default": []
+        },
+        "schemas": {
+            "description": "possible schemas of a Union",
+            "type": "array",
+            "items": { "$ref": "#/definitions/subschema" },
+            "default": []
+        },
+        "regex": {
+            "description": "regex pattern to match against",
+            "type": "string",
+            "default": "(^.*$)"
+        },
+        "mapKeys": {
+            "description": "regex pattern to match map keys against",
+            "type": "string",
+            "default": "(^.*$)"
+        },
+        "mapValues": {
+            "description": "Schema to match map values against",
+            "$ref": "#/definitions/subschema",
+            "default": { "type": "any" }
+        },
+        "items": {
+            "description": "Schema to match array values against",
+            "$ref": "#/definitions/subschema",
+            "default": { "type": "any" }
+        },
+        "minSize": {
+            "description": "Minimum array size",
+            "type": ["integer","boolean"],
+            "default": false
+        },
+        "maxSize": {
+            "description": "Maximum array size",
+            "type": ["integer","boolean"],
+            "default": false
+        }
+    },
+    "required": ["type"],
+    "dependencies": {
+        "$schema": ["$name"]
+    },
+    "additionalProperties": false
+}
