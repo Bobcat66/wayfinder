@@ -64,7 +64,6 @@ void wips_twist2_destroy(wips_twist2_t* struct_ptr) {
     WIPS_TRACELOG("Destroyed twist2\n");
 }
 
-
 wips_status_t wips_encode_twist2(wips_bin_t* data, wips_twist2_t* in) {
     WIPS_TRACELOG("Encoding twist2\n");
     WIPS_Assert(data != NULL && in != NULL,0);

@@ -86,7 +86,6 @@ void wips_pipeline_result_destroy(wips_pipeline_result_t* struct_ptr) {
     WIPS_TRACELOG("Destroyed pipeline_result\n");
 }
 
-
 wips_status_t wips_encode_pipeline_result(wips_bin_t* data, wips_pipeline_result_t* in) {
     WIPS_TRACELOG("Encoding pipeline_result\n");
     WIPS_Assert(data != NULL && in != NULL,0);

@@ -64,7 +64,6 @@ void wips_pose3_destroy(wips_pose3_t* struct_ptr) {
     WIPS_TRACELOG("Destroyed pose3\n");
 }
 
-
 wips_status_t wips_encode_pose3(wips_bin_t* data, wips_pose3_t* in) {
     WIPS_TRACELOG("Encoding pose3\n");
     WIPS_Assert(data != NULL && in != NULL,0);

@@ -64,7 +64,6 @@ void wips_object_detection_destroy(wips_object_detection_t* struct_ptr) {
     WIPS_TRACELOG("Destroyed object_detection\n");
 }
 
-
 wips_status_t wips_encode_object_detection(wips_bin_t* data, wips_object_detection_t* in) {
     WIPS_TRACELOG("Encoding object_detection\n");
     WIPS_Assert(data != NULL && in != NULL,0);

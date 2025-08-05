@@ -64,7 +64,6 @@ void wips_apriltag_relative_pose_observation_destroy(wips_apriltag_relative_pose
     WIPS_TRACELOG("Destroyed apriltag_relative_pose_observation\n");
 }
 
-
 wips_status_t wips_encode_apriltag_relative_pose_observation(wips_bin_t* data, wips_apriltag_relative_pose_observation_t* in) {
     WIPS_TRACELOG("Encoding apriltag_relative_pose_observation\n");
     WIPS_Assert(data != NULL && in != NULL,0);

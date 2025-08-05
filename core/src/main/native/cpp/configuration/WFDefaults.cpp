@@ -22,38 +22,147 @@
 #include "wfdetail/validation/inference_validators.h"
 #include "wfdetail/validation/video_validators.h"
 #include "wfcore/common/json_utils.h"
+#include "jval/WFDefaults.jval.hpp"
+#include "wfcore/common/jval_compat.h"
+#include "wfcore/common/wfdef.h"
 
 namespace impl {
     using namespace wf;
 
-    static const JSONValidationFunctor* getDefaultsValidator() {
-        static JSONStructValidator validator(
-            {
-                {"engineType", detail::getInferenceEngineTypeValidator()},
-                {"modelArch", detail::getModelArchValidator()},
-                {"tensorParams", detail::getTensorParamsValidator()},
-                {"nmsThreshold", getPrimitiveValidator<float>()},
-                {"confidenceThreshold", getPrimitiveValidator<float>()},
-                {"modelFile", getPrimitiveValidator<std::string>()},
-                {"modelColorSpace", detail::getEncodingValidator()},
-                {"qtps", detail::getDetectorQTPsValidator()},
-                {"tagDetectorConfig", detail::getDetectorQTPsValidator()},
-                {"tagSize", getPrimitiveValidator<double>()},
-                {"tagFamily", getPrimitiveValidator<std::string>()},
-                {"tagField", getPrimitiveValidator<std::string>()}
-            },
-            {},
-            {}
-        );
-        return static_cast<JSONValidationFunctor*>(&validator);
+    inline constexpr std::string_view inferenceEngineTypeToString(InferenceEngineType engine) {
+        switch (engine) {
+            case InferenceEngineType::CV_CPU:     return "CV_CPU";
+            case InferenceEngineType::CV_OPENCL:  return "CV_OPENCL";
+            case InferenceEngineType::CV_VULKAN:  return "CV_VULKAN";
+            case InferenceEngineType::CUDA:       return "CUDA";
+            case InferenceEngineType::OpenVINO:   return "OpenVINO";
+            case InferenceEngineType::RKNN:       return "RKNN";
+            case InferenceEngineType::CoreML:     return "CoreML";
+            case InferenceEngineType::ROCm:       return "ROCm";
+            case InferenceEngineType::EdgeTPU:    return "EdgeTPU";
+            case InferenceEngineType::HailoRT:    return "HailoRT";
+        }
+        WF_UNREACHABLE;
     }
 
-}
+    inline constexpr InferenceEngineType parseInferenceEngineType(std::string_view str) {
+        if (str == "CV_CPU") return InferenceEngineType::CV_CPU;
+        if (str == "CV_OPENCL") return InferenceEngineType::CV_OPENCL;
+        if (str == "CV_VULKAN") return InferenceEngineType::CV_VULKAN;
+        if (str == "CUDA") return InferenceEngineType::CUDA;
+        if (str == "OpenVINO") return InferenceEngineType::OpenVINO;
+        if (str == "RKNN") return InferenceEngineType::RKNN;
+        if (str == "CoreML") return InferenceEngineType::CoreML;
+        if (str == "ROCm") return InferenceEngineType::ROCm;
+        if (str == "EdgeTPU") return InferenceEngineType::EdgeTPU;
+        if (str == "HailoRT") return InferenceEngineType::HailoRT;
+
+        WF_UNREACHABLE;
+    }
+
+    inline constexpr std::string_view modelArchToString(ModelArch arch) {
+        switch (arch) {
+            case ModelArch::YOLO:       return "YOLO";
+            case ModelArch::SSD:        return "SSD";
+            case ModelArch::RETINA_NET: return "RETINA_NET";
+            case ModelArch::RCNN:       return "RCNN";
+        }
+        WF_UNREACHABLE;
+    }
+
+    inline constexpr ModelArch parseModelArch(std::string_view str) {
+        if (str == "YOLO")        return ModelArch::YOLO;
+        if (str == "SSD")         return ModelArch::SSD;
+        if (str == "RETINA_NET")  return ModelArch::RETINA_NET;
+        if (str == "RCNN")        return ModelArch::RCNN;
+
+        WF_UNREACHABLE;
+    }
+
+    inline constexpr ImageEncoding parseEncoding(const std::string& name) {
+        if (name == "BGR24") return ImageEncoding::BGR24;
+        if (name == "RGB24") return ImageEncoding::RGB24;
+        if (name == "RGB565") return ImageEncoding::RGB565;
+        if (name == "Y8") return ImageEncoding::Y8;
+        if (name == "Y16") return ImageEncoding::Y16;
+        if (name == "YUYV") return ImageEncoding::YUYV;
+        if (name == "UYVY") return ImageEncoding::UYVY;
+        if (name == "RGBA") return ImageEncoding::RGBA;
+        if (name == "BGRA") return ImageEncoding::BGRA;
+        if (name == "MJPEG") return ImageEncoding::MJPEG;
+        return ImageEncoding::UNKNOWN;
+    }
+
+    inline constexpr std::string_view encodingToString(ImageEncoding encoding) {
+        using enum ImageEncoding;
+        switch (encoding) {
+            case BGR24: return "BGR24";
+            case RGB24: return "RGB24";
+            case RGB565: return "RGB565";
+            case Y8: return "Y8";
+            case Y16: return "Y16";
+            case YUYV: return "YUYV";
+            case UYVY: return "UYVY";
+            case RGBA: return "RGBA";
+            case BGRA: return "BGRA";
+            case MJPEG: return "MJPEG";
+            default: return "UNKNOWN";
+        }
+    }   
+
+    template<typename T>
+    cv::Scalar toScalar(const std::vector<T>& vec) {
+        return cv::Scalar(
+            vec.size() > 0 ? vec[0] : 0,
+            vec.size() > 1 ? vec[1] : 0,
+            vec.size() > 2 ? vec[2] : 0,
+            vec.size() > 3 ? vec[3] : 0
+        );
+    }
+};
+
 
 namespace wf {
     WFStatusResult WFDefaults::load_impl(const JSON& jobject) {
-        auto valres = (*impl::getDefaultsValidator())(jobject);
-        if (!valres) return valres;
-        
+        auto valres = (*jval::get_WFDefaults_validator())(jobject);
+        if (!valres) return JVResToWF(valres);
+        tagField_ = jobject["tagField"].get<std::string>();
+        tagFamily_ = jobject["tagFamily"].get<std::string>();
+        tagSize_ = jobject["tagSize"].get<double>();
+        modelFile_ = jobject["modelFile"].get<std::string>();
+        auto tdc_jobject = jobject["tagDetectorConfig"];
+        tagDetectorConfig_ = {
+            tdc_jobject["numThreads"].get<int>(),
+            tdc_jobject["quadDecimate"].get<float>(),
+            tdc_jobject["quadSigma"].get<float>(),
+            tdc_jobject["refineEdges"].get<bool>(),
+            tdc_jobject["decodeSharpening"].get<double>(),
+            tdc_jobject["debug"].get<bool>()
+        };
+        auto qtps_jobject = jobject["qtps"];
+        qtps_ = {
+            qtps_jobject["minClusterPixels"].get<int>(),
+            qtps_jobject["maxNumMaxima"].get<int>(),
+            qtps_jobject["criticalAngleRads"].get<float>(),
+            qtps_jobject["maxLineFitMSE"].get<float>(),
+            qtps_jobject["minWhiteBlackDiff"].get<int>(),
+            qtps_jobject["deglitch"].get<bool>()
+        };
+        auto tp_jobject = jobject["tensorParams"];
+        tensorParameters_ = {
+            tp_jobject["interleaved"].get<bool>(),
+            tp_jobject["height"].get<int>(),
+            tp_jobject["width"].get<int>(),
+            tp_jobject["channels"].get<int>(),
+            tp_jobject["scale"].get<float>(),
+            impl::toScalar(tp_jobject["stds"].get<std::vector<double>>()),
+            impl::toScalar(tp_jobject["means"].get<std::vector<double>>())
+        };
+        engineType_ = impl::parseInferenceEngineType(jobject["engineType"].get<std::string>());
+        modelArch_ = impl::parseModelArch(jobject["modelArch"].get<std::string>());
+        modelColorSpace_ = impl::parseEncoding(jobject["modelColorSpace"].get<std::string>());
+        nmsThreshold_ = jobject["nmsThreshold"].get<float>();
+        confThreshold_ = jobject["confidenceThreshold"].get<float>();
+        return WFStatusResult::success();
     }
 }

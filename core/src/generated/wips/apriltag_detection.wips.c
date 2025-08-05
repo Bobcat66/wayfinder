@@ -64,7 +64,6 @@ void wips_apriltag_detection_destroy(wips_apriltag_detection_t* struct_ptr) {
     WIPS_TRACELOG("Destroyed apriltag_detection\n");
 }
 
-
 wips_status_t wips_encode_apriltag_detection(wips_bin_t* data, wips_apriltag_detection_t* in) {
     WIPS_TRACELOG("Encoding apriltag_detection\n");
     WIPS_Assert(data != NULL && in != NULL,0);

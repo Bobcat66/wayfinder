@@ -58,10 +58,10 @@ class wips_schema:
         detail_fields: Dict[int,Dict] = {}
         for index, field in enumerate(self.fields):
             if field.get("optional"):
-                detail_fields[index] = {"name":f"DETAILoptpresent__{field["name"]}","type":"u8","trivial":True}
+                detail_fields[index] = {"name":f"DETAILoptpresent__{field["name"]}","type":"u8","trivial":True,"detail":True}
                 self.trivial = False
             elif field.get("vla"):
-                detail_fields[index] = {"name":f"DETAILvlasize__{field["name"]}","type":"u32","trivial":True}
+                detail_fields[index] = {"name":f"DETAILvlasize__{field["name"]}","type":"u32","trivial":True,"detail":True}
                 self.trivial = False
             else:
                 continue
@@ -82,6 +82,7 @@ def build_schemas(yaml_schemas: List[Dict]):
         print(f"Building {yaml_schema["name"]} schema")
         dependency_names: Set[str] = set()
         for field in yaml_schema["fields"]:
+            field["detail"] = False
             if field["type"] in primitives:
                 field["trivial"] = True
                 continue
@@ -173,22 +174,13 @@ def compile(schemas_path: Path, output_dir: Path, py: bool = False, jvm: bool = 
 # Core:
 # ./wips-compiler.py messages.yaml --out=../core/src/generated/wips
 
-# Client:
-# ./wips-compiler.py messages.yaml --py --out=../client/src/generated/wips
-
-# Lib:
-# ./wips-compiler.py messages.yaml --jvm --out=../wayfinderlib/src/generated/wips
-
 # Testing:
 # ./wips-compiler.py messages.yaml --out=./wips_output
-
-# Python and Java bindings generation is not implemented yet, but the flags are here for future use.
+.
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="WIPS Compiler")
     parser.add_argument("schemas", type=Path, help="path to YAML schema file")
     parser.add_argument("--out", type=Path, default=".", help='Output directory')
-    parser.add_argument("--py", action="store_true", help="Generate python bindings for the C code")
-    parser.add_argument("--jvm", action="store_true", help="Generate Java bindings for the C code")
     parser.add_argument("--trace", action="store_true", help="Enables trace logging in debug builds")
     args = parser.parse_args()
     args.out.mkdir(parents=True, exist_ok=True)

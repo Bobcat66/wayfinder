@@ -11,3 +11,5 @@ MSVC (A cursory google search turns up inconsistent and contradictory results). 
 GCC (which does support VA_OPT) is the primary compiler used during testing and debugging for both WIPS and 
 Wayfinder as a whole, and when built in release mode WIPS does not make use of VA_OPT at all. Nevertheless, it's 
 worth noting for posterity.
+
+Note: in general, the values returned by getters should be treated as invalidated after the original object is destroyed or modified

@@ -13,7 +13,11 @@ file(GLOB_RECURSE WIPSSOURCES
     CONFIGURE_DEPENDS 
     "${CMAKE_CURRENT_SOURCE_DIR}/src/generated/wips/*.c"
 )
-add_library(wfcore ${CORESOURCES} ${WIPSSOURCES})
+file(GLOB_RECURSE JVALSOURCES
+    CONFIGURE_DEPENDS
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/generated/jval/*.cpp"
+)
+add_library(wfcore ${CORESOURCES} ${WIPSSOURCES} ${JVALSOURCES})
 
 install(TARGETS wfcore LIBRARY DESTINATION lib)
 
