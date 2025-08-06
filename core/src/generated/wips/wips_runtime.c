@@ -109,46 +109,133 @@ void wips_i64_free_resources(wips_i64_t* data) {}
 void wips_fp32_free_resources(wips_fp32_t* data) {}
 void wips_fp64_free_resources(wips_fp64_t* data) {}
 
-unsigned char wips_u8_copy(wips_u8_t* dest, const wips_u8_t* src) {
+wips_status_t wips_u8_copy(wips_u8_t* dest, const wips_u8_t* src) {
     *dest = *src;
     return WIPS_STATUS_OK;
 }
-unsigned char wips_i8_copy(wips_i8_t* dest, const wips_i8_t* src) {
+wips_status_t wips_i8_copy(wips_i8_t* dest, const wips_i8_t* src) {
     *dest = *src;
     return WIPS_STATUS_OK;
 }
-unsigned char wips_u16_copy(wips_u16_t* dest, const wips_u16_t* src) {
+wips_status_t wips_u16_copy(wips_u16_t* dest, const wips_u16_t* src) {
     *dest = *src;
     return WIPS_STATUS_OK;
 }
-unsigned char wips_i16_copy(wips_i16_t* dest, const wips_i16_t* src) {
+wips_status_t wips_i16_copy(wips_i16_t* dest, const wips_i16_t* src) {
     *dest = *src;
     return WIPS_STATUS_OK;
 }
-unsigned char wips_u32_copy(wips_u32_t* dest, const wips_u32_t* src) {
+wips_status_t wips_u32_copy(wips_u32_t* dest, const wips_u32_t* src) {
     *dest = *src;
     return WIPS_STATUS_OK;
 }
-unsigned char wips_i32_copy(wips_i32_t* dest, const wips_i32_t* src) {
+wips_status_t wips_i32_copy(wips_i32_t* dest, const wips_i32_t* src) {
     *dest = *src;
     return WIPS_STATUS_OK;
 }
-unsigned char wips_u64_copy(wips_u64_t* dest, const wips_u64_t* src) {
+wips_status_t wips_u64_copy(wips_u64_t* dest, const wips_u64_t* src) {
+    *dest = *src;
+    return WIPS_STATUS_OK;
+}
+wips_status_t wips_i64_copy(wips_i64_t* dest, const wips_i64_t* src) {
+    *dest = *src;
+    return WIPS_STATUS_OK;
+}
+wips_status_t wips_fp32_copy(wips_fp32_t* dest, const wips_fp32_t* src) {
+    *dest = *src;
+    return WIPS_STATUS_OK;
+}
+wips_status_t wips_fp64_copy(wips_fp64_t* dest, const wips_fp64_t* src) {
     *dest = *src;
     return WIPS_STATUS_OK;
 }
 
-unsigned char wips_i64_copy(wips_i64_t* dest, const wips_i64_t* src) {
-    *dest = *src;
-    return WIPS_STATUS_OK;
-}
+DEFINE_VLAGETTER(u8)
+DEFINE_VLASETTER(u8)
+DEFINE_VLAPUSHBACK(u8)
+wips_vlamethods_t wips_u8_vlamethods = {
+    wips_u8_vlagetter,
+    wips_u8_vlasetter,
+    wips_u8_vlapushback
+};
 
-unsigned char wips_fp32_copy(wips_fp32_t* dest, const wips_fp32_t* src) {
-    *dest = *src;
-    return WIPS_STATUS_OK;
-}
+DEFINE_VLAGETTER(i8)
+DEFINE_VLASETTER(i8)
+DEFINE_VLAPUSHBACK(i8)
+wips_vlamethods_t wips_i8_vlamethods = {
+    wips_i8_vlagetter,
+    wips_i8_vlasetter,
+    wips_i8_vlapushback
+};
 
-unsigned char wips_fp64_copy(wips_fp64_t* dest, const wips_fp64_t* src) {
-    *dest = *src;
-    return WIPS_STATUS_OK;
-}
+DEFINE_VLAGETTER(u16)
+DEFINE_VLASETTER(u16)
+DEFINE_VLAPUSHBACK(u16)
+wips_vlamethods_t wips_u16_vlamethods = {
+    wips_u16_vlagetter,
+    wips_u16_vlasetter,
+    wips_u16_vlapushback
+};
+
+DEFINE_VLAGETTER(i16)
+DEFINE_VLASETTER(i16)
+DEFINE_VLAPUSHBACK(i16)
+wips_vlamethods_t wips_i16_vlamethods = {
+    wips_i16_vlagetter,
+    wips_i16_vlasetter,
+    wips_i16_vlapushback
+};
+
+DEFINE_VLAGETTER(u32)
+DEFINE_VLASETTER(u32)
+DEFINE_VLAPUSHBACK(u32)
+wips_vlamethods_t wips_u32_vlamethods = {
+    wips_u32_vlagetter,
+    wips_u32_vlasetter,
+    wips_u32_vlapushback
+};
+
+DEFINE_VLAGETTER(i32)
+DEFINE_VLASETTER(i32)
+DEFINE_VLAPUSHBACK(i32)
+wips_vlamethods_t wips_i32_vlamethods = {
+    wips_i32_vlagetter,
+    wips_i32_vlasetter,
+    wips_i32_vlapushback
+};
+
+DEFINE_VLAGETTER(u64)
+DEFINE_VLASETTER(u64)
+DEFINE_VLAPUSHBACK(u64)
+wips_vlamethods_t wips_u64_vlamethods = {
+    wips_u64_vlagetter,
+    wips_u64_vlasetter,
+    wips_u64_vlapushback
+};
+
+DEFINE_VLAGETTER(i64)
+DEFINE_VLASETTER(i64)
+DEFINE_VLAPUSHBACK(i64)
+wips_vlamethods_t wips_i64_vlamethods = {
+    wips_i64_vlagetter,
+    wips_i64_vlasetter,
+    wips_i64_vlapushback
+};
+
+DEFINE_VLAGETTER(fp32)
+DEFINE_VLASETTER(fp32)
+DEFINE_VLAPUSHBACK(fp32)
+wips_vlamethods_t wips_fp32_vlamethods = {
+    wips_fp32_vlagetter,
+    wips_fp32_vlasetter,
+    wips_fp32_vlapushback
+};
+
+DEFINE_VLAGETTER(fp64)
+DEFINE_VLASETTER(fp64)
+DEFINE_VLAPUSHBACK(fp64)
+wips_vlamethods_t wips_fp64_vlamethods = {
+    wips_fp64_vlagetter,
+    wips_fp64_vlasetter,
+    wips_fp64_vlapushback
+};

@@ -225,7 +225,8 @@ wips_vla_PyObject_dealloc(PyObject* self) {
 
     if (obj->base.handler) {
         wips_handler_decref(obj->base.handler);
-        obj->buffer = NULL;
+        free(obj->buffer_pt);
+        obj->buffer_pt = NULL;
         obj->vlasize = NULL;
         obj->base.handler = NULL;
         obj->base.wips_type = NULL;
@@ -234,11 +235,13 @@ wips_vla_PyObject_dealloc(PyObject* self) {
     Py_TYPE(self)->tp_free(self);
 }
 
-PyObject* wips_vla_PyObject_create(void* buffer, wips_u32_t* vlasize, wips_handler_t* handler, wips_pytype_t* wips_type) {
+PyObject* wips_vla_PyObject_create(unsigned char* buffer, wips_u32_t* vlasize, wips_handler_t* handler, wips_pytype_t* wips_type) {
     PyTypeObject* type = &wips_vla_PyTypeObject;
     wips_vla_PyObject* obj = (wips_vla_PyObject*)(type->tp_alloc(type,0));
     if (!obj) return NULL;
-    obj->buffer = buffer;
+    unsigned char** buffer_pt = (unsigned char**)malloc(sizeof(unsigned char*));
+    *buffer_pt = buffer;
+    obj->buffer_pt = buffer_pt;
     obj->vlasize = vlasize;
     obj->base.handler = handler;
     obj->base.wips_type = wips_type;
@@ -270,7 +273,7 @@ static PyObject* wips_vla_PyObject_item(PyObject* self,Py_ssize_t index) {
         PyErr_SetString(PyExc_IndexError, "index out of range");
         return NULL;
     }
-    void* c_obj = obj->buffer + (real_index * obj->base.wips_type->size);
+    unsigned char* c_obj = *(obj->buffer_pt) + (real_index * (obj->base.wips_type->size));
     return obj->base.wips_type->wrapper(c_obj,obj->base.handler);
 }
 
@@ -283,6 +286,12 @@ static PyObject* wips_vla_PyObject_ass_item(PyObject* self, Py_ssize_t index, Py
     if (real_index > *(obj->vlasize)) {
         PyErr_SetString(PyExc_IndexError, "index out of range");
         return NULL;
+    }
+    if (value) {
+
+    } else {
+        // Value is NULL, delete
+        (*buffer)
     }
 }
 
@@ -310,8 +319,7 @@ PyTypeObject wips_PyObjectTypeObject = {
 
 static PyTypeObject wips_vla_PyTypeObject = {
     PyVarObject_HEAD_INIT(NULL,0)
-    .tp_name = "wips.vla",
-    .
+    .tp_name = "wips.vla"
 };
 
 #ifdef __cplusplus

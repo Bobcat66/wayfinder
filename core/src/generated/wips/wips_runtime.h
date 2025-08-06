@@ -40,6 +40,7 @@ extern "C" {
 
 #include <stdint.h>
 #include <stddef.h>
+#include <stdbool.h>
 
 // More user-friendly macro for accessing WIPS details than the ones used internally.
 #define GET_WIPS_DETAIL_IMPL(field,detail) DETAIL ## detail ## __ ## field
@@ -51,7 +52,49 @@ extern "C" {
 #define WIPS_STATUS_BOUNDS_ERROR 0x02 // Out-of-bounds error
 #define WIPS_STATUS_OVERFLOW 0x03 // Overflow error
 #define WIPS_STATUS_BAD_ASSERT 0x04 // Failed assertion
+#define WIPS_STATUS_UNDERFLOW 0x05 // Underflow error
 #define WIPS_STATUS_UNKNOWN 0xff // Unknown error
+
+typedef unsigned char wips_status_t;
+
+typedef struct {
+    size_t bytes_processed;
+    unsigned char status_code;
+} wips_result_t;
+
+static inline wips_result_t wips_make_result(size_t bytes, wips_status_t code) {
+    wips_result_t r;
+    r.bytes_processed = bytes;
+    r.status_code = code;
+    return r;
+}
+
+// Metadata and reflection code
+
+typedef struct wips_vlaref wips_vlaref_t;
+typedef struct wips_vlamethods wips_vlamethods_t;
+
+// Allows type-erased manipulation of VLAs. NOTE: A ref does NOT own the vla, the vla is still owned by the wips struct.
+// Refs are invalidated when the wips struct that owns the VLA is destroyed. vlarefs CAN mutate the VLA and its metadata,
+// however.
+struct wips_vlaref {
+    void* buffer_pt; // A double pointer to the buffer, type-erased to void*
+    wips_u32_t* vlasize_pt; // a pointer to the vlasize field
+};
+
+// Holds methods for manipulating VLAs of a given type
+struct wips_vlamethods {
+    // takes a pointer to the output, a vlaref, and an index.
+    // returns a pointer to the object. the Caller does NOT own the returned pointer
+    // returns NULL if the index is out of bounds
+    void* (* const getter)(wips_vlaref_t, size_t);
+    // If the value pointer is NULL, the element at the index will be deleted. Otherwise,
+    // A shallow copy of the memory referenced by the value pointer will be copied into the VLA
+    // (a direct memcpy). Will resize if needed
+    wips_status_t (* const setter)(wips_vlaref_t, size_t, void*);
+    // Appends value to end of VLA, resizing if needed. If the value pointer is NULL, this is a no-op
+    wips_status_t (* const pushback)(wips_vlaref_t, void*)
+};
 
 typedef uint8_t wips_u8_t;
 typedef int8_t wips_i8_t;
@@ -68,23 +111,11 @@ typedef int64_t wips_i64_t;
 typedef float wips_fp32_t;
 typedef double wips_fp64_t;
 
-typedef struct wips_blob {
+typedef struct {
     unsigned char* base;
     size_t offset; // the offset from the base pointer to the part of the wips_blob we actually care about.
     size_t allocated; // The amount of memory allocated
 } wips_blob_t;
-
-typedef struct wips_status {
-    size_t bytes_processed;
-    unsigned char status_code;
-} wips_status_t;
-
-static inline wips_status_t wips_make_status(size_t bytes, unsigned char code) {
-    wips_status_t s;
-    s.bytes_processed = bytes;
-    s.status_code = code;
-    return s;
-}
 
 wips_blob_t* wips_blob_create(size_t size);
 
@@ -92,35 +123,35 @@ wips_blob_t* wips_blob_wrap(unsigned char* base, size_t size);
 
 void wips_blob_destroy(wips_blob_t* bin);
 
-wips_status_t wips_encode_u8(wips_blob_t* data, wips_u8_t* in);
-wips_status_t wips_decode_u8(wips_u8_t* out, wips_blob_t* data);
+wips_result_t wips_encode_u8(wips_blob_t* data, wips_u8_t* in);
+wips_result_t wips_decode_u8(wips_u8_t* out, wips_blob_t* data);
 
-wips_status_t wips_encode_i8(wips_blob_t* data, wips_i8_t* in);
-wips_status_t wips_decode_i8(wips_i8_t* out, wips_blob_t* data);
+wips_result_t wips_encode_i8(wips_blob_t* data, wips_i8_t* in);
+wips_result_t wips_decode_i8(wips_i8_t* out, wips_blob_t* data);
 
-wips_status_t wips_encode_u16(wips_blob_t* data, wips_u16_t* in);
-wips_status_t wips_decode_u16(wips_u16_t* out, wips_blob_t* data);
+wips_result_t wips_encode_u16(wips_blob_t* data, wips_u16_t* in);
+wips_result_t wips_decode_u16(wips_u16_t* out, wips_blob_t* data);
 
-wips_status_t wips_encode_i16(wips_blob_t* data, wips_i16_t* in);
-wips_status_t wips_decode_i16(wips_i16_t* out, wips_blob_t* data);
+wips_result_t wips_encode_i16(wips_blob_t* data, wips_i16_t* in);
+wips_result_t wips_decode_i16(wips_i16_t* out, wips_blob_t* data);
 
-wips_status_t wips_encode_u32(wips_blob_t* data, wips_u32_t* in);
-wips_status_t wips_decode_u32(wips_u32_t* out, wips_blob_t* data);
+wips_result_t wips_encode_u32(wips_blob_t* data, wips_u32_t* in);
+wips_result_t wips_decode_u32(wips_u32_t* out, wips_blob_t* data);
 
-wips_status_t wips_encode_i32(wips_blob_t* data, wips_i32_t* in);
-wips_status_t wips_decode_i32(wips_i32_t* out, wips_blob_t* data);
+wips_result_t wips_encode_i32(wips_blob_t* data, wips_i32_t* in);
+wips_result_t wips_decode_i32(wips_i32_t* out, wips_blob_t* data);
 
-wips_status_t wips_encode_u64(wips_blob_t* data, wips_u64_t* in);
-wips_status_t wips_decode_u64(wips_u64_t* out, wips_blob_t* data);
+wips_result_t wips_encode_u64(wips_blob_t* data, wips_u64_t* in);
+wips_result_t wips_decode_u64(wips_u64_t* out, wips_blob_t* data);
 
-wips_status_t wips_encode_i64(wips_blob_t* data, wips_i64_t* in);
-wips_status_t wips_decode_i64(wips_i64_t* out, wips_blob_t* data);
+wips_result_t wips_encode_i64(wips_blob_t* data, wips_i64_t* in);
+wips_result_t wips_decode_i64(wips_i64_t* out, wips_blob_t* data);
 
-wips_status_t wips_encode_fp32(wips_blob_t* data, wips_fp32_t* in);
-wips_status_t wips_decode_fp32(wips_fp32_t* out, wips_blob_t* data);
+wips_result_t wips_encode_fp32(wips_blob_t* data, wips_fp32_t* in);
+wips_result_t wips_decode_fp32(wips_fp32_t* out, wips_blob_t* data);
 
-wips_status_t wips_encode_fp64(wips_blob_t* data, wips_fp64_t* in);
-wips_status_t wips_decode_fp64(wips_fp64_t* out, wips_blob_t* data);
+wips_result_t wips_encode_fp64(wips_blob_t* data, wips_fp64_t* in);
+wips_result_t wips_decode_fp64(wips_fp64_t* out, wips_blob_t* data);
 
 void wips_u8_free_resources(wips_u8_t* data);
 void wips_i8_free_resources(wips_i8_t* data);
@@ -133,16 +164,27 @@ void wips_i64_free_resources(wips_i64_t* data);
 void wips_fp32_free_resources(wips_fp32_t* data);
 void wips_fp64_free_resources(wips_fp64_t* data);
 
-unsigned char wips_u8_copy(wips_u8_t* dest, const wips_u8_t* src);
-unsigned char wips_i8_copy(wips_i8_t* dest, const wips_i8_t* src);
-unsigned char wips_u16_copy(wips_u16_t* dest, const wips_u16_t* src);
-unsigned char wips_i16_copy(wips_i16_t* dest, const wips_i16_t* src);
-unsigned char wips_u32_copy(wips_u32_t* dest, const wips_u32_t* src);
-unsigned char wips_i32_copy(wips_i32_t* dest, const wips_i32_t* src);
-unsigned char wips_u64_copy(wips_u64_t* dest, const wips_u64_t* src);
-unsigned char wips_i64_copy(wips_i64_t* dest, const wips_i64_t* src);
-unsigned char wips_fp32_copy(wips_fp32_t* dest, const wips_fp32_t* src);
-unsigned char wips_fp64_copy(wips_fp64_t* dest, const wips_fp64_t* src);
+wips_status_t wips_u8_copy(wips_u8_t* dest, const wips_u8_t* src);
+wips_status_t wips_i8_copy(wips_i8_t* dest, const wips_i8_t* src);
+wips_status_t wips_u16_copy(wips_u16_t* dest, const wips_u16_t* src);
+wips_status_t wips_i16_copy(wips_i16_t* dest, const wips_i16_t* src);
+wips_status_t wips_u32_copy(wips_u32_t* dest, const wips_u32_t* src);
+wips_status_t wips_i32_copy(wips_i32_t* dest, const wips_i32_t* src);
+wips_status_t wips_u64_copy(wips_u64_t* dest, const wips_u64_t* src);
+wips_status_t wips_i64_copy(wips_i64_t* dest, const wips_i64_t* src);
+wips_status_t wips_fp32_copy(wips_fp32_t* dest, const wips_fp32_t* src);
+wips_status_t wips_fp64_copy(wips_fp64_t* dest, const wips_fp64_t* src);
+
+extern wips_vlamethods_t wips_u8_vlamethods;
+extern wips_vlamethods_t wips_i8_vlamethods;
+extern wips_vlamethods_t wips_u16_vlamethods;
+extern wips_vlamethods_t wips_i16_vlamethods;
+extern wips_vlamethods_t wips_u32_vlamethods;
+extern wips_vlamethods_t wips_i32_vlamethods;
+extern wips_vlamethods_t wips_u64_vlamethods;
+extern wips_vlamethods_t wips_i64_vlamethods;
+extern wips_vlamethods_t wips_fp32_vlamethods;
+extern wips_vlamethods_t wips_fp64_vlamethods;
 
 #ifdef __cplusplus
 }

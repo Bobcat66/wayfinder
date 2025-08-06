@@ -61,9 +61,9 @@ void wips_apriltag_field_pose_observation_free_resources(wips_apriltag_field_pos
     WIPS_TRACELOG("Freed resources held by apriltag_field_pose_observation\n");
 }
 
-unsigned char wips_apriltag_field_pose_observation_copy(wips_apriltag_field_pose_observation_t* dest,const wips_apriltag_field_pose_observation_t* src){
+wips_status_t wips_apriltag_field_pose_observation_copy(wips_apriltag_field_pose_observation_t* dest,const wips_apriltag_field_pose_observation_t* src){
     WIPS_TRACELOG("Copying apriltag_field_pose_observation object\n");
-    unsigned char status = WIPS_STATUS_OK;
+    wips_status_t = WIPS_STATUS_OK;
     wips_apriltag_field_pose_observation_free_resources(dest);
     dest->DETAILvlasize__tags_used = src->DETAILvlasize__tags_used;
     
@@ -107,108 +107,117 @@ void wips_apriltag_field_pose_observation_destroy(wips_apriltag_field_pose_obser
     WIPS_TRACELOG("Destroyed apriltag_field_pose_observation\n");
 }
 
-wips_status_t wips_encode_apriltag_field_pose_observation(wips_blob_t* data, wips_apriltag_field_pose_observation_t* in) {
+wips_result_t wips_encode_apriltag_field_pose_observation(wips_blob_t* data, wips_apriltag_field_pose_observation_t* in) {
     WIPS_TRACELOG("Encoding apriltag_field_pose_observation\n");
     WIPS_Assert(data != NULL && in != NULL,0);
     size_t bytesEncoded = 0;
-    wips_status_t status;
+    wips_result_t result;
     WIPS_TRACELOG("Encoding apriltag_field_pose_observation field DETAILvlasize__tags_used (u32)\n");
-    status = wips_encode_u32(data, &(in->DETAILvlasize__tags_used));
-    bytesEncoded += status.bytes_processed;
-    if (status.status_code != WIPS_STATUS_OK) return wips_make_status(bytesEncoded,status.status_code);
+    result = wips_encode_u32(data, &(in->DETAILvlasize__tags_used));
+    bytesEncoded += result.bytes_processed;
+    if (result.status_code != WIPS_STATUS_OK) return wips_make_result(bytesEncoded,result.status_code);
     WIPS_TRACELOG("Encoding apriltag_field_pose_observation field tags_used (i32,VLA,size=%u)\n",in->GET_DETAIL(tags_used,vlasize));
     for (wips_u32_t i = 0; i < in->GET_DETAIL(tags_used,vlasize); i++) {
-        status = wips_encode_i32(data, in->tags_used + i);
-        bytesEncoded += status.bytes_processed;
-        if (status.status_code != WIPS_STATUS_OK) return wips_make_status(bytesEncoded,status.status_code);
+        result = wips_encode_i32(data, in->tags_used + i);
+        bytesEncoded += result.bytes_processed;
+        if (result.status_code != WIPS_STATUS_OK) return wips_make_result(bytesEncoded,result.status_code);
     }
     WIPS_TRACELOG("Encoding apriltag_field_pose_observation field field_pose_0 (pose3)\n");
-    status = wips_encode_pose3(data, &(in->field_pose_0));
-    bytesEncoded += status.bytes_processed;
-    if (status.status_code != WIPS_STATUS_OK) return wips_make_status(bytesEncoded,status.status_code);
+    result = wips_encode_pose3(data, &(in->field_pose_0));
+    bytesEncoded += result.bytes_processed;
+    if (result.status_code != WIPS_STATUS_OK) return wips_make_result(bytesEncoded,result.status_code);
     WIPS_TRACELOG("Encoding apriltag_field_pose_observation field error_0 (fp64)\n");
-    status = wips_encode_fp64(data, &(in->error_0));
-    bytesEncoded += status.bytes_processed;
-    if (status.status_code != WIPS_STATUS_OK) return wips_make_status(bytesEncoded,status.status_code);
+    result = wips_encode_fp64(data, &(in->error_0));
+    bytesEncoded += result.bytes_processed;
+    if (result.status_code != WIPS_STATUS_OK) return wips_make_result(bytesEncoded,result.status_code);
     WIPS_TRACELOG("Encoding apriltag_field_pose_observation field DETAILoptpresent__field_pose_1 (u8)\n");
-    status = wips_encode_u8(data, &(in->DETAILoptpresent__field_pose_1));
-    bytesEncoded += status.bytes_processed;
-    if (status.status_code != WIPS_STATUS_OK) return wips_make_status(bytesEncoded,status.status_code);
+    result = wips_encode_u8(data, &(in->DETAILoptpresent__field_pose_1));
+    bytesEncoded += result.bytes_processed;
+    if (result.status_code != WIPS_STATUS_OK) return wips_make_result(bytesEncoded,result.status_code);
     WIPS_TRACELOG("Encoding apriltag_field_pose_observation field field_pose_1 (pose3,optional,present=%u)\n",in->GET_DETAIL(field_pose_1,optpresent));
     if (in->GET_DETAIL(field_pose_1,optpresent)) {
-        status = wips_encode_pose3(data, &(in->field_pose_1));
-        bytesEncoded += status.bytes_processed;
-        if (status.status_code != WIPS_STATUS_OK) return wips_make_status(bytesEncoded,status.status_code);
+        result = wips_encode_pose3(data, &(in->field_pose_1));
+        bytesEncoded += result.bytes_processed;
+        if (result.status_code != WIPS_STATUS_OK) return wips_make_result(bytesEncoded,result.status_code);
     }
     WIPS_TRACELOG("Encoding apriltag_field_pose_observation field DETAILoptpresent__error_1 (u8)\n");
-    status = wips_encode_u8(data, &(in->DETAILoptpresent__error_1));
-    bytesEncoded += status.bytes_processed;
-    if (status.status_code != WIPS_STATUS_OK) return wips_make_status(bytesEncoded,status.status_code);
+    result = wips_encode_u8(data, &(in->DETAILoptpresent__error_1));
+    bytesEncoded += result.bytes_processed;
+    if (result.status_code != WIPS_STATUS_OK) return wips_make_result(bytesEncoded,result.status_code);
     WIPS_TRACELOG("Encoding apriltag_field_pose_observation field error_1 (fp64,optional,present=%u)\n",in->GET_DETAIL(error_1,optpresent));
     if (in->GET_DETAIL(error_1,optpresent)) {
-        status = wips_encode_fp64(data, &(in->error_1));
-        bytesEncoded += status.bytes_processed;
-        if (status.status_code != WIPS_STATUS_OK) return wips_make_status(bytesEncoded,status.status_code);
+        result = wips_encode_fp64(data, &(in->error_1));
+        bytesEncoded += result.bytes_processed;
+        if (result.status_code != WIPS_STATUS_OK) return wips_make_result(bytesEncoded,result.status_code);
     }
     WIPS_TRACELOG("Encoded apriltag_field_pose_observation\n");
-    return wips_make_status(bytesEncoded,WIPS_STATUS_OK);
+    return wips_make_result(bytesEncoded,WIPS_STATUS_OK);
 }
-wips_status_t wips_decode_apriltag_field_pose_observation(wips_apriltag_field_pose_observation_t* out, wips_blob_t* data) {
+wips_result_t wips_decode_apriltag_field_pose_observation(wips_apriltag_field_pose_observation_t* out, wips_blob_t* data) {
     WIPS_TRACELOG("Decoding apriltag_field_pose_observation\n");
     WIPS_Assert(out != NULL && data != NULL,0);
     size_t bytesDecoded = 0;
-    wips_status_t status;
+    wips_result_t result;
     WIPS_TRACELOG("Decoding apriltag_field_pose_observation field DETAILvlasize__tags_used (u32)\n");
-    status = wips_decode_u32(&(out->DETAILvlasize__tags_used), data);
-    bytesDecoded += status.bytes_processed;
-    if (status.status_code != WIPS_STATUS_OK) return wips_make_status(bytesDecoded,status.status_code);
+    result = wips_decode_u32(&(out->DETAILvlasize__tags_used), data);
+    bytesDecoded += result.bytes_processed;
+    if (result.status_code != WIPS_STATUS_OK) return wips_make_result(bytesDecoded,result.status_code);
     WIPS_TRACELOG("Decoding apriltag_field_pose_observation field tags_used (i32,VLA,size=%u)\n",out->GET_DETAIL(tags_used,vlasize));
     out->tags_used = malloc(out->GET_DETAIL(tags_used,vlasize) * GET_SIZE(i32));
     if (!out->tags_used){
         WIPS_DEBUGLOG("Fatal error while decoding apriltag_field_pose_observation: OOM\n");
-        return wips_make_status(bytesDecoded,WIPS_STATUS_OOM);
+        return wips_make_result(bytesDecoded,WIPS_STATUS_OOM);
     }
     for (wips_u32_t i = 0; i < out->GET_DETAIL(tags_used,vlasize); i++) {
-        status = wips_decode_i32(out->tags_used + i, data);
-        bytesDecoded += status.bytes_processed;
-        if (status.status_code != WIPS_STATUS_OK){
+        result = wips_decode_i32(out->tags_used + i, data);
+        bytesDecoded += result.bytes_processed;
+        if (result.status_code != WIPS_STATUS_OK){
             // Free any partially decoded elements to avoid leaks
             for (wips_u32_t j = 0; j < i; j++) {
                 wips_i32_free_resources(out->tags_used + j);
             }
             free(out->tags_used);
             out->tags_used = NULL;
-            return wips_make_status(bytesDecoded,status.status_code);
+            return wips_make_result(bytesDecoded,result.status_code);
         }
     }
     WIPS_TRACELOG("Decoding apriltag_field_pose_observation field field_pose_0 (pose3)\n");
-    status = wips_decode_pose3(&(out->field_pose_0), data);
-    bytesDecoded += status.bytes_processed;
-    if (status.status_code != WIPS_STATUS_OK) return wips_make_status(bytesDecoded,status.status_code);
+    result = wips_decode_pose3(&(out->field_pose_0), data);
+    bytesDecoded += result.bytes_processed;
+    if (result.status_code != WIPS_STATUS_OK) return wips_make_result(bytesDecoded,result.status_code);
     WIPS_TRACELOG("Decoding apriltag_field_pose_observation field error_0 (fp64)\n");
-    status = wips_decode_fp64(&(out->error_0), data);
-    bytesDecoded += status.bytes_processed;
-    if (status.status_code != WIPS_STATUS_OK) return wips_make_status(bytesDecoded,status.status_code);
+    result = wips_decode_fp64(&(out->error_0), data);
+    bytesDecoded += result.bytes_processed;
+    if (result.status_code != WIPS_STATUS_OK) return wips_make_result(bytesDecoded,result.status_code);
     WIPS_TRACELOG("Decoding apriltag_field_pose_observation field DETAILoptpresent__field_pose_1 (u8)\n");
-    status = wips_decode_u8(&(out->DETAILoptpresent__field_pose_1), data);
-    bytesDecoded += status.bytes_processed;
-    if (status.status_code != WIPS_STATUS_OK) return wips_make_status(bytesDecoded,status.status_code);
+    result = wips_decode_u8(&(out->DETAILoptpresent__field_pose_1), data);
+    bytesDecoded += result.bytes_processed;
+    if (result.status_code != WIPS_STATUS_OK) return wips_make_result(bytesDecoded,result.status_code);
     WIPS_TRACELOG("Decoding apriltag_field_pose_observation field field_pose_1 (pose3,optional,present=%u)\n",out->GET_DETAIL(field_pose_1,optpresent));
     if (out->GET_DETAIL(field_pose_1,optpresent)) {
-        status = wips_decode_pose3(&(out->field_pose_1), data);
-        bytesDecoded += status.bytes_processed;
-        if (status.status_code != WIPS_STATUS_OK) return wips_make_status(bytesDecoded,status.status_code);
+        result = wips_decode_pose3(&(out->field_pose_1), data);
+        bytesDecoded += result.bytes_processed;
+        if (result.status_code != WIPS_STATUS_OK) return wips_make_result(bytesDecoded,result.status_code);
     }
     WIPS_TRACELOG("Decoding apriltag_field_pose_observation field DETAILoptpresent__error_1 (u8)\n");
-    status = wips_decode_u8(&(out->DETAILoptpresent__error_1), data);
-    bytesDecoded += status.bytes_processed;
-    if (status.status_code != WIPS_STATUS_OK) return wips_make_status(bytesDecoded,status.status_code);
+    result = wips_decode_u8(&(out->DETAILoptpresent__error_1), data);
+    bytesDecoded += result.bytes_processed;
+    if (result.status_code != WIPS_STATUS_OK) return wips_make_result(bytesDecoded,result.status_code);
     WIPS_TRACELOG("Decoding apriltag_field_pose_observation field error_1 (fp64,optional,present=%u)\n",out->GET_DETAIL(error_1,optpresent));
     if (out->GET_DETAIL(error_1,optpresent)) {
-        status = wips_decode_fp64(&(out->error_1), data);
-        bytesDecoded += status.bytes_processed;
-        if (status.status_code != WIPS_STATUS_OK) return wips_make_status(bytesDecoded,status.status_code);
+        result = wips_decode_fp64(&(out->error_1), data);
+        bytesDecoded += result.bytes_processed;
+        if (result.status_code != WIPS_STATUS_OK) return wips_make_result(bytesDecoded,result.status_code);
     }
     WIPS_TRACELOG("Decoded apriltag_field_pose_observation\n");
-    return wips_make_status(bytesDecoded,WIPS_STATUS_OK);
+    return wips_make_result(bytesDecoded,WIPS_STATUS_OK);
 }
+
+DEFINE_VLAGETTER(apriltag_field_pose_observation)
+DEFINE_VLASETTER(apriltag_field_pose_observation)
+DEFINE_VLAPUSHBACK(apriltag_field_pose_observation)
+wips_vlamethods_t wips_apriltag_field_pose_observation_vlamethods = {
+    wips_apriltag_field_pose_observation_vlagetter,
+    wips_apriltag_field_pose_observation_vlasetter,
+    wips_apriltag_field_pose_observation_vlapushback
+};

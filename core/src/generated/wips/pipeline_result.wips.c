@@ -76,9 +76,9 @@ void wips_pipeline_result_free_resources(wips_pipeline_result_t* struct_ptr) {
     WIPS_TRACELOG("Freed resources held by pipeline_result\n");
 }
 
-unsigned char wips_pipeline_result_copy(wips_pipeline_result_t* dest,const wips_pipeline_result_t* src){
+wips_status_t wips_pipeline_result_copy(wips_pipeline_result_t* dest,const wips_pipeline_result_t* src){
     WIPS_TRACELOG("Copying pipeline_result object\n");
-    unsigned char status = WIPS_STATUS_OK;
+    wips_status_t = WIPS_STATUS_OK;
     wips_pipeline_result_free_resources(dest);
     dest->timestamp = src->timestamp;
     
@@ -151,154 +151,163 @@ void wips_pipeline_result_destroy(wips_pipeline_result_t* struct_ptr) {
     WIPS_TRACELOG("Destroyed pipeline_result\n");
 }
 
-wips_status_t wips_encode_pipeline_result(wips_blob_t* data, wips_pipeline_result_t* in) {
+wips_result_t wips_encode_pipeline_result(wips_blob_t* data, wips_pipeline_result_t* in) {
     WIPS_TRACELOG("Encoding pipeline_result\n");
     WIPS_Assert(data != NULL && in != NULL,0);
     size_t bytesEncoded = 0;
-    wips_status_t status;
+    wips_result_t result;
     WIPS_TRACELOG("Encoding pipeline_result field timestamp (u64)\n");
-    status = wips_encode_u64(data, &(in->timestamp));
-    bytesEncoded += status.bytes_processed;
-    if (status.status_code != WIPS_STATUS_OK) return wips_make_status(bytesEncoded,status.status_code);
+    result = wips_encode_u64(data, &(in->timestamp));
+    bytesEncoded += result.bytes_processed;
+    if (result.status_code != WIPS_STATUS_OK) return wips_make_result(bytesEncoded,result.status_code);
     WIPS_TRACELOG("Encoding pipeline_result field pipeline_type (u8)\n");
-    status = wips_encode_u8(data, &(in->pipeline_type));
-    bytesEncoded += status.bytes_processed;
-    if (status.status_code != WIPS_STATUS_OK) return wips_make_status(bytesEncoded,status.status_code);
+    result = wips_encode_u8(data, &(in->pipeline_type));
+    bytesEncoded += result.bytes_processed;
+    if (result.status_code != WIPS_STATUS_OK) return wips_make_result(bytesEncoded,result.status_code);
     WIPS_TRACELOG("Encoding pipeline_result field DETAILvlasize__tag_detections (u32)\n");
-    status = wips_encode_u32(data, &(in->DETAILvlasize__tag_detections));
-    bytesEncoded += status.bytes_processed;
-    if (status.status_code != WIPS_STATUS_OK) return wips_make_status(bytesEncoded,status.status_code);
+    result = wips_encode_u32(data, &(in->DETAILvlasize__tag_detections));
+    bytesEncoded += result.bytes_processed;
+    if (result.status_code != WIPS_STATUS_OK) return wips_make_result(bytesEncoded,result.status_code);
     WIPS_TRACELOG("Encoding pipeline_result field tag_detections (apriltag_detection,VLA,size=%u)\n",in->GET_DETAIL(tag_detections,vlasize));
     for (wips_u32_t i = 0; i < in->GET_DETAIL(tag_detections,vlasize); i++) {
-        status = wips_encode_apriltag_detection(data, in->tag_detections + i);
-        bytesEncoded += status.bytes_processed;
-        if (status.status_code != WIPS_STATUS_OK) return wips_make_status(bytesEncoded,status.status_code);
+        result = wips_encode_apriltag_detection(data, in->tag_detections + i);
+        bytesEncoded += result.bytes_processed;
+        if (result.status_code != WIPS_STATUS_OK) return wips_make_result(bytesEncoded,result.status_code);
     }
     WIPS_TRACELOG("Encoding pipeline_result field DETAILvlasize__tag_poses (u32)\n");
-    status = wips_encode_u32(data, &(in->DETAILvlasize__tag_poses));
-    bytesEncoded += status.bytes_processed;
-    if (status.status_code != WIPS_STATUS_OK) return wips_make_status(bytesEncoded,status.status_code);
+    result = wips_encode_u32(data, &(in->DETAILvlasize__tag_poses));
+    bytesEncoded += result.bytes_processed;
+    if (result.status_code != WIPS_STATUS_OK) return wips_make_result(bytesEncoded,result.status_code);
     WIPS_TRACELOG("Encoding pipeline_result field tag_poses (apriltag_relative_pose_observation,VLA,size=%u)\n",in->GET_DETAIL(tag_poses,vlasize));
     for (wips_u32_t i = 0; i < in->GET_DETAIL(tag_poses,vlasize); i++) {
-        status = wips_encode_apriltag_relative_pose_observation(data, in->tag_poses + i);
-        bytesEncoded += status.bytes_processed;
-        if (status.status_code != WIPS_STATUS_OK) return wips_make_status(bytesEncoded,status.status_code);
+        result = wips_encode_apriltag_relative_pose_observation(data, in->tag_poses + i);
+        bytesEncoded += result.bytes_processed;
+        if (result.status_code != WIPS_STATUS_OK) return wips_make_result(bytesEncoded,result.status_code);
     }
     WIPS_TRACELOG("Encoding pipeline_result field DETAILoptpresent__field_pose (u8)\n");
-    status = wips_encode_u8(data, &(in->DETAILoptpresent__field_pose));
-    bytesEncoded += status.bytes_processed;
-    if (status.status_code != WIPS_STATUS_OK) return wips_make_status(bytesEncoded,status.status_code);
+    result = wips_encode_u8(data, &(in->DETAILoptpresent__field_pose));
+    bytesEncoded += result.bytes_processed;
+    if (result.status_code != WIPS_STATUS_OK) return wips_make_result(bytesEncoded,result.status_code);
     WIPS_TRACELOG("Encoding pipeline_result field field_pose (apriltag_field_pose_observation,optional,present=%u)\n",in->GET_DETAIL(field_pose,optpresent));
     if (in->GET_DETAIL(field_pose,optpresent)) {
-        status = wips_encode_apriltag_field_pose_observation(data, &(in->field_pose));
-        bytesEncoded += status.bytes_processed;
-        if (status.status_code != WIPS_STATUS_OK) return wips_make_status(bytesEncoded,status.status_code);
+        result = wips_encode_apriltag_field_pose_observation(data, &(in->field_pose));
+        bytesEncoded += result.bytes_processed;
+        if (result.status_code != WIPS_STATUS_OK) return wips_make_result(bytesEncoded,result.status_code);
     }
     WIPS_TRACELOG("Encoding pipeline_result field DETAILvlasize__object_detections (u32)\n");
-    status = wips_encode_u32(data, &(in->DETAILvlasize__object_detections));
-    bytesEncoded += status.bytes_processed;
-    if (status.status_code != WIPS_STATUS_OK) return wips_make_status(bytesEncoded,status.status_code);
+    result = wips_encode_u32(data, &(in->DETAILvlasize__object_detections));
+    bytesEncoded += result.bytes_processed;
+    if (result.status_code != WIPS_STATUS_OK) return wips_make_result(bytesEncoded,result.status_code);
     WIPS_TRACELOG("Encoding pipeline_result field object_detections (object_detection,VLA,size=%u)\n",in->GET_DETAIL(object_detections,vlasize));
     for (wips_u32_t i = 0; i < in->GET_DETAIL(object_detections,vlasize); i++) {
-        status = wips_encode_object_detection(data, in->object_detections + i);
-        bytesEncoded += status.bytes_processed;
-        if (status.status_code != WIPS_STATUS_OK) return wips_make_status(bytesEncoded,status.status_code);
+        result = wips_encode_object_detection(data, in->object_detections + i);
+        bytesEncoded += result.bytes_processed;
+        if (result.status_code != WIPS_STATUS_OK) return wips_make_result(bytesEncoded,result.status_code);
     }
     WIPS_TRACELOG("Encoded pipeline_result\n");
-    return wips_make_status(bytesEncoded,WIPS_STATUS_OK);
+    return wips_make_result(bytesEncoded,WIPS_STATUS_OK);
 }
-wips_status_t wips_decode_pipeline_result(wips_pipeline_result_t* out, wips_blob_t* data) {
+wips_result_t wips_decode_pipeline_result(wips_pipeline_result_t* out, wips_blob_t* data) {
     WIPS_TRACELOG("Decoding pipeline_result\n");
     WIPS_Assert(out != NULL && data != NULL,0);
     size_t bytesDecoded = 0;
-    wips_status_t status;
+    wips_result_t result;
     WIPS_TRACELOG("Decoding pipeline_result field timestamp (u64)\n");
-    status = wips_decode_u64(&(out->timestamp), data);
-    bytesDecoded += status.bytes_processed;
-    if (status.status_code != WIPS_STATUS_OK) return wips_make_status(bytesDecoded,status.status_code);
+    result = wips_decode_u64(&(out->timestamp), data);
+    bytesDecoded += result.bytes_processed;
+    if (result.status_code != WIPS_STATUS_OK) return wips_make_result(bytesDecoded,result.status_code);
     WIPS_TRACELOG("Decoding pipeline_result field pipeline_type (u8)\n");
-    status = wips_decode_u8(&(out->pipeline_type), data);
-    bytesDecoded += status.bytes_processed;
-    if (status.status_code != WIPS_STATUS_OK) return wips_make_status(bytesDecoded,status.status_code);
+    result = wips_decode_u8(&(out->pipeline_type), data);
+    bytesDecoded += result.bytes_processed;
+    if (result.status_code != WIPS_STATUS_OK) return wips_make_result(bytesDecoded,result.status_code);
     WIPS_TRACELOG("Decoding pipeline_result field DETAILvlasize__tag_detections (u32)\n");
-    status = wips_decode_u32(&(out->DETAILvlasize__tag_detections), data);
-    bytesDecoded += status.bytes_processed;
-    if (status.status_code != WIPS_STATUS_OK) return wips_make_status(bytesDecoded,status.status_code);
+    result = wips_decode_u32(&(out->DETAILvlasize__tag_detections), data);
+    bytesDecoded += result.bytes_processed;
+    if (result.status_code != WIPS_STATUS_OK) return wips_make_result(bytesDecoded,result.status_code);
     WIPS_TRACELOG("Decoding pipeline_result field tag_detections (apriltag_detection,VLA,size=%u)\n",out->GET_DETAIL(tag_detections,vlasize));
     out->tag_detections = malloc(out->GET_DETAIL(tag_detections,vlasize) * GET_SIZE(apriltag_detection));
     if (!out->tag_detections){
         WIPS_DEBUGLOG("Fatal error while decoding pipeline_result: OOM\n");
-        return wips_make_status(bytesDecoded,WIPS_STATUS_OOM);
+        return wips_make_result(bytesDecoded,WIPS_STATUS_OOM);
     }
     for (wips_u32_t i = 0; i < out->GET_DETAIL(tag_detections,vlasize); i++) {
-        status = wips_decode_apriltag_detection(out->tag_detections + i, data);
-        bytesDecoded += status.bytes_processed;
-        if (status.status_code != WIPS_STATUS_OK){
+        result = wips_decode_apriltag_detection(out->tag_detections + i, data);
+        bytesDecoded += result.bytes_processed;
+        if (result.status_code != WIPS_STATUS_OK){
             // Free any partially decoded elements to avoid leaks
             for (wips_u32_t j = 0; j < i; j++) {
                 wips_apriltag_detection_free_resources(out->tag_detections + j);
             }
             free(out->tag_detections);
             out->tag_detections = NULL;
-            return wips_make_status(bytesDecoded,status.status_code);
+            return wips_make_result(bytesDecoded,result.status_code);
         }
     }
     WIPS_TRACELOG("Decoding pipeline_result field DETAILvlasize__tag_poses (u32)\n");
-    status = wips_decode_u32(&(out->DETAILvlasize__tag_poses), data);
-    bytesDecoded += status.bytes_processed;
-    if (status.status_code != WIPS_STATUS_OK) return wips_make_status(bytesDecoded,status.status_code);
+    result = wips_decode_u32(&(out->DETAILvlasize__tag_poses), data);
+    bytesDecoded += result.bytes_processed;
+    if (result.status_code != WIPS_STATUS_OK) return wips_make_result(bytesDecoded,result.status_code);
     WIPS_TRACELOG("Decoding pipeline_result field tag_poses (apriltag_relative_pose_observation,VLA,size=%u)\n",out->GET_DETAIL(tag_poses,vlasize));
     out->tag_poses = malloc(out->GET_DETAIL(tag_poses,vlasize) * GET_SIZE(apriltag_relative_pose_observation));
     if (!out->tag_poses){
         WIPS_DEBUGLOG("Fatal error while decoding pipeline_result: OOM\n");
-        return wips_make_status(bytesDecoded,WIPS_STATUS_OOM);
+        return wips_make_result(bytesDecoded,WIPS_STATUS_OOM);
     }
     for (wips_u32_t i = 0; i < out->GET_DETAIL(tag_poses,vlasize); i++) {
-        status = wips_decode_apriltag_relative_pose_observation(out->tag_poses + i, data);
-        bytesDecoded += status.bytes_processed;
-        if (status.status_code != WIPS_STATUS_OK){
+        result = wips_decode_apriltag_relative_pose_observation(out->tag_poses + i, data);
+        bytesDecoded += result.bytes_processed;
+        if (result.status_code != WIPS_STATUS_OK){
             // Free any partially decoded elements to avoid leaks
             for (wips_u32_t j = 0; j < i; j++) {
                 wips_apriltag_relative_pose_observation_free_resources(out->tag_poses + j);
             }
             free(out->tag_poses);
             out->tag_poses = NULL;
-            return wips_make_status(bytesDecoded,status.status_code);
+            return wips_make_result(bytesDecoded,result.status_code);
         }
     }
     WIPS_TRACELOG("Decoding pipeline_result field DETAILoptpresent__field_pose (u8)\n");
-    status = wips_decode_u8(&(out->DETAILoptpresent__field_pose), data);
-    bytesDecoded += status.bytes_processed;
-    if (status.status_code != WIPS_STATUS_OK) return wips_make_status(bytesDecoded,status.status_code);
+    result = wips_decode_u8(&(out->DETAILoptpresent__field_pose), data);
+    bytesDecoded += result.bytes_processed;
+    if (result.status_code != WIPS_STATUS_OK) return wips_make_result(bytesDecoded,result.status_code);
     WIPS_TRACELOG("Decoding pipeline_result field field_pose (apriltag_field_pose_observation,optional,present=%u)\n",out->GET_DETAIL(field_pose,optpresent));
     if (out->GET_DETAIL(field_pose,optpresent)) {
-        status = wips_decode_apriltag_field_pose_observation(&(out->field_pose), data);
-        bytesDecoded += status.bytes_processed;
-        if (status.status_code != WIPS_STATUS_OK) return wips_make_status(bytesDecoded,status.status_code);
+        result = wips_decode_apriltag_field_pose_observation(&(out->field_pose), data);
+        bytesDecoded += result.bytes_processed;
+        if (result.status_code != WIPS_STATUS_OK) return wips_make_result(bytesDecoded,result.status_code);
     }
     WIPS_TRACELOG("Decoding pipeline_result field DETAILvlasize__object_detections (u32)\n");
-    status = wips_decode_u32(&(out->DETAILvlasize__object_detections), data);
-    bytesDecoded += status.bytes_processed;
-    if (status.status_code != WIPS_STATUS_OK) return wips_make_status(bytesDecoded,status.status_code);
+    result = wips_decode_u32(&(out->DETAILvlasize__object_detections), data);
+    bytesDecoded += result.bytes_processed;
+    if (result.status_code != WIPS_STATUS_OK) return wips_make_result(bytesDecoded,result.status_code);
     WIPS_TRACELOG("Decoding pipeline_result field object_detections (object_detection,VLA,size=%u)\n",out->GET_DETAIL(object_detections,vlasize));
     out->object_detections = malloc(out->GET_DETAIL(object_detections,vlasize) * GET_SIZE(object_detection));
     if (!out->object_detections){
         WIPS_DEBUGLOG("Fatal error while decoding pipeline_result: OOM\n");
-        return wips_make_status(bytesDecoded,WIPS_STATUS_OOM);
+        return wips_make_result(bytesDecoded,WIPS_STATUS_OOM);
     }
     for (wips_u32_t i = 0; i < out->GET_DETAIL(object_detections,vlasize); i++) {
-        status = wips_decode_object_detection(out->object_detections + i, data);
-        bytesDecoded += status.bytes_processed;
-        if (status.status_code != WIPS_STATUS_OK){
+        result = wips_decode_object_detection(out->object_detections + i, data);
+        bytesDecoded += result.bytes_processed;
+        if (result.status_code != WIPS_STATUS_OK){
             // Free any partially decoded elements to avoid leaks
             for (wips_u32_t j = 0; j < i; j++) {
                 wips_object_detection_free_resources(out->object_detections + j);
             }
             free(out->object_detections);
             out->object_detections = NULL;
-            return wips_make_status(bytesDecoded,status.status_code);
+            return wips_make_result(bytesDecoded,result.status_code);
         }
     }
     WIPS_TRACELOG("Decoded pipeline_result\n");
-    return wips_make_status(bytesDecoded,WIPS_STATUS_OK);
+    return wips_make_result(bytesDecoded,WIPS_STATUS_OK);
 }
+
+DEFINE_VLAGETTER(pipeline_result)
+DEFINE_VLASETTER(pipeline_result)
+DEFINE_VLAPUSHBACK(pipeline_result)
+wips_vlamethods_t wips_pipeline_result_vlamethods = {
+    wips_pipeline_result_vlagetter,
+    wips_pipeline_result_vlasetter,
+    wips_pipeline_result_vlapushback
+};

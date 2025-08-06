@@ -71,13 +71,13 @@ void wips_{{ name }}_free_resources(wips_{{ name }}_t* struct_ptr) {
     WIPS_TRACELOG("Freed resources held by {{ name }}\n");
 }
 
-unsigned char wips_{{ name }}_copy(wips_{{ name }}_t* dest,const wips_{{ name }}_t* src){
+wips_status_t wips_{{ name }}_copy(wips_{{ name }}_t* dest,const wips_{{ name }}_t* src){
     WIPS_TRACELOG("Copying {{ name }} object\n");
     {%- if trivial %}
     (*dest) = (*src);
     return WIPS_STATUS_OK;
     {%- else %}
-    unsigned char status = WIPS_STATUS_OK;
+    wips_status_t = WIPS_STATUS_OK;
     wips_{{ name }}_free_resources(dest);
     {%- for field in fields %}
     {%- if field.vla == True %}
@@ -120,76 +120,85 @@ void wips_{{ name }}_destroy(wips_{{ name }}_t* struct_ptr) {
     WIPS_TRACELOG("Destroyed {{ name }}\n");
 }
 
-wips_status_t wips_encode_{{ name }}(wips_blob_t* data, wips_{{ name }}_t* in) {
+wips_result_t wips_encode_{{ name }}(wips_blob_t* data, wips_{{ name }}_t* in) {
     WIPS_TRACELOG("Encoding {{ name }}\n");
     WIPS_Assert(data != NULL && in != NULL,0);
     size_t bytesEncoded = 0;
-    wips_status_t status;
+    wips_result_t result;
 {%- for field in fields -%}
 {%- if field.vla == True %}
     WIPS_TRACELOG("Encoding {{ name }} field {{ field.name }} ({{ field.type }},VLA,size=%u)\n",in->GET_DETAIL({{ field.name }},vlasize));
     for (wips_u32_t i = 0; i < in->GET_DETAIL({{ field.name }},vlasize); i++) {
-        status = wips_encode_{{ field.type }}(data, in->{{ field.name }} + i);
-        bytesEncoded += status.bytes_processed;
-        if (status.status_code != WIPS_STATUS_OK) return wips_make_status(bytesEncoded,status.status_code);
+        result = wips_encode_{{ field.type }}(data, in->{{ field.name }} + i);
+        bytesEncoded += result.bytes_processed;
+        if (result.status_code != WIPS_STATUS_OK) return wips_make_result(bytesEncoded,result.status_code);
     }
 {%- elif field.optional == True %}
     WIPS_TRACELOG("Encoding {{ name }} field {{ field.name }} ({{ field.type }},optional,present=%u)\n",in->GET_DETAIL({{ field.name }},optpresent));
     if (in->GET_DETAIL({{ field.name }},optpresent)) {
-        status = wips_encode_{{ field.type }}(data, &(in->{{ field.name }}));
-        bytesEncoded += status.bytes_processed;
-        if (status.status_code != WIPS_STATUS_OK) return wips_make_status(bytesEncoded,status.status_code);
+        result = wips_encode_{{ field.type }}(data, &(in->{{ field.name }}));
+        bytesEncoded += result.bytes_processed;
+        if (result.status_code != WIPS_STATUS_OK) return wips_make_result(bytesEncoded,result.status_code);
     }
 {%- else %}
     WIPS_TRACELOG("Encoding {{ name }} field {{ field.name }} ({{ field.type }})\n");
-    status = wips_encode_{{ field.type }}(data, &(in->{{ field.name }}));
-    bytesEncoded += status.bytes_processed;
-    if (status.status_code != WIPS_STATUS_OK) return wips_make_status(bytesEncoded,status.status_code);
+    result = wips_encode_{{ field.type }}(data, &(in->{{ field.name }}));
+    bytesEncoded += result.bytes_processed;
+    if (result.status_code != WIPS_STATUS_OK) return wips_make_result(bytesEncoded,result.status_code);
 {%- endif %}
 {%- endfor %}
     WIPS_TRACELOG("Encoded {{ name }}\n");
-    return wips_make_status(bytesEncoded,WIPS_STATUS_OK);
+    return wips_make_result(bytesEncoded,WIPS_STATUS_OK);
 }
-wips_status_t wips_decode_{{ name }}(wips_{{ name }}_t* out, wips_blob_t* data) {
+wips_result_t wips_decode_{{ name }}(wips_{{ name }}_t* out, wips_blob_t* data) {
     WIPS_TRACELOG("Decoding {{ name }}\n");
     WIPS_Assert(out != NULL && data != NULL,0);
     size_t bytesDecoded = 0;
-    wips_status_t status;
+    wips_result_t result;
 {%- for field in fields -%}
 {%- if field.vla == True %}
     WIPS_TRACELOG("Decoding {{ name }} field {{ field.name }} ({{ field.type }},VLA,size=%u)\n",out->GET_DETAIL({{ field.name }},vlasize));
     out->{{ field.name }} = malloc(out->GET_DETAIL({{ field.name }},vlasize) * GET_SIZE({{ field.type }}));
     if (!out->{{ field.name }}){
         WIPS_DEBUGLOG("Fatal error while decoding {{ name }}: OOM\n");
-        return wips_make_status(bytesDecoded,WIPS_STATUS_OOM);
+        return wips_make_result(bytesDecoded,WIPS_STATUS_OOM);
     }
     for (wips_u32_t i = 0; i < out->GET_DETAIL({{ field.name }},vlasize); i++) {
-        status = wips_decode_{{ field.type }}(out->{{ field.name }} + i, data);
-        bytesDecoded += status.bytes_processed;
-        if (status.status_code != WIPS_STATUS_OK){
+        result = wips_decode_{{ field.type }}(out->{{ field.name }} + i, data);
+        bytesDecoded += result.bytes_processed;
+        if (result.status_code != WIPS_STATUS_OK){
             // Free any partially decoded elements to avoid leaks
             for (wips_u32_t j = 0; j < i; j++) {
                 wips_{{ field.type }}_free_resources(out->{{ field.name }} + j);
             }
             free(out->{{ field.name }});
             out->{{ field.name }} = NULL;
-            return wips_make_status(bytesDecoded,status.status_code);
+            return wips_make_result(bytesDecoded,result.status_code);
         }
     }
 {%- elif field.optional == True %}
     WIPS_TRACELOG("Decoding {{ name }} field {{ field.name }} ({{ field.type }},optional,present=%u)\n",out->GET_DETAIL({{ field.name }},optpresent));
     if (out->GET_DETAIL({{ field.name }},optpresent)) {
-        status = wips_decode_{{ field.type }}(&(out->{{ field.name }}), data);
-        bytesDecoded += status.bytes_processed;
-        if (status.status_code != WIPS_STATUS_OK) return wips_make_status(bytesDecoded,status.status_code);
+        result = wips_decode_{{ field.type }}(&(out->{{ field.name }}), data);
+        bytesDecoded += result.bytes_processed;
+        if (result.status_code != WIPS_STATUS_OK) return wips_make_result(bytesDecoded,result.status_code);
     }
 {%- else %}
     WIPS_TRACELOG("Decoding {{ name }} field {{ field.name }} ({{ field.type }})\n");
-    status = wips_decode_{{ field.type }}(&(out->{{ field.name }}), data);
-    bytesDecoded += status.bytes_processed;
-    if (status.status_code != WIPS_STATUS_OK) return wips_make_status(bytesDecoded,status.status_code);
+    result = wips_decode_{{ field.type }}(&(out->{{ field.name }}), data);
+    bytesDecoded += result.bytes_processed;
+    if (result.status_code != WIPS_STATUS_OK) return wips_make_result(bytesDecoded,result.status_code);
 {%- endif %}
 {%- endfor %}
     WIPS_TRACELOG("Decoded {{ name }}\n");
-    return wips_make_status(bytesDecoded,WIPS_STATUS_OK);
+    return wips_make_result(bytesDecoded,WIPS_STATUS_OK);
 }
+
+DEFINE_VLAGETTER({{ name }})
+DEFINE_VLASETTER({{ name }})
+DEFINE_VLAPUSHBACK({{ name }})
+wips_vlamethods_t wips_{{ name }}_vlamethods = {
+    wips_{{ name }}_vlagetter,
+    wips_{{ name }}_vlasetter,
+    wips_{{ name }}_vlapushback
+};

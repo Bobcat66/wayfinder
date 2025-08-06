@@ -40,7 +40,7 @@ extern "C" {
 
 #include "wips_runtime.h"
 
-typedef struct wips_pose3 {
+typedef struct {
     wips_fp64_t x;
     wips_fp64_t y;
     wips_fp64_t z;
@@ -59,8 +59,10 @@ void wips_pose3_destroy(wips_pose3_t* struct_ptr);
 
 unsigned char wips_pose3_copy(wips_pose3_t* dest, const wips_pose3_t* src);
 
-wips_status_t wips_encode_pose3(wips_blob_t* data, wips_pose3_t* in);
-wips_status_t wips_decode_pose3(wips_pose3_t* out, wips_blob_t* data);
+wips_result_t wips_encode_pose3(wips_blob_t* data, wips_pose3_t* in);
+wips_result_t wips_decode_pose3(wips_pose3_t* out, wips_blob_t* data);
+
+extern wips_vlamethods_t wips_pose3_vlamethods;
 
 #ifdef __cplusplus
 }

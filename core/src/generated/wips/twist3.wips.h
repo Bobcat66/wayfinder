@@ -40,7 +40,7 @@ extern "C" {
 
 #include "wips_runtime.h"
 
-typedef struct wips_twist3 {
+typedef struct {
     wips_fp64_t dx;
     wips_fp64_t dy;
     wips_fp64_t dz;
@@ -58,8 +58,10 @@ void wips_twist3_destroy(wips_twist3_t* struct_ptr);
 
 unsigned char wips_twist3_copy(wips_twist3_t* dest, const wips_twist3_t* src);
 
-wips_status_t wips_encode_twist3(wips_blob_t* data, wips_twist3_t* in);
-wips_status_t wips_decode_twist3(wips_twist3_t* out, wips_blob_t* data);
+wips_result_t wips_encode_twist3(wips_blob_t* data, wips_twist3_t* in);
+wips_result_t wips_decode_twist3(wips_twist3_t* out, wips_blob_t* data);
+
+extern wips_vlamethods_t wips_twist3_vlamethods;
 
 #ifdef __cplusplus
 }

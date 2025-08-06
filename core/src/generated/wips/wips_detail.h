@@ -101,7 +101,7 @@ struct tm* wips_localtime(const time_t* timer);
     do {                                                                                                        \
         if (!(expr)){                                                                                           \
             WIPS_DEBUGLOG("Assertion failed: %s, file %s, line %d\n",STRINGIZE(expr),__FILE__,__LINE__);        \
-            return wips_make_status(bytes_processed,WIPS_STATUS_BAD_ASSERT);                                    \
+            return wips_make_result(bytes_processed,WIPS_STATUS_BAD_ASSERT);                                    \
         }                                                                                                       \
     } while (0)
 
@@ -152,12 +152,12 @@ struct tm* wips_localtime(const time_t* timer);
 #endif // NDEBUG
 
 #define DEFINE_TRIVIAL_ENCODE(wips_typename)                                                                    \
-    wips_status_t wips_encode_##wips_typename(wips_blob_t* data, GET_CTYPE(wips_typename)* in){                 \
+    wips_result_t wips_encode_##wips_typename(wips_blob_t* data, GET_CTYPE(wips_typename)* in){                 \
         WIPS_Assert(data != NULL && in != NULL,0);                                                              \
         WIPS_TRACELOG("Encoding %s\n",STRINGIZE(wips_typename));                                                \
         if (data->offset > (SIZE_MAX - GET_SIZE(wips_typename))){                                               \
             WIPS_DEBUGLOG("Fatal error while encoding %s: Integer overflow\n",STRINGIZE(wips_typename));        \
-            return wips_make_status(0,WIPS_STATUS_OVERFLOW);                                                    \
+            return wips_make_result(0,WIPS_STATUS_OVERFLOW);                                                    \
         }                                                                                                       \
         size_t newOffset = data->offset + GET_SIZE(wips_typename);                                              \
         if (newOffset > data->allocated) {                                                                      \
@@ -168,7 +168,7 @@ struct tm* wips_localtime(const time_t* timer);
             unsigned char* newBase = realloc(data->base, new_allocated);                                        \
             if (!newBase) {                                                                                     \
                 WIPS_DEBUGLOG("Fatal error while encoding %s: OOM\n",STRINGIZE(wips_typename));                 \
-                return wips_make_status(0,WIPS_STATUS_OOM);                                                     \
+                return wips_make_result(0,WIPS_STATUS_OOM);                                                     \
             }                                                                                                   \
             data->allocated = new_allocated;                                                                    \
             data->base = newBase;                                                                               \
@@ -176,26 +176,76 @@ struct tm* wips_localtime(const time_t* timer);
         memcpy(data->base+data->offset,in, GET_SIZE(wips_typename));                                            \
         data->offset = newOffset;                                                                               \
         WIPS_TRACELOG("Finished encoding %s\n",STRINGIZE(wips_typename));                                       \
-        return wips_make_status(GET_SIZE(wips_typename),WIPS_STATUS_OK);                                        \
+        return wips_make_result(GET_SIZE(wips_typename),WIPS_STATUS_OK);                                        \
     }
     
 #define DEFINE_TRIVIAL_DECODE(wips_typename)                                                                    \
-    wips_status_t wips_decode_##wips_typename(GET_CTYPE(wips_typename)* out, wips_blob_t* data){                \
+    wips_result_t wips_decode_##wips_typename(GET_CTYPE(wips_typename)* out, wips_blob_t* data){                \
         WIPS_Assert(out != NULL && data != NULL,0);                                                             \
         WIPS_TRACELOG("Decoding %s\n",STRINGIZE(wips_typename));                                                \
         if (data->offset > (SIZE_MAX - GET_SIZE(wips_typename))){                                               \
             WIPS_DEBUGLOG("Fatal error while decoding %s: Integer overflow\n",STRINGIZE(wips_typename));        \
-            return wips_make_status(0,WIPS_STATUS_OVERFLOW);                                                    \
+            return wips_make_result(0,WIPS_STATUS_OVERFLOW);                                                    \
         }                                                                                                       \
         size_t newOffset = data->offset + GET_SIZE(wips_typename);                                              \
         if (newOffset > data->allocated){                                                                       \
             WIPS_DEBUGLOG("Fatal error while decoding %s: Out-of-bounds error\n",STRINGIZE(wips_typename));     \
-            return wips_make_status(0,WIPS_STATUS_BOUNDS_ERROR);                                                \
+            return wips_make_result(0,WIPS_STATUS_BOUNDS_ERROR);                                                \
         }                                                                                                       \
         memcpy(out,data->base+data->offset, GET_SIZE(wips_typename));                                           \
         data->offset = newOffset;                                                                               \
         WIPS_TRACELOG("Finished decoding %s\n",STRINGIZE(wips_typename));                                       \
-        return wips_make_status(GET_SIZE(wips_typename),WIPS_STATUS_OK);                                        \
+        return wips_make_result(GET_SIZE(wips_typename),WIPS_STATUS_OK);                                        \
+    }
+
+#define DEFINE_VLAGETTER(wips_typename)                                                                         \
+    static void* wips_ ## wips_typename ## _vlagetter(wips_vlaref_t vla, size_t index) {                        \
+        if (index >= *(vla.vlasize_pt)) return NULL;                                                            \
+        GET_CTYPE(wips_typename)** buffer_ptr =                                                                 \
+            (GET_CTYPE(wips_typename)**)(vla.buffer_pt);                                                        \
+        GET_CTYPE(wips_typename)* buffer = *buffer_ptr;                                                         \
+        return (void*)(buffer + index);                                                                         \
+    }
+
+#define DEFINE_VLASETTER(wips_typename)\
+    static wips_status_t wips_ ## wips_typename ## _vlasetter(wips_vlaref_t vla, size_t index, void* value) {   \
+        if (index >= *(vla.vlasize_pt)) return WIPS_STATUS_BOUNDS_ERROR;                                        \
+        GET_CTYPE(wips_typename)** buffer_ptr =                                                                 \
+            (GET_CTYPE(wips_typename)**)(vla.buffer_pt);                                                        \
+        GET_CTYPE(wips_typename)* buffer = *buffer_ptr;                                                         \
+        GET_CTYPE(wips_typename)* old_value = buffer + index;                                                   \
+        if (value) {                                                                                            \
+            memcpy(old_value, value, GET_SIZE(wips_typename));                                                  \
+            return WIPS_STATUS_OK;                                                                              \
+        } else {                                                                                                \
+            size_t count_after = *(vla.vlasize_pt) - index - 1;                                                 \
+            if (count_after > 0)                                                                                \
+                memmove(old_value, old_value + 1, count_after * GET_SIZE(wips_typename));                       \
+            (*vla.vlasize_pt)--;                                                                                \
+            size_t newalloc = (*vla.vlasize_pt) * GET_SIZE(wips_typename);                                      \
+            GET_CTYPE(wips_typename)* newbuffer =                                                               \
+                (GET_CTYPE(wips_typename)*)realloc(buffer, newalloc);                                           \
+            if (!newbuffer) return WIPS_STATUS_OOM;                                                             \
+            *buffer_ptr = newbuffer;                                                                            \
+            return WIPS_STATUS_OK;                                                                              \
+        }                                                                                                       \
+    }
+
+#define DEFINE_VLAPUSHBACK(wips_typename)                                                                       \
+    static wips_status_t wips_ ## wips_typename ## _vlapushback(wips_vlaref_t vla, void* value) {                                  \
+        if (!value) return WIPS_STATUS_OK;                                                                      \
+        GET_CTYPE(wips_typename)** buffer_ptr =                                                                 \
+            (GET_CTYPE(wips_typename)**)(vla.buffer_pt);                                                        \
+        GET_CTYPE(wips_typename)* buffer = *buffer_ptr;                                                         \
+        size_t newsize = (*vla.vlasize_pt) + 1;                                                                 \
+        GET_CTYPE(wips_typename)* newbuffer =                                                                   \
+            realloc(buffer,newsize * GET_SIZE(wips_typename));                                                  \
+        if (!newbuffer) return WIPS_STATUS_OOM;                                                                 \
+        size_t offset = (*vla.vlasize_pt);                                                                      \
+        memcpy(newbuffer + offset,value,GET_SIZE(wips_typename));                                               \
+        *buffer_ptr = newbuffer;                                                                                \
+        (*vla.vlasize_pt) = newsize;                                                                            \
+        return WIPS_STATUS_OK;                                                                                  \
     }
 
 #ifdef __cplusplus

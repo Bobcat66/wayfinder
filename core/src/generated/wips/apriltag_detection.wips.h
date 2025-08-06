@@ -40,7 +40,7 @@ extern "C" {
 
 #include "wips_runtime.h"
 
-typedef struct wips_apriltag_detection {
+typedef struct {
     wips_i32_t fiducial_id;
     wips_fp64_t corner0_x;
     wips_fp64_t corner0_y;
@@ -64,8 +64,10 @@ void wips_apriltag_detection_destroy(wips_apriltag_detection_t* struct_ptr);
 
 unsigned char wips_apriltag_detection_copy(wips_apriltag_detection_t* dest, const wips_apriltag_detection_t* src);
 
-wips_status_t wips_encode_apriltag_detection(wips_blob_t* data, wips_apriltag_detection_t* in);
-wips_status_t wips_decode_apriltag_detection(wips_apriltag_detection_t* out, wips_blob_t* data);
+wips_result_t wips_encode_apriltag_detection(wips_blob_t* data, wips_apriltag_detection_t* in);
+wips_result_t wips_decode_apriltag_detection(wips_apriltag_detection_t* out, wips_blob_t* data);
+
+extern wips_vlamethods_t wips_apriltag_detection_vlamethods;
 
 #ifdef __cplusplus
 }

@@ -54,7 +54,7 @@ void wips_twist2_free_resources(wips_twist2_t* struct_ptr) {
     WIPS_TRACELOG("Freed resources held by twist2\n");
 }
 
-unsigned char wips_twist2_copy(wips_twist2_t* dest,const wips_twist2_t* src){
+wips_status_t wips_twist2_copy(wips_twist2_t* dest,const wips_twist2_t* src){
     WIPS_TRACELOG("Copying twist2 object\n");
     (*dest) = (*src);
     return WIPS_STATUS_OK;
@@ -72,43 +72,52 @@ void wips_twist2_destroy(wips_twist2_t* struct_ptr) {
     WIPS_TRACELOG("Destroyed twist2\n");
 }
 
-wips_status_t wips_encode_twist2(wips_blob_t* data, wips_twist2_t* in) {
+wips_result_t wips_encode_twist2(wips_blob_t* data, wips_twist2_t* in) {
     WIPS_TRACELOG("Encoding twist2\n");
     WIPS_Assert(data != NULL && in != NULL,0);
     size_t bytesEncoded = 0;
-    wips_status_t status;
+    wips_result_t result;
     WIPS_TRACELOG("Encoding twist2 field dx (fp64)\n");
-    status = wips_encode_fp64(data, &(in->dx));
-    bytesEncoded += status.bytes_processed;
-    if (status.status_code != WIPS_STATUS_OK) return wips_make_status(bytesEncoded,status.status_code);
+    result = wips_encode_fp64(data, &(in->dx));
+    bytesEncoded += result.bytes_processed;
+    if (result.status_code != WIPS_STATUS_OK) return wips_make_result(bytesEncoded,result.status_code);
     WIPS_TRACELOG("Encoding twist2 field dy (fp64)\n");
-    status = wips_encode_fp64(data, &(in->dy));
-    bytesEncoded += status.bytes_processed;
-    if (status.status_code != WIPS_STATUS_OK) return wips_make_status(bytesEncoded,status.status_code);
+    result = wips_encode_fp64(data, &(in->dy));
+    bytesEncoded += result.bytes_processed;
+    if (result.status_code != WIPS_STATUS_OK) return wips_make_result(bytesEncoded,result.status_code);
     WIPS_TRACELOG("Encoding twist2 field dtheta (fp64)\n");
-    status = wips_encode_fp64(data, &(in->dtheta));
-    bytesEncoded += status.bytes_processed;
-    if (status.status_code != WIPS_STATUS_OK) return wips_make_status(bytesEncoded,status.status_code);
+    result = wips_encode_fp64(data, &(in->dtheta));
+    bytesEncoded += result.bytes_processed;
+    if (result.status_code != WIPS_STATUS_OK) return wips_make_result(bytesEncoded,result.status_code);
     WIPS_TRACELOG("Encoded twist2\n");
-    return wips_make_status(bytesEncoded,WIPS_STATUS_OK);
+    return wips_make_result(bytesEncoded,WIPS_STATUS_OK);
 }
-wips_status_t wips_decode_twist2(wips_twist2_t* out, wips_blob_t* data) {
+wips_result_t wips_decode_twist2(wips_twist2_t* out, wips_blob_t* data) {
     WIPS_TRACELOG("Decoding twist2\n");
     WIPS_Assert(out != NULL && data != NULL,0);
     size_t bytesDecoded = 0;
-    wips_status_t status;
+    wips_result_t result;
     WIPS_TRACELOG("Decoding twist2 field dx (fp64)\n");
-    status = wips_decode_fp64(&(out->dx), data);
-    bytesDecoded += status.bytes_processed;
-    if (status.status_code != WIPS_STATUS_OK) return wips_make_status(bytesDecoded,status.status_code);
+    result = wips_decode_fp64(&(out->dx), data);
+    bytesDecoded += result.bytes_processed;
+    if (result.status_code != WIPS_STATUS_OK) return wips_make_result(bytesDecoded,result.status_code);
     WIPS_TRACELOG("Decoding twist2 field dy (fp64)\n");
-    status = wips_decode_fp64(&(out->dy), data);
-    bytesDecoded += status.bytes_processed;
-    if (status.status_code != WIPS_STATUS_OK) return wips_make_status(bytesDecoded,status.status_code);
+    result = wips_decode_fp64(&(out->dy), data);
+    bytesDecoded += result.bytes_processed;
+    if (result.status_code != WIPS_STATUS_OK) return wips_make_result(bytesDecoded,result.status_code);
     WIPS_TRACELOG("Decoding twist2 field dtheta (fp64)\n");
-    status = wips_decode_fp64(&(out->dtheta), data);
-    bytesDecoded += status.bytes_processed;
-    if (status.status_code != WIPS_STATUS_OK) return wips_make_status(bytesDecoded,status.status_code);
+    result = wips_decode_fp64(&(out->dtheta), data);
+    bytesDecoded += result.bytes_processed;
+    if (result.status_code != WIPS_STATUS_OK) return wips_make_result(bytesDecoded,result.status_code);
     WIPS_TRACELOG("Decoded twist2\n");
-    return wips_make_status(bytesDecoded,WIPS_STATUS_OK);
+    return wips_make_result(bytesDecoded,WIPS_STATUS_OK);
 }
+
+DEFINE_VLAGETTER(twist2)
+DEFINE_VLASETTER(twist2)
+DEFINE_VLAPUSHBACK(twist2)
+wips_vlamethods_t wips_twist2_vlamethods = {
+    wips_twist2_vlagetter,
+    wips_twist2_vlasetter,
+    wips_twist2_vlapushback
+};

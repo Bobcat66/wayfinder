@@ -68,9 +68,9 @@ void wips_odometry_result_free_resources(wips_odometry_result_t* struct_ptr) {
     WIPS_TRACELOG("Freed resources held by odometry_result\n");
 }
 
-unsigned char wips_odometry_result_copy(wips_odometry_result_t* dest,const wips_odometry_result_t* src){
+wips_status_t wips_odometry_result_copy(wips_odometry_result_t* dest,const wips_odometry_result_t* src){
     WIPS_TRACELOG("Copying odometry_result object\n");
-    unsigned char status = WIPS_STATUS_OK;
+    wips_status_t = WIPS_STATUS_OK;
     wips_odometry_result_free_resources(dest);
     dest->DETAILvlasize__timestamps = src->DETAILvlasize__timestamps;
     
@@ -117,85 +117,94 @@ void wips_odometry_result_destroy(wips_odometry_result_t* struct_ptr) {
     WIPS_TRACELOG("Destroyed odometry_result\n");
 }
 
-wips_status_t wips_encode_odometry_result(wips_blob_t* data, wips_odometry_result_t* in) {
+wips_result_t wips_encode_odometry_result(wips_blob_t* data, wips_odometry_result_t* in) {
     WIPS_TRACELOG("Encoding odometry_result\n");
     WIPS_Assert(data != NULL && in != NULL,0);
     size_t bytesEncoded = 0;
-    wips_status_t status;
+    wips_result_t result;
     WIPS_TRACELOG("Encoding odometry_result field DETAILvlasize__timestamps (u32)\n");
-    status = wips_encode_u32(data, &(in->DETAILvlasize__timestamps));
-    bytesEncoded += status.bytes_processed;
-    if (status.status_code != WIPS_STATUS_OK) return wips_make_status(bytesEncoded,status.status_code);
+    result = wips_encode_u32(data, &(in->DETAILvlasize__timestamps));
+    bytesEncoded += result.bytes_processed;
+    if (result.status_code != WIPS_STATUS_OK) return wips_make_result(bytesEncoded,result.status_code);
     WIPS_TRACELOG("Encoding odometry_result field timestamps (u64,VLA,size=%u)\n",in->GET_DETAIL(timestamps,vlasize));
     for (wips_u32_t i = 0; i < in->GET_DETAIL(timestamps,vlasize); i++) {
-        status = wips_encode_u64(data, in->timestamps + i);
-        bytesEncoded += status.bytes_processed;
-        if (status.status_code != WIPS_STATUS_OK) return wips_make_status(bytesEncoded,status.status_code);
+        result = wips_encode_u64(data, in->timestamps + i);
+        bytesEncoded += result.bytes_processed;
+        if (result.status_code != WIPS_STATUS_OK) return wips_make_result(bytesEncoded,result.status_code);
     }
     WIPS_TRACELOG("Encoding odometry_result field DETAILvlasize__twists (u32)\n");
-    status = wips_encode_u32(data, &(in->DETAILvlasize__twists));
-    bytesEncoded += status.bytes_processed;
-    if (status.status_code != WIPS_STATUS_OK) return wips_make_status(bytesEncoded,status.status_code);
+    result = wips_encode_u32(data, &(in->DETAILvlasize__twists));
+    bytesEncoded += result.bytes_processed;
+    if (result.status_code != WIPS_STATUS_OK) return wips_make_result(bytesEncoded,result.status_code);
     WIPS_TRACELOG("Encoding odometry_result field twists (twist2,VLA,size=%u)\n",in->GET_DETAIL(twists,vlasize));
     for (wips_u32_t i = 0; i < in->GET_DETAIL(twists,vlasize); i++) {
-        status = wips_encode_twist2(data, in->twists + i);
-        bytesEncoded += status.bytes_processed;
-        if (status.status_code != WIPS_STATUS_OK) return wips_make_status(bytesEncoded,status.status_code);
+        result = wips_encode_twist2(data, in->twists + i);
+        bytesEncoded += result.bytes_processed;
+        if (result.status_code != WIPS_STATUS_OK) return wips_make_result(bytesEncoded,result.status_code);
     }
     WIPS_TRACELOG("Encoded odometry_result\n");
-    return wips_make_status(bytesEncoded,WIPS_STATUS_OK);
+    return wips_make_result(bytesEncoded,WIPS_STATUS_OK);
 }
-wips_status_t wips_decode_odometry_result(wips_odometry_result_t* out, wips_blob_t* data) {
+wips_result_t wips_decode_odometry_result(wips_odometry_result_t* out, wips_blob_t* data) {
     WIPS_TRACELOG("Decoding odometry_result\n");
     WIPS_Assert(out != NULL && data != NULL,0);
     size_t bytesDecoded = 0;
-    wips_status_t status;
+    wips_result_t result;
     WIPS_TRACELOG("Decoding odometry_result field DETAILvlasize__timestamps (u32)\n");
-    status = wips_decode_u32(&(out->DETAILvlasize__timestamps), data);
-    bytesDecoded += status.bytes_processed;
-    if (status.status_code != WIPS_STATUS_OK) return wips_make_status(bytesDecoded,status.status_code);
+    result = wips_decode_u32(&(out->DETAILvlasize__timestamps), data);
+    bytesDecoded += result.bytes_processed;
+    if (result.status_code != WIPS_STATUS_OK) return wips_make_result(bytesDecoded,result.status_code);
     WIPS_TRACELOG("Decoding odometry_result field timestamps (u64,VLA,size=%u)\n",out->GET_DETAIL(timestamps,vlasize));
     out->timestamps = malloc(out->GET_DETAIL(timestamps,vlasize) * GET_SIZE(u64));
     if (!out->timestamps){
         WIPS_DEBUGLOG("Fatal error while decoding odometry_result: OOM\n");
-        return wips_make_status(bytesDecoded,WIPS_STATUS_OOM);
+        return wips_make_result(bytesDecoded,WIPS_STATUS_OOM);
     }
     for (wips_u32_t i = 0; i < out->GET_DETAIL(timestamps,vlasize); i++) {
-        status = wips_decode_u64(out->timestamps + i, data);
-        bytesDecoded += status.bytes_processed;
-        if (status.status_code != WIPS_STATUS_OK){
+        result = wips_decode_u64(out->timestamps + i, data);
+        bytesDecoded += result.bytes_processed;
+        if (result.status_code != WIPS_STATUS_OK){
             // Free any partially decoded elements to avoid leaks
             for (wips_u32_t j = 0; j < i; j++) {
                 wips_u64_free_resources(out->timestamps + j);
             }
             free(out->timestamps);
             out->timestamps = NULL;
-            return wips_make_status(bytesDecoded,status.status_code);
+            return wips_make_result(bytesDecoded,result.status_code);
         }
     }
     WIPS_TRACELOG("Decoding odometry_result field DETAILvlasize__twists (u32)\n");
-    status = wips_decode_u32(&(out->DETAILvlasize__twists), data);
-    bytesDecoded += status.bytes_processed;
-    if (status.status_code != WIPS_STATUS_OK) return wips_make_status(bytesDecoded,status.status_code);
+    result = wips_decode_u32(&(out->DETAILvlasize__twists), data);
+    bytesDecoded += result.bytes_processed;
+    if (result.status_code != WIPS_STATUS_OK) return wips_make_result(bytesDecoded,result.status_code);
     WIPS_TRACELOG("Decoding odometry_result field twists (twist2,VLA,size=%u)\n",out->GET_DETAIL(twists,vlasize));
     out->twists = malloc(out->GET_DETAIL(twists,vlasize) * GET_SIZE(twist2));
     if (!out->twists){
         WIPS_DEBUGLOG("Fatal error while decoding odometry_result: OOM\n");
-        return wips_make_status(bytesDecoded,WIPS_STATUS_OOM);
+        return wips_make_result(bytesDecoded,WIPS_STATUS_OOM);
     }
     for (wips_u32_t i = 0; i < out->GET_DETAIL(twists,vlasize); i++) {
-        status = wips_decode_twist2(out->twists + i, data);
-        bytesDecoded += status.bytes_processed;
-        if (status.status_code != WIPS_STATUS_OK){
+        result = wips_decode_twist2(out->twists + i, data);
+        bytesDecoded += result.bytes_processed;
+        if (result.status_code != WIPS_STATUS_OK){
             // Free any partially decoded elements to avoid leaks
             for (wips_u32_t j = 0; j < i; j++) {
                 wips_twist2_free_resources(out->twists + j);
             }
             free(out->twists);
             out->twists = NULL;
-            return wips_make_status(bytesDecoded,status.status_code);
+            return wips_make_result(bytesDecoded,result.status_code);
         }
     }
     WIPS_TRACELOG("Decoded odometry_result\n");
-    return wips_make_status(bytesDecoded,WIPS_STATUS_OK);
+    return wips_make_result(bytesDecoded,WIPS_STATUS_OK);
 }
+
+DEFINE_VLAGETTER(odometry_result)
+DEFINE_VLASETTER(odometry_result)
+DEFINE_VLAPUSHBACK(odometry_result)
+wips_vlamethods_t wips_odometry_result_vlamethods = {
+    wips_odometry_result_vlagetter,
+    wips_odometry_result_vlasetter,
+    wips_odometry_result_vlapushback
+};

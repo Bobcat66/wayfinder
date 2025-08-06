@@ -41,7 +41,7 @@ extern "C" {
 #include "wips_runtime.h"
 #include "pose3.wips.h"
 
-typedef struct wips_apriltag_field_pose_observation {
+typedef struct {
     wips_u32_t DETAILvlasize__tags_used;
     wips_i32_t* tags_used;
     wips_pose3_t field_pose_0;
@@ -61,8 +61,10 @@ void wips_apriltag_field_pose_observation_destroy(wips_apriltag_field_pose_obser
 
 unsigned char wips_apriltag_field_pose_observation_copy(wips_apriltag_field_pose_observation_t* dest, const wips_apriltag_field_pose_observation_t* src);
 
-wips_status_t wips_encode_apriltag_field_pose_observation(wips_blob_t* data, wips_apriltag_field_pose_observation_t* in);
-wips_status_t wips_decode_apriltag_field_pose_observation(wips_apriltag_field_pose_observation_t* out, wips_blob_t* data);
+wips_result_t wips_encode_apriltag_field_pose_observation(wips_blob_t* data, wips_apriltag_field_pose_observation_t* in);
+wips_result_t wips_decode_apriltag_field_pose_observation(wips_apriltag_field_pose_observation_t* out, wips_blob_t* data);
+
+extern wips_vlamethods_t wips_apriltag_field_pose_observation_vlamethods;
 
 #ifdef __cplusplus
 }
