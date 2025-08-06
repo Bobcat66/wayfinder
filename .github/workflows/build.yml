@@ -24,7 +24,7 @@ jobs:
           ${{ runner.os }}-build-
     
     - name: Update packages
-      run: sudo apt get update
+      run: sudo apt-get update
           
     - name: Install OpenCV
       run: sudo apt install -y libopencv-dev
