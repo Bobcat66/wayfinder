@@ -81,18 +81,25 @@ void* wips_handler_get(wips_handler_t* handler) {
     return handler->resource;
 }
 
-static wips_status_t pyssize_to_size(Py_ssize_t val) {
-    if (val < 0) {
-        fprintf(stderr, "Error: negative Py_ssize_t value cannot be converted to size_t\n");
-        return wips_make_status(0,WIPS_STATUS_OVERFLOW);
-    }
-    return wips_make_status((size_t)val,WIPS_STATUS_OK);
+static inline unsigned char pyssize_to_size(size_t* out,Py_ssize_t val) {
+    if (val < 0)
+        return WIPS_STATUS_UNDERFLOW;
+    (*out) = (size_t)val;
+    return WIPS_STATUS_OK;
+}
+
+static inline unsigned char size_to_pyssize(Py_ssize_t* out,size_t val) {
+    if (val > (size_t)PY_SSIZE_T_MAX)
+        return WIPS_STATUS_OVERFLOW;
+    (*out) = (Py_ssize_t)val;
+    return WIPS_STATUS_OK;
 }
 
 
-static void wips_blob_PyObject_dealloc(PyObject* self) {
+// blob methods
+static void wips_PyBlob_dealloc(PyObject* self) {
 
-    wips_blob_PyObject* obj = (wips_blob_PyObject*)self;
+    wips_PyBlob* obj = (wips_PyBlob*)self;
 
     if (obj->c_obj) {
         wips_bin_destroy(obj->c_obj);
@@ -103,11 +110,11 @@ static void wips_blob_PyObject_dealloc(PyObject* self) {
 }
 
 
-static PyObject* wips_blob_PyObject_new(PyTypeObject* type, PyObject* args, PyObject* kwds) {
+static PyObject* wips_PyBlob_new(PyTypeObject* type, PyObject* args, PyObject* kwds) {
 
-    wips_blob_PyObject* self;
+    wips_PyBlob* self;
 
-    self = (wips_blob_PyObject*)(type->tp_alloc(type,0));
+    self = (wips_PyBlob*)(type->tp_alloc(type,0));
     if (self) {
         self->c_obj = NULL;
     }
@@ -115,24 +122,23 @@ static PyObject* wips_blob_PyObject_new(PyTypeObject* type, PyObject* args, PyOb
     return (PyObject*)self;
 }
 
-static int wips_blob_PyObject_init(PyObject* self, PyObject* args, PyObject* kwds) {
+static int wips_PyBlob_init(PyObject* self, PyObject* args, PyObject* kwds) {
 
     const char* buffer;
     Py_ssize_t py_size;
+    size_t size;
     
     if (!PyArg_ParseTuple(args,"y#",&buffer,&py_size)) {
         return -1;
     }
 
-    wips_status_t size_result = pyssize_to_size(py_size);
-    if (size_result.status_code == WIPS_STATUS_OVERFLOW){
+    unsigned char size_status = pyssize_to_size(&size,py_size);
+    if (size_status == WIPS_STATUS_UNDERFLOW){
         PyErr_SetString(PyExc_ValueError, "Negative buffer length");
         return -1;
     }
 
-    size_t size = size_result.bytes_processed;
-
-    wips_blob_PyObject *obj = (wips_blob_PyObject*)self;
+    wips_PyBlob *obj = (wips_PyBlob*)self;
 
     unsigned char* base = (unsigned char*)malloc(size);
     if (!base) {
@@ -153,8 +159,8 @@ static int wips_blob_PyObject_init(PyObject* self, PyObject* args, PyObject* kwd
     return 0;
 }
 
-static int wips_blob_PyObject_getbuffer(PyObject* self, Py_buffer* view, int flags) {
-    wips_blob_PyObject* obj = (wips_blob_PyObject*)self;
+static int wips_PyBlob_getbuffer(PyObject* self, Py_buffer* view, int flags) {
+    wips_PyBlob* obj = (wips_PyBlob*)self;
 
     if (!obj->c_obj) {
         PyErr_SetString(PyExc_BufferError, "Underlying buffer is NULL");
@@ -180,13 +186,13 @@ static int wips_blob_PyObject_getbuffer(PyObject* self, Py_buffer* view, int fla
     return 0;
 }
 
-static PyObject* wips_blob_PyObject_get_offset(PyObject* self, void* closure) {
-    wips_blob_PyObject* obj = (wips_blob_PyObject*)self;
+static PyObject* wips_PyBlob_get_offset(PyObject* self, void* closure) {
+    wips_PyBlob* obj = (wips_PyBlob*)self;
     return PyLong_FromSize_t(obj->c_obj->offset);
 }
 
-static int wips_blob_PyObject_set_offset(PyObject* self, PyObject* value, void* closure) {
-    wips_blob_PyObject* obj = (wips_blob_PyObject*)self;
+static int wips_PyBlob_set_offset(PyObject* self, PyObject* value, void* closure) {
+    wips_PyBlob* obj = (wips_PyBlob*)self;
 
     if (!PyLong_Check(value)) {
         PyErr_SetString(PyExc_TypeError, "The 'value' attribute must be an int");
@@ -202,26 +208,110 @@ static int wips_blob_PyObject_set_offset(PyObject* self, PyObject* value, void* 
     return 0;
 }
 
-static PyBufferProcs wips_blob_PyObject_as_buffer = {
-    .bf_getbuffer = wips_blob_PyObject_getbuffer,
+static PyBufferProcs wips_PyBlob_as_buffer = {
+    .bf_getbuffer = wips_PyBlob_getbuffer,
     .bf_releasebuffer = NULL
 };
 
-static PyGetSetDef wips_blob_PyObject_getsetters[] = {
-    {"offset",(getter)wips_blob_PyObject_get_offset,(setter)wips_blob_PyObject_set_offset,NULL,NULL},
+static PyGetSetDef wips_PyBlob_getsetters[] = {
+    {"offset",(getter)wips_PyBlob_get_offset,(setter)wips_PyBlob_set_offset,NULL,NULL},
     {NULL}
 };
 
-static PyTypeObject wips_blob_PyTypeObject = {
+// vla methods
+wips_vla_PyObject_dealloc(PyObject* self) {
+
+    wips_vla_PyObject* obj = (wips_vla_PyObject*)self;
+
+    if (obj->base.handler) {
+        wips_handler_decref(obj->base.handler);
+        obj->buffer = NULL;
+        obj->vlasize = NULL;
+        obj->base.handler = NULL;
+        obj->base.wips_type = NULL;
+    }
+
+    Py_TYPE(self)->tp_free(self);
+}
+
+PyObject* wips_vla_PyObject_create(void* buffer, wips_u32_t* vlasize, wips_handler_t* handler, wips_pytype_t* wips_type) {
+    PyTypeObject* type = &wips_vla_PyTypeObject;
+    wips_vla_PyObject* obj = (wips_vla_PyObject*)(type->tp_alloc(type,0));
+    if (!obj) return NULL;
+    obj->buffer = buffer;
+    obj->vlasize = vlasize;
+    obj->base.handler = handler;
+    obj->base.wips_type = wips_type;
+    return (PyObject*)obj;
+}
+
+static Py_ssize_t wips_vla_PyObject_length(PyObject* self) {
+    wips_vla_PyObject* obj = (wips_vla_PyObject*)self;
+    Py_ssize_t pysize;
+    unsigned char size_status = size_to_pyssize(&pysize,*(obj->vlasize));
+    if (!obj->vlasize) {
+        PyErr_SetString(PyExc_RuntimeError, "vlasize pointer is NULL");
+        return -1;
+    }
+    if (size_status == WIPS_STATUS_OVERFLOW){
+        PyErr_SetString(PyExc_OverflowError,"vla is too large");
+        return -1;
+    }
+    return pysize;
+}
+
+static PyObject* wips_vla_PyObject_item(PyObject* self,Py_ssize_t index) {
+    wips_vla_PyObject* obj = (wips_vla_PyObject*)self;
+    size_t real_index;
+    unsigned char index_status = pyssize_to_size(&real_index,index);
+    if (index_status == WIPS_STATUS_UNDERFLOW) // index is negative, subtract from the end of the sequence
+        real_index = *(obj->vlasize) - (size_t)(-index);
+    if (real_index > *(obj->vlasize)) {
+        PyErr_SetString(PyExc_IndexError, "index out of range");
+        return NULL;
+    }
+    void* c_obj = obj->buffer + (real_index * obj->base.wips_type->size);
+    return obj->base.wips_type->wrapper(c_obj,obj->base.handler);
+}
+
+static PyObject* wips_vla_PyObject_ass_item(PyObject* self, Py_ssize_t index, PyObject* value) {
+    wips_vla_PyObject* obj = (wips_vla_PyObject*)self;
+    size_t real_index;
+    unsigned char index_status = pyssize_to_size(&real_index,index);
+    if (index_status == WIPS_STATUS_UNDERFLOW) // index is negative, subtract from the end of the sequence
+        real_index = *(obj->vlasize) - (size_t)(-index);
+    if (real_index > *(obj->vlasize)) {
+        PyErr_SetString(PyExc_IndexError, "index out of range");
+        return NULL;
+    }
+}
+
+
+
+// Type objects
+PyTypeObject wips_PyBlobTypeObject = {
     PyVarObject_HEAD_INIT(NULL,0)
     .tp_name = "wips.blob",
-    .tp_basicsize = sizeof(wips_blob_PyObject),
-    .tp_dealloc = wips_blob_PyObject_dealloc,
-    .tp_as_buffer = &wips_blob_PyObject_as_buffer,
-    .tp_new = wips_blob_PyObject_new,
-    .tp_init = (initproc)wips_blob_PyObject_init,
+    .tp_basicsize = sizeof(wips_PyBlob),
+    .tp_dealloc = wips_PyBlob_dealloc,
+    .tp_as_buffer = &wips_PyBlob_as_buffer,
+    .tp_new = wips_PyBlob_new,
+    .tp_init = (initproc)wips_PyBlob_init,
     .tp_flags = Py_TPFLAGS_DEFAULT,
-    .tp_getset = wips_blob_PyObject_getsetters
+    .tp_getset = wips_PyBlob_getsetters
+};
+
+PyTypeObject wips_PyObjectTypeObject = {
+    PyVarObject_HEAD_INIT(NULL,0)
+    .tp_name = "wips.PyObject",
+    .tp_basicsize = sizeof(wips_PyObject),
+    .tp_flags = Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE
+};
+
+static PyTypeObject wips_vla_PyTypeObject = {
+    PyVarObject_HEAD_INIT(NULL,0)
+    .tp_name = "wips.vla",
+    .
 };
 
 #ifdef __cplusplus

@@ -53,7 +53,24 @@ static void wips_{{ name }}_PyObject_new(PyTypeObject* type, PyObject* args, PyO
 }
 
 static int wips_{{ name }}_PyObject_init(PyObject* self, PyObject* args, PyObject* kwds) {
-    
+
+    wips_{{ name }}_PyObject* obj = (wips_{{ name }}_PyObject*)self;
+
+    wips_{{ name }}_t* c_obj = wips_{{ name }}_create();
+    if (!c_obj) {
+        PyErr_NoMemory();
+        return -1;
+    }
+    wips_handler_t* handler = wips_handler_create((void*)c_obj,wips_{{ name }}_void_destructor);
+    if (!handler) {
+        PyErr_NoMemory();
+        return -1;
+    }
+
+    obj->c_obj = c_obj;
+    obj->handler = handler;
+
+    return 0;
 }
 
 static void wips_{{ name }}_PyObject_dealloc(PyObject* self) {
@@ -68,6 +85,10 @@ static void wips_{{ name }}_PyObject_dealloc(PyObject* self) {
 
     Py_TYPE(self)->tp_free(self);
 
+}
+
+void wips_{{ name }}_void_destructor(void* ptr) {
+    wips_{{ name }}_destroy((wips_{{ name }}_t*)ptr);
 }
 
 #ifdef __cplusplus

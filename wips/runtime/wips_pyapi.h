@@ -41,7 +41,9 @@
 extern "C" {
 #endif
 
-// wips_handler_t manages its own lifetime and should never be freed manually
+// wips_handler_t manages a collection of memory allocated by WIPS with reference counting. In general, whenever a new wips struct pointer is allocated, a new handler is created to handle it.
+// Whenever a python object referencing the wips struct or a member of the wips struct is created, that python object
+// is passed a copy of the handler. Making a copy creates a new handler
 typedef struct wips_handler wips_handler_t;
 
 // When the ref counter reaches zero, the destructor will be called on the resource. If the destructor is NULL, the resource will be freed instead
@@ -51,15 +53,44 @@ wips_handler_t* wips_handler_incref(wips_handler_t* handler);
 
 wips_handler_t* wips_handler_decref(wips_handler_t* handler);
 
+typedef struct {
+    // Size of the wips struct in bytes
+    const size_t size;
+    // Function pointer to a method that creates a new uninitialized object
+    void* (* const creator)(void);
+    // Function pointer to a method that wraps an existing wips_struct
+    PyObject* (* const wrapper)(void*,wips_handler_t*);
+    void (* const destructor)(void*);
+} wips_pytype_t;
+
 // The pointer returned by this function is owned by the handler and should NOT be freed manually
 void* wips_handler_get(wips_handler_t* handler);
 
 typedef struct {
     PyObject_HEAD
     wips_blob_t* c_obj;
-} wips_blob_PyObject;
+} wips_PyBlob;
 
-extern PyTypeObject wips_blob_PyTypeObject;
+// A wips struct is a base class for any object which wraps a WIPS struct. VLAs are also considered struct
+typedef struct {
+    PyObject_HEAD
+    wips_pytype_t* wips_type;
+    wips_handler_t* handler;
+} wips_PyObject;
+
+typedef struct {
+    wips_PyObject base;
+    void* buffer;
+    wips_u32_t* vlasize;
+} wips_vla_PyObject;
+
+PyObject* wips_vla_PyObject_wrap(void* buffer, wips_u32_t* vlasize, wips_handler_t* handler, wips_pytype_t* wips_type);
+
+extern PyTypeObject wips_PyBlobTypeObject;
+
+extern PyTypeObject wips_PyObjectTypeObject;
+
+extern PyTypeObject wips_vla_PyTypeObject;
 
 #ifdef __cplusplus
 }

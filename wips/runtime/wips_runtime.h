@@ -51,6 +51,7 @@ extern "C" {
 #define WIPS_STATUS_BOUNDS_ERROR 0x02 // Out-of-bounds error
 #define WIPS_STATUS_OVERFLOW 0x03 // Overflow error
 #define WIPS_STATUS_BAD_ASSERT 0x04 // Failed assertion
+#define WIPS_STATUS_UNDERFLOW 0x05 // Underflow error
 #define WIPS_STATUS_UNKNOWN 0xff // Unknown error
 
 typedef uint8_t wips_u8_t;
