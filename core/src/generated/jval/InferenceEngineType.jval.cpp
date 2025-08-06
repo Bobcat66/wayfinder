@@ -45,16 +45,16 @@ namespace jval {
     using namespace impl;
     const JSONValidationFunctor* get_InferenceEngineType_validator() {        
         static JSONEnumValidator validator({
-            "CV_VULKAN", 
             "CV_OPENCL", 
-            "CV_CPU", 
-            "RKNN", 
-            "EdgeTPU", 
-            "HailoRT", 
-            "CUDA", 
             "OpenVINO", 
+            "CV_VULKAN", 
+            "RKNN", 
+            "CV_CPU", 
+            "CUDA", 
             "ROCm", 
-            "CoreML"
+            "CoreML", 
+            "HailoRT", 
+            "EdgeTPU"
         });
         return static_cast<JSONValidationFunctor*>(&validator);
     }

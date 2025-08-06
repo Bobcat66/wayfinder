@@ -599,11 +599,11 @@ TEST(JSONTests,validatorTest) {
         "AUTO_WHITE_BALANCE": 1
     }
 })";
-    const wf::JSONValidationFunctor* validate = wf::CameraConfiguration::getValidator();
+    wf::WFStatusResult (*validate)(const wf::JSON&) = wf::CameraConfiguration::validate;
 
     wf::JSON control_jobject = wf::JSON::parse(control_json);
 
-    auto controlRes = (*validate)(control_jobject);
+    auto controlRes = wf::CameraConfiguration::validate(control_jobject);
     EXPECT_TRUE(controlRes);
     if (!controlRes) {
         std::cout << "Control error: " << controlRes.what() << std::endl;

@@ -66,17 +66,17 @@ namespace jval {
                 { "tagField", getPrimitiveValidator<std::string>() }
             },
             {
-                "modelColorSpace", 
-                "modelFile", 
-                "modelArch", 
-                "tensorParams", 
                 "tagField", 
-                "engineType", 
                 "confidenceThreshold", 
-                "qtps", 
-                "tagDetectorConfig", 
-                "tagFamily", 
+                "modelFile", 
                 "nmsThreshold", 
+                "tagFamily", 
+                "modelArch", 
+                "tagDetectorConfig", 
+                "qtps", 
+                "engineType", 
+                "tensorParams", 
+                "modelColorSpace", 
                 "tagSize"
             },
             {

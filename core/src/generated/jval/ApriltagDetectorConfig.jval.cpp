@@ -56,10 +56,10 @@ namespace jval {
             {
                 "quadSigma", 
                 "decodeSharpening", 
-                "quadDecimate", 
-                "debug", 
                 "numThreads", 
-                "refineEdges"
+                "refineEdges", 
+                "debug", 
+                "quadDecimate"
             },
             {
             }

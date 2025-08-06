@@ -47,7 +47,7 @@ namespace wf {
         : aprilTags(std::move(aprilTags_)), length(length_), width(width_) {}
         const Apriltag* getTag(int id) const noexcept;
 
-        static const JSONValidationFunctor* getValidator_impl();
+        static const jval::JSONValidationFunctor* getValidator_impl();
         static WFResult<JSON> toJSON_impl(const ApriltagField& object);
         static WFResult<ApriltagField> fromJSON_impl(const JSON& jobject);
         

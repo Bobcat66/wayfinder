@@ -45,8 +45,8 @@ namespace impl {
     using namespace jval;
     const JSONValidationFunctor* get__z42Droot_pipelineType_validator() {        
         static JSONEnumValidator validator({
-            "ObjDetect", 
-            "Apriltag"
+            "Apriltag", 
+            "ObjDetect"
         });
         return static_cast<JSONValidationFunctor*>(&validator);
     }
@@ -75,11 +75,11 @@ namespace jval {
                 { "pipelineConfig", get__z42Droot_pipelineConfig_validator() }
             },
             {
-                "pipelineConfig", 
-                "stream", 
-                "camera_nickname", 
+                "name", 
                 "pipelineType", 
-                "name"
+                "stream", 
+                "pipelineConfig", 
+                "camera_nickname"
             },
             {
             }

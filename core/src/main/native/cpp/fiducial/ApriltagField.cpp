@@ -19,6 +19,7 @@
 
 
 #include "wfcore/fiducial/ApriltagField.h"
+#include "jval/ApriltagField.jval.hpp"
 #include <nlohmann/json.hpp>
 #include <fstream>
 #include <format>
@@ -38,15 +39,8 @@ namespace wf {
         return nullptr; // Not found
     }
 
-    const JSONValidationFunctor* ApriltagField::getValidator_impl() {
-        static JSONStructValidator validator(
-            {
-                {"tags", impl::getTagsValidator()},
-                {"field", impl::getFieldValidator()}
-            },
-            {"tags","field"}
-        );
-        return static_cast<JSONValidationFunctor*>(&validator);
+    const jval::JSONValidationFunctor* ApriltagField::getValidator_impl() {
+        return jval::get_ApriltagField_validator();
     }
 
     WFResult<JSON> ApriltagField::toJSON_impl(const ApriltagField& object) {
@@ -92,7 +86,7 @@ namespace wf {
 
     WFResult<ApriltagField> ApriltagField::fromJSON_impl(const JSON& jobject) {
 
-        auto valid = (*getValidator())(jobject);
+        auto valid = validate(jobject);
         if (!valid) return WFResult<ApriltagField>::propagateFail(valid);
 
         std::unordered_map<int,Apriltag> tags;

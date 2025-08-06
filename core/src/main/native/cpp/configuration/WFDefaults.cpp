@@ -18,13 +18,12 @@
  */
 
 #include "wfcore/configuration/WFDefaults.h"
-#include "wfdetail/validation/tag_detector_validators.h"
-#include "wfdetail/validation/inference_validators.h"
-#include "wfdetail/validation/video_validators.h"
 #include "wfcore/common/json_utils.h"
 #include "jval/WFDefaults.jval.hpp"
 #include "wfcore/common/jval_compat.h"
 #include "wfcore/common/wfdef.h"
+
+#include <shared_mutex>
 
 namespace impl {
     using namespace wf;
@@ -119,10 +118,68 @@ namespace impl {
             vec.size() > 3 ? vec[3] : 0
         );
     }
+
+
+    static std::shared_mutex mtx_;
 };
 
 
 namespace wf {
+    WFStatusResult WFDefaults::load(const JSON& jobject) {
+        std::unique_lock lock(impl::mtx_);
+        return getInstance().load_impl(jobject);
+    }
+
+    std::string WFDefaults::tagField() {
+        std::shared_lock lock(impl::mtx_);
+        return getInstance().tagField_;
+    }
+
+    std::string WFDefaults::tagFamily() {
+        std::shared_lock lock(impl::mtx_);
+        return getInstance().tagFamily_;
+    }
+
+    double WFDefaults::tagSize() {
+        std::shared_lock lock(impl::mtx_);
+        return getInstance().tagSize_;
+    }
+
+    std::string WFDefaults::modelFile() {
+        std::shared_lock lock(impl::mtx_);
+        return getInstance().modelFile_;
+    }
+
+    ApriltagDetectorConfig WFDefaults::tagDetectorConfig() {
+        std::shared_lock lock(impl::mtx_);
+        return getInstance().tagDetectorConfig_;
+    }
+
+    QuadThresholdParams WFDefaults::qtps() {
+        std::shared_lock lock(impl::mtx_);
+        return getInstance().qtps_;
+    }
+
+    TensorParameters WFDefaults::tensorParameters() {
+        std::shared_lock lock(impl::mtx_);
+        return getInstance().tensorParameters_;
+    }
+
+    float WFDefaults::nmsThreshold() {
+        std::shared_lock lock(impl::mtx_);
+        return getInstance().nmsThreshold_;
+    }
+
+    float WFDefaults::confThreshold() {
+        std::shared_lock lock(impl::mtx_);
+        return getInstance().confThreshold_;
+    }
+
+    ImageEncoding WFDefaults::modelColorSpace() {
+        std::shared_lock lock(impl::mtx_);
+        return getInstance().modelColorSpace_;
+    }
+
     WFStatusResult WFDefaults::load_impl(const JSON& jobject) {
         auto valres = (*jval::get_WFDefaults_validator())(jobject);
         if (!valres) return JVResToWF(valres);
@@ -164,5 +221,36 @@ namespace wf {
         nmsThreshold_ = jobject["nmsThreshold"].get<float>();
         confThreshold_ = jobject["confidenceThreshold"].get<float>();
         return WFStatusResult::success();
+    }
+
+    WFDefaults::WFDefaults() {
+        std::unique_lock lock(impl::mtx_);
+        // These are the fallback defaults if a JSON defaults file isn't found or if the one that is found is invalid
+        // Also helps with unit testing
+        tagField_ = "k2025ReefscapeWelded";
+        tagFamily_ = "tag36h11";
+        tagSize_ = 6.5;
+        modelFile_ = "default.onnx";
+        tagDetectorConfig_ = {
+            .numThreads = 1,
+            .quadDecimate = 2.0f,
+            .quadSigma = 0.0f,
+            .refineEdges = true,
+            .decodeSharpening = 0.25,
+            .debug = false
+        };
+        qtps_ = {
+            .minClusterPixels = 5,
+            .maxNumMaxima = 10,
+            .criticalAngleRads = 0.0f,
+            .maxLineFitMSE = 10.0f,
+            .minWhiteBlackDiff = 5,
+            .deglitch = false
+        };
+        engineType_ = InferenceEngineType::CV_CPU;
+        modelArch_ = ModelArch::YOLO;
+        modelColorSpace_ = ImageEncoding::RGB24;
+        nmsThreshold_ = 0.5f;
+        confThreshold_ = 0.5f;
     }
 }

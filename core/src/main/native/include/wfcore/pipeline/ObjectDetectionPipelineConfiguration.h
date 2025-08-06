@@ -50,7 +50,7 @@ namespace wf {
         , modelColorSpace(modelColorSpace_)
         , filterParams(std::move(filterParams_)) {}
 
-        static const JSONValidationFunctor* getValidator_impl();
+        static const jval::JSONValidationFunctor* getValidator_impl();
         static WFResult<JSON> toJSON_impl(const ObjectDetectionPipelineConfiguration& object);
         static WFResult<ObjectDetectionPipelineConfiguration> fromJSON_impl(const JSON& jobject);
 

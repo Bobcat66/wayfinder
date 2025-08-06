@@ -48,9 +48,9 @@ namespace impl {
                 { "encoding", get_ImageEncoding_validator() }
             },
             {
+                "width", 
                 "encoding", 
-                "height", 
-                "width"
+                "height"
             },
             {
             }

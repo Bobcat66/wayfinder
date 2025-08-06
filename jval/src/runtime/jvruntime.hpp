@@ -100,10 +100,7 @@ namespace jval {
         }
     };
 
-    const JSONValidationFunctor* getNullValidator() {
-        static JSONNullValidator validator;
-        return static_cast<JSONValidationFunctor*>(&validator);
-    }
+    const JSONValidationFunctor* getNullValidator();
 
     // Meant for validating primitive types (number, string, etc.)
     template <typename T>

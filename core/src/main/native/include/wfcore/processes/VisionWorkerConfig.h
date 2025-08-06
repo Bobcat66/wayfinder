@@ -40,6 +40,6 @@ namespace wf {
 
         static WFResult<VisionWorkerConfig> fromJSON_impl();
         static WFResult<JSON> toJSON_impl();
-        static const JSONValidationFunctor* getValidator_impl();
+        static const jval::JSONValidationFunctor* getValidator_impl();
     };
 }

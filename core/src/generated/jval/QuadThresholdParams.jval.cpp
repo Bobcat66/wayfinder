@@ -54,12 +54,12 @@ namespace jval {
                 { "deglitch", getPrimitiveValidator<bool>() }
             },
             {
-                "deglitch", 
+                "criticalAngleRads", 
                 "minClusterPixels", 
                 "maxNumMaxima", 
-                "criticalAngleRads", 
-                "minWhiteBlackDiff", 
-                "maxLineFitMSE"
+                "deglitch", 
+                "maxLineFitMSE", 
+                "minWhiteBlackDiff"
             },
             {
             }

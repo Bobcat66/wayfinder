@@ -18,63 +18,57 @@
  */
 
 #include "wfcore/pipeline/ApriltagPipelineConfiguration.h"
-#include "wfdetail/validation/tag_detector_validators.h"
-
-namespace impl {
-    using namespace wf;
-
-    static const JSONValidationFunctor* getIntArrayValidator() {
-        static JSONArrayValidator validator(getPrimitiveValidator<int>());
-        return static_cast<JSONValidationFunctor*>(&validator);
-    }
-}
+#include "jval/ApriltagPipelineConfig.jval.hpp"
+#include "wfcore/configuration/WFDefaults.h"
 
 namespace wf {
-    const JSONValidationFunctor* ApriltagPipelineConfiguration::getValidator_impl() {
-        static JSONStructValidator validator(
-            {
-                {"detConfig", detail::getDetectorConfigValidator()},
-                {"detQTPs", detail::getDetectorQTPsValidator()},
-                {"apriltagField", getPrimitiveValidator<std::string>()},
-                {"apriltagFamily", getPrimitiveValidator<std::string>()},
-                {"apriltagSize", getPrimitiveValidator<double>()},
-                {"detectorExcludes", impl::getIntArrayValidator()},
-                {"solvePnPExcludes", impl::getIntArrayValidator()},
-                {"solveTagRelative", getPrimitiveValidator<bool>()}
-            },
-            {"apriltagField","apriltagFamily","apriltagSize"}
-        );
-        return static_cast<JSONValidationFunctor*>(&validator);
+    const jval::JSONValidationFunctor* ApriltagPipelineConfiguration::getValidator_impl() {
+        return jval::get_ApriltagPipelineConfig_validator();
     }
     WFResult<ApriltagPipelineConfiguration> ApriltagPipelineConfiguration::fromJSON_impl(const JSON& jobject) {
-        auto valid = (*getValidator())(jobject);
+        auto valid = validate(jobject);
         if (!valid) return WFResult<ApriltagPipelineConfiguration>::propagateFail(valid);
 
-        ApriltagDetectorConfig detConfig;
-        QuadThresholdParams qtps;
+        ApriltagDetectorConfig detConfig = WFDefaults::tagDetectorConfig();
+        QuadThresholdParams qtps = WFDefaults::qtps();
         if (jobject.contains("detConfig")) {
-            detConfig.numThreads = getJSONOpt<int>(jobject["detConfig"],"numThreads",detConfig.numThreads);
-            detConfig.quadDecimate = getJSONOpt<float>(jobject["detConfig"],"quadDecimate",detConfig.quadDecimate);
-            detConfig.quadSigma = getJSONOpt<float>(jobject["detConfig"],"quadSigma",detConfig.quadSigma);
-            detConfig.refineEdges = getJSONOpt<bool>(jobject["detConfig"],"refineEdges",detConfig.refineEdges);
-            detConfig.decodeSharpening = getJSONOpt<double>(jobject["detConfig"],"decodeSharpening",detConfig.decodeSharpening);
-            detConfig.debug = getJSONOpt<bool>(jobject["detConfig"],"debug",detConfig.debug);
+            auto dtc_jobject = jobject["detConfig"];
+            detConfig = {
+                dtc_jobject["numThreads"].get<int>(),
+                dtc_jobject["quadDecimate"].get<float>(),
+                dtc_jobject["quadSigma"].get<float>(),
+                dtc_jobject["refineEdges"].get<bool>(),
+                dtc_jobject["decodeSharpening"].get<double>(),
+                dtc_jobject["debug"].get<bool>()
+            };
         }
         if (jobject.contains("detQTPs")) {
-            qtps.minClusterPixels = getJSONOpt<int>(jobject["detQTPs"],"minClusterPixels",qtps.minClusterPixels);
-            qtps.maxNumMaxima = getJSONOpt<int>(jobject["detQTPs"],"maxNumMaxima",qtps.maxNumMaxima);
-            qtps.criticalAngleRads = getJSONOpt<float>(jobject["detQTPs"],"criticalAngleRads",qtps.criticalAngleRads);
-            qtps.maxLineFitMSE = getJSONOpt<float>(jobject["detQTPs"],"maxLineFitMSE",qtps.maxLineFitMSE);
-            qtps.minWhiteBlackDiff = getJSONOpt<int>(jobject["detQTPs"],"minWhiteBlackDiff",qtps.minWhiteBlackDiff);
-            qtps.deglitch = getJSONOpt<bool>(jobject["detQTPs"],"deglitch",qtps.deglitch);
+            auto qtp_jobject = jobject["detQTPs"];
+            qtps = {
+                qtp_jobject["minClusterPixels"].get<int>(),
+                qtp_jobject["maxNumMaxima"].get<int>(),
+                qtp_jobject["criticalAngleRads"].get<float>(),
+                qtp_jobject["maxLineFitMSE"].get<float>(),
+                qtp_jobject["minWhiteBlackDiff"].get<int>(),
+                qtp_jobject["deglitch"].get<bool>()
+            };
         }
+        // TODO: Move these into WFDefaults???
+        auto solvePnP = getJSONOpt<bool>(jobject,"solvePnP",false);
         auto detectorExcludes = getJSONOpt<std::vector<int>>(jobject,"detectorExcludes",{});
         auto solvePnPExcludes = getJSONOpt<std::vector<int>>(jobject,"solvePnPExcludes",{});
-        auto solveTagRelative = getJSONOpt<bool>(jobject,"solveTagRelative",true);
+        auto solveTagRelative = getJSONOpt<bool>(jobject,"solveTagRelative",false);
+        auto tagField = getJSONOpt<std::string>(jobject,"tagField",WFDefaults::tagField());
+        auto tagFamily = getJSONOpt<std::string>(jobject,"tagFamily",WFDefaults::tagFamily());
+        auto tagSize = getJSONOpt<double>(jobject,"tagSize",WFDefaults::tagSize());
         return WFResult<ApriltagPipelineConfiguration>::success(
             std::in_place,
+            solvePnP,
             std::move(detConfig),
             std::move(qtps),
+            std::move(tagField),
+            std::move(tagFamily),
+            tagSize,
             detectorExcludes,
             solvePnPExcludes,
             solveTagRelative
@@ -99,6 +93,9 @@ namespace wf {
                     {"minWhiteBlackDiff", object.detQTPs.minWhiteBlackDiff},
                     {"deglitch", object.detQTPs.deglitch}
                 }},
+                {"tagField", object.apriltagField},
+                {"tagFamily", object.apriltagFamily},
+                {"tagSize", object.apriltagSize},
                 {"detectorExcludes", object.detectorExcludes},
                 {"solvePnPExcludes", object.SolvePNPExcludes},
                 {"solveTagRelative", object.solveTagRelative}

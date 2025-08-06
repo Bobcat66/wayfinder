@@ -43,10 +43,10 @@ namespace impl {
     using namespace jval;
     const JSONValidationFunctor* get__z42Droot_backend_validator() {        
         static JSONEnumValidator validator({
-            "REALSENSE", 
             "LIBCAMERA", 
-            "CSCORE", 
-            "GSTREAMER"
+            "GSTREAMER", 
+            "REALSENSE", 
+            "CSCORE"
         });
         return static_cast<JSONValidationFunctor*>(&validator);
     }
@@ -88,10 +88,10 @@ namespace jval {
                 { "controls", get__z42Droot_controls_validator() }
             },
             {
-                "nickname", 
-                "format", 
                 "backend", 
-                "devpath"
+                "nickname", 
+                "devpath", 
+                "format"
             },
             {
                 { "controls", { "controlAliases" } }

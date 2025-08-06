@@ -26,67 +26,23 @@
 #include "wfcore/fiducial/ApriltagConfiguration.h"
 #include "wfcore/video/video_types.h"
 #include "wfcore/inference/inference_configs.h"
-#include <shared_mutex>
 #include "wfcore/common/json_utils.h"
 
 namespace wf {
     class WFDefaults {
     public:
         // Loads defaults from environment
-        static WFStatusResult load(const JSON& jobject) {
-            std::unique_lock lock(mtx_);
-            return getInstance().load_impl(jobject);
-        }
-
-        static std::string tagField() {
-            std::shared_lock lock(mtx_);
-            return getInstance().tagField_;
-        }
-
-        static std::string tagFamily() {
-            std::shared_lock lock(mtx_);
-            return getInstance().tagFamily_;
-        }
-
-        static double tagSize() {
-            std::shared_lock lock(mtx_);
-            return getInstance().tagSize_;
-        }
-
-        static std::string modelFile() {
-            std::shared_lock lock(mtx_);
-            return getInstance().modelFile_;
-        }
-
-        static ApriltagDetectorConfig tagDetectorConfig() {
-            std::shared_lock lock(mtx_);
-            return getInstance().tagDetectorConfig_;
-        }
-
-        static QuadThresholdParams qtps() {
-            std::shared_lock lock(mtx_);
-            return getInstance().qtps_;
-        }
-
-        static TensorParameters tensorParameters() {
-            std::shared_lock lock(mtx_);
-            return getInstance().tensorParameters_;
-        }
-
-        static float nmsThreshold() {
-            std::shared_lock lock(mtx_);
-            return getInstance().nmsThreshold_;
-        }
-
-        static float confThreshold() {
-            std::shared_lock lock(mtx_);
-            return getInstance().confThreshold_;
-        }
-
-        static ImageEncoding modelColorSpace() {
-            std::shared_lock lock(mtx_);
-            return getInstance().modelColorSpace_;
-        }
+        static WFStatusResult load(const JSON& jobject);
+        static std::string tagField();
+        static std::string tagFamily();
+        static double tagSize();
+        static std::string modelFile();
+        static ApriltagDetectorConfig tagDetectorConfig();
+        static QuadThresholdParams qtps();
+        static TensorParameters tensorParameters();
+        static float nmsThreshold();
+        static float confThreshold();
+        static ImageEncoding modelColorSpace();
 
     private:
         static WFDefaults& getInstance() {
@@ -116,7 +72,5 @@ namespace wf {
         ImageEncoding modelColorSpace_;
         float nmsThreshold_;
         float confThreshold_;
-
-        static std::shared_mutex mtx_;
     };
 }

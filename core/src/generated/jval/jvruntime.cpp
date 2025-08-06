@@ -100,6 +100,11 @@ namespace impl {
 
 namespace jval {
 
+    const JSONValidationFunctor* getNullValidator() {
+        static JSONNullValidator validator;
+        return static_cast<JSONValidationFunctor*>(&validator);
+    }
+
     std::string JVResult::what() const {
         if (ok()) return "";
         return std::format(

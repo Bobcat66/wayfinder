@@ -76,7 +76,7 @@ namespace wf {
         , SolvePNPExcludes(SolvePNPExcludes_.begin(),SolvePNPExcludes_.end())
         , solveTagRelative(solveTagRelative_) {}
         
-        static const JSONValidationFunctor* getValidator_impl();
+        static const jval::JSONValidationFunctor* getValidator_impl();
         static WFResult<ApriltagPipelineConfiguration> fromJSON_impl(const JSON& jobject);
         static WFResult<JSON> toJSON_impl(const ApriltagPipelineConfiguration& object);
     };

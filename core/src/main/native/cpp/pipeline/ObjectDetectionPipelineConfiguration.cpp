@@ -21,8 +21,7 @@
 #include "wfcore/common/wfdef.h"
 #include "wfcore/common/logging.h"
 #include "wfcore/common/envutils.h"
-#include "wfdetail/validation/video_validators.h"
-#include "wfdetail/validation/inference_validators.h"
+#include "jval/ObjectDetectionPipelineConfig.jval.hpp"
 #include <string_view>
 
 namespace impl {
@@ -121,22 +120,8 @@ namespace impl {
 };
 
 namespace wf {
-    const JSONValidationFunctor* ObjectDetectionPipelineConfiguration::getValidator_impl() {
-        static JSONStructValidator validator(
-            {
-                {"modelFile", getPrimitiveValidator<std::string>()},
-                {"modelArch", detail::getModelArchValidator()},
-                {"engineType", detail::getInferenceEngineTypeValidator()},
-                {"tensorParams", detail::getTensorParamsValidator()},
-                {"modelColorSpace", detail::getEncodingValidator()},
-                {"filterParams", detail::getFilterParamsValidator()}
-            },
-            {},
-            {
-                {"modelFile",{"modelArch","engineType","tensorParams","modelColorSpace"}}
-            }
-        );
-        return static_cast<JSONValidationFunctor*>(&validator);
+    const jval::JSONValidationFunctor* ObjectDetectionPipelineConfiguration::getValidator_impl() {
+        return jval::get_ObjectDetectionPipelineConfig_validator();
     }
 
     WFResult<JSON> ObjectDetectionPipelineConfiguration::toJSON_impl(const ObjectDetectionPipelineConfiguration& object) {
@@ -178,7 +163,7 @@ namespace wf {
 
     // ts is lowkey scuffed, refactor after 1.0
     WFResult<ObjectDetectionPipelineConfiguration> ObjectDetectionPipelineConfiguration::fromJSON_impl(const JSON& jobject) {
-        auto valid = (*getValidator())(jobject);
+        auto valid = validate(jobject);
         if (!valid) return WFResult<ObjectDetectionPipelineConfiguration>::propagateFail(valid);
 
         auto stds = impl::toScalar(jobject["tensorParams"]["stds"].get<std::vector<double>>());

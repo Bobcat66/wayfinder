@@ -28,6 +28,7 @@
 #include <unordered_set>
 #include <regex>
 #include <limits>
+#include "wfcore/common/jval_compat.h"
 
 // TODO: Refactor JSON utilities.
 // The way they are structured now, a lot of unnecessary checks are performed
@@ -65,101 +66,6 @@ namespace wf {
         return jsonCast<T>(jobject,"JSON Object",verbose);
     }
 
-    // An interface for objects that implement JSON validation
-    // ALL JSONValidationFunctor objects should be STATIC objects with "eternal" lifetime
-    // Additionally, calling the functors should be STRICTLY read-only
-    class JSONValidationFunctor {
-    public:
-        virtual WFStatusResult operator()(const JSON& jobject) const = 0;
-    };
-
-    // Meant for validating primitive types (number, string, etc.)
-    template <typename T>
-    class JSONPrimitiveValidator : public JSONValidationFunctor {
-    public:
-        WFStatusResult operator()(const JSON& jobject) const override {
-            try {
-                jobject.get<T>();
-                return WFStatusResult::success();
-            } catch (const JSON::type_error& e) {
-                return WFStatusResult::failure(WFStatus::JSON_INVALID_TYPE);
-            } catch (const JSON::exception& e) {
-                return WFStatusResult::failure(WFStatus::JSON_UNKNOWN);
-            }
-        }
-    };
-
-    template <typename T>
-    const JSONPrimitiveValidator<T>* getPrimitiveValidator() {
-        static JSONPrimitiveValidator<T> validator;
-        return &validator;
-    }
-
-    // Meant for validating JSON objects with explicitly defined and typed properties
-    // (i.e. JSON objects that behave like structs)
-    class JSONStructValidator : public JSONValidationFunctor {
-    public:
-        JSONStructValidator(
-            std::unordered_map<std::string,const JSONValidationFunctor*> properties_,
-            std::unordered_set<std::string> required_,
-            std::unordered_map<std::string,std::unordered_set<std::string>> dependencies_
-        ) 
-        : properties(std::move(properties_))
-        , required(std::move(required_)) 
-        , dependencies(std::move(dependencies_)) {}
-        WFStatusResult operator()(const JSON& jobject) const override;
-    private:
-        const std::unordered_map<std::string,const JSONValidationFunctor*> properties;
-        const std::unordered_set<std::string> required;
-        const std::unordered_map<std::string,std::unordered_set<std::string>> dependencies;
-    };
-
-    // Meant for validating objects with an indeterminate number of properties that share a type
-    // (i.e. JSON objects that behave like maps)
-    class JSONMapValidator : public JSONValidationFunctor {
-    public:
-        JSONMapValidator(const JSONValidationFunctor* valueValidator_,const std::string& keyPattern = R"(^.*$)") : valueValidator(valueValidator_), keyMatcher(keyPattern) {}
-        WFStatusResult operator()(const JSON& jobject) const override;
-    private:
-        const std::regex keyMatcher;
-        const JSONValidationFunctor* valueValidator;
-    };
-
-    class JSONEnumValidator : public JSONValidationFunctor {
-    public:
-        JSONEnumValidator(std::unordered_set<std::string> enumValues_) : enumValues(std::move(enumValues_)) {}
-        WFStatusResult operator()(const JSON& jobject) const override;
-    private:
-        const std::unordered_set<std::string> enumValues;
-    };
-
-    class JSONArrayValidator : public JSONValidationFunctor {
-    public:
-        JSONArrayValidator(const JSONValidationFunctor* valueValidator_,size_t minSize_ = 0,size_t maxSize_ = array_maxsize)
-        : valueValidator(valueValidator_), minSize(minSize_), maxSize(maxSize_) {}
-        WFStatusResult operator()(const JSON& jobject) const override;
-    private:
-        const size_t minSize;
-        const size_t maxSize;
-        const JSONValidationFunctor* valueValidator;
-    };
-
-    class JSONUnionValidator : public JSONValidationFunctor {
-    public:
-        JSONUnionValidator(std::vector<JSONValidationFunctor*> validators_) : validators(std::move(validators_)) {}
-        WFStatusResult operator()(const JSON& jobject) const override;
-    private:
-        const std::vector<JSONValidationFunctor*> validators;
-    };
-
-    class JSONPatternValidator: public JSONValidationFunctor {
-    public:
-        JSONPatternValidator(const std::string& pattern = R"(^.*$)") : patternMatcher(pattern) {}
-        WFStatusResult operator()(const JSON& jobject) const override;
-    private:
-        const std::regex patternMatcher;
-    };
-
     // Returns a primitive optional property or a default
     template <typename T>
     inline T getJSONOpt(const JSON& jobject,std::string_view property, T defaultValue) {
@@ -178,8 +84,8 @@ namespace wf {
         }
 
         // getValidator_impl() should return a pointer to a persistent singleton validation functor
-        static const JSONValidationFunctor* getValidator() {
-            return DerivedType::getValidator_impl();
+        static WFStatusResult validate(const JSON& jobject) {
+            return JVResToWF((*DerivedType::getValidator_impl())(jobject));
         }
 
         std::string dump() const {

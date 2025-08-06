@@ -18,16 +18,6 @@
  */
 
 #include "wfcore/processes/VisionWorkerConfig.h"
-namespace impl {
-    using namespace wf;
-    static const JSONValidationFunctor* getPipelineTypeValidator() {
-        static JSONEnumValidator validator({
-            "Apriltag",
-            "ObjDetect"
-        });
-        return static_cast<JSONValidationFunctor*>(&validator);
-    }
-}
 
 namespace wf {
 
