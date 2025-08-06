@@ -48,10 +48,18 @@ wips_apriltag_relative_pose_observation_t* wips_apriltag_relative_pose_observati
     WIPS_TRACELOG("Created apriltag_relative_pose_observation struct\n");
     return struct_ptr;
 }
+
 void wips_apriltag_relative_pose_observation_free_resources(wips_apriltag_relative_pose_observation_t* struct_ptr) {
     WIPS_TRACELOG("Freeing resources held by apriltag_relative_pose_observation\n");
     WIPS_TRACELOG("Freed resources held by apriltag_relative_pose_observation\n");
 }
+
+unsigned char wips_apriltag_relative_pose_observation_copy(wips_apriltag_relative_pose_observation_t* dest,const wips_apriltag_relative_pose_observation_t* src){
+    WIPS_TRACELOG("Copying apriltag_relative_pose_observation object\n");
+    (*dest) = (*src);
+    return WIPS_STATUS_OK;
+}
+
 // Function to destroy the struct and free all resources
 void wips_apriltag_relative_pose_observation_destroy(wips_apriltag_relative_pose_observation_t* struct_ptr) {
     WIPS_TRACELOG("Destroying apriltag_relative_pose_observation\n");
@@ -64,7 +72,7 @@ void wips_apriltag_relative_pose_observation_destroy(wips_apriltag_relative_pose
     WIPS_TRACELOG("Destroyed apriltag_relative_pose_observation\n");
 }
 
-wips_status_t wips_encode_apriltag_relative_pose_observation(wips_bin_t* data, wips_apriltag_relative_pose_observation_t* in) {
+wips_status_t wips_encode_apriltag_relative_pose_observation(wips_blob_t* data, wips_apriltag_relative_pose_observation_t* in) {
     WIPS_TRACELOG("Encoding apriltag_relative_pose_observation\n");
     WIPS_Assert(data != NULL && in != NULL,0);
     size_t bytesEncoded = 0;
@@ -92,7 +100,7 @@ wips_status_t wips_encode_apriltag_relative_pose_observation(wips_bin_t* data, w
     WIPS_TRACELOG("Encoded apriltag_relative_pose_observation\n");
     return wips_make_status(bytesEncoded,WIPS_STATUS_OK);
 }
-wips_status_t wips_decode_apriltag_relative_pose_observation(wips_apriltag_relative_pose_observation_t* out, wips_bin_t* data) {
+wips_status_t wips_decode_apriltag_relative_pose_observation(wips_apriltag_relative_pose_observation_t* out, wips_blob_t* data) {
     WIPS_TRACELOG("Decoding apriltag_relative_pose_observation\n");
     WIPS_Assert(out != NULL && data != NULL,0);
     size_t bytesDecoded = 0;

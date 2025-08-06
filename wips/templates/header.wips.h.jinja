@@ -61,8 +61,10 @@ void wips_{{ name }}_free_resources(wips_{{ name }}_t* struct_ptr);
 wips_{{ name }}_t* wips_{{ name }}_create();
 void wips_{{ name }}_destroy(wips_{{ name }}_t* struct_ptr);
 
-wips_status_t wips_encode_{{ name }}(wips_bin_t* data, wips_{{ name }}_t* in);
-wips_status_t wips_decode_{{ name }}(wips_{{ name }}_t* out, wips_bin_t* data);
+unsigned char wips_{{ name }}_copy(wips_{{ name }}_t* dest, const wips_{{ name }}_t* src);
+
+wips_status_t wips_encode_{{ name }}(wips_blob_t* data, wips_{{ name }}_t* in);
+wips_status_t wips_decode_{{ name }}(wips_{{ name }}_t* out, wips_blob_t* data);
 
 #ifdef __cplusplus
 }

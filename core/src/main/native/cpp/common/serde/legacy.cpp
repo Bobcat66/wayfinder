@@ -283,14 +283,14 @@ namespace impl {
 
 namespace wf {
 
-    wips_bin_t* packPose3(const gtsam::Pose3& pose) {
+    wips_blob_t* packPose3(const gtsam::Pose3& pose) {
         wips_pose3_t wipspose = impl::wfcore2wips_pose3_shim(pose);
-        wips_bin_t* bin = wips_bin_create(sizeof(wips_pose3_t));
+        wips_blob_t* bin = wips_blob_create(sizeof(wips_pose3_t));
         wips_encode_pose3(bin, &wipspose);
         wips_pose3_free_resources(&wipspose);
         return bin;
     }
-    gtsam::Pose3 unpackPose3(wips_bin_t* data) {
+    gtsam::Pose3 unpackPose3(wips_blob_t* data) {
         wips_pose3_t wipspose;
         wips_decode_pose3(&wipspose,data);
         auto out = impl::wips2wfcore_pose3_shim(wipspose);
@@ -298,14 +298,14 @@ namespace wf {
         return out;
     }
 
-    wips_bin_t* packApriltagDetection(const ApriltagDetection& detection) {
+    wips_blob_t* packApriltagDetection(const ApriltagDetection& detection) {
         wips_apriltag_detection_t wipsdetection = impl::wfcore2wips_atd_shim(detection);
-        wips_bin_t* bin = wips_bin_create(sizeof(wips_apriltag_detection_t));
+        wips_blob_t* bin = wips_blob_create(sizeof(wips_apriltag_detection_t));
         wips_encode_apriltag_detection(bin, &wipsdetection);
         wips_apriltag_detection_free_resources(&wipsdetection);
         return bin;
     }
-    ApriltagDetection unpackApriltagDetection(wips_bin_t* data) {
+    ApriltagDetection unpackApriltagDetection(wips_blob_t* data) {
         wips_apriltag_detection_t wipsdetection;
         wips_decode_apriltag_detection(&wipsdetection, data);
         auto out = impl::wips2wfcore_atd_shim(wipsdetection);
@@ -313,14 +313,14 @@ namespace wf {
         return out;
     }
 
-    wips_bin_t* packApriltagRelativePoseObservation(const ApriltagRelativePoseObservation& poseObservation) {
+    wips_blob_t* packApriltagRelativePoseObservation(const ApriltagRelativePoseObservation& poseObservation) {
         wips_apriltag_relative_pose_observation_t wipsobservation = impl::wfcore2wips_rpo_shim(poseObservation);
-        wips_bin_t* bin = wips_bin_create(sizeof(wips_apriltag_relative_pose_observation_t));
+        wips_blob_t* bin = wips_blob_create(sizeof(wips_apriltag_relative_pose_observation_t));
         wips_encode_apriltag_relative_pose_observation(bin, &wipsobservation);
         wips_apriltag_relative_pose_observation_free_resources(&wipsobservation);
         return bin;
     }
-    ApriltagRelativePoseObservation unpackApriltagRelativePoseObservation(wips_bin_t* data) {
+    ApriltagRelativePoseObservation unpackApriltagRelativePoseObservation(wips_blob_t* data) {
         wips_apriltag_relative_pose_observation_t wipsobservation;
         wips_decode_apriltag_relative_pose_observation(&wipsobservation, data);
         auto out = impl::wips2wfcore_rpo_shim(wipsobservation);
@@ -328,14 +328,14 @@ namespace wf {
         return out;
     }
 
-    wips_bin_t* packApriltagFieldPoseObservation(const ApriltagFieldPoseObservation& poseObservation) {
+    wips_blob_t* packApriltagFieldPoseObservation(const ApriltagFieldPoseObservation& poseObservation) {
         wips_apriltag_field_pose_observation_t wipsobservation = impl::wfcore2wips_fpo_shim(poseObservation);
-        wips_bin_t* bin = wips_bin_create(sizeof(wips_apriltag_field_pose_observation_t));
+        wips_blob_t* bin = wips_blob_create(sizeof(wips_apriltag_field_pose_observation_t));
         wips_encode_apriltag_field_pose_observation(bin, &wipsobservation);
         wips_apriltag_field_pose_observation_free_resources(&wipsobservation);
         return bin;
     }
-    ApriltagFieldPoseObservation unpackApriltagFieldPoseObservation(wips_bin_t* data) {
+    ApriltagFieldPoseObservation unpackApriltagFieldPoseObservation(wips_blob_t* data) {
         wips_apriltag_field_pose_observation_t wipsobservation;
         wips_decode_apriltag_field_pose_observation(&wipsobservation, data);
         auto out = impl::wips2wfcore_fpo_shim(wipsobservation);
@@ -343,14 +343,14 @@ namespace wf {
         return out;
     }
 
-    wips_bin_t* packObjectDetection(const ObjectDetection& detection) {
+    wips_blob_t* packObjectDetection(const ObjectDetection& detection) {
         wips_object_detection_t wipsdetection = impl::wfcore2wips_object_detection_shim(detection);
-        wips_bin_t* bin = wips_bin_create(sizeof(wips_object_detection_t));
+        wips_blob_t* bin = wips_blob_create(sizeof(wips_object_detection_t));
         wips_encode_object_detection(bin, &wipsdetection);
         wips_object_detection_free_resources(&wipsdetection);
         return bin;
     }
-    ObjectDetection unpackObjectDetection(wips_bin_t* data) {
+    ObjectDetection unpackObjectDetection(wips_blob_t* data) {
         wips_object_detection_t wipsdetection;
         wips_decode_object_detection(&wipsdetection, data);
         auto out = impl::wips2wfcore_object_detection_shim(wipsdetection);
@@ -358,14 +358,14 @@ namespace wf {
         return out;
     }
 
-    wips_bin_t* packPipelineResult(const PipelineResult& pipelineResult) {
+    wips_blob_t* packPipelineResult(const PipelineResult& pipelineResult) {
         wips_pipeline_result_t wipspipeline = impl::wfcore2wips_pipeline_result_shim(pipelineResult);
-        wips_bin_t* bin = wips_bin_create(sizeof(wips_pipeline_result_t));
+        wips_blob_t* bin = wips_blob_create(sizeof(wips_pipeline_result_t));
         wips_encode_pipeline_result(bin, &wipspipeline);
         wips_pipeline_result_free_resources(&wipspipeline);
         return bin;
     }
-    PipelineResult unpackPipelineResult(wips_bin_t* data) {
+    PipelineResult unpackPipelineResult(wips_blob_t* data) {
         wips_pipeline_result_t wipspipelineresult;
         wips_decode_pipeline_result(&wipspipelineresult, data);
         auto out = impl::wips2wfcore_pipeline_result_shim(wipspipelineresult);

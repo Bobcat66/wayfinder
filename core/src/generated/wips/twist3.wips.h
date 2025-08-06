@@ -56,8 +56,10 @@ void wips_twist3_free_resources(wips_twist3_t* struct_ptr);
 wips_twist3_t* wips_twist3_create();
 void wips_twist3_destroy(wips_twist3_t* struct_ptr);
 
-wips_status_t wips_encode_twist3(wips_bin_t* data, wips_twist3_t* in);
-wips_status_t wips_decode_twist3(wips_twist3_t* out, wips_bin_t* data);
+unsigned char wips_twist3_copy(wips_twist3_t* dest, const wips_twist3_t* src);
+
+wips_status_t wips_encode_twist3(wips_blob_t* data, wips_twist3_t* in);
+wips_status_t wips_decode_twist3(wips_twist3_t* out, wips_blob_t* data);
 
 #ifdef __cplusplus
 }

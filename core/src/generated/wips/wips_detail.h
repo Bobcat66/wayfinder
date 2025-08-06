@@ -152,7 +152,7 @@ struct tm* wips_localtime(const time_t* timer);
 #endif // NDEBUG
 
 #define DEFINE_TRIVIAL_ENCODE(wips_typename)                                                                    \
-    wips_status_t wips_encode_##wips_typename(wips_bin_t* data, GET_CTYPE(wips_typename)* in){                  \
+    wips_status_t wips_encode_##wips_typename(wips_blob_t* data, GET_CTYPE(wips_typename)* in){                 \
         WIPS_Assert(data != NULL && in != NULL,0);                                                              \
         WIPS_TRACELOG("Encoding %s\n",STRINGIZE(wips_typename));                                                \
         if (data->offset > (SIZE_MAX - GET_SIZE(wips_typename))){                                               \
@@ -180,7 +180,7 @@ struct tm* wips_localtime(const time_t* timer);
     }
     
 #define DEFINE_TRIVIAL_DECODE(wips_typename)                                                                    \
-    wips_status_t wips_decode_##wips_typename(GET_CTYPE(wips_typename)* out, wips_bin_t* data){                 \
+    wips_status_t wips_decode_##wips_typename(GET_CTYPE(wips_typename)* out, wips_blob_t* data){                \
         WIPS_Assert(out != NULL && data != NULL,0);                                                             \
         WIPS_TRACELOG("Decoding %s\n",STRINGIZE(wips_typename));                                                \
         if (data->offset > (SIZE_MAX - GET_SIZE(wips_typename))){                                               \

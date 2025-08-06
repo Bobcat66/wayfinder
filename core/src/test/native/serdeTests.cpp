@@ -106,7 +106,7 @@ TEST(serdeTests, pose3WIPSCharacterizationTest) {
             i
         );
         wips_pose3_free_resources(wipsstruct);
-        wips_bin_destroy(wipsbin);
+        wips_blob_destroy(wipsbin);
     }
 }
 
@@ -159,6 +159,6 @@ TEST(serdeTests, FPOSerdeCharacterizationTest) {
             i
         );
         wips_apriltag_field_pose_observation_free_resources(wipsstruct);
-        wips_bin_destroy(wipsbin);
+        wips_blob_destroy(wipsbin);
     }
 }

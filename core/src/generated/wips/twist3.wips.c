@@ -48,10 +48,18 @@ wips_twist3_t* wips_twist3_create(){
     WIPS_TRACELOG("Created twist3 struct\n");
     return struct_ptr;
 }
+
 void wips_twist3_free_resources(wips_twist3_t* struct_ptr) {
     WIPS_TRACELOG("Freeing resources held by twist3\n");
     WIPS_TRACELOG("Freed resources held by twist3\n");
 }
+
+unsigned char wips_twist3_copy(wips_twist3_t* dest,const wips_twist3_t* src){
+    WIPS_TRACELOG("Copying twist3 object\n");
+    (*dest) = (*src);
+    return WIPS_STATUS_OK;
+}
+
 // Function to destroy the struct and free all resources
 void wips_twist3_destroy(wips_twist3_t* struct_ptr) {
     WIPS_TRACELOG("Destroying twist3\n");
@@ -64,7 +72,7 @@ void wips_twist3_destroy(wips_twist3_t* struct_ptr) {
     WIPS_TRACELOG("Destroyed twist3\n");
 }
 
-wips_status_t wips_encode_twist3(wips_bin_t* data, wips_twist3_t* in) {
+wips_status_t wips_encode_twist3(wips_blob_t* data, wips_twist3_t* in) {
     WIPS_TRACELOG("Encoding twist3\n");
     WIPS_Assert(data != NULL && in != NULL,0);
     size_t bytesEncoded = 0;
@@ -96,7 +104,7 @@ wips_status_t wips_encode_twist3(wips_bin_t* data, wips_twist3_t* in) {
     WIPS_TRACELOG("Encoded twist3\n");
     return wips_make_status(bytesEncoded,WIPS_STATUS_OK);
 }
-wips_status_t wips_decode_twist3(wips_twist3_t* out, wips_bin_t* data) {
+wips_status_t wips_decode_twist3(wips_twist3_t* out, wips_blob_t* data) {
     WIPS_TRACELOG("Decoding twist3\n");
     WIPS_Assert(out != NULL && data != NULL,0);
     size_t bytesDecoded = 0;

@@ -57,8 +57,10 @@ void wips_pose3_free_resources(wips_pose3_t* struct_ptr);
 wips_pose3_t* wips_pose3_create();
 void wips_pose3_destroy(wips_pose3_t* struct_ptr);
 
-wips_status_t wips_encode_pose3(wips_bin_t* data, wips_pose3_t* in);
-wips_status_t wips_decode_pose3(wips_pose3_t* out, wips_bin_t* data);
+unsigned char wips_pose3_copy(wips_pose3_t* dest, const wips_pose3_t* src);
+
+wips_status_t wips_encode_pose3(wips_blob_t* data, wips_pose3_t* in);
+wips_status_t wips_decode_pose3(wips_pose3_t* out, wips_blob_t* data);
 
 #ifdef __cplusplus
 }

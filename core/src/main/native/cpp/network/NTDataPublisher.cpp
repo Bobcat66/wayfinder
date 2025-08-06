@@ -32,6 +32,6 @@ namespace wf {
         // WIP, test
         auto bin = packPipelineResult(result);
         pipelineResultPub.Set(std::span<const uint8_t>(bin->base,bin->offset));
-        wips_bin_destroy(bin);
+        wips_blob_destroy(bin);
     }
 }

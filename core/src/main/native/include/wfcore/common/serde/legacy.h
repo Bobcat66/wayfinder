@@ -30,21 +30,21 @@
 // This file breaks that rule, should refactor eventually
 
 namespace wf {
-    wips_bin_t* packPose3(const gtsam::Pose3& pose);
-    gtsam::Pose3 unpackPose3(wips_bin_t* data);
+    wips_blob_t* packPose3(const gtsam::Pose3& pose);
+    gtsam::Pose3 unpackPose3(wips_blob_t* data);
 
-    wips_bin_t* packApriltagDetection(const ApriltagDetection& detection);
-    ApriltagDetection unpackApriltagDetection(wips_bin_t* data);
+    wips_blob_t* packApriltagDetection(const ApriltagDetection& detection);
+    ApriltagDetection unpackApriltagDetection(wips_blob_t* data);
 
-    wips_bin_t* packApriltagRelativePoseObservation(const ApriltagRelativePoseObservation& poseObservation);
-    ApriltagRelativePoseObservation unpackApriltagRelativePoseObservation(wips_bin_t* data);
+    wips_blob_t* packApriltagRelativePoseObservation(const ApriltagRelativePoseObservation& poseObservation);
+    ApriltagRelativePoseObservation unpackApriltagRelativePoseObservation(wips_blob_t* data);
 
-    wips_bin_t* packApriltagFieldPoseObservation(const ApriltagFieldPoseObservation& poseObservation);
-    ApriltagFieldPoseObservation unpackApriltagFieldPoseObservation(wips_bin_t* data);
+    wips_blob_t* packApriltagFieldPoseObservation(const ApriltagFieldPoseObservation& poseObservation);
+    ApriltagFieldPoseObservation unpackApriltagFieldPoseObservation(wips_blob_t* data);
 
-    wips_bin_t* packObjectDetection(const ObjectDetection& detection);
-    ObjectDetection unpackObjectDetection(wips_bin_t* data);
+    wips_blob_t* packObjectDetection(const ObjectDetection& detection);
+    ObjectDetection unpackObjectDetection(wips_blob_t* data);
 
-    wips_bin_t* packPipelineResult(const PipelineResult& pipelineResult);
-    PipelineResult unpackPipelineResult(wips_bin_t* data);
+    wips_blob_t* packPipelineResult(const PipelineResult& pipelineResult);
+    PipelineResult unpackPipelineResult(wips_blob_t* data);
 }

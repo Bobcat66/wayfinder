@@ -68,11 +68,11 @@ typedef int64_t wips_i64_t;
 typedef float wips_fp32_t;
 typedef double wips_fp64_t;
 
-typedef struct wips_bin {
+typedef struct wips_blob {
     unsigned char* base;
-    size_t offset; // the offset from the base pointer to the part of the wips_bin we actually care about.
+    size_t offset; // the offset from the base pointer to the part of the wips_blob we actually care about.
     size_t allocated; // The amount of memory allocated
-} wips_bin_t;
+} wips_blob_t;
 
 typedef struct wips_status {
     size_t bytes_processed;
@@ -86,41 +86,41 @@ static inline wips_status_t wips_make_status(size_t bytes, unsigned char code) {
     return s;
 }
 
-wips_bin_t* wips_bin_create(size_t size);
+wips_blob_t* wips_blob_create(size_t size);
 
-wips_bin_t* wips_bin_wrap(unsigned char* base, size_t size);
+wips_blob_t* wips_blob_wrap(unsigned char* base, size_t size);
 
-void wips_bin_destroy(wips_bin_t* bin);
+void wips_blob_destroy(wips_blob_t* bin);
 
-wips_status_t wips_encode_u8(wips_bin_t* data, wips_u8_t* in);
-wips_status_t wips_decode_u8(wips_u8_t* out, wips_bin_t* data);
+wips_status_t wips_encode_u8(wips_blob_t* data, wips_u8_t* in);
+wips_status_t wips_decode_u8(wips_u8_t* out, wips_blob_t* data);
 
-wips_status_t wips_encode_i8(wips_bin_t* data, wips_i8_t* in);
-wips_status_t wips_decode_i8(wips_i8_t* out, wips_bin_t* data);
+wips_status_t wips_encode_i8(wips_blob_t* data, wips_i8_t* in);
+wips_status_t wips_decode_i8(wips_i8_t* out, wips_blob_t* data);
 
-wips_status_t wips_encode_u16(wips_bin_t* data, wips_u16_t* in);
-wips_status_t wips_decode_u16(wips_u16_t* out, wips_bin_t* data);
+wips_status_t wips_encode_u16(wips_blob_t* data, wips_u16_t* in);
+wips_status_t wips_decode_u16(wips_u16_t* out, wips_blob_t* data);
 
-wips_status_t wips_encode_i16(wips_bin_t* data, wips_i16_t* in);
-wips_status_t wips_decode_i16(wips_i16_t* out, wips_bin_t* data);
+wips_status_t wips_encode_i16(wips_blob_t* data, wips_i16_t* in);
+wips_status_t wips_decode_i16(wips_i16_t* out, wips_blob_t* data);
 
-wips_status_t wips_encode_u32(wips_bin_t* data, wips_u32_t* in);
-wips_status_t wips_decode_u32(wips_u32_t* out, wips_bin_t* data);
+wips_status_t wips_encode_u32(wips_blob_t* data, wips_u32_t* in);
+wips_status_t wips_decode_u32(wips_u32_t* out, wips_blob_t* data);
 
-wips_status_t wips_encode_i32(wips_bin_t* data, wips_i32_t* in);
-wips_status_t wips_decode_i32(wips_i32_t* out, wips_bin_t* data);
+wips_status_t wips_encode_i32(wips_blob_t* data, wips_i32_t* in);
+wips_status_t wips_decode_i32(wips_i32_t* out, wips_blob_t* data);
 
-wips_status_t wips_encode_u64(wips_bin_t* data, wips_u64_t* in);
-wips_status_t wips_decode_u64(wips_u64_t* out, wips_bin_t* data);
+wips_status_t wips_encode_u64(wips_blob_t* data, wips_u64_t* in);
+wips_status_t wips_decode_u64(wips_u64_t* out, wips_blob_t* data);
 
-wips_status_t wips_encode_i64(wips_bin_t* data, wips_i64_t* in);
-wips_status_t wips_decode_i64(wips_i64_t* out, wips_bin_t* data);
+wips_status_t wips_encode_i64(wips_blob_t* data, wips_i64_t* in);
+wips_status_t wips_decode_i64(wips_i64_t* out, wips_blob_t* data);
 
-wips_status_t wips_encode_fp32(wips_bin_t* data, wips_fp32_t* in);
-wips_status_t wips_decode_fp32(wips_fp32_t* out, wips_bin_t* data);
+wips_status_t wips_encode_fp32(wips_blob_t* data, wips_fp32_t* in);
+wips_status_t wips_decode_fp32(wips_fp32_t* out, wips_blob_t* data);
 
-wips_status_t wips_encode_fp64(wips_bin_t* data, wips_fp64_t* in);
-wips_status_t wips_decode_fp64(wips_fp64_t* out, wips_bin_t* data);
+wips_status_t wips_encode_fp64(wips_blob_t* data, wips_fp64_t* in);
+wips_status_t wips_decode_fp64(wips_fp64_t* out, wips_blob_t* data);
 
 void wips_u8_free_resources(wips_u8_t* data);
 void wips_i8_free_resources(wips_i8_t* data);
@@ -132,6 +132,17 @@ void wips_u64_free_resources(wips_u64_t* data);
 void wips_i64_free_resources(wips_i64_t* data);
 void wips_fp32_free_resources(wips_fp32_t* data);
 void wips_fp64_free_resources(wips_fp64_t* data);
+
+unsigned char wips_u8_copy(wips_u8_t* dest, const wips_u8_t* src);
+unsigned char wips_i8_copy(wips_i8_t* dest, const wips_i8_t* src);
+unsigned char wips_u16_copy(wips_u16_t* dest, const wips_u16_t* src);
+unsigned char wips_i16_copy(wips_i16_t* dest, const wips_i16_t* src);
+unsigned char wips_u32_copy(wips_u32_t* dest, const wips_u32_t* src);
+unsigned char wips_i32_copy(wips_i32_t* dest, const wips_i32_t* src);
+unsigned char wips_u64_copy(wips_u64_t* dest, const wips_u64_t* src);
+unsigned char wips_i64_copy(wips_i64_t* dest, const wips_i64_t* src);
+unsigned char wips_fp32_copy(wips_fp32_t* dest, const wips_fp32_t* src);
+unsigned char wips_fp64_copy(wips_fp64_t* dest, const wips_fp64_t* src);
 
 #ifdef __cplusplus
 }

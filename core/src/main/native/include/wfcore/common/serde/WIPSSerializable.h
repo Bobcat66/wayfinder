@@ -30,8 +30,8 @@ namespace wf {
     // MUST implement public methods with the following signatures:
     // `static DerivedType toWIPS_impl(const WipsType&)`
     // `static WipsType fromWIPS_impl(const DerivedType&)`
-    // `static wips_bin_t* toWIPSBin_impl(const DerivedType&)`
-    // `static DerivedType fromWIPSBin_impl(wips_bin_t*)`
+    // `static wips_blob_t* toWIPSBin_impl(const DerivedType&)`
+    // `static DerivedType fromWIPSBin_impl(wips_blob_t*)`
     template <typename DerivedType,typename WipsType>
     class WIPSSerializable {
     public:
@@ -43,11 +43,11 @@ namespace wf {
             return DerivedType::fromWIPS_impl(wfcore_object);
         }
 
-        static wips_bin_t* toWIPSBin(const DerivedType& wfcore_object) {
+        static wips_blob_t* toWIPSBin(const DerivedType& wfcore_object) {
             return DerivedType::toWIPSBin_impl(wfcore_object);
         }
 
-        static DerivedType fromWIPSBin(wips_bin_t* data) {
+        static DerivedType fromWIPSBin(wips_blob_t* data) {
             return DerivedType::fromWIPSBin_impl(data);
         }
     };

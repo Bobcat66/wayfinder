@@ -38,34 +38,15 @@
 extern "C" {
 #endif
 
-#include "wips_runtime.h"
+#include "wips_pyapi.h"
 
-typedef struct wips_apriltag_detection {
-    wips_i32_t fiducial_id;
-    wips_fp64_t corner0_x;
-    wips_fp64_t corner0_y;
-    wips_fp64_t corner1_x;
-    wips_fp64_t corner1_y;
-    wips_fp64_t corner2_x;
-    wips_fp64_t corner2_y;
-    wips_fp64_t corner3_x;
-    wips_fp64_t corner3_y;
-    wips_fp64_t decision_margin;
-    wips_fp64_t hamming_distance;
-    wips_u8_t tag_family_id;
-} wips_apriltag_detection_t;
+typedef struct {
+    PyObject_HEAD
+    wips_{{ name }}_t* c_obj;
+    wips_handler_t* handler;
+} wips_{{ name }}_PyObject;
 
-// Recursive function to free all memory allocated by the struct and its members. Does NOT free the struct itself if it was dynamically allocated.
-// Warning: Calling this function on a struct that has not been written to from a WIPS binary will result in undefined behavior.
-// This function is intended to be used when the struct is no longer needed, to prevent memory leaks.
-void wips_apriltag_detection_free_resources(wips_apriltag_detection_t* struct_ptr);
-wips_apriltag_detection_t* wips_apriltag_detection_create();
-void wips_apriltag_detection_destroy(wips_apriltag_detection_t* struct_ptr);
-
-unsigned char wips_apriltag_detection_copy(wips_apriltag_detection_t* dest, const wips_apriltag_detection_t* src);
-
-wips_status_t wips_encode_apriltag_detection(wips_blob_t* data, wips_apriltag_detection_t* in);
-wips_status_t wips_decode_apriltag_detection(wips_apriltag_detection_t* out, wips_blob_t* data);
+extern PyTypeObject wips_{{ name }}_PyObjectType;
 
 #ifdef __cplusplus
 }

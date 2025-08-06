@@ -55,8 +55,10 @@ void wips_odometry_result_free_resources(wips_odometry_result_t* struct_ptr);
 wips_odometry_result_t* wips_odometry_result_create();
 void wips_odometry_result_destroy(wips_odometry_result_t* struct_ptr);
 
-wips_status_t wips_encode_odometry_result(wips_bin_t* data, wips_odometry_result_t* in);
-wips_status_t wips_decode_odometry_result(wips_odometry_result_t* out, wips_bin_t* data);
+unsigned char wips_odometry_result_copy(wips_odometry_result_t* dest, const wips_odometry_result_t* src);
+
+wips_status_t wips_encode_odometry_result(wips_blob_t* data, wips_odometry_result_t* in);
+wips_status_t wips_decode_odometry_result(wips_odometry_result_t* out, wips_blob_t* data);
 
 #ifdef __cplusplus
 }

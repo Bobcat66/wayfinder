@@ -48,24 +48,63 @@ wips_odometry_result_t* wips_odometry_result_create(){
     WIPS_TRACELOG("Created odometry_result struct\n");
     return struct_ptr;
 }
+
 void wips_odometry_result_free_resources(wips_odometry_result_t* struct_ptr) {
     WIPS_TRACELOG("Freeing resources held by odometry_result\n");
     if (struct_ptr->timestamps) {
         WIPS_TRACELOG("Freeing odometry_result field timestamps (u64,VLA,size=%u)\n",struct_ptr->GET_DETAIL(timestamps,vlasize));
-        for (wips_u32_t i = 0; i < struct_ptr->GET_DETAIL(timestamps,vlasize); i++) {
+        for (wips_u32_t i = 0; i < struct_ptr->GET_DETAIL(timestamps,vlasize); ++i) {
             wips_u64_free_resources(struct_ptr->timestamps + i);
         }
         free(struct_ptr->timestamps);
     }
     if (struct_ptr->twists) {
         WIPS_TRACELOG("Freeing odometry_result field twists (twist2,VLA,size=%u)\n",struct_ptr->GET_DETAIL(twists,vlasize));
-        for (wips_u32_t i = 0; i < struct_ptr->GET_DETAIL(twists,vlasize); i++) {
+        for (wips_u32_t i = 0; i < struct_ptr->GET_DETAIL(twists,vlasize); ++i) {
             wips_twist2_free_resources(struct_ptr->twists + i);
         }
         free(struct_ptr->twists);
     }
     WIPS_TRACELOG("Freed resources held by odometry_result\n");
 }
+
+unsigned char wips_odometry_result_copy(wips_odometry_result_t* dest,const wips_odometry_result_t* src){
+    WIPS_TRACELOG("Copying odometry_result object\n");
+    unsigned char status = WIPS_STATUS_OK;
+    wips_odometry_result_free_resources(dest);
+    dest->DETAILvlasize__timestamps = src->DETAILvlasize__timestamps;
+    
+    dest->timestamps = calloc(src->GET_DETAIL(timestamps,vlasize),GET_SIZE(u64));
+    if ((!dest->timestamps) && (src->GET_DETAIL(timestamps,vlasize) != 0)) {
+        WIPS_DEBUGLOG("Error: Failed to allocate VLA timestamps\n");
+        wips_odometry_result_free_resources(dest);
+        return WIPS_STATUS_OOM;
+    }
+    for (wips_u32_t i = 0; i < src->GET_DETAIL(timestamps,vlasize); ++i) {
+        status = wips_u64_copy(dest->timestamps + i,src->timestamps + i);
+        if (!(status == WIPS_STATUS_OK)) {
+            wips_odometry_result_free_resources(dest);
+            return status;
+        }
+    }
+    dest->DETAILvlasize__twists = src->DETAILvlasize__twists;
+    
+    dest->twists = calloc(src->GET_DETAIL(twists,vlasize),GET_SIZE(twist2));
+    if ((!dest->twists) && (src->GET_DETAIL(twists,vlasize) != 0)) {
+        WIPS_DEBUGLOG("Error: Failed to allocate VLA twists\n");
+        wips_odometry_result_free_resources(dest);
+        return WIPS_STATUS_OOM;
+    }
+    for (wips_u32_t i = 0; i < src->GET_DETAIL(twists,vlasize); ++i) {
+        status = wips_twist2_copy(dest->twists + i,src->twists + i);
+        if (!(status == WIPS_STATUS_OK)) {
+            wips_odometry_result_free_resources(dest);
+            return status;
+        }
+    }
+    return status;
+}
+
 // Function to destroy the struct and free all resources
 void wips_odometry_result_destroy(wips_odometry_result_t* struct_ptr) {
     WIPS_TRACELOG("Destroying odometry_result\n");
@@ -78,7 +117,7 @@ void wips_odometry_result_destroy(wips_odometry_result_t* struct_ptr) {
     WIPS_TRACELOG("Destroyed odometry_result\n");
 }
 
-wips_status_t wips_encode_odometry_result(wips_bin_t* data, wips_odometry_result_t* in) {
+wips_status_t wips_encode_odometry_result(wips_blob_t* data, wips_odometry_result_t* in) {
     WIPS_TRACELOG("Encoding odometry_result\n");
     WIPS_Assert(data != NULL && in != NULL,0);
     size_t bytesEncoded = 0;
@@ -106,7 +145,7 @@ wips_status_t wips_encode_odometry_result(wips_bin_t* data, wips_odometry_result
     WIPS_TRACELOG("Encoded odometry_result\n");
     return wips_make_status(bytesEncoded,WIPS_STATUS_OK);
 }
-wips_status_t wips_decode_odometry_result(wips_odometry_result_t* out, wips_bin_t* data) {
+wips_status_t wips_decode_odometry_result(wips_odometry_result_t* out, wips_blob_t* data) {
     WIPS_TRACELOG("Decoding odometry_result\n");
     WIPS_Assert(out != NULL && data != NULL,0);
     size_t bytesDecoded = 0;

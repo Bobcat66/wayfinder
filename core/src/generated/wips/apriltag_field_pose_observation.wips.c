@@ -48,17 +48,53 @@ wips_apriltag_field_pose_observation_t* wips_apriltag_field_pose_observation_cre
     WIPS_TRACELOG("Created apriltag_field_pose_observation struct\n");
     return struct_ptr;
 }
+
 void wips_apriltag_field_pose_observation_free_resources(wips_apriltag_field_pose_observation_t* struct_ptr) {
     WIPS_TRACELOG("Freeing resources held by apriltag_field_pose_observation\n");
     if (struct_ptr->tags_used) {
         WIPS_TRACELOG("Freeing apriltag_field_pose_observation field tags_used (i32,VLA,size=%u)\n",struct_ptr->GET_DETAIL(tags_used,vlasize));
-        for (wips_u32_t i = 0; i < struct_ptr->GET_DETAIL(tags_used,vlasize); i++) {
+        for (wips_u32_t i = 0; i < struct_ptr->GET_DETAIL(tags_used,vlasize); ++i) {
             wips_i32_free_resources(struct_ptr->tags_used + i);
         }
         free(struct_ptr->tags_used);
     }
     WIPS_TRACELOG("Freed resources held by apriltag_field_pose_observation\n");
 }
+
+unsigned char wips_apriltag_field_pose_observation_copy(wips_apriltag_field_pose_observation_t* dest,const wips_apriltag_field_pose_observation_t* src){
+    WIPS_TRACELOG("Copying apriltag_field_pose_observation object\n");
+    unsigned char status = WIPS_STATUS_OK;
+    wips_apriltag_field_pose_observation_free_resources(dest);
+    dest->DETAILvlasize__tags_used = src->DETAILvlasize__tags_used;
+    
+    dest->tags_used = calloc(src->GET_DETAIL(tags_used,vlasize),GET_SIZE(i32));
+    if ((!dest->tags_used) && (src->GET_DETAIL(tags_used,vlasize) != 0)) {
+        WIPS_DEBUGLOG("Error: Failed to allocate VLA tags_used\n");
+        wips_apriltag_field_pose_observation_free_resources(dest);
+        return WIPS_STATUS_OOM;
+    }
+    for (wips_u32_t i = 0; i < src->GET_DETAIL(tags_used,vlasize); ++i) {
+        status = wips_i32_copy(dest->tags_used + i,src->tags_used + i);
+        if (!(status == WIPS_STATUS_OK)) {
+            wips_apriltag_field_pose_observation_free_resources(dest);
+            return status;
+        }
+    }
+    dest->field_pose_0 = src->field_pose_0;
+    
+    dest->error_0 = src->error_0;
+    
+    dest->DETAILoptpresent__field_pose_1 = src->DETAILoptpresent__field_pose_1;
+    
+    dest->field_pose_1 = src->field_pose_1;
+    
+    dest->DETAILoptpresent__error_1 = src->DETAILoptpresent__error_1;
+    
+    dest->error_1 = src->error_1;
+    
+    return status;
+}
+
 // Function to destroy the struct and free all resources
 void wips_apriltag_field_pose_observation_destroy(wips_apriltag_field_pose_observation_t* struct_ptr) {
     WIPS_TRACELOG("Destroying apriltag_field_pose_observation\n");
@@ -71,7 +107,7 @@ void wips_apriltag_field_pose_observation_destroy(wips_apriltag_field_pose_obser
     WIPS_TRACELOG("Destroyed apriltag_field_pose_observation\n");
 }
 
-wips_status_t wips_encode_apriltag_field_pose_observation(wips_bin_t* data, wips_apriltag_field_pose_observation_t* in) {
+wips_status_t wips_encode_apriltag_field_pose_observation(wips_blob_t* data, wips_apriltag_field_pose_observation_t* in) {
     WIPS_TRACELOG("Encoding apriltag_field_pose_observation\n");
     WIPS_Assert(data != NULL && in != NULL,0);
     size_t bytesEncoded = 0;
@@ -117,7 +153,7 @@ wips_status_t wips_encode_apriltag_field_pose_observation(wips_bin_t* data, wips
     WIPS_TRACELOG("Encoded apriltag_field_pose_observation\n");
     return wips_make_status(bytesEncoded,WIPS_STATUS_OK);
 }
-wips_status_t wips_decode_apriltag_field_pose_observation(wips_apriltag_field_pose_observation_t* out, wips_bin_t* data) {
+wips_status_t wips_decode_apriltag_field_pose_observation(wips_apriltag_field_pose_observation_t* out, wips_blob_t* data) {
     WIPS_TRACELOG("Decoding apriltag_field_pose_observation\n");
     WIPS_Assert(out != NULL && data != NULL,0);
     size_t bytesDecoded = 0;

@@ -176,7 +176,7 @@ def compile(schemas_path: Path, output_dir: Path, py: bool = False, jvm: bool = 
 
 # Testing:
 # ./wips-compiler.py messages.yaml --out=./wips_output
-.
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="WIPS Compiler")
     parser.add_argument("schemas", type=Path, help="path to YAML schema file")
@@ -184,5 +184,6 @@ if __name__ == "__main__":
     parser.add_argument("--trace", action="store_true", help="Enables trace logging in debug builds")
     args = parser.parse_args()
     args.out.mkdir(parents=True, exist_ok=True)
-    compile(args.schemas,args.out,args.py,args.jvm,args.trace)
+    # python and JVM flags will be added back in eventually
+    compile(args.schemas,args.out,False,False,args.trace)
 

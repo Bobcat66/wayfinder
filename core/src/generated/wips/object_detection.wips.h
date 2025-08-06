@@ -61,8 +61,10 @@ void wips_object_detection_free_resources(wips_object_detection_t* struct_ptr);
 wips_object_detection_t* wips_object_detection_create();
 void wips_object_detection_destroy(wips_object_detection_t* struct_ptr);
 
-wips_status_t wips_encode_object_detection(wips_bin_t* data, wips_object_detection_t* in);
-wips_status_t wips_decode_object_detection(wips_object_detection_t* out, wips_bin_t* data);
+unsigned char wips_object_detection_copy(wips_object_detection_t* dest, const wips_object_detection_t* src);
+
+wips_status_t wips_encode_object_detection(wips_blob_t* data, wips_object_detection_t* in);
+wips_status_t wips_decode_object_detection(wips_object_detection_t* out, wips_blob_t* data);
 
 #ifdef __cplusplus
 }
