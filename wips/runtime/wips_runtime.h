@@ -57,6 +57,22 @@ extern "C" {
 
 typedef unsigned char wips_status_t;
 
+
+typedef uint8_t wips_u8_t;
+typedef int8_t wips_i8_t;
+
+typedef uint16_t wips_u16_t;
+typedef int16_t wips_i16_t;
+
+typedef uint32_t wips_u32_t;
+typedef int32_t wips_i32_t;
+
+typedef uint64_t wips_u64_t;
+typedef int64_t wips_i64_t;
+
+typedef float wips_fp32_t;
+typedef double wips_fp64_t;
+
 typedef struct {
     size_t bytes_processed;
     unsigned char status_code;
@@ -93,23 +109,8 @@ struct wips_vlamethods {
     // (a direct memcpy). Will resize if needed
     wips_status_t (* const setter)(wips_vlaref_t, size_t, void*);
     // Appends value to end of VLA, resizing if needed. If the value pointer is NULL, this is a no-op
-    wips_status_t (* const pushback)(wips_vlaref_t, void*)
+    wips_status_t (* const pushback)(wips_vlaref_t, void*);
 };
-
-typedef uint8_t wips_u8_t;
-typedef int8_t wips_i8_t;
-
-typedef uint16_t wips_u16_t;
-typedef int16_t wips_i16_t;
-
-typedef uint32_t wips_u32_t;
-typedef int32_t wips_i32_t;
-
-typedef uint64_t wips_u64_t;
-typedef int64_t wips_i64_t;
-
-typedef float wips_fp32_t;
-typedef double wips_fp64_t;
 
 typedef struct {
     unsigned char* base;

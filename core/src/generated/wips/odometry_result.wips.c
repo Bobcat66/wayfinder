@@ -70,7 +70,7 @@ void wips_odometry_result_free_resources(wips_odometry_result_t* struct_ptr) {
 
 wips_status_t wips_odometry_result_copy(wips_odometry_result_t* dest,const wips_odometry_result_t* src){
     WIPS_TRACELOG("Copying odometry_result object\n");
-    wips_status_t = WIPS_STATUS_OK;
+    wips_status_t status = WIPS_STATUS_OK;
     wips_odometry_result_free_resources(dest);
     dest->DETAILvlasize__timestamps = src->DETAILvlasize__timestamps;
     

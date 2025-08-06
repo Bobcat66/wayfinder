@@ -78,7 +78,7 @@ void wips_pipeline_result_free_resources(wips_pipeline_result_t* struct_ptr) {
 
 wips_status_t wips_pipeline_result_copy(wips_pipeline_result_t* dest,const wips_pipeline_result_t* src){
     WIPS_TRACELOG("Copying pipeline_result object\n");
-    wips_status_t = WIPS_STATUS_OK;
+    wips_status_t status = WIPS_STATUS_OK;
     wips_pipeline_result_free_resources(dest);
     dest->timestamp = src->timestamp;
     

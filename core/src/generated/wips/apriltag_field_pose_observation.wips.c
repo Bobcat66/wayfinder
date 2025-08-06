@@ -63,7 +63,7 @@ void wips_apriltag_field_pose_observation_free_resources(wips_apriltag_field_pos
 
 wips_status_t wips_apriltag_field_pose_observation_copy(wips_apriltag_field_pose_observation_t* dest,const wips_apriltag_field_pose_observation_t* src){
     WIPS_TRACELOG("Copying apriltag_field_pose_observation object\n");
-    wips_status_t = WIPS_STATUS_OK;
+    wips_status_t status = WIPS_STATUS_OK;
     wips_apriltag_field_pose_observation_free_resources(dest);
     dest->DETAILvlasize__tags_used = src->DETAILvlasize__tags_used;
     
