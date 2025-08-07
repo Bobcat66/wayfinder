@@ -34,6 +34,8 @@
 
 #pragma once
 
+//#ifdef WIPS_OPTION_BUILD_PYTHON
+
 #include <Python.h>
 #include "wips_runtime.h"
 
@@ -41,47 +43,65 @@
 extern "C" {
 #endif
 
+#define WIPS_u8     0x00
+#define WIPS_i8     0x01
+#define WIPS_u16    0x02
+#define WIPS_i16    0x03
+#define WIPS_u32    0x04
+#define WIPS_i32    0x05
+#define WIPS_u64    0x06
+#define WIPS_i64    0x07
+#define WIPS_fp32   0x08
+#define WIPS_fp64   0x09
+#define WIPS_struct 0x0a
+
+typedef unsigned char wips_type_id;
+
 // wips_PyHandler manages a collection of memory allocated by WIPS with reference counting. In general, whenever a new wips struct pointer is allocated, a new handler is created to handle it.
 // Whenever a python object referencing the wips struct or a member of the wips struct is created, that python object
 // is passed a pointer to the handler (either directly or through a VLA ref). Making a copy of a struct or VLA creates a new handler
 typedef struct wips_handler wips_PyHandler;
+typedef struct wips_pytype wips_PyType;
+typedef struct wips_pyvla wips_vla_PyObject;
 
 // When the ref counter reaches zero, the destructor will be called on the resource. If the destructor is NULL, the resource will be freed instead
-wips_PyHandler* wips_handler_create(void* resource,void (*destructor)(void*));
+wips_PyHandler* wips_PyHandler_create(void* resource,void (*destructor)(void*));
 
-wips_PyHandler* wips_handler_incref(wips_PyHandler* handler);
+wips_PyHandler* wips_PyHandler_incref(wips_PyHandler* handler);
 
-wips_PyHandler* wips_handler_decref(wips_PyHandler* handler);
-
-// A struct which allows type-erased manipulation of a VLA. Does not own the VLA, and cannot destroy it
-// vlarefs also do not 
-typedef struct {
-    // Pointer to a pointer to the buffer. Should be a foo_t** casted to void* for a VLA of foo_t
-    void* buffer_pt;
-    wips_u32_t* vlasize;
-    // Pointer to the handler which owns the VLA
-    wips_PyHandler* handler;
-    // Pointer to a method table which contains methods for manipulating the VLA
-    wips_PyVLAMethods* const methods;
-} wips_PyVLA;
-
-wips_PyVLA wips_vlaref_create(void* vla_pt, wips_u32_t* vlasize, wips_PyHandler* handler);
+wips_PyHandler* wips_PyHandler_decref(wips_PyHandler* handler);
 
 // Holds WIPS type information
-typedef struct {
+struct wips_pytype {
+    // Used for primitive types. For primitive types, all function pointers and vlamethod should be NULL
+    const wips_type_id type_id;
     // Size of the wips struct in bytes
     const size_t size;
+    // The python type corresponding to this wips type
+    const PyTypeObject* const python_type;
+    // VLA method struct
+    const wips_vlamethods_t* const vlamethods;
     // Function pointer to a method that creates a new uninitialized object
     void* (* const creator)(void);
     // Function pointer to a method that wraps an existing wips_struct
     PyObject* (* const wrapper)(void*,wips_PyHandler*);
+    // Function pointer to a method which unwraps the c object. This is a NON-OWNING pointer, and should not be freed
+    void* (* const unwrapper)(PyObject*);
     void (* const destructor)(void*);
-    // Takes a type erased foo_t**, a pointer to the vlasize field, and a pointer to the handler
-    wips_PyVLA (* const vla_wrapper)(void*,wips_u32_t*,wips_PyHandler*);
-} wips_PyType;
+    // Function pointer to a method which creates a deep copy of the c object
+    wips_status_t (* const copier)(void*,const void*);
+};
 
-// The pointer returned by this function is owned by the handler and should NOT be freed manually
-void* wips_handler_get(wips_PyHandler* handler);
+extern wips_PyType wips_u8_PyType;
+extern wips_PyType wips_i8_PyType;
+extern wips_PyType wips_u16_PyType;
+extern wips_PyType wips_i16_PyType;
+extern wips_PyType wips_u32_PyType;
+extern wips_PyType wips_i32_PyType;
+extern wips_PyType wips_u64_PyType;
+extern wips_PyType wips_i64_PyType;
+extern wips_PyType wips_fp32_PyType;
+extern wips_PyType wips_fp64_PyType;
 
 typedef struct {
     PyObject_HEAD
@@ -91,23 +111,26 @@ typedef struct {
 // base class for any python class which wraps a WIPS struct.
 typedef struct {
     PyObject_HEAD
+    const wips_PyType* wips_type;
+    wips_PyHandler* handler;
+} wips_struct_PyObject;
+
+struct wips_pyvla {
+    PyObject_HEAD
+    // The type of the objects contained within the VLA
     wips_PyType* wips_type;
     wips_PyHandler* handler;
-} wips_PyStruct;
+    wips_vlaref_t c_vla;
+};
 
-typedef struct {
-    PyObject_HEAD
-    wips_PyVLA vla;
-} wips_vla_PyObject;
+wips_vla_PyObject* wips_vla_PyObject_create(wips_PyType* wips_type, wips_PyHandler* handler, wips_vlaref_t c_vla);
 
-PyObject* wips_vla_PyObject_wrap(void* buffer_pt, wips_u32_t* vlasize, wips_PyHandler* handler, wips_PyType* wips_type);
-
-extern PyTypeObject wips_PyBlobTypeObject;
-
-extern PyTypeObject wips_PyObjectTypeObject;
-
+extern PyTypeObject wips_blob_PyTypeObject;
+extern PyTypeObject wips_struct_PyTypeObject;
 extern PyTypeObject wips_vla_PyTypeObject;
 
 #ifdef __cplusplus
 }
 #endif
+
+//#endif // WIPS_OPTION_BUILD_PYTHON

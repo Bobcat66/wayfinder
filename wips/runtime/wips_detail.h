@@ -49,7 +49,6 @@ extern "C" {
     #warning "wips_detail.h is an INTERNAL HEADER! It should NOT be included directly in public code"
 #endif
 
-#include "options.wips.h"
 #include "wips_runtime.h"
 #include <stdlib.h>
 #include <string.h>
@@ -247,6 +246,16 @@ struct tm* wips_localtime(const time_t* timer);
         (*vla.vlasize_pt) = newsize;                                                                            \
         return WIPS_STATUS_OK;                                                                                  \
     }
+
+// Technically this doesn't need to be passed pointers, but it matches the semantics of the rest of the program
+// This isn't ALGOL-60, call-by-name semantics is not something I want to think about
+#define GET_VLAREF(out,wips_typename,wips_struct,field)                                                         \
+    do {                                                                                                        \
+        wips_u32_t* vlasize_pt = &((wips_struct)->GET_DETAIL(field,vlasize));                                   \
+        void* buffer_pt = (void*)(&((wips_struct)->field));                                                     \
+        out->vlasize_pt = vlasize_pt;                                                                           \
+        out->buffer_pt = buffer_pt;                                                                             \
+    } while (0)
 
 #ifdef __cplusplus
 }

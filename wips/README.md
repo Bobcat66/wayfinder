@@ -13,3 +13,9 @@ Wayfinder as a whole, and when built in release mode WIPS does not make use of V
 worth noting for posterity.
 
 Note: in general, the values returned by getters should be treated as invalidated after the original object is destroyed or modified
+
+WIPS Feature Macros:
+WIPS_OPTION_TRACEBACK - Enables traceback, useful for debugging
+WIPS_OPTION_BUILD_PYTHON - Enables compilation of a python binding layer for WIPS
+WIPS_OPTION_BUILD_JNI - Enables compilation of a JNI layer for WIPS (Not implemented)
+WIPS_OPTION_BUILD_OO - Enables compilation of a C++ object-oriented layer for WIPS (Not implemented)

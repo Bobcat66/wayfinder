@@ -41,6 +41,7 @@ extern "C" {
 #include <stdint.h>
 #include <stddef.h>
 #include <stdbool.h>
+#include <float.h>
 
 // More user-friendly macro for accessing WIPS details than the ones used internally.
 #define GET_WIPS_DETAIL_IMPL(field,detail) DETAIL ## detail ## __ ## field
@@ -57,21 +58,45 @@ extern "C" {
 
 typedef unsigned char wips_status_t;
 
-
 typedef uint8_t wips_u8_t;
+#define WIPS_u8_max UINT8_MAX
+#define WIPS_u8_min 0
+
 typedef int8_t wips_i8_t;
+#define WIPS_i8_max INT8_MAX
+#define WIPS_i8_min INT8_MIN
 
 typedef uint16_t wips_u16_t;
+#define WIPS_u16_max UINT16_MAX
+#define WIPS_u16_min 0
+
 typedef int16_t wips_i16_t;
+#define WIPS_i16_max INT16_MAX
+#define WIPS_i16_min INT16_MIN
 
 typedef uint32_t wips_u32_t;
+#define WIPS_u32_max UINT32_MAX
+#define WIPS_u32_min 0
+
 typedef int32_t wips_i32_t;
+#define WIPS_i32_max INT32_MAX
+#define WIPS_i32_min INT32_MIN
 
 typedef uint64_t wips_u64_t;
+#define WIPS_u64_max UINT64_MAX
+#define WIPS_u64_min 0
+
 typedef int64_t wips_i64_t;
+#define WIPS_i64_max INT64_MAX
+#define WIPS_i64_min INT64_MIN
 
 typedef float wips_fp32_t;
+#define WIPS_fp32_max FLT_MAX
+#define WIPS_fp32_min (-FLT_MAX)
+
 typedef double wips_fp64_t;
+#define WIPS_fp64_max DBL_MAX
+#define WIPS_fp64_min (-DBL_MAX)
 
 typedef struct {
     size_t bytes_processed;
@@ -98,7 +123,7 @@ struct wips_vlaref {
     wips_u32_t* vlasize_pt; // a pointer to the vlasize field
 };
 
-// Holds methods for manipulating VLAs of a given type
+// Holds methods for manipulating VLAs of a given type, with type erasure
 struct wips_vlamethods {
     // takes a pointer to the output, a vlaref, and an index.
     // returns a pointer to the object. the Caller does NOT own the returned pointer

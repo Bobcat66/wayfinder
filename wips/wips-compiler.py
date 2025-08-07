@@ -149,17 +149,6 @@ def compile(schemas_path: Path, output_dir: Path, py: bool = False, jvm: bool = 
         rendered_code = render_config["template"].render(**render_config["params"])
         with open(render_target,'w') as f:
             f.write(rendered_code)
-    
-    # Render options file
-    print(f"Rendering target {output_dir}/options.wips.h")
-    options_template = env.get_template("options.wips.h.jinja")
-    rendered_opts = options_template.render(
-        {
-            "trace": trace
-        }
-    )
-    with open(output_dir / "options.wips.h",'w') as f:
-        f.write(rendered_opts)
 
     print("Render complete")
     # Loading runtime
@@ -181,7 +170,6 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="WIPS Compiler")
     parser.add_argument("schemas", type=Path, help="path to YAML schema file")
     parser.add_argument("--out", type=Path, default=".", help='Output directory')
-    parser.add_argument("--trace", action="store_true", help="Enables trace logging in debug builds")
     args = parser.parse_args()
     args.out.mkdir(parents=True, exist_ok=True)
     # python and JVM flags will be added back in eventually
