@@ -27,13 +27,15 @@
 #include <opencv2/core.hpp>
 #include <opencv2/core/eigen.hpp>
 #include <Eigen/Core>
+#include "wfcore/common/wfassert.h"
+#include "wfcore/common/logging.h"
 
 // For some type safety, and convenience. Maybe remove?
 namespace wf {
 
     // Converts OpenCV 3x3 Mat of type CV_64F to an Eigen 3d matrix
     inline Eigen::Matrix3d cvMat3ToEigen_64F(const cv::Mat& CV_M) {
-        assert(CV_M.rows == 3 && CV_M.cols == 3 && CV_M.type() == CV_64F);
+        WF_Assert(CV_M.rows == 3 && CV_M.cols == 3 && CV_M.type() == CV_64F);
 
         Eigen::Matrix3d Eigen_M;
         cv::cv2eigen(CV_M, Eigen_M);
@@ -43,7 +45,8 @@ namespace wf {
     }
 
     inline Eigen::Vector3d cvVec3ToEigen_64F(const cv::Mat& CV_v) {
-        assert(CV_v.rows == 1 && CV_v.cols == 3 && CV_v.type() == CV_64F);
+        WF_DEBUGLOG(globalLogger(),"Rows: {}, Cols: {}",CV_v.rows,CV_v.cols);
+        WF_Assert(CV_v.rows == 3 && CV_v.cols == 1 && CV_v.type() == CV_64F);
 
         Eigen::Vector3d Eigen_v;
         cv::cv2eigen(CV_v, Eigen_v);
