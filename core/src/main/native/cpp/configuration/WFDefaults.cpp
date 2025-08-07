@@ -130,52 +130,52 @@ namespace wf {
         return getInstance().load_impl(jobject);
     }
 
-    std::string WFDefaults::tagField() {
+    std::string WFDefaults::getTagField() {
         std::shared_lock lock(impl::mtx_);
         return getInstance().tagField_;
     }
 
-    std::string WFDefaults::tagFamily() {
+    std::string WFDefaults::getTagFamily() {
         std::shared_lock lock(impl::mtx_);
         return getInstance().tagFamily_;
     }
 
-    double WFDefaults::tagSize() {
+    double WFDefaults::getTagSize() {
         std::shared_lock lock(impl::mtx_);
         return getInstance().tagSize_;
     }
 
-    std::string WFDefaults::modelFile() {
+    std::string WFDefaults::getModelFile() {
         std::shared_lock lock(impl::mtx_);
         return getInstance().modelFile_;
     }
 
-    ApriltagDetectorConfig WFDefaults::tagDetectorConfig() {
+    ApriltagDetectorConfig WFDefaults::getTagDetectorConfig() {
         std::shared_lock lock(impl::mtx_);
         return getInstance().tagDetectorConfig_;
     }
 
-    QuadThresholdParams WFDefaults::qtps() {
+    QuadThresholdParams WFDefaults::getQtps() {
         std::shared_lock lock(impl::mtx_);
         return getInstance().qtps_;
     }
 
-    TensorParameters WFDefaults::tensorParameters() {
+    TensorParameters WFDefaults::getTensorParameters() {
         std::shared_lock lock(impl::mtx_);
         return getInstance().tensorParameters_;
     }
 
-    float WFDefaults::nmsThreshold() {
+    float WFDefaults::getNmsThreshold() {
         std::shared_lock lock(impl::mtx_);
         return getInstance().nmsThreshold_;
     }
 
-    float WFDefaults::confThreshold() {
+    float WFDefaults::getConfThreshold() {
         std::shared_lock lock(impl::mtx_);
         return getInstance().confThreshold_;
     }
 
-    ImageEncoding WFDefaults::modelColorSpace() {
+    ImageEncoding WFDefaults::getModelColorSpace() {
         std::shared_lock lock(impl::mtx_);
         return getInstance().modelColorSpace_;
     }

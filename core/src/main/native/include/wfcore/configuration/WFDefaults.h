@@ -33,16 +33,16 @@ namespace wf {
     public:
         // Loads defaults from environment
         static WFStatusResult load(const JSON& jobject);
-        static std::string tagField();
-        static std::string tagFamily();
-        static double tagSize();
-        static std::string modelFile();
-        static ApriltagDetectorConfig tagDetectorConfig();
-        static QuadThresholdParams qtps();
-        static TensorParameters tensorParameters();
-        static float nmsThreshold();
-        static float confThreshold();
-        static ImageEncoding modelColorSpace();
+        static std::string getTagField();
+        static std::string getTagFamily();
+        static double getTagSize();
+        static std::string getModelFile();
+        static ApriltagDetectorConfig getTagDetectorConfig();
+        static QuadThresholdParams getQtps();
+        static TensorParameters getTensorParameters();
+        static float getNmsThreshold();
+        static float getConfThreshold();
+        static ImageEncoding getModelColorSpace();
 
     private:
         static WFDefaults& getInstance() {

@@ -38,5 +38,7 @@ namespace wf {
         HardwareManager hardwareManager_;
         ResourceManager resourceManager_;
         std::unique_ptr<VisionWorkerManager> workerManager_;
+        InferenceEngineFactory inferenceEngineFactory_;
+        ApriltagField aprilTagField_;
     };
 }

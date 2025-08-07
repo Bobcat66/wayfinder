@@ -19,11 +19,26 @@
 
 #include "wfcore/processes/WFOrchestrator.h"
 #include "wfcore/common/wfexcept.h"
+#include <memory>
+#include "wfcore/configuration/WFDefaults.h"
 
 namespace wf {
     WFOrchestrator::WFOrchestrator(WFSystemConfig config)
     : ntManager_(config.device_name,config.team,config.nt_server) 
-    , resourceManager_(config.paths.resource_path,config.paths.local_path) {
-        
+    , resourceManager_(config.paths.resource_path,config.paths.local_path) 
+    , inferenceEngineFactory_(resourceManager_) {
+        ApriltagConfiguration apriltagConfiguration(
+            WFDefaults::getTagFamily(), 
+            WFDefaults::getTagSize()
+        );
+        resourceManager_.assignResourceSubdir("aprilTagFields", config.paths.fields_rsubdir);
+        auto tmp = resourceManager_.loadResourceJSON("aprilTagFields", "2025-reefscape-welded.json");
+        if(!tmp) {
+            throw std::runtime_error("Bad JSON");
+        }
+        auto value = tmp.value();
+        aprilTagField_ = ApriltagField::fromJSON(value).value();
+
+        workerManager_ = std::move(std::make_unique<VisionWorkerManager>(ntManager_, hardwareManager_, apriltagConfiguration, aprilTagField_, inferenceEngineFactory_));
     }
 }

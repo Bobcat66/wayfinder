@@ -29,8 +29,8 @@ namespace wf {
         auto valid = validate(jobject);
         if (!valid) return WFResult<ApriltagPipelineConfiguration>::propagateFail(valid);
 
-        ApriltagDetectorConfig detConfig = WFDefaults::tagDetectorConfig();
-        QuadThresholdParams qtps = WFDefaults::qtps();
+        ApriltagDetectorConfig detConfig = WFDefaults::getTagDetectorConfig();
+        QuadThresholdParams qtps = WFDefaults::getQtps();
         if (jobject.contains("detConfig")) {
             auto dtc_jobject = jobject["detConfig"];
             detConfig = {
@@ -58,9 +58,9 @@ namespace wf {
         auto detectorExcludes = getJSONOpt<std::vector<int>>(jobject,"detectorExcludes",{});
         auto solvePnPExcludes = getJSONOpt<std::vector<int>>(jobject,"solvePnPExcludes",{});
         auto solveTagRelative = getJSONOpt<bool>(jobject,"solveTagRelative",false);
-        auto tagField = getJSONOpt<std::string>(jobject,"tagField",WFDefaults::tagField());
-        auto tagFamily = getJSONOpt<std::string>(jobject,"tagFamily",WFDefaults::tagFamily());
-        auto tagSize = getJSONOpt<double>(jobject,"tagSize",WFDefaults::tagSize());
+        auto tagField = getJSONOpt<std::string>(jobject,"tagField",WFDefaults::getTagField());
+        auto tagFamily = getJSONOpt<std::string>(jobject,"tagFamily",WFDefaults::getTagFamily());
+        auto tagSize = getJSONOpt<double>(jobject,"tagSize",WFDefaults::getTagSize());
         return WFResult<ApriltagPipelineConfiguration>::success(
             std::in_place,
             solvePnP,

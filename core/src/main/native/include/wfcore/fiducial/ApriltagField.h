@@ -43,6 +43,7 @@ namespace wf {
         std::unordered_map<int, Apriltag> aprilTags;
         double length;
         double width;
+        ApriltagField() = default;
         ApriltagField(std::unordered_map<int, Apriltag> aprilTags_, double length_, double width_)
         : aprilTags(std::move(aprilTags_)), length(length_), width(width_) {}
         const Apriltag* getTag(int id) const noexcept;
