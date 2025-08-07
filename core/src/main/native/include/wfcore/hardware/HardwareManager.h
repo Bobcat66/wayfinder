@@ -62,6 +62,7 @@ namespace wf {
 
         WFResult<CameraConfiguration> getCameraConfiguration(const std::string& nickname);
 
+        void periodic();
     private:
         const CameraHandler* getCamera_(const std::string& devpath) const;
         CameraHandler* getCamera_(const std::string& devpath);

@@ -167,4 +167,14 @@ namespace wf {
         }
         return getCamera_(nickname)->getSupportedControls();
     }
+
+    void HardwareManager::periodic() {
+        for(auto it = cameras.begin(); it != cameras.end(); ++it) {
+            it->second->periodic();
+            auto status = it->second->getStatus();
+            if(status!=WFStatus::OK) {
+                this->reportError(status);
+            }
+        }
+    }
 }
