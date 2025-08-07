@@ -704,19 +704,6 @@ wips_PyType wips_fp64_PyType = {
     .unwrapper = wips_fp64_unwrap
 };
 
-wips_PyType wips_i8_PyType;
-wips_PyType wips_u16_PyType;
-wips_PyType wips_i16_PyType;
-wips_PyType wips_u32_PyType;
-wips_PyType wips_i32_PyType;
-wips_PyType wips_u64_PyType;
-wips_PyType wips_i64_PyType;
-wips_PyType wips_fp32_PyType;
-wips_PyType wips_fp64_PyType;
-
-
-
-
 // Type objects
 PyTypeObject wips_blob_PyTypeObject = {
     PyVarObject_HEAD_INIT(NULL,0)
