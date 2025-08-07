@@ -61,6 +61,9 @@ namespace wf {
         static std::shared_ptr<CSCameraHandler> create(const CameraConfiguration& config) {
             return std::shared_ptr<CSCameraHandler>(new CSCameraHandler(config));
         }
+        
+        // Disables the camera
+        void disable();
 
     private:
         CSCameraHandler(const CameraConfiguration& config);

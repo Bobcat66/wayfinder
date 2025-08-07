@@ -165,4 +165,9 @@ namespace wf {
             this->controls_
         );
     }
+
+    void CSCameraHandler::disable() {
+        this->reportError(WFStatus::HARDWARE_DISABLED);
+        camera_.SetConnectionStrategy(cs::VideoSource::kConnectionForceClose);
+    }
 }

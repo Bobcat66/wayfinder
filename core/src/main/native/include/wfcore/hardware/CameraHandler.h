@@ -59,5 +59,7 @@ namespace wf {
         virtual std::string getNickname() const = 0;
 
         virtual CameraConfiguration getConfiguration() = 0;
+
+        virtual void disable() = 0;
     };
 }
