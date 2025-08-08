@@ -68,15 +68,17 @@ namespace wf {
             : observation.camPose0;
         cv::Mat tvecs, rvecs;
         WPILibPose3ToCvPoseVecs(tagPose, rvecs, tvecs);
+        // The xy coordinates need to be offset by {-tagSize/2,-tagSize/2}, as the tagPose is in the center of the tag
+        // And we want the box corners to be on the corners of the tag
         std::vector<cv::Point3d> cubePoints = {
-            {0, 0, 0},
-            {tagSize, 0, 0},
-            {tagSize, tagSize, 0},
-            {0, tagSize, 0},
-            {0, 0, -tagSize},
-            {tagSize, 0, -tagSize},
-            {tagSize, tagSize, -tagSize},
-            {0, tagSize, -tagSize}
+            {-tagSize/2, -tagSize/2, 0},
+            {tagSize/2, -tagSize/2, 0},
+            {tagSize/2, tagSize/2, 0},
+            {-tagSize/2, tagSize/2, 0},
+            {-tagSize/2, -tagSize/2, -tagSize},
+            {tagSize/2, -tagSize/2, -tagSize},
+            {tagSize/2, tagSize/2, -tagSize},
+            {-tagSize/2, tagSize/2, -tagSize}
         };
 
         // Project 3D points to 2D image points

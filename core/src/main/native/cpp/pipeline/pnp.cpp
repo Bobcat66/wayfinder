@@ -242,9 +242,6 @@ namespace wf {
             cv::noArray(),
             reprojectionErrors
         );
-        #ifndef NDEBUG
-        std::cout << rvecs[0].t();
-        #endif
         if (!success) {
             WF_DEBUGLOG(globalLogger(),"PnP calculation failed");
             return std::nullopt; //PnP was not successful, give up
