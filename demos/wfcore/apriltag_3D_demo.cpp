@@ -31,6 +31,7 @@ static cv::Mat createIntrinsicsMatrix(double fx, double fy, double cx, double cy
          0,  0,  1);
 }
 
+
 int main() {
     auto distortionMat = cv::Mat(std::vector<double>{
         0.09581952042360092,
@@ -88,12 +89,8 @@ int main() {
             wf::drawTag(frame,detection);
         }
         for (auto observation: observations) {
-            wf::drawTag3D(
-                frame,
-                observation,
-                intrinsics,
-                6.5
-            );
+            if(!wf::drawTag3D(frame,observation,intrinsics,6.5))
+                std::cerr << "Failed to render 3D box\n";
         }
         wf::drawCamLabel(frame,"/dev/video0");
         cv::imshow("OpenCV Apriltag Demo",frame);

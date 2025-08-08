@@ -57,6 +57,7 @@ namespace wf {
 
         APRILTAG_BASE =             0x00200000,
         APRILTAG_BAD_FAMILY =       0x00200001,
+        APRILTAG_BAD_POSE =         0x00200002,
         APRILTAG_UNKNOWN =          0x002fffff,
 
         INFERENCE_BASE =            0x00300000,
@@ -134,6 +135,7 @@ namespace wf {
 
             case WFStatus::APRILTAG_BASE:               return "APRILTAG_BASE";
             case WFStatus::APRILTAG_BAD_FAMILY:         return "APRILTAG_BAD_FAMILY";
+            case WFStatus::APRILTAG_BAD_POSE:           return "APRILTAG_BAD_POSE";
             case WFStatus::APRILTAG_UNKNOWN:            return "APRILTAG_UNKNOWN";
 
             case WFStatus::INFERENCE_BASE:              return "INFERENCE_BASE";

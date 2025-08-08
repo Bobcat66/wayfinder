@@ -29,14 +29,14 @@
 #include "wfcore/pipeline/pnp.h"
 
 namespace wf {
-    int drawTag3D(
+    bool drawTag3D(
         cv::Mat& image,
         const ApriltagRelativePoseObservation& observation,
         const CameraIntrinsics& intrinsics,
         double tagSize
     );
-    int drawBbox(cv::Mat& image, const ObjectDetection& detection);
-    int drawTag(cv::Mat& image, const ApriltagDetection& detection);
-    int drawCamLabel(cv::Mat& image, const std::string& camera_label);
+    void drawBbox(cv::Mat& image, const ObjectDetection& detection);
+    void drawTag(cv::Mat& image, const ApriltagDetection& detection);
+    void drawCamLabel(cv::Mat& image, const std::string& camera_label);
 }
 

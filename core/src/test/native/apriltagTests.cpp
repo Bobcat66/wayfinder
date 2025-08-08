@@ -17,7 +17,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-
 #include "wfcore/fiducial/ApriltagDetector.h"
 #include "wfcore/common/logging/LoggerManager.h"
 #include "wfcore/pipeline/annotations.h"

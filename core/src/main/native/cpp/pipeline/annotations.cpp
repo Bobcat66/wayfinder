@@ -19,11 +19,12 @@
 
 #include "wfcore/pipeline/annotations.h"
 #include "wfcore/utils/coordinates.h"
+#include "wfcore/common/status.h"
 #include <opencv2/imgproc.hpp>
 #include <format>
 
 namespace impl {
-    void renderText(cv::Mat& image, const std::string& text, double scale, const cv::Point& orig, const cv::Scalar& color, int thickness) {
+    static void renderText(cv::Mat& image, const std::string& text, double scale, const cv::Point& orig, const cv::Scalar& color, int thickness) {
         int imageHeight = image.rows;
         double fontScale = imageHeight * scale;
         //fontScale = std::max(fontScale, 0.5);
@@ -37,10 +38,22 @@ namespace impl {
             thickness
         );
     }
+
+    static bool validPoint(const cv::Point2d& pt) {
+        return std::isfinite(pt.x) && std::isfinite(pt.y);
+    }
+
+    static constexpr double MAX_OFFSET = 1000.0; // px outside the image allowed
+
+    static bool inReasonableBounds(const cv::Point2d& p,const cv::Mat& image) {
+    return p.x >= -MAX_OFFSET && p.x <= image.cols + MAX_OFFSET &&
+           p.y >= -MAX_OFFSET && p.y <= image.rows + MAX_OFFSET;
+    };
+
 }
 
 namespace wf {
-    int drawTag3D(
+    bool drawTag3D(
         cv::Mat& image,
         const ApriltagRelativePoseObservation& observation,
         const CameraIntrinsics& intrinsics, 
@@ -75,6 +88,10 @@ namespace wf {
             imgPoints
         );
 
+        for (auto& p: imgPoints) {
+            if (!impl::validPoint(p) || !impl::inReasonableBounds(p,image)) return false;
+        }
+
         // Draw base of cube
         for (int i = 0; i < 4; ++i)
             cv::line(image, imgPoints[i], imgPoints[(i + 1) % 4], Blue, 2);
@@ -87,10 +104,10 @@ namespace wf {
         for (int i = 0; i < 4; ++i)
             cv::line(image, imgPoints[i], imgPoints[i + 4], Red, 2);
         
-        return 0;
+        return true;
 
     }
-    int drawBbox(cv::Mat& image, const ObjectDetection& detection) {
+    void drawBbox(cv::Mat& image, const ObjectDetection& detection) {
         static cv::Scalar Red(0,0,255);
         cv::rectangle(image,
             detection.bboxTopLeftPixels,
@@ -109,10 +126,8 @@ namespace wf {
             Red,
             1
         );
-
-        return 0;
     }
-    int drawTag(cv::Mat& image, const ApriltagDetection& detection) {
+    void drawTag(cv::Mat& image, const ApriltagDetection& detection) {
         static cv::Scalar Green(0,255,0);
         for (int i = 0; i < 4; ++i) {
             cv::line(
@@ -135,9 +150,8 @@ namespace wf {
             Green,
             1
         );
-        return 0;
     }
-    int drawCamLabel(cv::Mat& image, const std::string& camera_label) {
+    void drawCamLabel(cv::Mat& image, const std::string& camera_label) {
         static cv::Scalar White(255, 255, 255);
         impl::renderText(
             image,
@@ -147,6 +161,5 @@ namespace wf {
             White,
             2
         );
-        return 0;
     }
 }
