@@ -119,7 +119,7 @@ namespace wf {
         static cv::Scalar   Red(0, 0, 255);
         const auto tagPose = observation.camPose0;
         cv::Mat tvecs, rvecs;
-        WPILibPose3ToCvPoseVecs(tagPose, tvecs, rvecs);
+        WPILibPose3ToCvPoseVecs(tagPose, rvecs, tvecs);
         cv::drawFrameAxes(
             image,
             intrinsics.cameraMatrix,
