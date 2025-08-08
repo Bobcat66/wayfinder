@@ -18,6 +18,7 @@
  */
 
 #include "wfcore/fiducial/ApriltagDetector.h"
+#include "wfcore/fiducial/ArucoDetector.h"
 #include "wfcore/pipeline/annotations.h"
 #include <opencv2/opencv.hpp>
 #include "wfcore/video/processing.h"
@@ -31,20 +32,32 @@ static cv::Mat createIntrinsicsMatrix(double fx, double fy, double cx, double cy
          0,  0,  1);
 }
 
+static void printPose(const gtsam::Pose3& pose) {
+    gtsam::Point3 rpy = pose.rotation().rpy(); // roll, pitch, yaw in radians
+    auto t = pose.translation();
+
+    constexpr double RAD2DEG = 180.0 / M_PI;
+    std::cout << "Euler angles (degrees): Roll: " << rpy.x() * RAD2DEG
+              << ", Pitch: " << rpy.y() * RAD2DEG
+              << ", Yaw: " << rpy.z() * RAD2DEG << std::endl;
+}
+
 
 int main() {
     auto distortionMat = cv::Mat(std::vector<double>{
-        0.09581952042360092,
-        -0.2603932345361037,
-        0.0035795949814343524,
-        -0.005134231272255606,
-        0.19101200082384226
+        0.13145614464760497,
+        -0.6031661749097205,
+        0.004860575909760611,
+        -0.0013587378119565765,
+        0.4796777316837005
     }).reshape(1,1).clone();
+    std::cout << distortionMat.rows << std::endl;
+    std::cout << distortionMat.cols << std::endl;
     auto matrixMat = createIntrinsicsMatrix(
-        979.1087360312252,
-        979.8457780935689,
-        608.5591334099096,
-        352.9815581130428
+        990.6425189953818,
+        990.4035015428351,
+        618.162517150233,
+        350.8315858067323
     );
     wf::CameraIntrinsics intrinsics(
         {1280,720},
@@ -62,6 +75,7 @@ int main() {
         wf::FrameFormat(wf::ImageEncoding::BGR24,720,1280),
         std::move(nodes)
     );
+    wf::ArucoDetector arucoDetector;
     wf::ApriltagDetector detector;
     std::cout << "Initialized Demo" << std::endl;
     detector.addFamily("tag36h11");
@@ -89,6 +103,10 @@ int main() {
             wf::drawTag(frame,detection);
         }
         for (auto observation: observations) {
+            printPose(observation.error0 > observation.error1
+                ? observation.camPose1
+                : observation.camPose0
+            );
             if(!wf::drawTag3D(frame,observation,intrinsics,6.5))
                 std::cerr << "Failed to render 3D box\n";
         }

@@ -20,6 +20,7 @@
 #include "wfcore/pipeline/annotations.h"
 #include "wfcore/utils/coordinates.h"
 #include "wfcore/common/status.h"
+#include <opencv2/calib3d.hpp>
 #include <opencv2/imgproc.hpp>
 #include <format>
 
@@ -106,6 +107,28 @@ namespace wf {
         
         return true;
 
+    }
+    bool drawTagAxes(
+        cv::Mat& image,
+        const ApriltagRelativePoseObservation& observation,
+        const CameraIntrinsics& intrinsics,
+        double tagSize
+    ) {
+        static cv::Scalar  Blue(255, 0, 0);
+        static cv::Scalar Green(0, 255, 0);
+        static cv::Scalar   Red(0, 0, 255);
+        const auto tagPose = observation.camPose0;
+        cv::Mat tvecs, rvecs;
+        WPILibPose3ToCvPoseVecs(tagPose, tvecs, rvecs);
+        cv::drawFrameAxes(
+            image,
+            intrinsics.cameraMatrix,
+            intrinsics.distCoeffs,
+            rvecs,
+            tvecs,
+            6.5
+        );
+        return true;
     }
     void drawBbox(cv::Mat& image, const ObjectDetection& detection) {
         static cv::Scalar Red(0,0,255);

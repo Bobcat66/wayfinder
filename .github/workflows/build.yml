@@ -30,7 +30,7 @@ jobs:
       run: sudo apt install -y libopencv-dev
           
     - name: Configure & Build wayfinder
-      run: cmake --preset release && cmake --build --preset release
+      run: cmake --preset ci && cmake --build --preset ci
 
     - name: Upload build artifacts
       uses: actions/upload-artifact@v4
@@ -69,7 +69,7 @@ jobs:
       run: source tools/load-test-env.sh
 
     - name: Test
-      run: ctest --test-dir build/release --verbose
+      run: ctest --test-dir build/ci --verbose
 
 
 

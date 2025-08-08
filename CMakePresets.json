@@ -55,6 +55,17 @@
                 "CMAKE_BUILD_TYPE": "MinSizeRel",
                 "WF_BUILD_DEMOS": "ON"
             }
+        },
+        {
+            "name": "ci",
+            "generator": "Ninja",
+            "binaryDir": "${sourceDir}/build/ci",
+            "cacheVariables": {
+                "WF_USE_SYSTEM_OPENCV": "ON",
+                "WF_BOOTSTRAP": "OFF",
+                "CMAKE_BUILD_TYPE": "Release",
+                "WF_BUILD_DEMOS": "OFF"
+            }
         }
     ],
     "buildPresets": [
@@ -86,6 +97,12 @@
             "name": "bootstrap",
             "configurePreset": "bootstrap",
             "description": "Bootstrap build system by building out-of-tree dependences",
+            "verbose": false
+        },
+        {
+            "name": "ci",
+            "configurePreset": "ci",
+            "description": "preset for CI pipelines",
             "verbose": false
         }
     ]

@@ -36,6 +36,7 @@
 #include <map>
 #include <unordered_map>
 #include <format>
+#include "wfcore/common/wfassert.h"
 
 #define C_FAMILY(x) static_cast<apriltag_family_t*>(x)
 #define C_DETECTOR static_cast<apriltag_detector_t*>(detectorHandle_)
@@ -115,7 +116,7 @@ namespace wf {
 
         // Perform detection, returns a zarray of results
         auto rawDetections = apriltag_detector_detect(C_DETECTOR,&im);
-        assert(rawDetections);
+        WF_FatalAssert(rawDetections);
 
         std::vector<ApriltagDetection> detections;
         detections.reserve(zarray_size(rawDetections));

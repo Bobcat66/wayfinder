@@ -19,30 +19,19 @@
 
 #pragma once
 
-#include <opencv2/core.hpp>
-#include <opencv2/imgproc.hpp>
-#include <gtsam/geometry/Pose3.h>
-#include "wfcore/hardware/CameraConfiguration.h"
-#include <vector>
-#include "wfcore/inference/InferenceEngine.h"
+#include "wfcore/common/status.h"
+#include <opencv2/opencv.hpp>
+#include <opencv2/aruco.hpp>
 #include "wfcore/fiducial/ApriltagDetection.h"
-#include "wfcore/pipeline/pnp.h"
+// This is a prototype for aruco detection, for testing. It is not going to be part of the main pipeline at the moment
 
 namespace wf {
-    bool drawTag3D(
-        cv::Mat& image,
-        const ApriltagRelativePoseObservation& observation,
-        const CameraIntrinsics& intrinsics,
-        double tagSize
-    );
-    bool drawTagAxes(
-        cv::Mat& image,
-        const ApriltagRelativePoseObservation& observation,
-        const CameraIntrinsics& intrinsics,
-        double tagSize
-    );
-    void drawBbox(cv::Mat& image, const ObjectDetection& detection);
-    void drawTag(cv::Mat& image, const ApriltagDetection& detection);
-    void drawCamLabel(cv::Mat& image, const std::string& camera_label);
+    class ArucoDetector {
+    public:
+        ArucoDetector();
+        WFResult<std::vector<ApriltagDetection>> detect(const cv::Mat& im);
+    private:
+        cv::Ptr<cv::aruco::Dictionary> dictionary;
+        cv::Ptr<cv::aruco::DetectorParameters> detectorParams;
+    };
 }
-
