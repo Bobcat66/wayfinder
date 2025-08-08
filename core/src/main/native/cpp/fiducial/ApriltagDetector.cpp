@@ -120,7 +120,7 @@ namespace wf {
 
         std::vector<ApriltagDetection> detections;
         detections.reserve(zarray_size(rawDetections));
-        WF_DEBUGLOG(globalLogger(),"{} detections in zarray",zarray_size(rawDetections));
+        //WF_DEBUGLOG(globalLogger(),"{} detections in zarray",zarray_size(rawDetections));
         // Destructively converts rawDetections into a vector of wf::ApriltagDetections
         for (int i = 0; i < zarray_size(rawDetections); i++) {
             apriltag_detection_t* det;
@@ -139,7 +139,7 @@ namespace wf {
             );
             apriltag_detection_destroy(det);
         }
-        WF_DEBUGLOG(globalLogger(),"Destroying zarray");
+        //WF_DEBUGLOG(globalLogger(),"Destroying zarray");
         zarray_destroy(rawDetections);
 
         return WFResult<std::vector<ApriltagDetection>>::success(std::move(detections));

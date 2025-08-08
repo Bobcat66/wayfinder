@@ -67,7 +67,7 @@ namespace wf {
             ? observation.camPose1
             : observation.camPose0;
         cv::Mat tvecs, rvecs;
-        WPILibPose3ToCvPoseVecs(tagPose, tvecs, rvecs);
+        WPILibPose3ToCvPoseVecs(tagPose, rvecs, tvecs);
         std::vector<cv::Point3d> cubePoints = {
             {0, 0, 0},
             {tagSize, 0, 0},

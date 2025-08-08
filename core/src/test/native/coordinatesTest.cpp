@@ -23,7 +23,7 @@
 
 #include "wfcore/utils/coordinates.h"
 #include "wfcore/utils/units.h"
-
+#include <opencv2/opencv.hpp>
 #include <gtest/gtest.h>
 
 static bool posesAreApproxEqual(const gtsam::Pose3& p1, const gtsam::Pose3& p2, 
@@ -38,6 +38,14 @@ static bool posesAreApproxEqual(const gtsam::Pose3& p1, const gtsam::Pose3& p2,
 
     return (rot_diff.norm() < tol_rotation) && (trans_diff.norm() < tol_translation);
 }
+static bool matsAreApproxEqual(const cv::Mat& v1, const cv::Mat& v2, double tol = 1e-6) {
+    if (v1.size() != v2.size() || v1.type() != v2.type()) return false;
+    cv::Mat diff = cv::abs(v1 - v2);
+    double maxDiff = 0.0;
+    cv::minMaxLoc(diff, nullptr, &maxDiff);
+    return maxDiff < tol;
+}
+
 // Tests transforming OpenCV translations to WPILib translations
 TEST(coordinatesTest, CVtoWPILIBTranslation){
     Eigen::Vector3d t_c(3.0,4.0,2.0);
@@ -52,4 +60,27 @@ TEST(coordinatesTest, CVtoWPILIBTranslation){
     wf::WPILibPose3ToCvPoseVecs(orig_pose,rvec,tvec);
     auto out_pose = wf::cvPoseVecsToWPILibPose3(rvec,tvec);
     EXPECT_TRUE(posesAreApproxEqual(orig_pose,out_pose));
+
+    // Mock rotation vector (Rodrigues): rotate 45 degrees (pi/4) around Z axis
+    // Rotation vector (3x1 matrix) - 45 degrees around Z axis
+    double angle_rad = CV_PI / 4;  // 45 degrees
+    cv::Mat rvec_orig = (cv::Mat_<double>(3,1) << 0, 0, angle_rad);
+
+    // Translation vector (3x1 matrix)
+    cv::Mat tvec_orig = (cv::Mat_<double>(3,1) << 10.0, 5.0, 2.0);
+
+    std::cout << "rvec orig:\n" << rvec_orig << std::endl;
+    std::cout << "tvec orig:\n" << tvec_orig << std::endl;
+
+    auto pose = wf::cvPoseVecsToWPILibPose3(rvec_orig,tvec_orig);
+
+    cv::Mat rvec_out;
+    cv::Mat tvec_out;
+
+    wf::WPILibPose3ToCvPoseVecs(pose,rvec_out,tvec_out);
+
+    std::cout << "rvec out:\n" << rvec_out << std::endl;
+    std::cout << "tvec out:\n" << tvec_out << std::endl;
+
+    EXPECT_TRUE(matsAreApproxEqual(rvec_out,rvec_orig) && matsAreApproxEqual(tvec_out,tvec_orig));
 }

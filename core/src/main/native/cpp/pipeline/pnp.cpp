@@ -225,26 +225,10 @@ namespace wf {
         for (const auto& corner : detection.corners) {
             imagePoints.push_back(corner);
         }
-        objectPoints.emplace_back(
-            -tagConfig.tagSize / 2.0,
-            tagConfig.tagSize / 2.0, 
-            0.0
-        );
-        objectPoints.emplace_back(
-            tagConfig.tagSize / 2.0, 
-            tagConfig.tagSize / 2.0,
-            0.0
-        );
-        objectPoints.emplace_back(
-            tagConfig.tagSize / 2.0, 
-            -tagConfig.tagSize / 2.0,
-            0.0
-        );
-        objectPoints.emplace_back(
-            -tagConfig.tagSize / 2.0, 
-            -tagConfig.tagSize / 2.0,
-            0.0
-        );
+        objectPoints.emplace_back(-tagConfig.tagSize / 2.0, tagConfig.tagSize / 2.0, 0.0);
+        objectPoints.emplace_back(tagConfig.tagSize / 2.0, tagConfig.tagSize / 2.0, 0.0);
+        objectPoints.emplace_back(tagConfig.tagSize / 2.0, -tagConfig.tagSize / 2.0, 0.0);
+        objectPoints.emplace_back(-tagConfig.tagSize / 2.0, -tagConfig.tagSize / 2.0, 0.0);
         bool success = cv::solvePnPGeneric(
             objectPoints,
             imagePoints,
@@ -258,6 +242,9 @@ namespace wf {
             cv::noArray(),
             reprojectionErrors
         );
+        #ifndef NDEBUG
+        std::cout << rvecs[0].t();
+        #endif
         if (!success) {
             WF_DEBUGLOG(globalLogger(),"PnP calculation failed");
             return std::nullopt; //PnP was not successful, give up
