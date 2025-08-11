@@ -37,8 +37,8 @@
 #include "wips_runtime.h"
 #include "wips_detail.h"
 
-wips_blob_t* wips_blob_create(size_t size) {
-    wips_blob_t* newbin = calloc(1, sizeof(wips_blob_t)); 
+wips_blob_t *wips_blob_create(size_t size) {
+    wips_blob_t *newbin = calloc(1, sizeof(wips_blob_t)); 
     if (!newbin) return NULL;
     
     newbin->base = malloc(size);  // Buffer uninitialized for performance
@@ -52,9 +52,9 @@ wips_blob_t* wips_blob_create(size_t size) {
     return newbin;
 }
 
-wips_blob_t* wips_blob_wrap(unsigned char* base, size_t size) {
+wips_blob_t *wips_blob_wrap(unsigned char *base, size_t size) {
     WIPS_FatalAssert(base != NULL);
-    wips_blob_t* newbin = malloc(sizeof(wips_blob_t));
+    wips_blob_t *newbin = malloc(sizeof(wips_blob_t));
     if (!newbin) return NULL;
     newbin->base = base;
     newbin->offset = 0;
@@ -62,7 +62,7 @@ wips_blob_t* wips_blob_wrap(unsigned char* base, size_t size) {
     return newbin;
 }
 
-void wips_blob_destroy(wips_blob_t* bin) {
+void wips_blob_destroy(wips_blob_t *bin) {
     if (!bin) return;
     free(bin->base);
     free(bin);
@@ -98,54 +98,54 @@ DEFINE_TRIVIAL_DECODE(fp32)
 DEFINE_TRIVIAL_ENCODE(fp64)
 DEFINE_TRIVIAL_DECODE(fp64)
 
-void wips_u8_free_resources(wips_u8_t* data) {}
-void wips_i8_free_resources(wips_i8_t* data) {}
-void wips_u16_free_resources(wips_u16_t* data) {}
-void wips_i16_free_resources(wips_i16_t* data) {}
-void wips_u32_free_resources(wips_u32_t* data) {}
-void wips_i32_free_resources(wips_i32_t* data) {}
-void wips_u64_free_resources(wips_u64_t* data) {}
-void wips_i64_free_resources(wips_i64_t* data) {}
-void wips_fp32_free_resources(wips_fp32_t* data) {}
-void wips_fp64_free_resources(wips_fp64_t* data) {}
+void wips_u8_free_resources(wips_u8_t *data) {}
+void wips_i8_free_resources(wips_i8_t *data) {}
+void wips_u16_free_resources(wips_u16_t *data) {}
+void wips_i16_free_resources(wips_i16_t *data) {}
+void wips_u32_free_resources(wips_u32_t *data) {}
+void wips_i32_free_resources(wips_i32_t *data) {}
+void wips_u64_free_resources(wips_u64_t *data) {}
+void wips_i64_free_resources(wips_i64_t *data) {}
+void wips_fp32_free_resources(wips_fp32_t *data) {}
+void wips_fp64_free_resources(wips_fp64_t *data) {}
 
-wips_status_t wips_u8_copy(wips_u8_t* dest, const wips_u8_t* src) {
+wips_status_t wips_u8_copy(wips_u8_t *dest, const wips_u8_t *src) {
     *dest = *src;
     return WIPS_STATUS_OK;
 }
-wips_status_t wips_i8_copy(wips_i8_t* dest, const wips_i8_t* src) {
+wips_status_t wips_i8_copy(wips_i8_t *dest, const wips_i8_t *src) {
     *dest = *src;
     return WIPS_STATUS_OK;
 }
-wips_status_t wips_u16_copy(wips_u16_t* dest, const wips_u16_t* src) {
+wips_status_t wips_u16_copy(wips_u16_t *dest, const wips_u16_t *src) {
     *dest = *src;
     return WIPS_STATUS_OK;
 }
-wips_status_t wips_i16_copy(wips_i16_t* dest, const wips_i16_t* src) {
+wips_status_t wips_i16_copy(wips_i16_t *dest, const wips_i16_t *src) {
     *dest = *src;
     return WIPS_STATUS_OK;
 }
-wips_status_t wips_u32_copy(wips_u32_t* dest, const wips_u32_t* src) {
+wips_status_t wips_u32_copy(wips_u32_t *dest, const wips_u32_t *src) {
     *dest = *src;
     return WIPS_STATUS_OK;
 }
-wips_status_t wips_i32_copy(wips_i32_t* dest, const wips_i32_t* src) {
+wips_status_t wips_i32_copy(wips_i32_t *dest, const wips_i32_t *src) {
     *dest = *src;
     return WIPS_STATUS_OK;
 }
-wips_status_t wips_u64_copy(wips_u64_t* dest, const wips_u64_t* src) {
+wips_status_t wips_u64_copy(wips_u64_t *dest, const wips_u64_t *src) {
     *dest = *src;
     return WIPS_STATUS_OK;
 }
-wips_status_t wips_i64_copy(wips_i64_t* dest, const wips_i64_t* src) {
+wips_status_t wips_i64_copy(wips_i64_t *dest, const wips_i64_t *src) {
     *dest = *src;
     return WIPS_STATUS_OK;
 }
-wips_status_t wips_fp32_copy(wips_fp32_t* dest, const wips_fp32_t* src) {
+wips_status_t wips_fp32_copy(wips_fp32_t *dest, const wips_fp32_t *src) {
     *dest = *src;
     return WIPS_STATUS_OK;
 }
-wips_status_t wips_fp64_copy(wips_fp64_t* dest, const wips_fp64_t* src) {
+wips_status_t wips_fp64_copy(wips_fp64_t *dest, const wips_fp64_t *src) {
     *dest = *src;
     return WIPS_STATUS_OK;
 }

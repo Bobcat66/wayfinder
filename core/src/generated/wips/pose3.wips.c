@@ -38,9 +38,9 @@
 #define WIPS_INTERNAL
 #include "wips_detail.h"
 
-wips_pose3_t* wips_pose3_create(){
+wips_pose3_t *wips_pose3_create(){
     WIPS_TRACELOG("Creating pose3 struct\n");
-    wips_pose3_t* struct_ptr = calloc(1,GET_SIZE(pose3));
+    wips_pose3_t *struct_ptr = calloc(1,GET_SIZE(pose3));
     if (!struct_ptr) {
         WIPS_DEBUGLOG("Error: Failed to allocate pose3 struct\n");
         return NULL;
@@ -49,19 +49,19 @@ wips_pose3_t* wips_pose3_create(){
     return struct_ptr;
 }
 
-void wips_pose3_free_resources(wips_pose3_t* struct_ptr) {
+void wips_pose3_free_resources(wips_pose3_t *struct_ptr) {
     WIPS_TRACELOG("Freeing resources held by pose3\n");
     WIPS_TRACELOG("Freed resources held by pose3\n");
 }
 
-wips_status_t wips_pose3_copy(wips_pose3_t* dest,const wips_pose3_t* src){
+wips_status_t wips_pose3_copy(wips_pose3_t *dest,const wips_pose3_t *src){
     WIPS_TRACELOG("Copying pose3 object\n");
     (*dest) = (*src);
     return WIPS_STATUS_OK;
 }
 
 // Function to destroy the struct and free all resources
-void wips_pose3_destroy(wips_pose3_t* struct_ptr) {
+void wips_pose3_destroy(wips_pose3_t *struct_ptr) {
     WIPS_TRACELOG("Destroying pose3\n");
     if (!struct_ptr) { return; }
     // Free resources allocated by the struct
@@ -72,7 +72,7 @@ void wips_pose3_destroy(wips_pose3_t* struct_ptr) {
     WIPS_TRACELOG("Destroyed pose3\n");
 }
 
-wips_result_t wips_encode_pose3(wips_blob_t* data, wips_pose3_t* in) {
+wips_result_t wips_encode_pose3(wips_blob_t *data, wips_pose3_t *in) {
     WIPS_TRACELOG("Encoding pose3\n");
     WIPS_Assert(data != NULL && in != NULL,0);
     size_t bytesEncoded = 0;
@@ -108,7 +108,7 @@ wips_result_t wips_encode_pose3(wips_blob_t* data, wips_pose3_t* in) {
     WIPS_TRACELOG("Encoded pose3\n");
     return wips_make_result(bytesEncoded,WIPS_STATUS_OK);
 }
-wips_result_t wips_decode_pose3(wips_pose3_t* out, wips_blob_t* data) {
+wips_result_t wips_decode_pose3(wips_pose3_t *out, wips_blob_t *data) {
     WIPS_TRACELOG("Decoding pose3\n");
     WIPS_Assert(out != NULL && data != NULL,0);
     size_t bytesDecoded = 0;

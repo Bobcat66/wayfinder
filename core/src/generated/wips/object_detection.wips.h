@@ -57,14 +57,14 @@ typedef struct {
 // Recursive function to free all memory allocated by the struct and its members. Does NOT free the struct itself if it was dynamically allocated.
 // Warning: Calling this function on a struct that has not been written to from a WIPS binary will result in undefined behavior.
 // This function is intended to be used when the struct is no longer needed, to prevent memory leaks.
-void wips_object_detection_free_resources(wips_object_detection_t* struct_ptr);
-wips_object_detection_t* wips_object_detection_create();
-void wips_object_detection_destroy(wips_object_detection_t* struct_ptr);
+void wips_object_detection_free_resources(wips_object_detection_t *struct_ptr);
+wips_object_detection_t *wips_object_detection_create();
+void wips_object_detection_destroy(wips_object_detection_t *struct_ptr);
 
-unsigned char wips_object_detection_copy(wips_object_detection_t* dest, const wips_object_detection_t* src);
+wips_status_t wips_object_detection_copy(wips_object_detection_t *dest, const wips_object_detection_t *src);
 
-wips_result_t wips_encode_object_detection(wips_blob_t* data, wips_object_detection_t* in);
-wips_result_t wips_decode_object_detection(wips_object_detection_t* out, wips_blob_t* data);
+wips_result_t wips_encode_object_detection(wips_blob_t *data, wips_object_detection_t *in);
+wips_result_t wips_decode_object_detection(wips_object_detection_t *out, wips_blob_t *data);
 
 extern wips_vlamethods_t wips_object_detection_vlamethods;
 

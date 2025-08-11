@@ -30,27 +30,30 @@
 #include <stdexcept>
 
 namespace wf {
-    using enum VisionWorkerManagerStatus;
     //static auto logger = LoggerManager::getInstance().getLogger("VisionWorkerManager",LogGroup::General);
 
-    VisionWorkerManager::VisionWorkerManager(NetworkTablesManager& ntManager_, HardwareManager& hardwareManager_,ApriltagConfiguration atagConfig_,ApriltagField& atagField_,InferenceEngineFactory& engineFactory)
-    : ntManager(ntManager_), hardwareManager(hardwareManager_), atagConfig(atagConfig_), atagField(atagField_), engineFactory(engineFactory)
+    VisionWorkerManager::VisionWorkerManager(NetworkTablesManager& ntManager_, HardwareManager& hardwareManager_, InferenceEngineFactory& engineFactory)
+    : ntManager(ntManager_), hardwareManager(hardwareManager_), engineFactory(engineFactory)
     , WFLoggedStatusfulObject("VisionWorkerManager",LogGroup::General) {}
 
     // TODO: Refactor this with Status codes?
-    VisionWorker& VisionWorkerManager::buildVisionWorker(const VisionWorkerConfig& config) {
+    WFResult<std::shared_ptr<VisionWorker>> VisionWorkerManager::buildVisionWorker(const VisionWorkerConfig& config) {
         this->logger()->info("Building worker {}",config.name);
         switch (config.pipelineType) {
             case PipelineType::Apriltag:
                 {
                     // Check to make sure the configuration passed is valid
                     if (!hardwareManager.cameraRegistered(config.camera_nickname))
-                        throw camera_not_found(std::format("Camera {} not found",config.camera_nickname));
-                    if (!std::holds_alternative<ApriltagPipelineConfiguration>(config.pipelineConfig))
-                        throw invalid_pipeline_configuration(
-                            std::format("Pipeline {} is declared as Apriltag Pipeline yet specifies an incompatible configuration!",config.camera_nickname)
+                        return WFResult<std::shared_ptr<VisionWorker>>::failure(
+                            WFStatus::HARDWARE_BAD_CAMERA, 
+                            "Camera {} not registered", config.camera_nickname
                         );
-                    auto intrinsics = hardwareManager.getIntrinsics(config.camera_nickname);
+                    if (!std::holds_alternative<ApriltagPipelineConfiguration>(config.pipelineConfig))
+                        return WFResult<std::shared_ptr<VisionWorker>>::failure(
+                            WFStatus::PIPELINE_BAD_CONFIG,
+                            "Pipeline {} is declared as Apriltag Pipeline yet specifies an incompatible configuration!",config.camera_nickname
+                        );
+                    auto& intrinsics = hardwareManager.getIntrinsics(config.camera_nickname).value();
                     if (!intrinsics)
                         throw intrinsics_not_found(
                             std::format("Attempted to create apriltag PnP pipeline, but no camera intrinsics were specified for camera {} at the given resolution!",config.camera_nickname)

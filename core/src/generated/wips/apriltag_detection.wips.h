@@ -58,14 +58,14 @@ typedef struct {
 // Recursive function to free all memory allocated by the struct and its members. Does NOT free the struct itself if it was dynamically allocated.
 // Warning: Calling this function on a struct that has not been written to from a WIPS binary will result in undefined behavior.
 // This function is intended to be used when the struct is no longer needed, to prevent memory leaks.
-void wips_apriltag_detection_free_resources(wips_apriltag_detection_t* struct_ptr);
-wips_apriltag_detection_t* wips_apriltag_detection_create();
-void wips_apriltag_detection_destroy(wips_apriltag_detection_t* struct_ptr);
+void wips_apriltag_detection_free_resources(wips_apriltag_detection_t *struct_ptr);
+wips_apriltag_detection_t *wips_apriltag_detection_create();
+void wips_apriltag_detection_destroy(wips_apriltag_detection_t *struct_ptr);
 
-unsigned char wips_apriltag_detection_copy(wips_apriltag_detection_t* dest, const wips_apriltag_detection_t* src);
+wips_status_t wips_apriltag_detection_copy(wips_apriltag_detection_t *dest, const wips_apriltag_detection_t *src);
 
-wips_result_t wips_encode_apriltag_detection(wips_blob_t* data, wips_apriltag_detection_t* in);
-wips_result_t wips_decode_apriltag_detection(wips_apriltag_detection_t* out, wips_blob_t* data);
+wips_result_t wips_encode_apriltag_detection(wips_blob_t *data, wips_apriltag_detection_t *in);
+wips_result_t wips_decode_apriltag_detection(wips_apriltag_detection_t *out, wips_blob_t *data);
 
 extern wips_vlamethods_t wips_apriltag_detection_vlamethods;
 

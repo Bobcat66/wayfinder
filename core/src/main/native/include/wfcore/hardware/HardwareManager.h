@@ -28,6 +28,7 @@
 #include "wfcore/common/status.h"
 #include <memory>
 #include <optional>
+#include <shared_mutex>
 
 // Camera Handlers WILL NOT be destroyed once created. They effectively have unlimited lifetime
 // This rule applies even if the camera is disconnected or has some other persistent fault.
@@ -62,10 +63,15 @@ namespace wf {
 
         WFResult<CameraConfiguration> getCameraConfiguration(const std::string& nickname);
 
-        void periodic();
+        void periodic() noexcept;
+
+        // Returns whether or not the camera with the given name has faults
+        bool cameraHasFaults(const std::string& nickname) const;
     private:
-        const CameraHandler* getCamera_(const std::string& devpath) const;
-        CameraHandler* getCamera_(const std::string& devpath);
+        bool cameraRegistered_impl_(const std::string& nickname) const noexcept;
+        const CameraHandler* getCamera_(const std::string& nickname) const;
+        CameraHandler* getCamera_(const std::string& nickname);
         std::unordered_map<std::string,std::shared_ptr<CameraHandler>> cameras;
+        std::shared_mutex cameras_mtx;
     };
 }

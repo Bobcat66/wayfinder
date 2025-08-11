@@ -38,9 +38,9 @@
 #define WIPS_INTERNAL
 #include "wips_detail.h"
 
-wips_apriltag_detection_t* wips_apriltag_detection_create(){
+wips_apriltag_detection_t *wips_apriltag_detection_create(){
     WIPS_TRACELOG("Creating apriltag_detection struct\n");
-    wips_apriltag_detection_t* struct_ptr = calloc(1,GET_SIZE(apriltag_detection));
+    wips_apriltag_detection_t *struct_ptr = calloc(1,GET_SIZE(apriltag_detection));
     if (!struct_ptr) {
         WIPS_DEBUGLOG("Error: Failed to allocate apriltag_detection struct\n");
         return NULL;
@@ -49,19 +49,19 @@ wips_apriltag_detection_t* wips_apriltag_detection_create(){
     return struct_ptr;
 }
 
-void wips_apriltag_detection_free_resources(wips_apriltag_detection_t* struct_ptr) {
+void wips_apriltag_detection_free_resources(wips_apriltag_detection_t *struct_ptr) {
     WIPS_TRACELOG("Freeing resources held by apriltag_detection\n");
     WIPS_TRACELOG("Freed resources held by apriltag_detection\n");
 }
 
-wips_status_t wips_apriltag_detection_copy(wips_apriltag_detection_t* dest,const wips_apriltag_detection_t* src){
+wips_status_t wips_apriltag_detection_copy(wips_apriltag_detection_t *dest,const wips_apriltag_detection_t *src){
     WIPS_TRACELOG("Copying apriltag_detection object\n");
     (*dest) = (*src);
     return WIPS_STATUS_OK;
 }
 
 // Function to destroy the struct and free all resources
-void wips_apriltag_detection_destroy(wips_apriltag_detection_t* struct_ptr) {
+void wips_apriltag_detection_destroy(wips_apriltag_detection_t *struct_ptr) {
     WIPS_TRACELOG("Destroying apriltag_detection\n");
     if (!struct_ptr) { return; }
     // Free resources allocated by the struct
@@ -72,7 +72,7 @@ void wips_apriltag_detection_destroy(wips_apriltag_detection_t* struct_ptr) {
     WIPS_TRACELOG("Destroyed apriltag_detection\n");
 }
 
-wips_result_t wips_encode_apriltag_detection(wips_blob_t* data, wips_apriltag_detection_t* in) {
+wips_result_t wips_encode_apriltag_detection(wips_blob_t *data, wips_apriltag_detection_t *in) {
     WIPS_TRACELOG("Encoding apriltag_detection\n");
     WIPS_Assert(data != NULL && in != NULL,0);
     size_t bytesEncoded = 0;
@@ -128,7 +128,7 @@ wips_result_t wips_encode_apriltag_detection(wips_blob_t* data, wips_apriltag_de
     WIPS_TRACELOG("Encoded apriltag_detection\n");
     return wips_make_result(bytesEncoded,WIPS_STATUS_OK);
 }
-wips_result_t wips_decode_apriltag_detection(wips_apriltag_detection_t* out, wips_blob_t* data) {
+wips_result_t wips_decode_apriltag_detection(wips_apriltag_detection_t *out, wips_blob_t *data) {
     WIPS_TRACELOG("Decoding apriltag_detection\n");
     WIPS_Assert(out != NULL && data != NULL,0);
     size_t bytesDecoded = 0;

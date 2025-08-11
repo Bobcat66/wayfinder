@@ -38,9 +38,9 @@
 #define WIPS_INTERNAL
 #include "wips_detail.h"
 
-wips_pipeline_result_t* wips_pipeline_result_create(){
+wips_pipeline_result_t *wips_pipeline_result_create(){
     WIPS_TRACELOG("Creating pipeline_result struct\n");
-    wips_pipeline_result_t* struct_ptr = calloc(1,GET_SIZE(pipeline_result));
+    wips_pipeline_result_t *struct_ptr = calloc(1,GET_SIZE(pipeline_result));
     if (!struct_ptr) {
         WIPS_DEBUGLOG("Error: Failed to allocate pipeline_result struct\n");
         return NULL;
@@ -49,7 +49,7 @@ wips_pipeline_result_t* wips_pipeline_result_create(){
     return struct_ptr;
 }
 
-void wips_pipeline_result_free_resources(wips_pipeline_result_t* struct_ptr) {
+void wips_pipeline_result_free_resources(wips_pipeline_result_t *struct_ptr) {
     WIPS_TRACELOG("Freeing resources held by pipeline_result\n");
     if (struct_ptr->tag_detections) {
         WIPS_TRACELOG("Freeing pipeline_result field tag_detections (apriltag_detection,VLA,size=%u)\n",struct_ptr->GET_DETAIL(tag_detections,vlasize));
@@ -76,7 +76,7 @@ void wips_pipeline_result_free_resources(wips_pipeline_result_t* struct_ptr) {
     WIPS_TRACELOG("Freed resources held by pipeline_result\n");
 }
 
-wips_status_t wips_pipeline_result_copy(wips_pipeline_result_t* dest,const wips_pipeline_result_t* src){
+wips_status_t wips_pipeline_result_copy(wips_pipeline_result_t *dest,const wips_pipeline_result_t *src){
     WIPS_TRACELOG("Copying pipeline_result object\n");
     wips_status_t status = WIPS_STATUS_OK;
     wips_pipeline_result_free_resources(dest);
@@ -119,6 +119,7 @@ wips_status_t wips_pipeline_result_copy(wips_pipeline_result_t* dest,const wips_
     status = wips_apriltag_field_pose_observation_copy(&(dest->field_pose),&(src->field_pose));
     if (!(status == WIPS_STATUS_OK)){
         WIPS_DEBUGLOG("Error: Failed to copy field_pose\n");
+        wips_pipeline_result_free_resources(dest);
         return status;
     }
     dest->DETAILvlasize__object_detections = src->DETAILvlasize__object_detections;
@@ -140,7 +141,7 @@ wips_status_t wips_pipeline_result_copy(wips_pipeline_result_t* dest,const wips_
 }
 
 // Function to destroy the struct and free all resources
-void wips_pipeline_result_destroy(wips_pipeline_result_t* struct_ptr) {
+void wips_pipeline_result_destroy(wips_pipeline_result_t *struct_ptr) {
     WIPS_TRACELOG("Destroying pipeline_result\n");
     if (!struct_ptr) { return; }
     // Free resources allocated by the struct
@@ -151,7 +152,7 @@ void wips_pipeline_result_destroy(wips_pipeline_result_t* struct_ptr) {
     WIPS_TRACELOG("Destroyed pipeline_result\n");
 }
 
-wips_result_t wips_encode_pipeline_result(wips_blob_t* data, wips_pipeline_result_t* in) {
+wips_result_t wips_encode_pipeline_result(wips_blob_t *data, wips_pipeline_result_t *in) {
     WIPS_TRACELOG("Encoding pipeline_result\n");
     WIPS_Assert(data != NULL && in != NULL,0);
     size_t bytesEncoded = 0;
@@ -207,7 +208,7 @@ wips_result_t wips_encode_pipeline_result(wips_blob_t* data, wips_pipeline_resul
     WIPS_TRACELOG("Encoded pipeline_result\n");
     return wips_make_result(bytesEncoded,WIPS_STATUS_OK);
 }
-wips_result_t wips_decode_pipeline_result(wips_pipeline_result_t* out, wips_blob_t* data) {
+wips_result_t wips_decode_pipeline_result(wips_pipeline_result_t *out, wips_blob_t *data) {
     WIPS_TRACELOG("Decoding pipeline_result\n");
     WIPS_Assert(out != NULL && data != NULL,0);
     size_t bytesDecoded = 0;

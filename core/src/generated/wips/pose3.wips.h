@@ -53,14 +53,14 @@ typedef struct {
 // Recursive function to free all memory allocated by the struct and its members. Does NOT free the struct itself if it was dynamically allocated.
 // Warning: Calling this function on a struct that has not been written to from a WIPS binary will result in undefined behavior.
 // This function is intended to be used when the struct is no longer needed, to prevent memory leaks.
-void wips_pose3_free_resources(wips_pose3_t* struct_ptr);
-wips_pose3_t* wips_pose3_create();
-void wips_pose3_destroy(wips_pose3_t* struct_ptr);
+void wips_pose3_free_resources(wips_pose3_t *struct_ptr);
+wips_pose3_t *wips_pose3_create();
+void wips_pose3_destroy(wips_pose3_t *struct_ptr);
 
-unsigned char wips_pose3_copy(wips_pose3_t* dest, const wips_pose3_t* src);
+wips_status_t wips_pose3_copy(wips_pose3_t *dest, const wips_pose3_t *src);
 
-wips_result_t wips_encode_pose3(wips_blob_t* data, wips_pose3_t* in);
-wips_result_t wips_decode_pose3(wips_pose3_t* out, wips_blob_t* data);
+wips_result_t wips_encode_pose3(wips_blob_t *data, wips_pose3_t *in);
+wips_result_t wips_decode_pose3(wips_pose3_t *out, wips_blob_t *data);
 
 extern wips_vlamethods_t wips_pose3_vlamethods;
 

@@ -32,7 +32,6 @@ namespace wf {
     , calibrations_(config.calibrations)
     , controlAliases_(config.controlAliases)
     , camera_(std::format("{}_source",devpath_),devpath_) {
-        camera_.SetConnectionStrategy(cs::VideoSource::kConnectionKeepOpen);
         auto videomodes = camera_.EnumerateVideoModes();
         for (const auto& videomode : videomodes) {
             supportedFormats_.push_back(getStreamFormatFromVideoMode(videomode));
@@ -47,6 +46,7 @@ namespace wf {
         if (!camera_.SetVideoMode(getVideoModeFromStreamFormat(format_))) {
             throw invalid_stream_format("Camera {} configured with invalid stream format",config.devpath);
         }
+        enable();
     }
 
     WFResult<std::shared_ptr<FrameProvider>> CSCameraHandler::getFrameProvider(const std::string& name){
@@ -129,7 +129,7 @@ namespace wf {
             // Control has no alias, give up
             return WFResult<int>::failure(
                 HARDWARE_BAD_CONTROL,
-                "Attempted to query non-aliased camera control for camera {}", devpath_
+                "Attempted to query non-aliased camera control for camera {}", name_
             );
         }
         auto property = camera_.GetProperty(it->second);
@@ -137,20 +137,38 @@ namespace wf {
             // No property with the aliased name exists, give up
             return WFResult<int>::failure(
                 HARDWARE_BAD_CONTROL,
-                "Attempted to query unsupported camera control for camera {}",devpath_
+                "Attempted to query unsupported camera control for camera {}",name_
             );
         }
         return WFResult<int>::success(property.Get());
     }
 
+    void CSCameraHandler::checkConnection() {
+        auto status = getStatus();
+        if (status == HARDWARE_DISCONNECT || status == HARDWARE_CONNECTING) {
+            if (camera_.IsConnected()) reportOk();
+        }
+    }
+
     void CSCameraHandler::periodic() {
-        if (!ok()) return;
-        if (!camera_.IsConnected()){
-            this->reportError(
-                HARDWARE_DISCONNECT,
-                "Camera {} ({}) disconnected", name_, devpath_
-            );
-            return;
+        switch (getStatus()) {
+            case OK:
+                if (!camera_.IsConnected()){
+                this->reportError(
+                        HARDWARE_DISCONNECT,
+                        "Camera {} disconnected", name_
+                    );
+                    return;
+                }
+            case HARDWARE_DISABLED: return;
+            case HARDWARE_CONNECTING: 
+                checkConnection();
+                return;
+            case HARDWARE_DISCONNECT:
+                checkConnection();
+                return;
+            case HARDWARE_UNKNOWN: return; // HARDWARE_UNKNOWN is generally considered to be unrecoverable within the scope of the camera handler
+            default: reportError(HARDWARE_UNKNOWN, "Unknown fault in camera {}", name_); // Unknown status
         }
     }
 
@@ -169,5 +187,11 @@ namespace wf {
     void CSCameraHandler::disable() {
         this->reportError(WFStatus::HARDWARE_DISABLED);
         camera_.SetConnectionStrategy(cs::VideoSource::kConnectionForceClose);
+    }
+
+    void CSCameraHandler::enable() {
+        if (getStatus() != HARDWARE_DISABLED) return;
+        camera_.SetConnectionStrategy(cs::VideoSource::kConnectionKeepOpen);
+        this->reportError(HARDWARE_CONNECTING);
     }
 }

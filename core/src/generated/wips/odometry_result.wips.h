@@ -43,22 +43,22 @@ extern "C" {
 
 typedef struct {
     wips_u32_t DETAILvlasize__timestamps;
-    wips_u64_t* timestamps;
+    wips_u64_t *timestamps;
     wips_u32_t DETAILvlasize__twists;
-    wips_twist2_t* twists;
+    wips_twist2_t *twists;
 } wips_odometry_result_t;
 
 // Recursive function to free all memory allocated by the struct and its members. Does NOT free the struct itself if it was dynamically allocated.
 // Warning: Calling this function on a struct that has not been written to from a WIPS binary will result in undefined behavior.
 // This function is intended to be used when the struct is no longer needed, to prevent memory leaks.
-void wips_odometry_result_free_resources(wips_odometry_result_t* struct_ptr);
-wips_odometry_result_t* wips_odometry_result_create();
-void wips_odometry_result_destroy(wips_odometry_result_t* struct_ptr);
+void wips_odometry_result_free_resources(wips_odometry_result_t *struct_ptr);
+wips_odometry_result_t *wips_odometry_result_create();
+void wips_odometry_result_destroy(wips_odometry_result_t *struct_ptr);
 
-unsigned char wips_odometry_result_copy(wips_odometry_result_t* dest, const wips_odometry_result_t* src);
+wips_status_t wips_odometry_result_copy(wips_odometry_result_t *dest, const wips_odometry_result_t *src);
 
-wips_result_t wips_encode_odometry_result(wips_blob_t* data, wips_odometry_result_t* in);
-wips_result_t wips_decode_odometry_result(wips_odometry_result_t* out, wips_blob_t* data);
+wips_result_t wips_encode_odometry_result(wips_blob_t *data, wips_odometry_result_t *in);
+wips_result_t wips_decode_odometry_result(wips_odometry_result_t *out, wips_blob_t *data);
 
 extern wips_vlamethods_t wips_odometry_result_vlamethods;
 

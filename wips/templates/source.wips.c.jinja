@@ -38,9 +38,9 @@
 #define WIPS_INTERNAL
 #include "wips_detail.h"
 
-wips_{{ name }}_t* wips_{{ name }}_create(){
+wips_{{ name }}_t *wips_{{ name }}_create(){
     WIPS_TRACELOG("Creating {{ name }} struct\n");
-    wips_{{ name }}_t* struct_ptr = calloc(1,GET_SIZE({{ name }}));
+    wips_{{ name }}_t *struct_ptr = calloc(1,GET_SIZE({{ name }}));
     if (!struct_ptr) {
         WIPS_DEBUGLOG("Error: Failed to allocate {{ name }} struct\n");
         return NULL;
@@ -49,7 +49,7 @@ wips_{{ name }}_t* wips_{{ name }}_create(){
     return struct_ptr;
 }
 
-void wips_{{ name }}_free_resources(wips_{{ name }}_t* struct_ptr) {
+void wips_{{ name }}_free_resources(wips_{{ name }}_t *struct_ptr) {
     WIPS_TRACELOG("Freeing resources held by {{ name }}\n");
 {%- if trivial == True %}
 {%- else %}
@@ -71,7 +71,7 @@ void wips_{{ name }}_free_resources(wips_{{ name }}_t* struct_ptr) {
     WIPS_TRACELOG("Freed resources held by {{ name }}\n");
 }
 
-wips_status_t wips_{{ name }}_copy(wips_{{ name }}_t* dest,const wips_{{ name }}_t* src){
+wips_status_t wips_{{ name }}_copy(wips_{{ name }}_t *dest,const wips_{{ name }}_t *src){
     WIPS_TRACELOG("Copying {{ name }} object\n");
     {%- if trivial %}
     (*dest) = (*src);
@@ -100,6 +100,7 @@ wips_status_t wips_{{ name }}_copy(wips_{{ name }}_t* dest,const wips_{{ name }}
     status = wips_{{ field.type }}_copy(&(dest->{{ field.name }}),&(src->{{ field.name }}));
     if (!(status == WIPS_STATUS_OK)){
         WIPS_DEBUGLOG("Error: Failed to copy {{ field.name }}\n");
+        wips_{{ name }}_free_resources(dest);
         return status;
     }
     {%- endif %}
@@ -109,7 +110,7 @@ wips_status_t wips_{{ name }}_copy(wips_{{ name }}_t* dest,const wips_{{ name }}
 }
 
 // Function to destroy the struct and free all resources
-void wips_{{ name }}_destroy(wips_{{ name }}_t* struct_ptr) {
+void wips_{{ name }}_destroy(wips_{{ name }}_t *struct_ptr) {
     WIPS_TRACELOG("Destroying {{ name }}\n");
     if (!struct_ptr) { return; }
     // Free resources allocated by the struct
@@ -120,7 +121,7 @@ void wips_{{ name }}_destroy(wips_{{ name }}_t* struct_ptr) {
     WIPS_TRACELOG("Destroyed {{ name }}\n");
 }
 
-wips_result_t wips_encode_{{ name }}(wips_blob_t* data, wips_{{ name }}_t* in) {
+wips_result_t wips_encode_{{ name }}(wips_blob_t *data, wips_{{ name }}_t *in) {
     WIPS_TRACELOG("Encoding {{ name }}\n");
     WIPS_Assert(data != NULL && in != NULL,0);
     size_t bytesEncoded = 0;
@@ -150,7 +151,7 @@ wips_result_t wips_encode_{{ name }}(wips_blob_t* data, wips_{{ name }}_t* in) {
     WIPS_TRACELOG("Encoded {{ name }}\n");
     return wips_make_result(bytesEncoded,WIPS_STATUS_OK);
 }
-wips_result_t wips_decode_{{ name }}(wips_{{ name }}_t* out, wips_blob_t* data) {
+wips_result_t wips_decode_{{ name }}(wips_{{ name }}_t *out, wips_blob_t *data) {
     WIPS_TRACELOG("Decoding {{ name }}\n");
     WIPS_Assert(out != NULL && data != NULL,0);
     size_t bytesDecoded = 0;

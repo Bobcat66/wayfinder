@@ -41,4 +41,8 @@ namespace wf {
 
         workerManager_ = std::move(std::make_unique<VisionWorkerManager>(ntManager_, hardwareManager_, apriltagConfiguration, aprilTagField_, inferenceEngineFactory_));
     }
+
+    void WFOrchestrator::periodic() noexcept {
+        hardwareManager_.periodic();
+    }
 }

@@ -49,7 +49,6 @@ extern "C" {
     #warning "wips_detail.h is an INTERNAL HEADER! It should NOT be included directly in public code"
 #endif
 
-#include "options.wips.h"
 #include "wips_runtime.h"
 #include <stdlib.h>
 #include <string.h>
@@ -201,19 +200,19 @@ struct tm* wips_localtime(const time_t* timer);
 #define DEFINE_VLAGETTER(wips_typename)                                                                         \
     static void* wips_ ## wips_typename ## _vlagetter(wips_vlaref_t vla, size_t index) {                        \
         if (index >= *(vla.vlasize_pt)) return NULL;                                                            \
-        GET_CTYPE(wips_typename)** buffer_ptr =                                                                 \
-            (GET_CTYPE(wips_typename)**)(vla.buffer_pt);                                                        \
-        GET_CTYPE(wips_typename)* buffer = *buffer_ptr;                                                         \
-        return (void*)(buffer + index);                                                                         \
+        GET_CTYPE(wips_typename) **buffer_ptr =                                                                 \
+            (GET_CTYPE(wips_typename) **)(vla.buffer_pt);                                                       \
+        GET_CTYPE(wips_typename) *buffer = *buffer_ptr;                                                         \
+        return (void *)(buffer + index);                                                                        \
     }
 
 #define DEFINE_VLASETTER(wips_typename)\
-    static wips_status_t wips_ ## wips_typename ## _vlasetter(wips_vlaref_t vla, size_t index, void* value) {   \
+    static wips_status_t wips_ ## wips_typename ## _vlasetter(wips_vlaref_t vla, size_t index, void *value) {   \
         if (index >= *(vla.vlasize_pt)) return WIPS_STATUS_BOUNDS_ERROR;                                        \
-        GET_CTYPE(wips_typename)** buffer_ptr =                                                                 \
-            (GET_CTYPE(wips_typename)**)(vla.buffer_pt);                                                        \
-        GET_CTYPE(wips_typename)* buffer = *buffer_ptr;                                                         \
-        GET_CTYPE(wips_typename)* old_value = buffer + index;                                                   \
+        GET_CTYPE(wips_typename) **buffer_ptr =                                                                 \
+            (GET_CTYPE(wips_typename) **)(vla.buffer_pt);                                                       \
+        GET_CTYPE(wips_typename) *buffer = *buffer_ptr;                                                         \
+        GET_CTYPE(wips_typename) *old_value = buffer + index;                                                   \
         if (value) {                                                                                            \
             memcpy(old_value, value, GET_SIZE(wips_typename));                                                  \
             return WIPS_STATUS_OK;                                                                              \
@@ -223,8 +222,8 @@ struct tm* wips_localtime(const time_t* timer);
                 memmove(old_value, old_value + 1, count_after * GET_SIZE(wips_typename));                       \
             (*vla.vlasize_pt)--;                                                                                \
             size_t newalloc = (*vla.vlasize_pt) * GET_SIZE(wips_typename);                                      \
-            GET_CTYPE(wips_typename)* newbuffer =                                                               \
-                (GET_CTYPE(wips_typename)*)realloc(buffer, newalloc);                                           \
+            GET_CTYPE(wips_typename) *newbuffer =                                                               \
+                (GET_CTYPE(wips_typename) *)realloc(buffer, newalloc);                                          \
             if (!newbuffer) return WIPS_STATUS_OOM;                                                             \
             *buffer_ptr = newbuffer;                                                                            \
             return WIPS_STATUS_OK;                                                                              \
@@ -232,13 +231,13 @@ struct tm* wips_localtime(const time_t* timer);
     }
 
 #define DEFINE_VLAPUSHBACK(wips_typename)                                                                       \
-    static wips_status_t wips_ ## wips_typename ## _vlapushback(wips_vlaref_t vla, void* value) {                                  \
+    static wips_status_t wips_ ## wips_typename ## _vlapushback(wips_vlaref_t vla, void *value) {               \
         if (!value) return WIPS_STATUS_OK;                                                                      \
-        GET_CTYPE(wips_typename)** buffer_ptr =                                                                 \
-            (GET_CTYPE(wips_typename)**)(vla.buffer_pt);                                                        \
-        GET_CTYPE(wips_typename)* buffer = *buffer_ptr;                                                         \
+        GET_CTYPE(wips_typename) **buffer_ptr =                                                                 \
+            (GET_CTYPE(wips_typename) **)(vla.buffer_pt);                                                       \
+        GET_CTYPE(wips_typename) *buffer = *buffer_ptr;                                                         \
         size_t newsize = (*vla.vlasize_pt) + 1;                                                                 \
-        GET_CTYPE(wips_typename)* newbuffer =                                                                   \
+        GET_CTYPE(wips_typename) *newbuffer =                                                                   \
             realloc(buffer,newsize * GET_SIZE(wips_typename));                                                  \
         if (!newbuffer) return WIPS_STATUS_OOM;                                                                 \
         size_t offset = (*vla.vlasize_pt);                                                                      \
@@ -247,6 +246,16 @@ struct tm* wips_localtime(const time_t* timer);
         (*vla.vlasize_pt) = newsize;                                                                            \
         return WIPS_STATUS_OK;                                                                                  \
     }
+
+// Technically this doesn't need to be passed pointers, but it matches the semantics of the rest of the program
+// This isn't ALGOL-60, call-by-name semantics is not something I want to think about
+#define GET_VLAREF(out,wips_typename,wips_struct,field)                                                         \
+    do {                                                                                                        \
+        wips_u32_t *vlasize_pt = &((wips_struct)->GET_DETAIL(field,vlasize));                                   \
+        void *buffer_pt = (void *)(&((wips_struct)->field));                                                    \
+        out->vlasize_pt = vlasize_pt;                                                                           \
+        out->buffer_pt = buffer_pt;                                                                             \
+    } while (0)
 
 #ifdef __cplusplus
 }

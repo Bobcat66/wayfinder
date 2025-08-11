@@ -38,9 +38,9 @@
 #define WIPS_INTERNAL
 #include "wips_detail.h"
 
-wips_object_detection_t* wips_object_detection_create(){
+wips_object_detection_t *wips_object_detection_create(){
     WIPS_TRACELOG("Creating object_detection struct\n");
-    wips_object_detection_t* struct_ptr = calloc(1,GET_SIZE(object_detection));
+    wips_object_detection_t *struct_ptr = calloc(1,GET_SIZE(object_detection));
     if (!struct_ptr) {
         WIPS_DEBUGLOG("Error: Failed to allocate object_detection struct\n");
         return NULL;
@@ -49,19 +49,19 @@ wips_object_detection_t* wips_object_detection_create(){
     return struct_ptr;
 }
 
-void wips_object_detection_free_resources(wips_object_detection_t* struct_ptr) {
+void wips_object_detection_free_resources(wips_object_detection_t *struct_ptr) {
     WIPS_TRACELOG("Freeing resources held by object_detection\n");
     WIPS_TRACELOG("Freed resources held by object_detection\n");
 }
 
-wips_status_t wips_object_detection_copy(wips_object_detection_t* dest,const wips_object_detection_t* src){
+wips_status_t wips_object_detection_copy(wips_object_detection_t *dest,const wips_object_detection_t *src){
     WIPS_TRACELOG("Copying object_detection object\n");
     (*dest) = (*src);
     return WIPS_STATUS_OK;
 }
 
 // Function to destroy the struct and free all resources
-void wips_object_detection_destroy(wips_object_detection_t* struct_ptr) {
+void wips_object_detection_destroy(wips_object_detection_t *struct_ptr) {
     WIPS_TRACELOG("Destroying object_detection\n");
     if (!struct_ptr) { return; }
     // Free resources allocated by the struct
@@ -72,7 +72,7 @@ void wips_object_detection_destroy(wips_object_detection_t* struct_ptr) {
     WIPS_TRACELOG("Destroyed object_detection\n");
 }
 
-wips_result_t wips_encode_object_detection(wips_blob_t* data, wips_object_detection_t* in) {
+wips_result_t wips_encode_object_detection(wips_blob_t *data, wips_object_detection_t *in) {
     WIPS_TRACELOG("Encoding object_detection\n");
     WIPS_Assert(data != NULL && in != NULL,0);
     size_t bytesEncoded = 0;
@@ -124,7 +124,7 @@ wips_result_t wips_encode_object_detection(wips_blob_t* data, wips_object_detect
     WIPS_TRACELOG("Encoded object_detection\n");
     return wips_make_result(bytesEncoded,WIPS_STATUS_OK);
 }
-wips_result_t wips_decode_object_detection(wips_object_detection_t* out, wips_blob_t* data) {
+wips_result_t wips_decode_object_detection(wips_object_detection_t *out, wips_blob_t *data) {
     WIPS_TRACELOG("Decoding object_detection\n");
     WIPS_Assert(out != NULL && data != NULL,0);
     size_t bytesDecoded = 0;

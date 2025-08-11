@@ -38,9 +38,9 @@
 #define WIPS_INTERNAL
 #include "wips_detail.h"
 
-wips_odometry_result_t* wips_odometry_result_create(){
+wips_odometry_result_t *wips_odometry_result_create(){
     WIPS_TRACELOG("Creating odometry_result struct\n");
-    wips_odometry_result_t* struct_ptr = calloc(1,GET_SIZE(odometry_result));
+    wips_odometry_result_t *struct_ptr = calloc(1,GET_SIZE(odometry_result));
     if (!struct_ptr) {
         WIPS_DEBUGLOG("Error: Failed to allocate odometry_result struct\n");
         return NULL;
@@ -49,7 +49,7 @@ wips_odometry_result_t* wips_odometry_result_create(){
     return struct_ptr;
 }
 
-void wips_odometry_result_free_resources(wips_odometry_result_t* struct_ptr) {
+void wips_odometry_result_free_resources(wips_odometry_result_t *struct_ptr) {
     WIPS_TRACELOG("Freeing resources held by odometry_result\n");
     if (struct_ptr->timestamps) {
         WIPS_TRACELOG("Freeing odometry_result field timestamps (u64,VLA,size=%u)\n",struct_ptr->GET_DETAIL(timestamps,vlasize));
@@ -68,7 +68,7 @@ void wips_odometry_result_free_resources(wips_odometry_result_t* struct_ptr) {
     WIPS_TRACELOG("Freed resources held by odometry_result\n");
 }
 
-wips_status_t wips_odometry_result_copy(wips_odometry_result_t* dest,const wips_odometry_result_t* src){
+wips_status_t wips_odometry_result_copy(wips_odometry_result_t *dest,const wips_odometry_result_t *src){
     WIPS_TRACELOG("Copying odometry_result object\n");
     wips_status_t status = WIPS_STATUS_OK;
     wips_odometry_result_free_resources(dest);
@@ -106,7 +106,7 @@ wips_status_t wips_odometry_result_copy(wips_odometry_result_t* dest,const wips_
 }
 
 // Function to destroy the struct and free all resources
-void wips_odometry_result_destroy(wips_odometry_result_t* struct_ptr) {
+void wips_odometry_result_destroy(wips_odometry_result_t *struct_ptr) {
     WIPS_TRACELOG("Destroying odometry_result\n");
     if (!struct_ptr) { return; }
     // Free resources allocated by the struct
@@ -117,7 +117,7 @@ void wips_odometry_result_destroy(wips_odometry_result_t* struct_ptr) {
     WIPS_TRACELOG("Destroyed odometry_result\n");
 }
 
-wips_result_t wips_encode_odometry_result(wips_blob_t* data, wips_odometry_result_t* in) {
+wips_result_t wips_encode_odometry_result(wips_blob_t *data, wips_odometry_result_t *in) {
     WIPS_TRACELOG("Encoding odometry_result\n");
     WIPS_Assert(data != NULL && in != NULL,0);
     size_t bytesEncoded = 0;
@@ -145,7 +145,7 @@ wips_result_t wips_encode_odometry_result(wips_blob_t* data, wips_odometry_resul
     WIPS_TRACELOG("Encoded odometry_result\n");
     return wips_make_result(bytesEncoded,WIPS_STATUS_OK);
 }
-wips_result_t wips_decode_odometry_result(wips_odometry_result_t* out, wips_blob_t* data) {
+wips_result_t wips_decode_odometry_result(wips_odometry_result_t *out, wips_blob_t *data) {
     WIPS_TRACELOG("Decoding odometry_result\n");
     WIPS_Assert(out != NULL && data != NULL,0);
     size_t bytesDecoded = 0;

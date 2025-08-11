@@ -60,6 +60,10 @@ namespace wf {
 
         virtual CameraConfiguration getConfiguration() = 0;
 
+        virtual void checkConnection() = 0;
+
         virtual void disable() = 0;
+
+        virtual void enable() = 0;
     };
 }

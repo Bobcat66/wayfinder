@@ -47,13 +47,13 @@
 #include "wips_detail.h"
 
 #if defined (__unix__) || (defined (__APPLE__) && defined (__MACH__))
-struct tm* wips_localtime(const time_t* timer) {
+struct tm *wips_localtime(const time_t *timer) {
     static thread_local struct tm timestruct;
-    struct tm* timeptr = localtime_r(timer,&timestruct);
+    struct tm *timeptr = localtime_r(timer, &timestruct);
     return timeptr;
 }
 #elif defined (_WIN32)
-struct tm* wips_localtime(const time_t* timer) {
+struct tm *wips_localtime(const time_t *timer) {
     // Thank you Microsoft for getting Annex K into the C11 standard and
     // then not even implementing it correctly, very cool
     static thread_local struct tm timestruct;
@@ -66,8 +66,8 @@ struct tm* wips_localtime(const time_t* timer) {
 }
 #else 
 #warning "wips_localtime may not be thread-safe"
-struct tm* wips_localtime(const time_t* timer) {
-    struct tm* timeptr = localtime(timer);
+struct tm *wips_localtime(const time_t *timer) {
+    struct tm *timeptr = localtime(timer);
     return timeptr;
 }
 #endif // __unix__

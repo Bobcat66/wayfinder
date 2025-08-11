@@ -47,7 +47,7 @@ extern "C" {
 typedef struct {
     {%- for field in fields %}
     {%- if field.vla == True %}
-    {{ field | get_ctype_name }}* {{ field.name }};
+    {{ field | get_ctype_name }} *{{ field.name }};
     {%- else %}
     {{ field | get_ctype_name }} {{ field.name }};
     {%- endif %}
@@ -57,14 +57,14 @@ typedef struct {
 // Recursive function to free all memory allocated by the struct and its members. Does NOT free the struct itself if it was dynamically allocated.
 // Warning: Calling this function on a struct that has not been written to from a WIPS binary will result in undefined behavior.
 // This function is intended to be used when the struct is no longer needed, to prevent memory leaks.
-void wips_{{ name }}_free_resources(wips_{{ name }}_t* struct_ptr);
-wips_{{ name }}_t* wips_{{ name }}_create();
-void wips_{{ name }}_destroy(wips_{{ name }}_t* struct_ptr);
+void wips_{{ name }}_free_resources(wips_{{ name }}_t *struct_ptr);
+wips_{{ name }}_t *wips_{{ name }}_create();
+void wips_{{ name }}_destroy(wips_{{ name }}_t *struct_ptr);
 
-unsigned char wips_{{ name }}_copy(wips_{{ name }}_t* dest, const wips_{{ name }}_t* src);
+wips_status_t wips_{{ name }}_copy(wips_{{ name }}_t *dest, const wips_{{ name }}_t *src);
 
-wips_result_t wips_encode_{{ name }}(wips_blob_t* data, wips_{{ name }}_t* in);
-wips_result_t wips_decode_{{ name }}(wips_{{ name }}_t* out, wips_blob_t* data);
+wips_result_t wips_encode_{{ name }}(wips_blob_t *data, wips_{{ name }}_t *in);
+wips_result_t wips_decode_{{ name }}(wips_{{ name }}_t *out, wips_blob_t *data);
 
 extern wips_vlamethods_t wips_{{ name }}_vlamethods;
 

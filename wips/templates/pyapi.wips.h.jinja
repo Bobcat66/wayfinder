@@ -34,22 +34,27 @@
 
 #pragma once
 
+#ifdef WIPS_OPTION_BUILD_PYTHON
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 
 #include "wips_pyapi.h"
+#include "{{ name }}.wips.h"
 
 typedef struct {
-    PyObject_HEAD
-    wips_{{ name }}_t* c_obj;
-    wips_handler_t* handler;
+    wips_struct_PyObject base;
+    wips_{{ name }}_t *c_obj;
 } wips_{{ name }}_PyObject;
 
+extern wips_PyType wips_{{ name }}_PyType;
 extern PyTypeObject wips_{{ name }}_PyObjectType;
 
-void wips_{{ name }}_void_destructor(void* ptr);
+int wips_{{ name }}_PyObjectType_init(PyObject *m);
 
 #ifdef __cplusplus
 }
 #endif
+
+#endif // WIPS_OPTION_BUILD_PYTHON

@@ -27,7 +27,7 @@ import time
 home_path = Path(__file__).resolve()    # Full absolute path to where the compiler lives, not necessarily the CWD
 
 def get_ctype_name(field: Dict) -> str:
-    return f"wips_{field["type"]}_t"
+    return f"wips_{field['type']}_t"
 
 def verify_yaml_schemas(yaml_schemas: List[Dict]) -> Tuple[int,str]:
     defined_types: Set[str] = set(["u8","i8","u16","i16","u32","i32","u64","i64","fp32","fp64"]) # The types that have already been defined
@@ -55,16 +55,28 @@ class wips_schema:
     def preprocess(self) -> None:
         if self.preprocessed:
             return
+        
         detail_fields: Dict[int,Dict] = {}
         for index, field in enumerate(self.fields):
             if field.get("optional"):
-                detail_fields[index] = {"name":f"DETAILoptpresent__{field["name"]}","type":"u8","trivial":True,"detail":True}
+                detail_fields[index] = {
+                    "name":f"DETAILoptpresent__{field["name"]}",
+                    "type":"u8",
+                    "trivial":True,
+                    "detail":True
+                }
                 self.trivial = False
             elif field.get("vla"):
-                detail_fields[index] = {"name":f"DETAILvlasize__{field["name"]}","type":"u32","trivial":True,"detail":True}
+                detail_fields[index] = {
+                    "name":f"DETAILvlasize__{field["name"]}",
+                    "type":"u32",
+                    "trivial":True,
+                    "detail":True
+                }
                 self.trivial = False
             else:
                 continue
+        
         offset: int = 0
         for index, detail_field in detail_fields.items():
             self.fields.insert(index + offset,detail_field)
@@ -104,7 +116,7 @@ def copyfile(src: Path, dest: Path):
     with open(dest,'w') as f_dest:
         f_dest.write(content)
 
-def compile(schemas_path: Path, output_dir: Path, py: bool = False, jvm: bool = False, trace: bool = False) -> None:
+def compile(schemas_path: Path, output_dir: Path, py: bool = False, jvm: bool = False) -> None:
     start = time.perf_counter()
     print(f"Compiling {schemas_path}...")
     # Parse YAML
@@ -123,7 +135,11 @@ def compile(schemas_path: Path, output_dir: Path, py: bool = False, jvm: bool = 
     env.filters["get_ctype_name"] = get_ctype_name
     header_template = env.get_template("header.wips.h.jinja")
     source_template = env.get_template("source.wips.c.jinja")
+    pyapi_header_template = env.get_template("pyapi.wips.h.jinja")
+    pyapi_source_template = env.get_template("pyapi.wips.c.jinja")
+    pymod_template = env.get_template("pymod.wips.c.jinja")
     render_targets: Dict[Path,Dict[str,any]] = {}
+    typenames: List[str] = []
     for schema in schemas.values():
         render_targets[output_dir / f"{schema.name}.wips.h"] = {
             "template" : header_template,
@@ -143,6 +159,31 @@ def compile(schemas_path: Path, output_dir: Path, py: bool = False, jvm: bool = 
                 "dependencies" : schema.dependencies
             }
         }
+        render_targets[output_dir / f"{schema.name}_pyapi.wips.h"] = {
+            "template" : pyapi_header_template,
+            "params" : {
+                "name" : schema.name,
+                "trivial" : schema.trivial,
+                "fields" : schema.fields,
+                "dependencies" : schema.dependencies
+            }
+        }
+        render_targets[output_dir / f"{schema.name}_pyapi.wips.c"] = {
+            "template" : pyapi_source_template,
+            "params" : {
+                "name" : schema.name,
+                "trivial" : schema.trivial,
+                "fields" : schema.fields,
+                "dependencies" : schema.dependencies
+            }
+        }
+        typenames.append(schema.name)
+    render_targets[output_dir / "pymod.wips.c"] = {
+        "template" : pymod_template,
+        "params" : {
+            "typenames" : typenames
+        }
+    }
     print("Rendering code...")
     for render_target,render_config in render_targets.items():
         print(f"Rendering target {render_target}")
@@ -157,6 +198,9 @@ def compile(schemas_path: Path, output_dir: Path, py: bool = False, jvm: bool = 
     copyfile(home_path.parent/"runtime"/"wips_runtime.h",output_dir/"wips_runtime.h")
     copyfile(home_path.parent/"runtime"/"wips_detail.h",output_dir/"wips_detail.h")
     copyfile(home_path.parent/"runtime"/"wips_chrono.c",output_dir/"wips_chrono.c")
+    copyfile(home_path.parent/"runtime"/"wips_pyapi.c",output_dir/"wips_pyapi.c")
+    copyfile(home_path.parent/"runtime"/"wips_pyapi.h",output_dir/"wips_pyapi.h")
+    
     end = time.perf_counter()
     print(f"Compilation finished in {end-start} seconds")
 
@@ -173,5 +217,5 @@ if __name__ == "__main__":
     args = parser.parse_args()
     args.out.mkdir(parents=True, exist_ok=True)
     # python and JVM flags will be added back in eventually
-    compile(args.schemas,args.out,False,False,args.trace)
+    compile(args.schemas,args.out,False,False)
 

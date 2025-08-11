@@ -53,6 +53,7 @@ namespace wf {
 
         PIPELINE_BASE =             0x00100000,
         PIPELINE_BAD_FRAME =        0x00100001,
+        PIPELINE_BAD_CONFIG =       0x00100002,
         PIPELINE_UNKNOWN =          0x001fffff,
 
         APRILTAG_BASE =             0x00200000,
@@ -75,6 +76,7 @@ namespace wf {
         HARDWARE_BAD_CAMERA =       0x00400006,
         HARDWARE_NO_CALIB =         0x00400007,
         HARDWARE_DISABLED =         0x00400008,
+        HARDWARE_CONNECTING =       0x00400009,
         HARDWARE_UNKNOWN =          0x004fffff,
 
         NETWORK_BASE =              0x00500000,
@@ -131,6 +133,7 @@ namespace wf {
 
             case WFStatus::PIPELINE_BASE:               return "PIPELINE_BASE";
             case WFStatus::PIPELINE_BAD_FRAME:          return "PIPELINE_BAD_FRAME";
+            case WFStatus::PIPELINE_BAD_CONFIG:         return "PIPELINE_BAD_CONFIG";
             case WFStatus::PIPELINE_UNKNOWN:            return "PIPELINE_UNKNOWN";
 
             case WFStatus::APRILTAG_BASE:               return "APRILTAG_BASE";

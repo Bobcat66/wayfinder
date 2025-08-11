@@ -49,14 +49,14 @@ typedef struct {
 // Recursive function to free all memory allocated by the struct and its members. Does NOT free the struct itself if it was dynamically allocated.
 // Warning: Calling this function on a struct that has not been written to from a WIPS binary will result in undefined behavior.
 // This function is intended to be used when the struct is no longer needed, to prevent memory leaks.
-void wips_twist2_free_resources(wips_twist2_t* struct_ptr);
-wips_twist2_t* wips_twist2_create();
-void wips_twist2_destroy(wips_twist2_t* struct_ptr);
+void wips_twist2_free_resources(wips_twist2_t *struct_ptr);
+wips_twist2_t *wips_twist2_create();
+void wips_twist2_destroy(wips_twist2_t *struct_ptr);
 
-unsigned char wips_twist2_copy(wips_twist2_t* dest, const wips_twist2_t* src);
+wips_status_t wips_twist2_copy(wips_twist2_t *dest, const wips_twist2_t *src);
 
-wips_result_t wips_encode_twist2(wips_blob_t* data, wips_twist2_t* in);
-wips_result_t wips_decode_twist2(wips_twist2_t* out, wips_blob_t* data);
+wips_result_t wips_encode_twist2(wips_blob_t *data, wips_twist2_t *in);
+wips_result_t wips_decode_twist2(wips_twist2_t *out, wips_blob_t *data);
 
 extern wips_vlamethods_t wips_twist2_vlamethods;
 

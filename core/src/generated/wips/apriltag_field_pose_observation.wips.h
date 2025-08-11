@@ -43,7 +43,7 @@ extern "C" {
 
 typedef struct {
     wips_u32_t DETAILvlasize__tags_used;
-    wips_i32_t* tags_used;
+    wips_i32_t *tags_used;
     wips_pose3_t field_pose_0;
     wips_fp64_t error_0;
     wips_u8_t DETAILoptpresent__field_pose_1;
@@ -55,14 +55,14 @@ typedef struct {
 // Recursive function to free all memory allocated by the struct and its members. Does NOT free the struct itself if it was dynamically allocated.
 // Warning: Calling this function on a struct that has not been written to from a WIPS binary will result in undefined behavior.
 // This function is intended to be used when the struct is no longer needed, to prevent memory leaks.
-void wips_apriltag_field_pose_observation_free_resources(wips_apriltag_field_pose_observation_t* struct_ptr);
-wips_apriltag_field_pose_observation_t* wips_apriltag_field_pose_observation_create();
-void wips_apriltag_field_pose_observation_destroy(wips_apriltag_field_pose_observation_t* struct_ptr);
+void wips_apriltag_field_pose_observation_free_resources(wips_apriltag_field_pose_observation_t *struct_ptr);
+wips_apriltag_field_pose_observation_t *wips_apriltag_field_pose_observation_create();
+void wips_apriltag_field_pose_observation_destroy(wips_apriltag_field_pose_observation_t *struct_ptr);
 
-unsigned char wips_apriltag_field_pose_observation_copy(wips_apriltag_field_pose_observation_t* dest, const wips_apriltag_field_pose_observation_t* src);
+wips_status_t wips_apriltag_field_pose_observation_copy(wips_apriltag_field_pose_observation_t *dest, const wips_apriltag_field_pose_observation_t *src);
 
-wips_result_t wips_encode_apriltag_field_pose_observation(wips_blob_t* data, wips_apriltag_field_pose_observation_t* in);
-wips_result_t wips_decode_apriltag_field_pose_observation(wips_apriltag_field_pose_observation_t* out, wips_blob_t* data);
+wips_result_t wips_encode_apriltag_field_pose_observation(wips_blob_t *data, wips_apriltag_field_pose_observation_t *in);
+wips_result_t wips_decode_apriltag_field_pose_observation(wips_apriltag_field_pose_observation_t *out, wips_blob_t *data);
 
 extern wips_vlamethods_t wips_apriltag_field_pose_observation_vlamethods;
 

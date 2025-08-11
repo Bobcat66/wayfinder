@@ -62,7 +62,7 @@ namespace wf {
         // Memory pool for storing corner poses
         std::array<gtsam::Pose3, 4> cornerPoses;
         for (const auto& det : detections) {
-            if (std::find(ignoreList.begin(), ignoreList.end(), det.id) != ignoreList.end()) {
+            if (ignoreList.find(det.id) != ignoreList.end()) {
                 WF_DEBUGLOG(globalLogger(),"Ignoring tag {} for PnP",det.id);
                 continue; // Skip ignored tags
             }
