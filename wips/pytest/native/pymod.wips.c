@@ -42,10 +42,15 @@ extern "C" {
 
 #define PY_SSIZE_T_CLEAN
 #include <Python.h>
-
-{%- for typename in typenames %}
-#include "{{ typename }}_pyapi.wips.h"
-{%- endfor %}
+#include "pose3_pyapi.wips.h"
+#include "object_detection_pyapi.wips.h"
+#include "apriltag_detection_pyapi.wips.h"
+#include "apriltag_field_pose_observation_pyapi.wips.h"
+#include "apriltag_relative_pose_observation_pyapi.wips.h"
+#include "pipeline_result_pyapi.wips.h"
+#include "twist3_pyapi.wips.h"
+#include "twist2_pyapi.wips.h"
+#include "odometry_result_pyapi.wips.h"
 
 static PyMethodDef wips_methods[] = {
     {NULL, NULL, 0, NULL}  // Sentinel
@@ -66,14 +71,51 @@ PyMODINIT_FUNC PyInit_wips(void) {
     // Create the module object
     m = PyModule_Create(&wips_module);
     if (!m) return NULL;
-
-    {%- for typename in typenames %}
-    if (wips_{{ typename }}_PyTypeObject_init(m) < 0) {
-        fprintf(stderr,"Failed to initialize {{ typename }}\n");
+    if (wips_pose3_PyTypeObject_init(m) < 0) {
+        fprintf(stderr,"Failed to initialize pose3\n");
         Py_DECREF(m);
         return NULL;
     };
-    {%- endfor %}
+    if (wips_object_detection_PyTypeObject_init(m) < 0) {
+        fprintf(stderr,"Failed to initialize object_detection\n");
+        Py_DECREF(m);
+        return NULL;
+    };
+    if (wips_apriltag_detection_PyTypeObject_init(m) < 0) {
+        fprintf(stderr,"Failed to initialize apriltag_detection\n");
+        Py_DECREF(m);
+        return NULL;
+    };
+    if (wips_apriltag_field_pose_observation_PyTypeObject_init(m) < 0) {
+        fprintf(stderr,"Failed to initialize apriltag_field_pose_observation\n");
+        Py_DECREF(m);
+        return NULL;
+    };
+    if (wips_apriltag_relative_pose_observation_PyTypeObject_init(m) < 0) {
+        fprintf(stderr,"Failed to initialize apriltag_relative_pose_observation\n");
+        Py_DECREF(m);
+        return NULL;
+    };
+    if (wips_pipeline_result_PyTypeObject_init(m) < 0) {
+        fprintf(stderr,"Failed to initialize pipeline_result\n");
+        Py_DECREF(m);
+        return NULL;
+    };
+    if (wips_twist3_PyTypeObject_init(m) < 0) {
+        fprintf(stderr,"Failed to initialize twist3\n");
+        Py_DECREF(m);
+        return NULL;
+    };
+    if (wips_twist2_PyTypeObject_init(m) < 0) {
+        fprintf(stderr,"Failed to initialize twist2\n");
+        Py_DECREF(m);
+        return NULL;
+    };
+    if (wips_odometry_result_PyTypeObject_init(m) < 0) {
+        fprintf(stderr,"Failed to initialize odometry_result\n");
+        Py_DECREF(m);
+        return NULL;
+    };
 
     return m;
 }

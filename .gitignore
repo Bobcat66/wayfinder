@@ -9,3 +9,4 @@ __pycache__
 staging
 .gradle
 wips_output
+wips/pytest/*.so

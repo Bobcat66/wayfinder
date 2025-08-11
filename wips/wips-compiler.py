@@ -210,6 +210,9 @@ def compile(schemas_path: Path, output_dir: Path, py: bool = False, jvm: bool = 
 # Testing:
 # ./wips-compiler.py messages.yaml --out=./wips_output
 
+# Python testing
+# ./wips-compiler.py messages.yaml --out=../wips_pytest/native
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="WIPS Compiler")
     parser.add_argument("schemas", type=Path, help="path to YAML schema file")
