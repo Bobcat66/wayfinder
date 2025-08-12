@@ -51,8 +51,6 @@ typedef struct {
 extern wips_PyType wips_twist3_PyType;
 extern PyTypeObject wips_twist3_PyTypeObject;
 
-int wips_twist3_PyTypeObject_init(PyObject *m);
-
 #ifdef __cplusplus
 }
 #endif

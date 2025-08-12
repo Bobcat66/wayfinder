@@ -9,7 +9,7 @@ wips_extension = Extension(
     'wips',
     sources=sources,
     define_macros=[("WIPS_OPTION_BUILD_PYTHON", None)],
-    extra_compile_args=["-O3","-Wall", "-Wextra"],
+    extra_compile_args=["-g","-Wall", "-Wextra","-U","NDEBUG"],
     include_dirs=[python_include_dir]
 )
 
@@ -19,4 +19,4 @@ setup(
     ext_modules=[wips_extension],
 )
 
-# python3 setup.py build_ext --inplace
+# python3 setup.py build_ext --inplace --force

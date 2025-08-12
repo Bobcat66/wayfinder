@@ -53,7 +53,7 @@ static void _wips_pose3_void_destructor(void *ptr) {
     wips_pose3_destroy((wips_pose3_t *)ptr);
 }
 
-static PyObject *wips_pose3_PyObject_new(PyTypeObject* type, PyObject *args, PyObject *kwds) {
+static PyObject *wips_pose3_PyObject_new(PyTypeObject* type, PyObject *Py_UNUSED(args), PyObject *Py_UNUSED(kwds)) {
     
     wips_pose3_PyObject *obj;
 
@@ -62,14 +62,14 @@ static PyObject *wips_pose3_PyObject_new(PyTypeObject* type, PyObject *args, PyO
         obj->base.wips_type = &wips_pose3_PyType;
         obj->base.handler = NULL;
         obj->c_obj = NULL;
-        return (PyObject *)self;
+        return (PyObject *)obj;
     } else {
         PyErr_SetString(PyExc_RuntimeError, "Failed to initialize pose3");
         return NULL;
     }
 }
 
-static int wips_pose3_PyObject_init(PyObject *self, PyObject *args, PyObject *kwds) {
+static int wips_pose3_PyObject_init(PyObject *self, PyObject *Py_UNUSED(args), PyObject *Py_UNUSED(kwds)) {
 
     wips_pose3_PyObject *obj = (wips_pose3_PyObject *)self;
 
@@ -85,7 +85,7 @@ static int wips_pose3_PyObject_init(PyObject *self, PyObject *args, PyObject *kw
     }
 
     obj->c_obj = c_obj;
-    obj->handler = handler;
+    obj->base.handler = handler;
 
     return 0;
 }
@@ -95,7 +95,7 @@ static void wips_pose3_PyObject_dealloc(PyObject *self) {
     wips_pose3_PyObject *obj = (wips_pose3_PyObject *)self;
 
     if (obj->base.handler) {
-        wips_PyHandler_decref(obj->handler);
+        wips_PyHandler_decref(obj->base.handler);
         obj->base.handler = NULL;
         obj->base.wips_type = NULL;
         obj->c_obj = NULL;
@@ -105,7 +105,7 @@ static void wips_pose3_PyObject_dealloc(PyObject *self) {
 }
 
 // getsetters
-static PyObject *wips_pose3_PyObject_get_x(PyObject *self, void *closure) {
+static PyObject *wips_pose3_PyObject_get_x(PyObject *self, void *Py_UNUSED(closure)) {
     wips_pose3_PyObject *obj = (wips_pose3_PyObject *)self;
     if (!obj->c_obj) {
         PyErr_SetString(PyExc_AttributeError,"Struct is not initialized");
@@ -121,11 +121,11 @@ static PyObject *wips_pose3_PyObject_get_x(PyObject *self, void *closure) {
     }
     return py_field;
 }
-static int wips_pose3_PyObject_set_x(PyObject *self, PyObject *value, void *closure) {
+static int wips_pose3_PyObject_set_x(PyObject *self, PyObject *value, void *Py_UNUSED(closure)) {
     wips_pose3_PyObject *obj = (wips_pose3_PyObject *)self;
     if (!obj->c_obj) {
         PyErr_SetString(PyExc_AttributeError,"Struct is not initialized");
-        return NULL;
+        return -1;
     }
 
     // value is not None
@@ -152,7 +152,7 @@ static int wips_pose3_PyObject_set_x(PyObject *self, PyObject *value, void *clos
     }
     return 0;
 }
-static PyObject *wips_pose3_PyObject_get_y(PyObject *self, void *closure) {
+static PyObject *wips_pose3_PyObject_get_y(PyObject *self, void *Py_UNUSED(closure)) {
     wips_pose3_PyObject *obj = (wips_pose3_PyObject *)self;
     if (!obj->c_obj) {
         PyErr_SetString(PyExc_AttributeError,"Struct is not initialized");
@@ -168,11 +168,11 @@ static PyObject *wips_pose3_PyObject_get_y(PyObject *self, void *closure) {
     }
     return py_field;
 }
-static int wips_pose3_PyObject_set_y(PyObject *self, PyObject *value, void *closure) {
+static int wips_pose3_PyObject_set_y(PyObject *self, PyObject *value, void *Py_UNUSED(closure)) {
     wips_pose3_PyObject *obj = (wips_pose3_PyObject *)self;
     if (!obj->c_obj) {
         PyErr_SetString(PyExc_AttributeError,"Struct is not initialized");
-        return NULL;
+        return -1;
     }
 
     // value is not None
@@ -199,7 +199,7 @@ static int wips_pose3_PyObject_set_y(PyObject *self, PyObject *value, void *clos
     }
     return 0;
 }
-static PyObject *wips_pose3_PyObject_get_z(PyObject *self, void *closure) {
+static PyObject *wips_pose3_PyObject_get_z(PyObject *self, void *Py_UNUSED(closure)) {
     wips_pose3_PyObject *obj = (wips_pose3_PyObject *)self;
     if (!obj->c_obj) {
         PyErr_SetString(PyExc_AttributeError,"Struct is not initialized");
@@ -215,11 +215,11 @@ static PyObject *wips_pose3_PyObject_get_z(PyObject *self, void *closure) {
     }
     return py_field;
 }
-static int wips_pose3_PyObject_set_z(PyObject *self, PyObject *value, void *closure) {
+static int wips_pose3_PyObject_set_z(PyObject *self, PyObject *value, void *Py_UNUSED(closure)) {
     wips_pose3_PyObject *obj = (wips_pose3_PyObject *)self;
     if (!obj->c_obj) {
         PyErr_SetString(PyExc_AttributeError,"Struct is not initialized");
-        return NULL;
+        return -1;
     }
 
     // value is not None
@@ -246,7 +246,7 @@ static int wips_pose3_PyObject_set_z(PyObject *self, PyObject *value, void *clos
     }
     return 0;
 }
-static PyObject *wips_pose3_PyObject_get_wq(PyObject *self, void *closure) {
+static PyObject *wips_pose3_PyObject_get_wq(PyObject *self, void *Py_UNUSED(closure)) {
     wips_pose3_PyObject *obj = (wips_pose3_PyObject *)self;
     if (!obj->c_obj) {
         PyErr_SetString(PyExc_AttributeError,"Struct is not initialized");
@@ -262,11 +262,11 @@ static PyObject *wips_pose3_PyObject_get_wq(PyObject *self, void *closure) {
     }
     return py_field;
 }
-static int wips_pose3_PyObject_set_wq(PyObject *self, PyObject *value, void *closure) {
+static int wips_pose3_PyObject_set_wq(PyObject *self, PyObject *value, void *Py_UNUSED(closure)) {
     wips_pose3_PyObject *obj = (wips_pose3_PyObject *)self;
     if (!obj->c_obj) {
         PyErr_SetString(PyExc_AttributeError,"Struct is not initialized");
-        return NULL;
+        return -1;
     }
 
     // value is not None
@@ -293,7 +293,7 @@ static int wips_pose3_PyObject_set_wq(PyObject *self, PyObject *value, void *clo
     }
     return 0;
 }
-static PyObject *wips_pose3_PyObject_get_xq(PyObject *self, void *closure) {
+static PyObject *wips_pose3_PyObject_get_xq(PyObject *self, void *Py_UNUSED(closure)) {
     wips_pose3_PyObject *obj = (wips_pose3_PyObject *)self;
     if (!obj->c_obj) {
         PyErr_SetString(PyExc_AttributeError,"Struct is not initialized");
@@ -309,11 +309,11 @@ static PyObject *wips_pose3_PyObject_get_xq(PyObject *self, void *closure) {
     }
     return py_field;
 }
-static int wips_pose3_PyObject_set_xq(PyObject *self, PyObject *value, void *closure) {
+static int wips_pose3_PyObject_set_xq(PyObject *self, PyObject *value, void *Py_UNUSED(closure)) {
     wips_pose3_PyObject *obj = (wips_pose3_PyObject *)self;
     if (!obj->c_obj) {
         PyErr_SetString(PyExc_AttributeError,"Struct is not initialized");
-        return NULL;
+        return -1;
     }
 
     // value is not None
@@ -340,7 +340,7 @@ static int wips_pose3_PyObject_set_xq(PyObject *self, PyObject *value, void *clo
     }
     return 0;
 }
-static PyObject *wips_pose3_PyObject_get_yq(PyObject *self, void *closure) {
+static PyObject *wips_pose3_PyObject_get_yq(PyObject *self, void *Py_UNUSED(closure)) {
     wips_pose3_PyObject *obj = (wips_pose3_PyObject *)self;
     if (!obj->c_obj) {
         PyErr_SetString(PyExc_AttributeError,"Struct is not initialized");
@@ -356,11 +356,11 @@ static PyObject *wips_pose3_PyObject_get_yq(PyObject *self, void *closure) {
     }
     return py_field;
 }
-static int wips_pose3_PyObject_set_yq(PyObject *self, PyObject *value, void *closure) {
+static int wips_pose3_PyObject_set_yq(PyObject *self, PyObject *value, void *Py_UNUSED(closure)) {
     wips_pose3_PyObject *obj = (wips_pose3_PyObject *)self;
     if (!obj->c_obj) {
         PyErr_SetString(PyExc_AttributeError,"Struct is not initialized");
-        return NULL;
+        return -1;
     }
 
     // value is not None
@@ -387,7 +387,7 @@ static int wips_pose3_PyObject_set_yq(PyObject *self, PyObject *value, void *clo
     }
     return 0;
 }
-static PyObject *wips_pose3_PyObject_get_zq(PyObject *self, void *closure) {
+static PyObject *wips_pose3_PyObject_get_zq(PyObject *self, void *Py_UNUSED(closure)) {
     wips_pose3_PyObject *obj = (wips_pose3_PyObject *)self;
     if (!obj->c_obj) {
         PyErr_SetString(PyExc_AttributeError,"Struct is not initialized");
@@ -403,11 +403,11 @@ static PyObject *wips_pose3_PyObject_get_zq(PyObject *self, void *closure) {
     }
     return py_field;
 }
-static int wips_pose3_PyObject_set_zq(PyObject *self, PyObject *value, void *closure) {
+static int wips_pose3_PyObject_set_zq(PyObject *self, PyObject *value, void *Py_UNUSED(closure)) {
     wips_pose3_PyObject *obj = (wips_pose3_PyObject *)self;
     if (!obj->c_obj) {
         PyErr_SetString(PyExc_AttributeError,"Struct is not initialized");
-        return NULL;
+        return -1;
     }
 
     // value is not None
@@ -439,54 +439,54 @@ static PyGetSetDef wips_pose3_PyObject_getsetters[] = {
     {
         "x",
         (getter)wips_pose3_PyObject_get_x,
-        (setter)wips_pose3_PyObject_set_x,,
+        (setter)wips_pose3_PyObject_set_x,
         "fp64",
         NULL
     },
     {
         "y",
         (getter)wips_pose3_PyObject_get_y,
-        (setter)wips_pose3_PyObject_set_y,,
+        (setter)wips_pose3_PyObject_set_y,
         "fp64",
         NULL
     },
     {
         "z",
         (getter)wips_pose3_PyObject_get_z,
-        (setter)wips_pose3_PyObject_set_z,,
+        (setter)wips_pose3_PyObject_set_z,
         "fp64",
         NULL
     },
     {
         "wq",
         (getter)wips_pose3_PyObject_get_wq,
-        (setter)wips_pose3_PyObject_set_wq,,
+        (setter)wips_pose3_PyObject_set_wq,
         "fp64",
         NULL
     },
     {
         "xq",
         (getter)wips_pose3_PyObject_get_xq,
-        (setter)wips_pose3_PyObject_set_xq,,
+        (setter)wips_pose3_PyObject_set_xq,
         "fp64",
         NULL
     },
     {
         "yq",
         (getter)wips_pose3_PyObject_get_yq,
-        (setter)wips_pose3_PyObject_set_yq,,
+        (setter)wips_pose3_PyObject_set_yq,
         "fp64",
         NULL
     },
     {
         "zq",
         (getter)wips_pose3_PyObject_get_zq,
-        (setter)wips_pose3_PyObject_set_zq,,
+        (setter)wips_pose3_PyObject_set_zq,
         "fp64",
         NULL
     },
     {NULL}
-}
+};
 
 // wips_PyType
 
@@ -507,7 +507,7 @@ static PyObject *wips_pose3_wrap(void *c_obj, wips_PyHandler *handler) {
     obj->c_obj = (wips_pose3_t *)c_obj;
     wips_PyHandler_incref(handler);
 
-    return obj;
+    return (PyObject *)obj;
 }
 
 static void *wips_pose3_unwrap(PyObject *py_obj) {
@@ -808,13 +808,13 @@ static PyMethodDef wips_pose3_PyObject_methods[] = {
     {
         "encode",
         wips_pose3_PyObject_encode,
-        METH_VARARGS,
+        METH_VARARGS | METH_STATIC,
         "Encodes a struct"
     },
     {
         "decode",
         wips_pose3_PyObject_decode,
-        METH_VARARGS,
+        METH_VARARGS | METH_STATIC,
         "Decodes a blob"
     },
     {
@@ -835,7 +835,7 @@ static PyMethodDef wips_pose3_PyObject_methods[] = {
 PyTypeObject wips_pose3_PyTypeObject = {
     PyVarObject_HEAD_INIT(NULL, 0)
     .tp_name = "wips.pose3",
-    .tp_basicsize = GET_SIZE(pose3),
+    .tp_basicsize = sizeof(wips_pose3_PyObject),
     .tp_flags = Py_TPFLAGS_DEFAULT,
     .tp_base = &wips_struct_PyTypeObject,
     .tp_new = wips_pose3_PyObject_new,
@@ -844,55 +844,6 @@ PyTypeObject wips_pose3_PyTypeObject = {
     .tp_methods = wips_pose3_PyObject_methods,
     .tp_getset = wips_pose3_PyObject_getsetters
 };
-
-int wips_pose3_PyTypeObject_init(PyObject *m) {
-    if (PyType_Ready(&wips_pose3_PyTypeObject) < 0) {
-        return -1;
-    }
-
-    Py_INCREF(&wips_pose3_PyTypeObject);
-    if (PyModule_AddObject(m, "pose3", (PyObject *)&wips_pose3_PyTypeObject) < 0) {
-        Py_DECREF(&wips_pose3_PyTypeObject);
-        return -1;
-    }
-
-    PyObject *encode_func = PyObject_GetAttrString((PyObject *)&wips_pose3_PyTypeObject, "encode");
-    if (!encode_func) {
-        // failed to retrieve encoder function, give up
-        return -1;
-    }
-
-    PyObject *decode_func = PyObject_GetAttrString((PyObject *)&wips_pose3_PyTypeObject, "decode");
-    if (!encode_func) {
-        // failed to retrieve decoder function, give up
-        return -1;
-    }
-
-    PyObject *static_encode_func = PyStaticMethod_New(encode_func);
-    Py_DECREF(encode_func);
-    if (!static_encode_func) {
-        // failed to create static encoder function, give up
-        return -1;
-    }
-    if (PyObject_SetAttrString((PyObject *)&wips_pose3_PyTypeObject, "encode", static_encode_func) < 0) {
-        Py_DECREF(static_encode_func);
-        return -1;
-    }
-    Py_DECREF(static_encode_func);
-
-    PyObject *static_decode_func = PyStaticMethod_New(decode_func);
-    Py_DECREF(decode_func);
-    if (!static_decode_func) {
-        // failed to create static decoder function, give up
-        return -1;
-    }
-    if (PyObject_SetAttrString((PyObject *)&wips_pose3_PyTypeObject, "decode", static_decode_func) < 0) {
-        Py_DECREF(static_decode_func);
-        return -1;
-    }
-    Py_DECREF(static_decode_func);
-    return 0;
-}
 
 #ifdef __cplusplus
 }

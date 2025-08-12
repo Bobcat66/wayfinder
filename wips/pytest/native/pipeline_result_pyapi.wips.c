@@ -44,8 +44,8 @@ extern "C" {
 #define PY_SSIZE_T_CLEAN
 #include "pipeline_result_pyapi.wips.h"
 #include "object_detection_pyapi.wips.h"
-#include "apriltag_relative_pose_observation_pyapi.wips.h"
 #include "apriltag_detection_pyapi.wips.h"
+#include "apriltag_relative_pose_observation_pyapi.wips.h"
 #include "apriltag_field_pose_observation_pyapi.wips.h"
 
 #define WIPS_INTERNAL
@@ -1086,7 +1086,7 @@ static PyMethodDef wips_pipeline_result_PyObject_methods[] = {
 PyTypeObject wips_pipeline_result_PyTypeObject = {
     PyVarObject_HEAD_INIT(NULL, 0)
     .tp_name = "wips.pipeline_result",
-    .tp_basicsize = GET_SIZE(pipeline_result),
+    .tp_basicsize = sizeof(wips_pipeline_result_PyObject),
     .tp_flags = Py_TPFLAGS_DEFAULT,
     .tp_base = &wips_struct_PyTypeObject,
     .tp_new = wips_pipeline_result_PyObject_new,
@@ -1095,25 +1095,6 @@ PyTypeObject wips_pipeline_result_PyTypeObject = {
     .tp_methods = wips_pipeline_result_PyObject_methods,
     .tp_getset = wips_pipeline_result_PyObject_getsetters
 };
-
-static void wips_pipeline_result_static_method_init(void) {
-    
-}
-
-int wips_pipeline_result_PyTypeObject_init(PyObject *m) {
-    
-    if (PyType_Ready(&wips_pipeline_result_PyTypeObject) < 0) {
-        return -1;
-    }
-
-    Py_INCREF(&wips_pipeline_result_PyTypeObject);
-    if (PyModule_AddObject(m, "pipeline_result", (PyObject *)&wips_pipeline_result_PyTypeObject) < 0) {
-        Py_DECREF(&wips_pipeline_result_PyTypeObject);
-        return -1;
-    }
-
-    return 0;
-}
 
 #ifdef __cplusplus
 }

@@ -53,7 +53,7 @@ static void _wips_twist3_void_destructor(void *ptr) {
     wips_twist3_destroy((wips_twist3_t *)ptr);
 }
 
-static PyObject *wips_twist3_PyObject_new(PyTypeObject* type, PyObject *args, PyObject *kwds) {
+static PyObject *wips_twist3_PyObject_new(PyTypeObject* type, PyObject *Py_UNUSED(args), PyObject *Py_UNUSED(kwds)) {
     
     wips_twist3_PyObject *obj;
 
@@ -62,14 +62,14 @@ static PyObject *wips_twist3_PyObject_new(PyTypeObject* type, PyObject *args, Py
         obj->base.wips_type = &wips_twist3_PyType;
         obj->base.handler = NULL;
         obj->c_obj = NULL;
-        return (PyObject *)self;
+        return (PyObject *)obj;
     } else {
         PyErr_SetString(PyExc_RuntimeError, "Failed to initialize twist3");
         return NULL;
     }
 }
 
-static int wips_twist3_PyObject_init(PyObject *self, PyObject *args, PyObject *kwds) {
+static int wips_twist3_PyObject_init(PyObject *self, PyObject *Py_UNUSED(args), PyObject *Py_UNUSED(kwds)) {
 
     wips_twist3_PyObject *obj = (wips_twist3_PyObject *)self;
 
@@ -85,7 +85,7 @@ static int wips_twist3_PyObject_init(PyObject *self, PyObject *args, PyObject *k
     }
 
     obj->c_obj = c_obj;
-    obj->handler = handler;
+    obj->base.handler = handler;
 
     return 0;
 }
@@ -95,7 +95,7 @@ static void wips_twist3_PyObject_dealloc(PyObject *self) {
     wips_twist3_PyObject *obj = (wips_twist3_PyObject *)self;
 
     if (obj->base.handler) {
-        wips_PyHandler_decref(obj->handler);
+        wips_PyHandler_decref(obj->base.handler);
         obj->base.handler = NULL;
         obj->base.wips_type = NULL;
         obj->c_obj = NULL;
@@ -105,7 +105,7 @@ static void wips_twist3_PyObject_dealloc(PyObject *self) {
 }
 
 // getsetters
-static PyObject *wips_twist3_PyObject_get_dx(PyObject *self, void *closure) {
+static PyObject *wips_twist3_PyObject_get_dx(PyObject *self, void *Py_UNUSED(closure)) {
     wips_twist3_PyObject *obj = (wips_twist3_PyObject *)self;
     if (!obj->c_obj) {
         PyErr_SetString(PyExc_AttributeError,"Struct is not initialized");
@@ -121,11 +121,11 @@ static PyObject *wips_twist3_PyObject_get_dx(PyObject *self, void *closure) {
     }
     return py_field;
 }
-static int wips_twist3_PyObject_set_dx(PyObject *self, PyObject *value, void *closure) {
+static int wips_twist3_PyObject_set_dx(PyObject *self, PyObject *value, void *Py_UNUSED(closure)) {
     wips_twist3_PyObject *obj = (wips_twist3_PyObject *)self;
     if (!obj->c_obj) {
         PyErr_SetString(PyExc_AttributeError,"Struct is not initialized");
-        return NULL;
+        return -1;
     }
 
     // value is not None
@@ -152,7 +152,7 @@ static int wips_twist3_PyObject_set_dx(PyObject *self, PyObject *value, void *cl
     }
     return 0;
 }
-static PyObject *wips_twist3_PyObject_get_dy(PyObject *self, void *closure) {
+static PyObject *wips_twist3_PyObject_get_dy(PyObject *self, void *Py_UNUSED(closure)) {
     wips_twist3_PyObject *obj = (wips_twist3_PyObject *)self;
     if (!obj->c_obj) {
         PyErr_SetString(PyExc_AttributeError,"Struct is not initialized");
@@ -168,11 +168,11 @@ static PyObject *wips_twist3_PyObject_get_dy(PyObject *self, void *closure) {
     }
     return py_field;
 }
-static int wips_twist3_PyObject_set_dy(PyObject *self, PyObject *value, void *closure) {
+static int wips_twist3_PyObject_set_dy(PyObject *self, PyObject *value, void *Py_UNUSED(closure)) {
     wips_twist3_PyObject *obj = (wips_twist3_PyObject *)self;
     if (!obj->c_obj) {
         PyErr_SetString(PyExc_AttributeError,"Struct is not initialized");
-        return NULL;
+        return -1;
     }
 
     // value is not None
@@ -199,7 +199,7 @@ static int wips_twist3_PyObject_set_dy(PyObject *self, PyObject *value, void *cl
     }
     return 0;
 }
-static PyObject *wips_twist3_PyObject_get_dz(PyObject *self, void *closure) {
+static PyObject *wips_twist3_PyObject_get_dz(PyObject *self, void *Py_UNUSED(closure)) {
     wips_twist3_PyObject *obj = (wips_twist3_PyObject *)self;
     if (!obj->c_obj) {
         PyErr_SetString(PyExc_AttributeError,"Struct is not initialized");
@@ -215,11 +215,11 @@ static PyObject *wips_twist3_PyObject_get_dz(PyObject *self, void *closure) {
     }
     return py_field;
 }
-static int wips_twist3_PyObject_set_dz(PyObject *self, PyObject *value, void *closure) {
+static int wips_twist3_PyObject_set_dz(PyObject *self, PyObject *value, void *Py_UNUSED(closure)) {
     wips_twist3_PyObject *obj = (wips_twist3_PyObject *)self;
     if (!obj->c_obj) {
         PyErr_SetString(PyExc_AttributeError,"Struct is not initialized");
-        return NULL;
+        return -1;
     }
 
     // value is not None
@@ -246,7 +246,7 @@ static int wips_twist3_PyObject_set_dz(PyObject *self, PyObject *value, void *cl
     }
     return 0;
 }
-static PyObject *wips_twist3_PyObject_get_rx(PyObject *self, void *closure) {
+static PyObject *wips_twist3_PyObject_get_rx(PyObject *self, void *Py_UNUSED(closure)) {
     wips_twist3_PyObject *obj = (wips_twist3_PyObject *)self;
     if (!obj->c_obj) {
         PyErr_SetString(PyExc_AttributeError,"Struct is not initialized");
@@ -262,11 +262,11 @@ static PyObject *wips_twist3_PyObject_get_rx(PyObject *self, void *closure) {
     }
     return py_field;
 }
-static int wips_twist3_PyObject_set_rx(PyObject *self, PyObject *value, void *closure) {
+static int wips_twist3_PyObject_set_rx(PyObject *self, PyObject *value, void *Py_UNUSED(closure)) {
     wips_twist3_PyObject *obj = (wips_twist3_PyObject *)self;
     if (!obj->c_obj) {
         PyErr_SetString(PyExc_AttributeError,"Struct is not initialized");
-        return NULL;
+        return -1;
     }
 
     // value is not None
@@ -293,7 +293,7 @@ static int wips_twist3_PyObject_set_rx(PyObject *self, PyObject *value, void *cl
     }
     return 0;
 }
-static PyObject *wips_twist3_PyObject_get_ry(PyObject *self, void *closure) {
+static PyObject *wips_twist3_PyObject_get_ry(PyObject *self, void *Py_UNUSED(closure)) {
     wips_twist3_PyObject *obj = (wips_twist3_PyObject *)self;
     if (!obj->c_obj) {
         PyErr_SetString(PyExc_AttributeError,"Struct is not initialized");
@@ -309,11 +309,11 @@ static PyObject *wips_twist3_PyObject_get_ry(PyObject *self, void *closure) {
     }
     return py_field;
 }
-static int wips_twist3_PyObject_set_ry(PyObject *self, PyObject *value, void *closure) {
+static int wips_twist3_PyObject_set_ry(PyObject *self, PyObject *value, void *Py_UNUSED(closure)) {
     wips_twist3_PyObject *obj = (wips_twist3_PyObject *)self;
     if (!obj->c_obj) {
         PyErr_SetString(PyExc_AttributeError,"Struct is not initialized");
-        return NULL;
+        return -1;
     }
 
     // value is not None
@@ -340,7 +340,7 @@ static int wips_twist3_PyObject_set_ry(PyObject *self, PyObject *value, void *cl
     }
     return 0;
 }
-static PyObject *wips_twist3_PyObject_get_rz(PyObject *self, void *closure) {
+static PyObject *wips_twist3_PyObject_get_rz(PyObject *self, void *Py_UNUSED(closure)) {
     wips_twist3_PyObject *obj = (wips_twist3_PyObject *)self;
     if (!obj->c_obj) {
         PyErr_SetString(PyExc_AttributeError,"Struct is not initialized");
@@ -356,11 +356,11 @@ static PyObject *wips_twist3_PyObject_get_rz(PyObject *self, void *closure) {
     }
     return py_field;
 }
-static int wips_twist3_PyObject_set_rz(PyObject *self, PyObject *value, void *closure) {
+static int wips_twist3_PyObject_set_rz(PyObject *self, PyObject *value, void *Py_UNUSED(closure)) {
     wips_twist3_PyObject *obj = (wips_twist3_PyObject *)self;
     if (!obj->c_obj) {
         PyErr_SetString(PyExc_AttributeError,"Struct is not initialized");
-        return NULL;
+        return -1;
     }
 
     // value is not None
@@ -392,47 +392,47 @@ static PyGetSetDef wips_twist3_PyObject_getsetters[] = {
     {
         "dx",
         (getter)wips_twist3_PyObject_get_dx,
-        (setter)wips_twist3_PyObject_set_dx,,
+        (setter)wips_twist3_PyObject_set_dx,
         "fp64",
         NULL
     },
     {
         "dy",
         (getter)wips_twist3_PyObject_get_dy,
-        (setter)wips_twist3_PyObject_set_dy,,
+        (setter)wips_twist3_PyObject_set_dy,
         "fp64",
         NULL
     },
     {
         "dz",
         (getter)wips_twist3_PyObject_get_dz,
-        (setter)wips_twist3_PyObject_set_dz,,
+        (setter)wips_twist3_PyObject_set_dz,
         "fp64",
         NULL
     },
     {
         "rx",
         (getter)wips_twist3_PyObject_get_rx,
-        (setter)wips_twist3_PyObject_set_rx,,
+        (setter)wips_twist3_PyObject_set_rx,
         "fp64",
         NULL
     },
     {
         "ry",
         (getter)wips_twist3_PyObject_get_ry,
-        (setter)wips_twist3_PyObject_set_ry,,
+        (setter)wips_twist3_PyObject_set_ry,
         "fp64",
         NULL
     },
     {
         "rz",
         (getter)wips_twist3_PyObject_get_rz,
-        (setter)wips_twist3_PyObject_set_rz,,
+        (setter)wips_twist3_PyObject_set_rz,
         "fp64",
         NULL
     },
     {NULL}
-}
+};
 
 // wips_PyType
 
@@ -453,7 +453,7 @@ static PyObject *wips_twist3_wrap(void *c_obj, wips_PyHandler *handler) {
     obj->c_obj = (wips_twist3_t *)c_obj;
     wips_PyHandler_incref(handler);
 
-    return obj;
+    return (PyObject *)obj;
 }
 
 static void *wips_twist3_unwrap(PyObject *py_obj) {
@@ -736,13 +736,13 @@ static PyMethodDef wips_twist3_PyObject_methods[] = {
     {
         "encode",
         wips_twist3_PyObject_encode,
-        METH_VARARGS,
+        METH_VARARGS | METH_STATIC,
         "Encodes a struct"
     },
     {
         "decode",
         wips_twist3_PyObject_decode,
-        METH_VARARGS,
+        METH_VARARGS | METH_STATIC,
         "Decodes a blob"
     },
     {
@@ -763,7 +763,7 @@ static PyMethodDef wips_twist3_PyObject_methods[] = {
 PyTypeObject wips_twist3_PyTypeObject = {
     PyVarObject_HEAD_INIT(NULL, 0)
     .tp_name = "wips.twist3",
-    .tp_basicsize = GET_SIZE(twist3),
+    .tp_basicsize = sizeof(wips_twist3_PyObject),
     .tp_flags = Py_TPFLAGS_DEFAULT,
     .tp_base = &wips_struct_PyTypeObject,
     .tp_new = wips_twist3_PyObject_new,
@@ -772,55 +772,6 @@ PyTypeObject wips_twist3_PyTypeObject = {
     .tp_methods = wips_twist3_PyObject_methods,
     .tp_getset = wips_twist3_PyObject_getsetters
 };
-
-int wips_twist3_PyTypeObject_init(PyObject *m) {
-    if (PyType_Ready(&wips_twist3_PyTypeObject) < 0) {
-        return -1;
-    }
-
-    Py_INCREF(&wips_twist3_PyTypeObject);
-    if (PyModule_AddObject(m, "twist3", (PyObject *)&wips_twist3_PyTypeObject) < 0) {
-        Py_DECREF(&wips_twist3_PyTypeObject);
-        return -1;
-    }
-
-    PyObject *encode_func = PyObject_GetAttrString((PyObject *)&wips_twist3_PyTypeObject, "encode");
-    if (!encode_func) {
-        // failed to retrieve encoder function, give up
-        return -1;
-    }
-
-    PyObject *decode_func = PyObject_GetAttrString((PyObject *)&wips_twist3_PyTypeObject, "decode");
-    if (!encode_func) {
-        // failed to retrieve decoder function, give up
-        return -1;
-    }
-
-    PyObject *static_encode_func = PyStaticMethod_New(encode_func);
-    Py_DECREF(encode_func);
-    if (!static_encode_func) {
-        // failed to create static encoder function, give up
-        return -1;
-    }
-    if (PyObject_SetAttrString((PyObject *)&wips_twist3_PyTypeObject, "encode", static_encode_func) < 0) {
-        Py_DECREF(static_encode_func);
-        return -1;
-    }
-    Py_DECREF(static_encode_func);
-
-    PyObject *static_decode_func = PyStaticMethod_New(decode_func);
-    Py_DECREF(decode_func);
-    if (!static_decode_func) {
-        // failed to create static decoder function, give up
-        return -1;
-    }
-    if (PyObject_SetAttrString((PyObject *)&wips_twist3_PyTypeObject, "decode", static_decode_func) < 0) {
-        Py_DECREF(static_decode_func);
-        return -1;
-    }
-    Py_DECREF(static_decode_func);
-    return 0;
-}
 
 #ifdef __cplusplus
 }

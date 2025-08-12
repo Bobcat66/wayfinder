@@ -51,8 +51,6 @@ typedef struct {
 extern wips_PyType wips_apriltag_detection_PyType;
 extern PyTypeObject wips_apriltag_detection_PyTypeObject;
 
-int wips_apriltag_detection_PyTypeObject_init(PyObject *m);
-
 #ifdef __cplusplus
 }
 #endif

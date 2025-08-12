@@ -692,7 +692,7 @@ static PyMethodDef wips_apriltag_relative_pose_observation_PyObject_methods[] = 
 PyTypeObject wips_apriltag_relative_pose_observation_PyTypeObject = {
     PyVarObject_HEAD_INIT(NULL, 0)
     .tp_name = "wips.apriltag_relative_pose_observation",
-    .tp_basicsize = GET_SIZE(apriltag_relative_pose_observation),
+    .tp_basicsize = sizeof(wips_apriltag_relative_pose_observation_PyObject),
     .tp_flags = Py_TPFLAGS_DEFAULT,
     .tp_base = &wips_struct_PyTypeObject,
     .tp_new = wips_apriltag_relative_pose_observation_PyObject_new,
@@ -701,25 +701,6 @@ PyTypeObject wips_apriltag_relative_pose_observation_PyTypeObject = {
     .tp_methods = wips_apriltag_relative_pose_observation_PyObject_methods,
     .tp_getset = wips_apriltag_relative_pose_observation_PyObject_getsetters
 };
-
-static void wips_apriltag_relative_pose_observation_static_method_init(void) {
-    
-}
-
-int wips_apriltag_relative_pose_observation_PyTypeObject_init(PyObject *m) {
-    
-    if (PyType_Ready(&wips_apriltag_relative_pose_observation_PyTypeObject) < 0) {
-        return -1;
-    }
-
-    Py_INCREF(&wips_apriltag_relative_pose_observation_PyTypeObject);
-    if (PyModule_AddObject(m, "apriltag_relative_pose_observation", (PyObject *)&wips_apriltag_relative_pose_observation_PyTypeObject) < 0) {
-        Py_DECREF(&wips_apriltag_relative_pose_observation_PyTypeObject);
-        return -1;
-    }
-
-    return 0;
-}
 
 #ifdef __cplusplus
 }

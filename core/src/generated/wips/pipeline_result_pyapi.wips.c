@@ -43,10 +43,10 @@ extern "C" {
 
 #define PY_SSIZE_T_CLEAN
 #include "pipeline_result_pyapi.wips.h"
-#include "object_detection_pyapi.wips.h"
-#include "apriltag_field_pose_observation_pyapi.wips.h"
 #include "apriltag_detection_pyapi.wips.h"
 #include "apriltag_relative_pose_observation_pyapi.wips.h"
+#include "object_detection_pyapi.wips.h"
+#include "apriltag_field_pose_observation_pyapi.wips.h"
 
 #define WIPS_INTERNAL
 #include "wips_detail.h"
@@ -57,7 +57,7 @@ static void _wips_pipeline_result_void_destructor(void *ptr) {
     wips_pipeline_result_destroy((wips_pipeline_result_t *)ptr);
 }
 
-static PyObject *wips_pipeline_result_PyObject_new(PyTypeObject* type, PyObject *args, PyObject *kwds) {
+static PyObject *wips_pipeline_result_PyObject_new(PyTypeObject* type, PyObject *Py_UNUSED(args), PyObject *Py_UNUSED(kwds)) {
     
     wips_pipeline_result_PyObject *obj;
 
@@ -66,14 +66,14 @@ static PyObject *wips_pipeline_result_PyObject_new(PyTypeObject* type, PyObject 
         obj->base.wips_type = &wips_pipeline_result_PyType;
         obj->base.handler = NULL;
         obj->c_obj = NULL;
-        return (PyObject *)self;
+        return (PyObject *)obj;
     } else {
         PyErr_SetString(PyExc_RuntimeError, "Failed to initialize pipeline_result");
         return NULL;
     }
 }
 
-static int wips_pipeline_result_PyObject_init(PyObject *self, PyObject *args, PyObject *kwds) {
+static int wips_pipeline_result_PyObject_init(PyObject *self, PyObject *Py_UNUSED(args), PyObject *Py_UNUSED(kwds)) {
 
     wips_pipeline_result_PyObject *obj = (wips_pipeline_result_PyObject *)self;
 
@@ -89,7 +89,7 @@ static int wips_pipeline_result_PyObject_init(PyObject *self, PyObject *args, Py
     }
 
     obj->c_obj = c_obj;
-    obj->handler = handler;
+    obj->base.handler = handler;
 
     return 0;
 }
@@ -99,7 +99,7 @@ static void wips_pipeline_result_PyObject_dealloc(PyObject *self) {
     wips_pipeline_result_PyObject *obj = (wips_pipeline_result_PyObject *)self;
 
     if (obj->base.handler) {
-        wips_PyHandler_decref(obj->handler);
+        wips_PyHandler_decref(obj->base.handler);
         obj->base.handler = NULL;
         obj->base.wips_type = NULL;
         obj->c_obj = NULL;
@@ -109,7 +109,7 @@ static void wips_pipeline_result_PyObject_dealloc(PyObject *self) {
 }
 
 // getsetters
-static PyObject *wips_pipeline_result_PyObject_get_timestamp(PyObject *self, void *closure) {
+static PyObject *wips_pipeline_result_PyObject_get_timestamp(PyObject *self, void *Py_UNUSED(closure)) {
     wips_pipeline_result_PyObject *obj = (wips_pipeline_result_PyObject *)self;
     if (!obj->c_obj) {
         PyErr_SetString(PyExc_AttributeError,"Struct is not initialized");
@@ -125,11 +125,11 @@ static PyObject *wips_pipeline_result_PyObject_get_timestamp(PyObject *self, voi
     }
     return py_field;
 }
-static int wips_pipeline_result_PyObject_set_timestamp(PyObject *self, PyObject *value, void *closure) {
+static int wips_pipeline_result_PyObject_set_timestamp(PyObject *self, PyObject *value, void *Py_UNUSED(closure)) {
     wips_pipeline_result_PyObject *obj = (wips_pipeline_result_PyObject *)self;
     if (!obj->c_obj) {
         PyErr_SetString(PyExc_AttributeError,"Struct is not initialized");
-        return NULL;
+        return -1;
     }
 
     // value is not None
@@ -156,7 +156,7 @@ static int wips_pipeline_result_PyObject_set_timestamp(PyObject *self, PyObject 
     }
     return 0;
 }
-static PyObject *wips_pipeline_result_PyObject_get_pipeline_type(PyObject *self, void *closure) {
+static PyObject *wips_pipeline_result_PyObject_get_pipeline_type(PyObject *self, void *Py_UNUSED(closure)) {
     wips_pipeline_result_PyObject *obj = (wips_pipeline_result_PyObject *)self;
     if (!obj->c_obj) {
         PyErr_SetString(PyExc_AttributeError,"Struct is not initialized");
@@ -172,11 +172,11 @@ static PyObject *wips_pipeline_result_PyObject_get_pipeline_type(PyObject *self,
     }
     return py_field;
 }
-static int wips_pipeline_result_PyObject_set_pipeline_type(PyObject *self, PyObject *value, void *closure) {
+static int wips_pipeline_result_PyObject_set_pipeline_type(PyObject *self, PyObject *value, void *Py_UNUSED(closure)) {
     wips_pipeline_result_PyObject *obj = (wips_pipeline_result_PyObject *)self;
     if (!obj->c_obj) {
         PyErr_SetString(PyExc_AttributeError,"Struct is not initialized");
-        return NULL;
+        return -1;
     }
 
     // value is not None
@@ -203,7 +203,7 @@ static int wips_pipeline_result_PyObject_set_pipeline_type(PyObject *self, PyObj
     }
     return 0;
 }
-static PyObject *wips_pipeline_result_PyObject_get_tag_detections(PyObject *self, void *closure) {
+static PyObject *wips_pipeline_result_PyObject_get_tag_detections(PyObject *self, void *Py_UNUSED(closure)) {
     wips_pipeline_result_PyObject *obj = (wips_pipeline_result_PyObject *)self;
     if (!obj->c_obj) {
         PyErr_SetString(PyExc_AttributeError,"Struct is not initialized");
@@ -217,7 +217,7 @@ static PyObject *wips_pipeline_result_PyObject_get_tag_detections(PyObject *self
     }
 
     wips_vlaref_t vlaref;
-    GET_VLAREF(&vlaref,apriltag_detection,obj->c_obj,tag_detections)
+    GET_VLAREF(&vlaref,apriltag_detection,obj->c_obj,tag_detections);
     wips_vla_PyObject *py_vla = wips_vla_PyObject_create(
         &wips_apriltag_detection_PyType,
         obj->base.handler,
@@ -230,7 +230,7 @@ static PyObject *wips_pipeline_result_PyObject_get_tag_detections(PyObject *self
     
     return (PyObject *)py_vla;
 }
-static int wips_pipeline_result_PyObject_set_tag_detections(PyObject *self, PyObject *value, void *closure) {
+static int wips_pipeline_result_PyObject_set_tag_detections(PyObject *self, PyObject *value, void *Py_UNUSED(closure)) {
     wips_pipeline_result_PyObject *obj = (wips_pipeline_result_PyObject *)self;
     if (!obj->c_obj) {
         PyErr_SetString(PyExc_AttributeError,"Struct is not initialized");
@@ -301,7 +301,7 @@ static int wips_pipeline_result_PyObject_set_tag_detections(PyObject *self, PyOb
     // Check if old vla is NULL
     if (obj->c_obj->tag_detections) {
         // old vla is not NULL, destroy the buffer
-        for (size_t i = 0; i < obj->c_obj->GET_DETAIL(tag_detections,vlasize)) {
+        for (size_t i = 0; i < obj->c_obj->GET_DETAIL(tag_detections,vlasize); ++i) {
             // Free resources recursively
             wips_apriltag_detection_t *old_elem = obj->c_obj->tag_detections + i;
             wips_apriltag_detection_free_resources(old_elem);
@@ -314,7 +314,7 @@ static int wips_pipeline_result_PyObject_set_tag_detections(PyObject *self, PyOb
     obj->c_obj->GET_DETAIL(tag_detections,vlasize) = new_vlasize;
     return 0;
 }
-static PyObject *wips_pipeline_result_PyObject_get_tag_poses(PyObject *self, void *closure) {
+static PyObject *wips_pipeline_result_PyObject_get_tag_poses(PyObject *self, void *Py_UNUSED(closure)) {
     wips_pipeline_result_PyObject *obj = (wips_pipeline_result_PyObject *)self;
     if (!obj->c_obj) {
         PyErr_SetString(PyExc_AttributeError,"Struct is not initialized");
@@ -328,7 +328,7 @@ static PyObject *wips_pipeline_result_PyObject_get_tag_poses(PyObject *self, voi
     }
 
     wips_vlaref_t vlaref;
-    GET_VLAREF(&vlaref,apriltag_relative_pose_observation,obj->c_obj,tag_poses)
+    GET_VLAREF(&vlaref,apriltag_relative_pose_observation,obj->c_obj,tag_poses);
     wips_vla_PyObject *py_vla = wips_vla_PyObject_create(
         &wips_apriltag_relative_pose_observation_PyType,
         obj->base.handler,
@@ -341,7 +341,7 @@ static PyObject *wips_pipeline_result_PyObject_get_tag_poses(PyObject *self, voi
     
     return (PyObject *)py_vla;
 }
-static int wips_pipeline_result_PyObject_set_tag_poses(PyObject *self, PyObject *value, void *closure) {
+static int wips_pipeline_result_PyObject_set_tag_poses(PyObject *self, PyObject *value, void *Py_UNUSED(closure)) {
     wips_pipeline_result_PyObject *obj = (wips_pipeline_result_PyObject *)self;
     if (!obj->c_obj) {
         PyErr_SetString(PyExc_AttributeError,"Struct is not initialized");
@@ -412,7 +412,7 @@ static int wips_pipeline_result_PyObject_set_tag_poses(PyObject *self, PyObject 
     // Check if old vla is NULL
     if (obj->c_obj->tag_poses) {
         // old vla is not NULL, destroy the buffer
-        for (size_t i = 0; i < obj->c_obj->GET_DETAIL(tag_poses,vlasize)) {
+        for (size_t i = 0; i < obj->c_obj->GET_DETAIL(tag_poses,vlasize); ++i) {
             // Free resources recursively
             wips_apriltag_relative_pose_observation_t *old_elem = obj->c_obj->tag_poses + i;
             wips_apriltag_relative_pose_observation_free_resources(old_elem);
@@ -425,7 +425,7 @@ static int wips_pipeline_result_PyObject_set_tag_poses(PyObject *self, PyObject 
     obj->c_obj->GET_DETAIL(tag_poses,vlasize) = new_vlasize;
     return 0;
 }
-static PyObject *wips_pipeline_result_PyObject_get_field_pose(PyObject *self, void *closure) {
+static PyObject *wips_pipeline_result_PyObject_get_field_pose(PyObject *self, void *Py_UNUSED(closure)) {
     wips_pipeline_result_PyObject *obj = (wips_pipeline_result_PyObject *)self;
     if (!obj->c_obj) {
         PyErr_SetString(PyExc_AttributeError,"Struct is not initialized");
@@ -447,11 +447,11 @@ static PyObject *wips_pipeline_result_PyObject_get_field_pose(PyObject *self, vo
         return Py_None;
     } 
 }
-static int wips_pipeline_result_PyObject_set_field_pose(PyObject *self, PyObject *value, void *closure) {
+static int wips_pipeline_result_PyObject_set_field_pose(PyObject *self, PyObject *value, void *Py_UNUSED(closure)) {
     wips_pipeline_result_PyObject *obj = (wips_pipeline_result_PyObject *)self;
     if (!obj->c_obj) {
         PyErr_SetString(PyExc_AttributeError,"Struct is not initialized");
-        return NULL;
+        return -1;
     }
 
     if (value == Py_None) {
@@ -486,7 +486,7 @@ static int wips_pipeline_result_PyObject_set_field_pose(PyObject *self, PyObject
     obj->c_obj->GET_DETAIL(field_pose,optpresent) = 0x01;
     return 0;
 }
-static PyObject *wips_pipeline_result_PyObject_get_object_detections(PyObject *self, void *closure) {
+static PyObject *wips_pipeline_result_PyObject_get_object_detections(PyObject *self, void *Py_UNUSED(closure)) {
     wips_pipeline_result_PyObject *obj = (wips_pipeline_result_PyObject *)self;
     if (!obj->c_obj) {
         PyErr_SetString(PyExc_AttributeError,"Struct is not initialized");
@@ -500,7 +500,7 @@ static PyObject *wips_pipeline_result_PyObject_get_object_detections(PyObject *s
     }
 
     wips_vlaref_t vlaref;
-    GET_VLAREF(&vlaref,object_detection,obj->c_obj,object_detections)
+    GET_VLAREF(&vlaref,object_detection,obj->c_obj,object_detections);
     wips_vla_PyObject *py_vla = wips_vla_PyObject_create(
         &wips_object_detection_PyType,
         obj->base.handler,
@@ -513,7 +513,7 @@ static PyObject *wips_pipeline_result_PyObject_get_object_detections(PyObject *s
     
     return (PyObject *)py_vla;
 }
-static int wips_pipeline_result_PyObject_set_object_detections(PyObject *self, PyObject *value, void *closure) {
+static int wips_pipeline_result_PyObject_set_object_detections(PyObject *self, PyObject *value, void *Py_UNUSED(closure)) {
     wips_pipeline_result_PyObject *obj = (wips_pipeline_result_PyObject *)self;
     if (!obj->c_obj) {
         PyErr_SetString(PyExc_AttributeError,"Struct is not initialized");
@@ -584,7 +584,7 @@ static int wips_pipeline_result_PyObject_set_object_detections(PyObject *self, P
     // Check if old vla is NULL
     if (obj->c_obj->object_detections) {
         // old vla is not NULL, destroy the buffer
-        for (size_t i = 0; i < obj->c_obj->GET_DETAIL(object_detections,vlasize)) {
+        for (size_t i = 0; i < obj->c_obj->GET_DETAIL(object_detections,vlasize); ++i) {
             // Free resources recursively
             wips_object_detection_t *old_elem = obj->c_obj->object_detections + i;
             wips_object_detection_free_resources(old_elem);
@@ -602,14 +602,14 @@ static PyGetSetDef wips_pipeline_result_PyObject_getsetters[] = {
     {
         "timestamp",
         (getter)wips_pipeline_result_PyObject_get_timestamp,
-        (setter)wips_pipeline_result_PyObject_set_timestamp,,
+        (setter)wips_pipeline_result_PyObject_set_timestamp,
         "u64",
         NULL
     },
     {
         "pipeline_type",
         (getter)wips_pipeline_result_PyObject_get_pipeline_type,
-        (setter)wips_pipeline_result_PyObject_set_pipeline_type,,
+        (setter)wips_pipeline_result_PyObject_set_pipeline_type,
         "u8",
         NULL
     },
@@ -642,7 +642,7 @@ static PyGetSetDef wips_pipeline_result_PyObject_getsetters[] = {
         NULL
     },
     {NULL}
-}
+};
 
 // wips_PyType
 
@@ -663,7 +663,7 @@ static PyObject *wips_pipeline_result_wrap(void *c_obj, wips_PyHandler *handler)
     obj->c_obj = (wips_pipeline_result_t *)c_obj;
     wips_PyHandler_incref(handler);
 
-    return obj;
+    return (PyObject *)obj;
 }
 
 static void *wips_pipeline_result_unwrap(PyObject *py_obj) {
@@ -1059,13 +1059,13 @@ static PyMethodDef wips_pipeline_result_PyObject_methods[] = {
     {
         "encode",
         wips_pipeline_result_PyObject_encode,
-        METH_VARARGS,
+        METH_VARARGS | METH_STATIC,
         "Encodes a struct"
     },
     {
         "decode",
         wips_pipeline_result_PyObject_decode,
-        METH_VARARGS,
+        METH_VARARGS | METH_STATIC,
         "Decodes a blob"
     },
     {
@@ -1086,7 +1086,7 @@ static PyMethodDef wips_pipeline_result_PyObject_methods[] = {
 PyTypeObject wips_pipeline_result_PyTypeObject = {
     PyVarObject_HEAD_INIT(NULL, 0)
     .tp_name = "wips.pipeline_result",
-    .tp_basicsize = GET_SIZE(pipeline_result),
+    .tp_basicsize = sizeof(wips_pipeline_result_PyObject),
     .tp_flags = Py_TPFLAGS_DEFAULT,
     .tp_base = &wips_struct_PyTypeObject,
     .tp_new = wips_pipeline_result_PyObject_new,
@@ -1095,55 +1095,6 @@ PyTypeObject wips_pipeline_result_PyTypeObject = {
     .tp_methods = wips_pipeline_result_PyObject_methods,
     .tp_getset = wips_pipeline_result_PyObject_getsetters
 };
-
-int wips_pipeline_result_PyTypeObject_init(PyObject *m) {
-    if (PyType_Ready(&wips_pipeline_result_PyTypeObject) < 0) {
-        return -1;
-    }
-
-    Py_INCREF(&wips_pipeline_result_PyTypeObject);
-    if (PyModule_AddObject(m, "pipeline_result", (PyObject *)&wips_pipeline_result_PyTypeObject) < 0) {
-        Py_DECREF(&wips_pipeline_result_PyTypeObject);
-        return -1;
-    }
-
-    PyObject *encode_func = PyObject_GetAttrString((PyObject *)&wips_pipeline_result_PyTypeObject, "encode");
-    if (!encode_func) {
-        // failed to retrieve encoder function, give up
-        return -1;
-    }
-
-    PyObject *decode_func = PyObject_GetAttrString((PyObject *)&wips_pipeline_result_PyTypeObject, "decode");
-    if (!encode_func) {
-        // failed to retrieve decoder function, give up
-        return -1;
-    }
-
-    PyObject *static_encode_func = PyStaticMethod_New(encode_func);
-    Py_DECREF(encode_func);
-    if (!static_encode_func) {
-        // failed to create static encoder function, give up
-        return -1;
-    }
-    if (PyObject_SetAttrString((PyObject *)&wips_pipeline_result_PyTypeObject, "encode", static_encode_func) < 0) {
-        Py_DECREF(static_encode_func);
-        return -1;
-    }
-    Py_DECREF(static_encode_func);
-
-    PyObject *static_decode_func = PyStaticMethod_New(decode_func);
-    Py_DECREF(decode_func);
-    if (!static_decode_func) {
-        // failed to create static decoder function, give up
-        return -1;
-    }
-    if (PyObject_SetAttrString((PyObject *)&wips_pipeline_result_PyTypeObject, "decode", static_decode_func) < 0) {
-        Py_DECREF(static_decode_func);
-        return -1;
-    }
-    Py_DECREF(static_decode_func);
-    return 0;
-}
 
 #ifdef __cplusplus
 }

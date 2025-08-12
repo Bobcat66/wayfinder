@@ -674,7 +674,7 @@ static PyMethodDef wips_odometry_result_PyObject_methods[] = {
 PyTypeObject wips_odometry_result_PyTypeObject = {
     PyVarObject_HEAD_INIT(NULL, 0)
     .tp_name = "wips.odometry_result",
-    .tp_basicsize = GET_SIZE(odometry_result),
+    .tp_basicsize = sizeof(wips_odometry_result_PyObject),
     .tp_flags = Py_TPFLAGS_DEFAULT,
     .tp_base = &wips_struct_PyTypeObject,
     .tp_new = wips_odometry_result_PyObject_new,
@@ -683,25 +683,6 @@ PyTypeObject wips_odometry_result_PyTypeObject = {
     .tp_methods = wips_odometry_result_PyObject_methods,
     .tp_getset = wips_odometry_result_PyObject_getsetters
 };
-
-static void wips_odometry_result_static_method_init(void) {
-    
-}
-
-int wips_odometry_result_PyTypeObject_init(PyObject *m) {
-    
-    if (PyType_Ready(&wips_odometry_result_PyTypeObject) < 0) {
-        return -1;
-    }
-
-    Py_INCREF(&wips_odometry_result_PyTypeObject);
-    if (PyModule_AddObject(m, "odometry_result", (PyObject *)&wips_odometry_result_PyTypeObject) < 0) {
-        Py_DECREF(&wips_odometry_result_PyTypeObject);
-        return -1;
-    }
-
-    return 0;
-}
 
 #ifdef __cplusplus
 }

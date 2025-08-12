@@ -1123,7 +1123,7 @@ static PyMethodDef wips_object_detection_PyObject_methods[] = {
 PyTypeObject wips_object_detection_PyTypeObject = {
     PyVarObject_HEAD_INIT(NULL, 0)
     .tp_name = "wips.object_detection",
-    .tp_basicsize = GET_SIZE(object_detection),
+    .tp_basicsize = sizeof(wips_object_detection_PyObject),
     .tp_flags = Py_TPFLAGS_DEFAULT,
     .tp_base = &wips_struct_PyTypeObject,
     .tp_new = wips_object_detection_PyObject_new,
@@ -1132,25 +1132,6 @@ PyTypeObject wips_object_detection_PyTypeObject = {
     .tp_methods = wips_object_detection_PyObject_methods,
     .tp_getset = wips_object_detection_PyObject_getsetters
 };
-
-static void wips_object_detection_static_method_init(void) {
-    
-}
-
-int wips_object_detection_PyTypeObject_init(PyObject *m) {
-    
-    if (PyType_Ready(&wips_object_detection_PyTypeObject) < 0) {
-        return -1;
-    }
-
-    Py_INCREF(&wips_object_detection_PyTypeObject);
-    if (PyModule_AddObject(m, "object_detection", (PyObject *)&wips_object_detection_PyTypeObject) < 0) {
-        Py_DECREF(&wips_object_detection_PyTypeObject);
-        return -1;
-    }
-
-    return 0;
-}
 
 #ifdef __cplusplus
 }

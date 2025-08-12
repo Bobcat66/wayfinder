@@ -684,7 +684,7 @@ static PyMethodDef wips_{{ name }}_PyObject_methods[] = {
 PyTypeObject wips_{{ name }}_PyTypeObject = {
     PyVarObject_HEAD_INIT(NULL, 0)
     .tp_name = "wips.{{ name }}",
-    .tp_basicsize = GET_SIZE({{ name }}),
+    .tp_basicsize = sizeof(wips_{{ name }}_PyObject),
     .tp_flags = Py_TPFLAGS_DEFAULT,
     .tp_base = &wips_struct_PyTypeObject,
     .tp_new = wips_{{ name }}_PyObject_new,
@@ -693,25 +693,6 @@ PyTypeObject wips_{{ name }}_PyTypeObject = {
     .tp_methods = wips_{{ name }}_PyObject_methods,
     .tp_getset = wips_{{ name }}_PyObject_getsetters
 };
-
-static void wips_{{ name }}_static_method_init(void) {
-    
-}
-
-int wips_{{ name }}_PyTypeObject_init(PyObject *m) {
-    
-    if (PyType_Ready(&wips_{{ name }}_PyTypeObject) < 0) {
-        return -1;
-    }
-
-    Py_INCREF(&wips_{{ name }}_PyTypeObject);
-    if (PyModule_AddObject(m, "{{ name }}", (PyObject *)&wips_{{ name }}_PyTypeObject) < 0) {
-        Py_DECREF(&wips_{{ name }}_PyTypeObject);
-        return -1;
-    }
-
-    return 0;
-}
 
 #ifdef __cplusplus
 }

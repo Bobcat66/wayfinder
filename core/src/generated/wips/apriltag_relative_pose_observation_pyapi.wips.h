@@ -49,9 +49,7 @@ typedef struct {
 } wips_apriltag_relative_pose_observation_PyObject;
 
 extern wips_PyType wips_apriltag_relative_pose_observation_PyType;
-extern PyTypeObject wips_apriltag_relative_pose_observation_PyObjectType;
-
-int wips_apriltag_relative_pose_observation_PyObjectType_init(PyObject *m);
+extern PyTypeObject wips_apriltag_relative_pose_observation_PyTypeObject;
 
 #ifdef __cplusplus
 }

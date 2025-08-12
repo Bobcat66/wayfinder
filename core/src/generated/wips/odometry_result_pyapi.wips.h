@@ -49,9 +49,7 @@ typedef struct {
 } wips_odometry_result_PyObject;
 
 extern wips_PyType wips_odometry_result_PyType;
-extern PyTypeObject wips_odometry_result_PyObjectType;
-
-int wips_odometry_result_PyObjectType_init(PyObject *m);
+extern PyTypeObject wips_odometry_result_PyTypeObject;
 
 #ifdef __cplusplus
 }

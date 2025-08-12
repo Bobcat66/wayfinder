@@ -547,7 +547,7 @@ static PyMethodDef wips_twist2_PyObject_methods[] = {
 PyTypeObject wips_twist2_PyTypeObject = {
     PyVarObject_HEAD_INIT(NULL, 0)
     .tp_name = "wips.twist2",
-    .tp_basicsize = GET_SIZE(twist2),
+    .tp_basicsize = sizeof(wips_twist2_PyObject),
     .tp_flags = Py_TPFLAGS_DEFAULT,
     .tp_base = &wips_struct_PyTypeObject,
     .tp_new = wips_twist2_PyObject_new,
@@ -556,25 +556,6 @@ PyTypeObject wips_twist2_PyTypeObject = {
     .tp_methods = wips_twist2_PyObject_methods,
     .tp_getset = wips_twist2_PyObject_getsetters
 };
-
-static void wips_twist2_static_method_init(void) {
-    
-}
-
-int wips_twist2_PyTypeObject_init(PyObject *m) {
-    
-    if (PyType_Ready(&wips_twist2_PyTypeObject) < 0) {
-        return -1;
-    }
-
-    Py_INCREF(&wips_twist2_PyTypeObject);
-    if (PyModule_AddObject(m, "twist2", (PyObject *)&wips_twist2_PyTypeObject) < 0) {
-        Py_DECREF(&wips_twist2_PyTypeObject);
-        return -1;
-    }
-
-    return 0;
-}
 
 #ifdef __cplusplus
 }

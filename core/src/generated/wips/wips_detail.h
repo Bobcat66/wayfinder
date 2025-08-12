@@ -253,8 +253,8 @@ struct tm* wips_localtime(const time_t* timer);
     do {                                                                                                        \
         wips_u32_t *vlasize_pt = &((wips_struct)->GET_DETAIL(field,vlasize));                                   \
         void *buffer_pt = (void *)(&((wips_struct)->field));                                                    \
-        out->vlasize_pt = vlasize_pt;                                                                           \
-        out->buffer_pt = buffer_pt;                                                                             \
+        (out)->vlasize_pt = vlasize_pt;                                                                         \
+        (out)->buffer_pt = buffer_pt;                                                                           \
     } while (0)
 
 #ifdef __cplusplus

@@ -53,7 +53,7 @@ static void _wips_object_detection_void_destructor(void *ptr) {
     wips_object_detection_destroy((wips_object_detection_t *)ptr);
 }
 
-static PyObject *wips_object_detection_PyObject_new(PyTypeObject* type, PyObject *args, PyObject *kwds) {
+static PyObject *wips_object_detection_PyObject_new(PyTypeObject* type, PyObject *Py_UNUSED(args), PyObject *Py_UNUSED(kwds)) {
     
     wips_object_detection_PyObject *obj;
 
@@ -62,14 +62,14 @@ static PyObject *wips_object_detection_PyObject_new(PyTypeObject* type, PyObject
         obj->base.wips_type = &wips_object_detection_PyType;
         obj->base.handler = NULL;
         obj->c_obj = NULL;
-        return (PyObject *)self;
+        return (PyObject *)obj;
     } else {
         PyErr_SetString(PyExc_RuntimeError, "Failed to initialize object_detection");
         return NULL;
     }
 }
 
-static int wips_object_detection_PyObject_init(PyObject *self, PyObject *args, PyObject *kwds) {
+static int wips_object_detection_PyObject_init(PyObject *self, PyObject *Py_UNUSED(args), PyObject *Py_UNUSED(kwds)) {
 
     wips_object_detection_PyObject *obj = (wips_object_detection_PyObject *)self;
 
@@ -85,7 +85,7 @@ static int wips_object_detection_PyObject_init(PyObject *self, PyObject *args, P
     }
 
     obj->c_obj = c_obj;
-    obj->handler = handler;
+    obj->base.handler = handler;
 
     return 0;
 }
@@ -95,7 +95,7 @@ static void wips_object_detection_PyObject_dealloc(PyObject *self) {
     wips_object_detection_PyObject *obj = (wips_object_detection_PyObject *)self;
 
     if (obj->base.handler) {
-        wips_PyHandler_decref(obj->handler);
+        wips_PyHandler_decref(obj->base.handler);
         obj->base.handler = NULL;
         obj->base.wips_type = NULL;
         obj->c_obj = NULL;
@@ -105,7 +105,7 @@ static void wips_object_detection_PyObject_dealloc(PyObject *self) {
 }
 
 // getsetters
-static PyObject *wips_object_detection_PyObject_get_object_class(PyObject *self, void *closure) {
+static PyObject *wips_object_detection_PyObject_get_object_class(PyObject *self, void *Py_UNUSED(closure)) {
     wips_object_detection_PyObject *obj = (wips_object_detection_PyObject *)self;
     if (!obj->c_obj) {
         PyErr_SetString(PyExc_AttributeError,"Struct is not initialized");
@@ -121,11 +121,11 @@ static PyObject *wips_object_detection_PyObject_get_object_class(PyObject *self,
     }
     return py_field;
 }
-static int wips_object_detection_PyObject_set_object_class(PyObject *self, PyObject *value, void *closure) {
+static int wips_object_detection_PyObject_set_object_class(PyObject *self, PyObject *value, void *Py_UNUSED(closure)) {
     wips_object_detection_PyObject *obj = (wips_object_detection_PyObject *)self;
     if (!obj->c_obj) {
         PyErr_SetString(PyExc_AttributeError,"Struct is not initialized");
-        return NULL;
+        return -1;
     }
 
     // value is not None
@@ -152,7 +152,7 @@ static int wips_object_detection_PyObject_set_object_class(PyObject *self, PyObj
     }
     return 0;
 }
-static PyObject *wips_object_detection_PyObject_get_confidence(PyObject *self, void *closure) {
+static PyObject *wips_object_detection_PyObject_get_confidence(PyObject *self, void *Py_UNUSED(closure)) {
     wips_object_detection_PyObject *obj = (wips_object_detection_PyObject *)self;
     if (!obj->c_obj) {
         PyErr_SetString(PyExc_AttributeError,"Struct is not initialized");
@@ -168,11 +168,11 @@ static PyObject *wips_object_detection_PyObject_get_confidence(PyObject *self, v
     }
     return py_field;
 }
-static int wips_object_detection_PyObject_set_confidence(PyObject *self, PyObject *value, void *closure) {
+static int wips_object_detection_PyObject_set_confidence(PyObject *self, PyObject *value, void *Py_UNUSED(closure)) {
     wips_object_detection_PyObject *obj = (wips_object_detection_PyObject *)self;
     if (!obj->c_obj) {
         PyErr_SetString(PyExc_AttributeError,"Struct is not initialized");
-        return NULL;
+        return -1;
     }
 
     // value is not None
@@ -199,7 +199,7 @@ static int wips_object_detection_PyObject_set_confidence(PyObject *self, PyObjec
     }
     return 0;
 }
-static PyObject *wips_object_detection_PyObject_get_percent_area(PyObject *self, void *closure) {
+static PyObject *wips_object_detection_PyObject_get_percent_area(PyObject *self, void *Py_UNUSED(closure)) {
     wips_object_detection_PyObject *obj = (wips_object_detection_PyObject *)self;
     if (!obj->c_obj) {
         PyErr_SetString(PyExc_AttributeError,"Struct is not initialized");
@@ -215,11 +215,11 @@ static PyObject *wips_object_detection_PyObject_get_percent_area(PyObject *self,
     }
     return py_field;
 }
-static int wips_object_detection_PyObject_set_percent_area(PyObject *self, PyObject *value, void *closure) {
+static int wips_object_detection_PyObject_set_percent_area(PyObject *self, PyObject *value, void *Py_UNUSED(closure)) {
     wips_object_detection_PyObject *obj = (wips_object_detection_PyObject *)self;
     if (!obj->c_obj) {
         PyErr_SetString(PyExc_AttributeError,"Struct is not initialized");
-        return NULL;
+        return -1;
     }
 
     // value is not None
@@ -246,7 +246,7 @@ static int wips_object_detection_PyObject_set_percent_area(PyObject *self, PyObj
     }
     return 0;
 }
-static PyObject *wips_object_detection_PyObject_get_topleft_x_pixels(PyObject *self, void *closure) {
+static PyObject *wips_object_detection_PyObject_get_topleft_x_pixels(PyObject *self, void *Py_UNUSED(closure)) {
     wips_object_detection_PyObject *obj = (wips_object_detection_PyObject *)self;
     if (!obj->c_obj) {
         PyErr_SetString(PyExc_AttributeError,"Struct is not initialized");
@@ -262,11 +262,11 @@ static PyObject *wips_object_detection_PyObject_get_topleft_x_pixels(PyObject *s
     }
     return py_field;
 }
-static int wips_object_detection_PyObject_set_topleft_x_pixels(PyObject *self, PyObject *value, void *closure) {
+static int wips_object_detection_PyObject_set_topleft_x_pixels(PyObject *self, PyObject *value, void *Py_UNUSED(closure)) {
     wips_object_detection_PyObject *obj = (wips_object_detection_PyObject *)self;
     if (!obj->c_obj) {
         PyErr_SetString(PyExc_AttributeError,"Struct is not initialized");
-        return NULL;
+        return -1;
     }
 
     // value is not None
@@ -293,7 +293,7 @@ static int wips_object_detection_PyObject_set_topleft_x_pixels(PyObject *self, P
     }
     return 0;
 }
-static PyObject *wips_object_detection_PyObject_get_topleft_y_pixels(PyObject *self, void *closure) {
+static PyObject *wips_object_detection_PyObject_get_topleft_y_pixels(PyObject *self, void *Py_UNUSED(closure)) {
     wips_object_detection_PyObject *obj = (wips_object_detection_PyObject *)self;
     if (!obj->c_obj) {
         PyErr_SetString(PyExc_AttributeError,"Struct is not initialized");
@@ -309,11 +309,11 @@ static PyObject *wips_object_detection_PyObject_get_topleft_y_pixels(PyObject *s
     }
     return py_field;
 }
-static int wips_object_detection_PyObject_set_topleft_y_pixels(PyObject *self, PyObject *value, void *closure) {
+static int wips_object_detection_PyObject_set_topleft_y_pixels(PyObject *self, PyObject *value, void *Py_UNUSED(closure)) {
     wips_object_detection_PyObject *obj = (wips_object_detection_PyObject *)self;
     if (!obj->c_obj) {
         PyErr_SetString(PyExc_AttributeError,"Struct is not initialized");
-        return NULL;
+        return -1;
     }
 
     // value is not None
@@ -340,7 +340,7 @@ static int wips_object_detection_PyObject_set_topleft_y_pixels(PyObject *self, P
     }
     return 0;
 }
-static PyObject *wips_object_detection_PyObject_get_bottomright_x_pixels(PyObject *self, void *closure) {
+static PyObject *wips_object_detection_PyObject_get_bottomright_x_pixels(PyObject *self, void *Py_UNUSED(closure)) {
     wips_object_detection_PyObject *obj = (wips_object_detection_PyObject *)self;
     if (!obj->c_obj) {
         PyErr_SetString(PyExc_AttributeError,"Struct is not initialized");
@@ -356,11 +356,11 @@ static PyObject *wips_object_detection_PyObject_get_bottomright_x_pixels(PyObjec
     }
     return py_field;
 }
-static int wips_object_detection_PyObject_set_bottomright_x_pixels(PyObject *self, PyObject *value, void *closure) {
+static int wips_object_detection_PyObject_set_bottomright_x_pixels(PyObject *self, PyObject *value, void *Py_UNUSED(closure)) {
     wips_object_detection_PyObject *obj = (wips_object_detection_PyObject *)self;
     if (!obj->c_obj) {
         PyErr_SetString(PyExc_AttributeError,"Struct is not initialized");
-        return NULL;
+        return -1;
     }
 
     // value is not None
@@ -387,7 +387,7 @@ static int wips_object_detection_PyObject_set_bottomright_x_pixels(PyObject *sel
     }
     return 0;
 }
-static PyObject *wips_object_detection_PyObject_get_bottomright_y_pixels(PyObject *self, void *closure) {
+static PyObject *wips_object_detection_PyObject_get_bottomright_y_pixels(PyObject *self, void *Py_UNUSED(closure)) {
     wips_object_detection_PyObject *obj = (wips_object_detection_PyObject *)self;
     if (!obj->c_obj) {
         PyErr_SetString(PyExc_AttributeError,"Struct is not initialized");
@@ -403,11 +403,11 @@ static PyObject *wips_object_detection_PyObject_get_bottomright_y_pixels(PyObjec
     }
     return py_field;
 }
-static int wips_object_detection_PyObject_set_bottomright_y_pixels(PyObject *self, PyObject *value, void *closure) {
+static int wips_object_detection_PyObject_set_bottomright_y_pixels(PyObject *self, PyObject *value, void *Py_UNUSED(closure)) {
     wips_object_detection_PyObject *obj = (wips_object_detection_PyObject *)self;
     if (!obj->c_obj) {
         PyErr_SetString(PyExc_AttributeError,"Struct is not initialized");
-        return NULL;
+        return -1;
     }
 
     // value is not None
@@ -434,7 +434,7 @@ static int wips_object_detection_PyObject_set_bottomright_y_pixels(PyObject *sel
     }
     return 0;
 }
-static PyObject *wips_object_detection_PyObject_get_topleft_x_norm(PyObject *self, void *closure) {
+static PyObject *wips_object_detection_PyObject_get_topleft_x_norm(PyObject *self, void *Py_UNUSED(closure)) {
     wips_object_detection_PyObject *obj = (wips_object_detection_PyObject *)self;
     if (!obj->c_obj) {
         PyErr_SetString(PyExc_AttributeError,"Struct is not initialized");
@@ -450,11 +450,11 @@ static PyObject *wips_object_detection_PyObject_get_topleft_x_norm(PyObject *sel
     }
     return py_field;
 }
-static int wips_object_detection_PyObject_set_topleft_x_norm(PyObject *self, PyObject *value, void *closure) {
+static int wips_object_detection_PyObject_set_topleft_x_norm(PyObject *self, PyObject *value, void *Py_UNUSED(closure)) {
     wips_object_detection_PyObject *obj = (wips_object_detection_PyObject *)self;
     if (!obj->c_obj) {
         PyErr_SetString(PyExc_AttributeError,"Struct is not initialized");
-        return NULL;
+        return -1;
     }
 
     // value is not None
@@ -481,7 +481,7 @@ static int wips_object_detection_PyObject_set_topleft_x_norm(PyObject *self, PyO
     }
     return 0;
 }
-static PyObject *wips_object_detection_PyObject_get_topleft_y_norm(PyObject *self, void *closure) {
+static PyObject *wips_object_detection_PyObject_get_topleft_y_norm(PyObject *self, void *Py_UNUSED(closure)) {
     wips_object_detection_PyObject *obj = (wips_object_detection_PyObject *)self;
     if (!obj->c_obj) {
         PyErr_SetString(PyExc_AttributeError,"Struct is not initialized");
@@ -497,11 +497,11 @@ static PyObject *wips_object_detection_PyObject_get_topleft_y_norm(PyObject *sel
     }
     return py_field;
 }
-static int wips_object_detection_PyObject_set_topleft_y_norm(PyObject *self, PyObject *value, void *closure) {
+static int wips_object_detection_PyObject_set_topleft_y_norm(PyObject *self, PyObject *value, void *Py_UNUSED(closure)) {
     wips_object_detection_PyObject *obj = (wips_object_detection_PyObject *)self;
     if (!obj->c_obj) {
         PyErr_SetString(PyExc_AttributeError,"Struct is not initialized");
-        return NULL;
+        return -1;
     }
 
     // value is not None
@@ -528,7 +528,7 @@ static int wips_object_detection_PyObject_set_topleft_y_norm(PyObject *self, PyO
     }
     return 0;
 }
-static PyObject *wips_object_detection_PyObject_get_bottomright_x_norm(PyObject *self, void *closure) {
+static PyObject *wips_object_detection_PyObject_get_bottomright_x_norm(PyObject *self, void *Py_UNUSED(closure)) {
     wips_object_detection_PyObject *obj = (wips_object_detection_PyObject *)self;
     if (!obj->c_obj) {
         PyErr_SetString(PyExc_AttributeError,"Struct is not initialized");
@@ -544,11 +544,11 @@ static PyObject *wips_object_detection_PyObject_get_bottomright_x_norm(PyObject 
     }
     return py_field;
 }
-static int wips_object_detection_PyObject_set_bottomright_x_norm(PyObject *self, PyObject *value, void *closure) {
+static int wips_object_detection_PyObject_set_bottomright_x_norm(PyObject *self, PyObject *value, void *Py_UNUSED(closure)) {
     wips_object_detection_PyObject *obj = (wips_object_detection_PyObject *)self;
     if (!obj->c_obj) {
         PyErr_SetString(PyExc_AttributeError,"Struct is not initialized");
-        return NULL;
+        return -1;
     }
 
     // value is not None
@@ -575,7 +575,7 @@ static int wips_object_detection_PyObject_set_bottomright_x_norm(PyObject *self,
     }
     return 0;
 }
-static PyObject *wips_object_detection_PyObject_get_bottomright_y_norm(PyObject *self, void *closure) {
+static PyObject *wips_object_detection_PyObject_get_bottomright_y_norm(PyObject *self, void *Py_UNUSED(closure)) {
     wips_object_detection_PyObject *obj = (wips_object_detection_PyObject *)self;
     if (!obj->c_obj) {
         PyErr_SetString(PyExc_AttributeError,"Struct is not initialized");
@@ -591,11 +591,11 @@ static PyObject *wips_object_detection_PyObject_get_bottomright_y_norm(PyObject 
     }
     return py_field;
 }
-static int wips_object_detection_PyObject_set_bottomright_y_norm(PyObject *self, PyObject *value, void *closure) {
+static int wips_object_detection_PyObject_set_bottomright_y_norm(PyObject *self, PyObject *value, void *Py_UNUSED(closure)) {
     wips_object_detection_PyObject *obj = (wips_object_detection_PyObject *)self;
     if (!obj->c_obj) {
         PyErr_SetString(PyExc_AttributeError,"Struct is not initialized");
-        return NULL;
+        return -1;
     }
 
     // value is not None
@@ -627,82 +627,82 @@ static PyGetSetDef wips_object_detection_PyObject_getsetters[] = {
     {
         "object_class",
         (getter)wips_object_detection_PyObject_get_object_class,
-        (setter)wips_object_detection_PyObject_set_object_class,,
+        (setter)wips_object_detection_PyObject_set_object_class,
         "i32",
         NULL
     },
     {
         "confidence",
         (getter)wips_object_detection_PyObject_get_confidence,
-        (setter)wips_object_detection_PyObject_set_confidence,,
+        (setter)wips_object_detection_PyObject_set_confidence,
         "fp32",
         NULL
     },
     {
         "percent_area",
         (getter)wips_object_detection_PyObject_get_percent_area,
-        (setter)wips_object_detection_PyObject_set_percent_area,,
+        (setter)wips_object_detection_PyObject_set_percent_area,
         "fp32",
         NULL
     },
     {
         "topleft_x_pixels",
         (getter)wips_object_detection_PyObject_get_topleft_x_pixels,
-        (setter)wips_object_detection_PyObject_set_topleft_x_pixels,,
+        (setter)wips_object_detection_PyObject_set_topleft_x_pixels,
         "fp64",
         NULL
     },
     {
         "topleft_y_pixels",
         (getter)wips_object_detection_PyObject_get_topleft_y_pixels,
-        (setter)wips_object_detection_PyObject_set_topleft_y_pixels,,
+        (setter)wips_object_detection_PyObject_set_topleft_y_pixels,
         "fp64",
         NULL
     },
     {
         "bottomright_x_pixels",
         (getter)wips_object_detection_PyObject_get_bottomright_x_pixels,
-        (setter)wips_object_detection_PyObject_set_bottomright_x_pixels,,
+        (setter)wips_object_detection_PyObject_set_bottomright_x_pixels,
         "fp64",
         NULL
     },
     {
         "bottomright_y_pixels",
         (getter)wips_object_detection_PyObject_get_bottomright_y_pixels,
-        (setter)wips_object_detection_PyObject_set_bottomright_y_pixels,,
+        (setter)wips_object_detection_PyObject_set_bottomright_y_pixels,
         "fp64",
         NULL
     },
     {
         "topleft_x_norm",
         (getter)wips_object_detection_PyObject_get_topleft_x_norm,
-        (setter)wips_object_detection_PyObject_set_topleft_x_norm,,
+        (setter)wips_object_detection_PyObject_set_topleft_x_norm,
         "fp64",
         NULL
     },
     {
         "topleft_y_norm",
         (getter)wips_object_detection_PyObject_get_topleft_y_norm,
-        (setter)wips_object_detection_PyObject_set_topleft_y_norm,,
+        (setter)wips_object_detection_PyObject_set_topleft_y_norm,
         "fp64",
         NULL
     },
     {
         "bottomright_x_norm",
         (getter)wips_object_detection_PyObject_get_bottomright_x_norm,
-        (setter)wips_object_detection_PyObject_set_bottomright_x_norm,,
+        (setter)wips_object_detection_PyObject_set_bottomright_x_norm,
         "fp64",
         NULL
     },
     {
         "bottomright_y_norm",
         (getter)wips_object_detection_PyObject_get_bottomright_y_norm,
-        (setter)wips_object_detection_PyObject_set_bottomright_y_norm,,
+        (setter)wips_object_detection_PyObject_set_bottomright_y_norm,
         "fp64",
         NULL
     },
     {NULL}
-}
+};
 
 // wips_PyType
 
@@ -723,7 +723,7 @@ static PyObject *wips_object_detection_wrap(void *c_obj, wips_PyHandler *handler
     obj->c_obj = (wips_object_detection_t *)c_obj;
     wips_PyHandler_incref(handler);
 
-    return obj;
+    return (PyObject *)obj;
 }
 
 static void *wips_object_detection_unwrap(PyObject *py_obj) {
@@ -1096,13 +1096,13 @@ static PyMethodDef wips_object_detection_PyObject_methods[] = {
     {
         "encode",
         wips_object_detection_PyObject_encode,
-        METH_VARARGS,
+        METH_VARARGS | METH_STATIC,
         "Encodes a struct"
     },
     {
         "decode",
         wips_object_detection_PyObject_decode,
-        METH_VARARGS,
+        METH_VARARGS | METH_STATIC,
         "Decodes a blob"
     },
     {
@@ -1123,7 +1123,7 @@ static PyMethodDef wips_object_detection_PyObject_methods[] = {
 PyTypeObject wips_object_detection_PyTypeObject = {
     PyVarObject_HEAD_INIT(NULL, 0)
     .tp_name = "wips.object_detection",
-    .tp_basicsize = GET_SIZE(object_detection),
+    .tp_basicsize = sizeof(wips_object_detection_PyObject),
     .tp_flags = Py_TPFLAGS_DEFAULT,
     .tp_base = &wips_struct_PyTypeObject,
     .tp_new = wips_object_detection_PyObject_new,
@@ -1132,55 +1132,6 @@ PyTypeObject wips_object_detection_PyTypeObject = {
     .tp_methods = wips_object_detection_PyObject_methods,
     .tp_getset = wips_object_detection_PyObject_getsetters
 };
-
-int wips_object_detection_PyTypeObject_init(PyObject *m) {
-    if (PyType_Ready(&wips_object_detection_PyTypeObject) < 0) {
-        return -1;
-    }
-
-    Py_INCREF(&wips_object_detection_PyTypeObject);
-    if (PyModule_AddObject(m, "object_detection", (PyObject *)&wips_object_detection_PyTypeObject) < 0) {
-        Py_DECREF(&wips_object_detection_PyTypeObject);
-        return -1;
-    }
-
-    PyObject *encode_func = PyObject_GetAttrString((PyObject *)&wips_object_detection_PyTypeObject, "encode");
-    if (!encode_func) {
-        // failed to retrieve encoder function, give up
-        return -1;
-    }
-
-    PyObject *decode_func = PyObject_GetAttrString((PyObject *)&wips_object_detection_PyTypeObject, "decode");
-    if (!encode_func) {
-        // failed to retrieve decoder function, give up
-        return -1;
-    }
-
-    PyObject *static_encode_func = PyStaticMethod_New(encode_func);
-    Py_DECREF(encode_func);
-    if (!static_encode_func) {
-        // failed to create static encoder function, give up
-        return -1;
-    }
-    if (PyObject_SetAttrString((PyObject *)&wips_object_detection_PyTypeObject, "encode", static_encode_func) < 0) {
-        Py_DECREF(static_encode_func);
-        return -1;
-    }
-    Py_DECREF(static_encode_func);
-
-    PyObject *static_decode_func = PyStaticMethod_New(decode_func);
-    Py_DECREF(decode_func);
-    if (!static_decode_func) {
-        // failed to create static decoder function, give up
-        return -1;
-    }
-    if (PyObject_SetAttrString((PyObject *)&wips_object_detection_PyTypeObject, "decode", static_decode_func) < 0) {
-        Py_DECREF(static_decode_func);
-        return -1;
-    }
-    Py_DECREF(static_decode_func);
-    return 0;
-}
 
 #ifdef __cplusplus
 }

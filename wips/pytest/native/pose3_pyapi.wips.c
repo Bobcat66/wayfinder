@@ -835,7 +835,7 @@ static PyMethodDef wips_pose3_PyObject_methods[] = {
 PyTypeObject wips_pose3_PyTypeObject = {
     PyVarObject_HEAD_INIT(NULL, 0)
     .tp_name = "wips.pose3",
-    .tp_basicsize = GET_SIZE(pose3),
+    .tp_basicsize = sizeof(wips_pose3_PyObject),
     .tp_flags = Py_TPFLAGS_DEFAULT,
     .tp_base = &wips_struct_PyTypeObject,
     .tp_new = wips_pose3_PyObject_new,
@@ -844,25 +844,6 @@ PyTypeObject wips_pose3_PyTypeObject = {
     .tp_methods = wips_pose3_PyObject_methods,
     .tp_getset = wips_pose3_PyObject_getsetters
 };
-
-static void wips_pose3_static_method_init(void) {
-    
-}
-
-int wips_pose3_PyTypeObject_init(PyObject *m) {
-    
-    if (PyType_Ready(&wips_pose3_PyTypeObject) < 0) {
-        return -1;
-    }
-
-    Py_INCREF(&wips_pose3_PyTypeObject);
-    if (PyModule_AddObject(m, "pose3", (PyObject *)&wips_pose3_PyTypeObject) < 0) {
-        Py_DECREF(&wips_pose3_PyTypeObject);
-        return -1;
-    }
-
-    return 0;
-}
 
 #ifdef __cplusplus
 }

@@ -54,7 +54,7 @@ static void _wips_apriltag_relative_pose_observation_void_destructor(void *ptr) 
     wips_apriltag_relative_pose_observation_destroy((wips_apriltag_relative_pose_observation_t *)ptr);
 }
 
-static PyObject *wips_apriltag_relative_pose_observation_PyObject_new(PyTypeObject* type, PyObject *args, PyObject *kwds) {
+static PyObject *wips_apriltag_relative_pose_observation_PyObject_new(PyTypeObject* type, PyObject *Py_UNUSED(args), PyObject *Py_UNUSED(kwds)) {
     
     wips_apriltag_relative_pose_observation_PyObject *obj;
 
@@ -63,14 +63,14 @@ static PyObject *wips_apriltag_relative_pose_observation_PyObject_new(PyTypeObje
         obj->base.wips_type = &wips_apriltag_relative_pose_observation_PyType;
         obj->base.handler = NULL;
         obj->c_obj = NULL;
-        return (PyObject *)self;
+        return (PyObject *)obj;
     } else {
         PyErr_SetString(PyExc_RuntimeError, "Failed to initialize apriltag_relative_pose_observation");
         return NULL;
     }
 }
 
-static int wips_apriltag_relative_pose_observation_PyObject_init(PyObject *self, PyObject *args, PyObject *kwds) {
+static int wips_apriltag_relative_pose_observation_PyObject_init(PyObject *self, PyObject *Py_UNUSED(args), PyObject *Py_UNUSED(kwds)) {
 
     wips_apriltag_relative_pose_observation_PyObject *obj = (wips_apriltag_relative_pose_observation_PyObject *)self;
 
@@ -86,7 +86,7 @@ static int wips_apriltag_relative_pose_observation_PyObject_init(PyObject *self,
     }
 
     obj->c_obj = c_obj;
-    obj->handler = handler;
+    obj->base.handler = handler;
 
     return 0;
 }
@@ -96,7 +96,7 @@ static void wips_apriltag_relative_pose_observation_PyObject_dealloc(PyObject *s
     wips_apriltag_relative_pose_observation_PyObject *obj = (wips_apriltag_relative_pose_observation_PyObject *)self;
 
     if (obj->base.handler) {
-        wips_PyHandler_decref(obj->handler);
+        wips_PyHandler_decref(obj->base.handler);
         obj->base.handler = NULL;
         obj->base.wips_type = NULL;
         obj->c_obj = NULL;
@@ -106,7 +106,7 @@ static void wips_apriltag_relative_pose_observation_PyObject_dealloc(PyObject *s
 }
 
 // getsetters
-static PyObject *wips_apriltag_relative_pose_observation_PyObject_get_fiducial_id(PyObject *self, void *closure) {
+static PyObject *wips_apriltag_relative_pose_observation_PyObject_get_fiducial_id(PyObject *self, void *Py_UNUSED(closure)) {
     wips_apriltag_relative_pose_observation_PyObject *obj = (wips_apriltag_relative_pose_observation_PyObject *)self;
     if (!obj->c_obj) {
         PyErr_SetString(PyExc_AttributeError,"Struct is not initialized");
@@ -122,11 +122,11 @@ static PyObject *wips_apriltag_relative_pose_observation_PyObject_get_fiducial_i
     }
     return py_field;
 }
-static int wips_apriltag_relative_pose_observation_PyObject_set_fiducial_id(PyObject *self, PyObject *value, void *closure) {
+static int wips_apriltag_relative_pose_observation_PyObject_set_fiducial_id(PyObject *self, PyObject *value, void *Py_UNUSED(closure)) {
     wips_apriltag_relative_pose_observation_PyObject *obj = (wips_apriltag_relative_pose_observation_PyObject *)self;
     if (!obj->c_obj) {
         PyErr_SetString(PyExc_AttributeError,"Struct is not initialized");
-        return NULL;
+        return -1;
     }
 
     // value is not None
@@ -153,7 +153,7 @@ static int wips_apriltag_relative_pose_observation_PyObject_set_fiducial_id(PyOb
     }
     return 0;
 }
-static PyObject *wips_apriltag_relative_pose_observation_PyObject_get_cam_pose_0(PyObject *self, void *closure) {
+static PyObject *wips_apriltag_relative_pose_observation_PyObject_get_cam_pose_0(PyObject *self, void *Py_UNUSED(closure)) {
     wips_apriltag_relative_pose_observation_PyObject *obj = (wips_apriltag_relative_pose_observation_PyObject *)self;
     if (!obj->c_obj) {
         PyErr_SetString(PyExc_AttributeError,"Struct is not initialized");
@@ -169,11 +169,11 @@ static PyObject *wips_apriltag_relative_pose_observation_PyObject_get_cam_pose_0
     }
     return py_field;
 }
-static int wips_apriltag_relative_pose_observation_PyObject_set_cam_pose_0(PyObject *self, PyObject *value, void *closure) {
+static int wips_apriltag_relative_pose_observation_PyObject_set_cam_pose_0(PyObject *self, PyObject *value, void *Py_UNUSED(closure)) {
     wips_apriltag_relative_pose_observation_PyObject *obj = (wips_apriltag_relative_pose_observation_PyObject *)self;
     if (!obj->c_obj) {
         PyErr_SetString(PyExc_AttributeError,"Struct is not initialized");
-        return NULL;
+        return -1;
     }
 
     // value is not None
@@ -200,7 +200,7 @@ static int wips_apriltag_relative_pose_observation_PyObject_set_cam_pose_0(PyObj
     }
     return 0;
 }
-static PyObject *wips_apriltag_relative_pose_observation_PyObject_get_error_0(PyObject *self, void *closure) {
+static PyObject *wips_apriltag_relative_pose_observation_PyObject_get_error_0(PyObject *self, void *Py_UNUSED(closure)) {
     wips_apriltag_relative_pose_observation_PyObject *obj = (wips_apriltag_relative_pose_observation_PyObject *)self;
     if (!obj->c_obj) {
         PyErr_SetString(PyExc_AttributeError,"Struct is not initialized");
@@ -216,11 +216,11 @@ static PyObject *wips_apriltag_relative_pose_observation_PyObject_get_error_0(Py
     }
     return py_field;
 }
-static int wips_apriltag_relative_pose_observation_PyObject_set_error_0(PyObject *self, PyObject *value, void *closure) {
+static int wips_apriltag_relative_pose_observation_PyObject_set_error_0(PyObject *self, PyObject *value, void *Py_UNUSED(closure)) {
     wips_apriltag_relative_pose_observation_PyObject *obj = (wips_apriltag_relative_pose_observation_PyObject *)self;
     if (!obj->c_obj) {
         PyErr_SetString(PyExc_AttributeError,"Struct is not initialized");
-        return NULL;
+        return -1;
     }
 
     // value is not None
@@ -247,7 +247,7 @@ static int wips_apriltag_relative_pose_observation_PyObject_set_error_0(PyObject
     }
     return 0;
 }
-static PyObject *wips_apriltag_relative_pose_observation_PyObject_get_cam_pose_1(PyObject *self, void *closure) {
+static PyObject *wips_apriltag_relative_pose_observation_PyObject_get_cam_pose_1(PyObject *self, void *Py_UNUSED(closure)) {
     wips_apriltag_relative_pose_observation_PyObject *obj = (wips_apriltag_relative_pose_observation_PyObject *)self;
     if (!obj->c_obj) {
         PyErr_SetString(PyExc_AttributeError,"Struct is not initialized");
@@ -263,11 +263,11 @@ static PyObject *wips_apriltag_relative_pose_observation_PyObject_get_cam_pose_1
     }
     return py_field;
 }
-static int wips_apriltag_relative_pose_observation_PyObject_set_cam_pose_1(PyObject *self, PyObject *value, void *closure) {
+static int wips_apriltag_relative_pose_observation_PyObject_set_cam_pose_1(PyObject *self, PyObject *value, void *Py_UNUSED(closure)) {
     wips_apriltag_relative_pose_observation_PyObject *obj = (wips_apriltag_relative_pose_observation_PyObject *)self;
     if (!obj->c_obj) {
         PyErr_SetString(PyExc_AttributeError,"Struct is not initialized");
-        return NULL;
+        return -1;
     }
 
     // value is not None
@@ -294,7 +294,7 @@ static int wips_apriltag_relative_pose_observation_PyObject_set_cam_pose_1(PyObj
     }
     return 0;
 }
-static PyObject *wips_apriltag_relative_pose_observation_PyObject_get_error_1(PyObject *self, void *closure) {
+static PyObject *wips_apriltag_relative_pose_observation_PyObject_get_error_1(PyObject *self, void *Py_UNUSED(closure)) {
     wips_apriltag_relative_pose_observation_PyObject *obj = (wips_apriltag_relative_pose_observation_PyObject *)self;
     if (!obj->c_obj) {
         PyErr_SetString(PyExc_AttributeError,"Struct is not initialized");
@@ -310,11 +310,11 @@ static PyObject *wips_apriltag_relative_pose_observation_PyObject_get_error_1(Py
     }
     return py_field;
 }
-static int wips_apriltag_relative_pose_observation_PyObject_set_error_1(PyObject *self, PyObject *value, void *closure) {
+static int wips_apriltag_relative_pose_observation_PyObject_set_error_1(PyObject *self, PyObject *value, void *Py_UNUSED(closure)) {
     wips_apriltag_relative_pose_observation_PyObject *obj = (wips_apriltag_relative_pose_observation_PyObject *)self;
     if (!obj->c_obj) {
         PyErr_SetString(PyExc_AttributeError,"Struct is not initialized");
-        return NULL;
+        return -1;
     }
 
     // value is not None
@@ -346,40 +346,40 @@ static PyGetSetDef wips_apriltag_relative_pose_observation_PyObject_getsetters[]
     {
         "fiducial_id",
         (getter)wips_apriltag_relative_pose_observation_PyObject_get_fiducial_id,
-        (setter)wips_apriltag_relative_pose_observation_PyObject_set_fiducial_id,,
+        (setter)wips_apriltag_relative_pose_observation_PyObject_set_fiducial_id,
         "i32",
         NULL
     },
     {
         "cam_pose_0",
         (getter)wips_apriltag_relative_pose_observation_PyObject_get_cam_pose_0,
-        (setter)wips_apriltag_relative_pose_observation_PyObject_set_cam_pose_0,,
+        (setter)wips_apriltag_relative_pose_observation_PyObject_set_cam_pose_0,
         "pose3",
         NULL
     },
     {
         "error_0",
         (getter)wips_apriltag_relative_pose_observation_PyObject_get_error_0,
-        (setter)wips_apriltag_relative_pose_observation_PyObject_set_error_0,,
+        (setter)wips_apriltag_relative_pose_observation_PyObject_set_error_0,
         "fp64",
         NULL
     },
     {
         "cam_pose_1",
         (getter)wips_apriltag_relative_pose_observation_PyObject_get_cam_pose_1,
-        (setter)wips_apriltag_relative_pose_observation_PyObject_set_cam_pose_1,,
+        (setter)wips_apriltag_relative_pose_observation_PyObject_set_cam_pose_1,
         "pose3",
         NULL
     },
     {
         "error_1",
         (getter)wips_apriltag_relative_pose_observation_PyObject_get_error_1,
-        (setter)wips_apriltag_relative_pose_observation_PyObject_set_error_1,,
+        (setter)wips_apriltag_relative_pose_observation_PyObject_set_error_1,
         "fp64",
         NULL
     },
     {NULL}
-}
+};
 
 // wips_PyType
 
@@ -400,7 +400,7 @@ static PyObject *wips_apriltag_relative_pose_observation_wrap(void *c_obj, wips_
     obj->c_obj = (wips_apriltag_relative_pose_observation_t *)c_obj;
     wips_PyHandler_incref(handler);
 
-    return obj;
+    return (PyObject *)obj;
 }
 
 static void *wips_apriltag_relative_pose_observation_unwrap(PyObject *py_obj) {
@@ -665,13 +665,13 @@ static PyMethodDef wips_apriltag_relative_pose_observation_PyObject_methods[] = 
     {
         "encode",
         wips_apriltag_relative_pose_observation_PyObject_encode,
-        METH_VARARGS,
+        METH_VARARGS | METH_STATIC,
         "Encodes a struct"
     },
     {
         "decode",
         wips_apriltag_relative_pose_observation_PyObject_decode,
-        METH_VARARGS,
+        METH_VARARGS | METH_STATIC,
         "Decodes a blob"
     },
     {
@@ -692,7 +692,7 @@ static PyMethodDef wips_apriltag_relative_pose_observation_PyObject_methods[] = 
 PyTypeObject wips_apriltag_relative_pose_observation_PyTypeObject = {
     PyVarObject_HEAD_INIT(NULL, 0)
     .tp_name = "wips.apriltag_relative_pose_observation",
-    .tp_basicsize = GET_SIZE(apriltag_relative_pose_observation),
+    .tp_basicsize = sizeof(wips_apriltag_relative_pose_observation_PyObject),
     .tp_flags = Py_TPFLAGS_DEFAULT,
     .tp_base = &wips_struct_PyTypeObject,
     .tp_new = wips_apriltag_relative_pose_observation_PyObject_new,
@@ -701,55 +701,6 @@ PyTypeObject wips_apriltag_relative_pose_observation_PyTypeObject = {
     .tp_methods = wips_apriltag_relative_pose_observation_PyObject_methods,
     .tp_getset = wips_apriltag_relative_pose_observation_PyObject_getsetters
 };
-
-int wips_apriltag_relative_pose_observation_PyTypeObject_init(PyObject *m) {
-    if (PyType_Ready(&wips_apriltag_relative_pose_observation_PyTypeObject) < 0) {
-        return -1;
-    }
-
-    Py_INCREF(&wips_apriltag_relative_pose_observation_PyTypeObject);
-    if (PyModule_AddObject(m, "apriltag_relative_pose_observation", (PyObject *)&wips_apriltag_relative_pose_observation_PyTypeObject) < 0) {
-        Py_DECREF(&wips_apriltag_relative_pose_observation_PyTypeObject);
-        return -1;
-    }
-
-    PyObject *encode_func = PyObject_GetAttrString((PyObject *)&wips_apriltag_relative_pose_observation_PyTypeObject, "encode");
-    if (!encode_func) {
-        // failed to retrieve encoder function, give up
-        return -1;
-    }
-
-    PyObject *decode_func = PyObject_GetAttrString((PyObject *)&wips_apriltag_relative_pose_observation_PyTypeObject, "decode");
-    if (!encode_func) {
-        // failed to retrieve decoder function, give up
-        return -1;
-    }
-
-    PyObject *static_encode_func = PyStaticMethod_New(encode_func);
-    Py_DECREF(encode_func);
-    if (!static_encode_func) {
-        // failed to create static encoder function, give up
-        return -1;
-    }
-    if (PyObject_SetAttrString((PyObject *)&wips_apriltag_relative_pose_observation_PyTypeObject, "encode", static_encode_func) < 0) {
-        Py_DECREF(static_encode_func);
-        return -1;
-    }
-    Py_DECREF(static_encode_func);
-
-    PyObject *static_decode_func = PyStaticMethod_New(decode_func);
-    Py_DECREF(decode_func);
-    if (!static_decode_func) {
-        // failed to create static decoder function, give up
-        return -1;
-    }
-    if (PyObject_SetAttrString((PyObject *)&wips_apriltag_relative_pose_observation_PyTypeObject, "decode", static_decode_func) < 0) {
-        Py_DECREF(static_decode_func);
-        return -1;
-    }
-    Py_DECREF(static_decode_func);
-    return 0;
-}
 
 #ifdef __cplusplus
 }

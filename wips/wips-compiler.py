@@ -211,7 +211,7 @@ def compile(schemas_path: Path, output_dir: Path, py: bool = False, jvm: bool = 
 # ./wips-compiler.py messages.yaml --out=./wips_output
 
 # Python testing
-# ./wips-compiler.py messages.yaml --out=../wips_pytest/native
+# ./wips-compiler.py messages.yaml --out=pytest/native
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="WIPS Compiler")

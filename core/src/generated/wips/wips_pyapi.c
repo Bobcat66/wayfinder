@@ -106,7 +106,7 @@ static void wips_blob_PyObject_dealloc(PyObject *self) {
     wips_blob_PyObject *obj = (wips_blob_PyObject *)self;
 
     if (obj->c_obj) {
-        wips_bin_destroy(obj->c_obj);
+        wips_blob_destroy(obj->c_obj);
         obj->c_obj = NULL;
     }
 
@@ -467,7 +467,7 @@ PyTypeObject wips_struct_PyTypeObject = {
     .tp_flags = Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE
 };
 
-static PyTypeObject wips_vla_PyTypeObject = {
+PyTypeObject wips_vla_PyTypeObject = {
     PyVarObject_HEAD_INIT(NULL,0)
     .tp_name = "wips.vla",
     .tp_doc = "Array of WIPS objects",

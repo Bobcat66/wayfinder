@@ -54,7 +54,7 @@ static void _wips_odometry_result_void_destructor(void *ptr) {
     wips_odometry_result_destroy((wips_odometry_result_t *)ptr);
 }
 
-static PyObject *wips_odometry_result_PyObject_new(PyTypeObject* type, PyObject *args, PyObject *kwds) {
+static PyObject *wips_odometry_result_PyObject_new(PyTypeObject* type, PyObject *Py_UNUSED(args), PyObject *Py_UNUSED(kwds)) {
     
     wips_odometry_result_PyObject *obj;
 
@@ -63,14 +63,14 @@ static PyObject *wips_odometry_result_PyObject_new(PyTypeObject* type, PyObject 
         obj->base.wips_type = &wips_odometry_result_PyType;
         obj->base.handler = NULL;
         obj->c_obj = NULL;
-        return (PyObject *)self;
+        return (PyObject *)obj;
     } else {
         PyErr_SetString(PyExc_RuntimeError, "Failed to initialize odometry_result");
         return NULL;
     }
 }
 
-static int wips_odometry_result_PyObject_init(PyObject *self, PyObject *args, PyObject *kwds) {
+static int wips_odometry_result_PyObject_init(PyObject *self, PyObject *Py_UNUSED(args), PyObject *Py_UNUSED(kwds)) {
 
     wips_odometry_result_PyObject *obj = (wips_odometry_result_PyObject *)self;
 
@@ -86,7 +86,7 @@ static int wips_odometry_result_PyObject_init(PyObject *self, PyObject *args, Py
     }
 
     obj->c_obj = c_obj;
-    obj->handler = handler;
+    obj->base.handler = handler;
 
     return 0;
 }
@@ -96,7 +96,7 @@ static void wips_odometry_result_PyObject_dealloc(PyObject *self) {
     wips_odometry_result_PyObject *obj = (wips_odometry_result_PyObject *)self;
 
     if (obj->base.handler) {
-        wips_PyHandler_decref(obj->handler);
+        wips_PyHandler_decref(obj->base.handler);
         obj->base.handler = NULL;
         obj->base.wips_type = NULL;
         obj->c_obj = NULL;
@@ -106,7 +106,7 @@ static void wips_odometry_result_PyObject_dealloc(PyObject *self) {
 }
 
 // getsetters
-static PyObject *wips_odometry_result_PyObject_get_timestamps(PyObject *self, void *closure) {
+static PyObject *wips_odometry_result_PyObject_get_timestamps(PyObject *self, void *Py_UNUSED(closure)) {
     wips_odometry_result_PyObject *obj = (wips_odometry_result_PyObject *)self;
     if (!obj->c_obj) {
         PyErr_SetString(PyExc_AttributeError,"Struct is not initialized");
@@ -120,7 +120,7 @@ static PyObject *wips_odometry_result_PyObject_get_timestamps(PyObject *self, vo
     }
 
     wips_vlaref_t vlaref;
-    GET_VLAREF(&vlaref,u64,obj->c_obj,timestamps)
+    GET_VLAREF(&vlaref,u64,obj->c_obj,timestamps);
     wips_vla_PyObject *py_vla = wips_vla_PyObject_create(
         &wips_u64_PyType,
         obj->base.handler,
@@ -133,7 +133,7 @@ static PyObject *wips_odometry_result_PyObject_get_timestamps(PyObject *self, vo
     
     return (PyObject *)py_vla;
 }
-static int wips_odometry_result_PyObject_set_timestamps(PyObject *self, PyObject *value, void *closure) {
+static int wips_odometry_result_PyObject_set_timestamps(PyObject *self, PyObject *value, void *Py_UNUSED(closure)) {
     wips_odometry_result_PyObject *obj = (wips_odometry_result_PyObject *)self;
     if (!obj->c_obj) {
         PyErr_SetString(PyExc_AttributeError,"Struct is not initialized");
@@ -204,7 +204,7 @@ static int wips_odometry_result_PyObject_set_timestamps(PyObject *self, PyObject
     // Check if old vla is NULL
     if (obj->c_obj->timestamps) {
         // old vla is not NULL, destroy the buffer
-        for (size_t i = 0; i < obj->c_obj->GET_DETAIL(timestamps,vlasize)) {
+        for (size_t i = 0; i < obj->c_obj->GET_DETAIL(timestamps,vlasize); ++i) {
             // Free resources recursively
             wips_u64_t *old_elem = obj->c_obj->timestamps + i;
             wips_u64_free_resources(old_elem);
@@ -217,7 +217,7 @@ static int wips_odometry_result_PyObject_set_timestamps(PyObject *self, PyObject
     obj->c_obj->GET_DETAIL(timestamps,vlasize) = new_vlasize;
     return 0;
 }
-static PyObject *wips_odometry_result_PyObject_get_twists(PyObject *self, void *closure) {
+static PyObject *wips_odometry_result_PyObject_get_twists(PyObject *self, void *Py_UNUSED(closure)) {
     wips_odometry_result_PyObject *obj = (wips_odometry_result_PyObject *)self;
     if (!obj->c_obj) {
         PyErr_SetString(PyExc_AttributeError,"Struct is not initialized");
@@ -231,7 +231,7 @@ static PyObject *wips_odometry_result_PyObject_get_twists(PyObject *self, void *
     }
 
     wips_vlaref_t vlaref;
-    GET_VLAREF(&vlaref,twist2,obj->c_obj,twists)
+    GET_VLAREF(&vlaref,twist2,obj->c_obj,twists);
     wips_vla_PyObject *py_vla = wips_vla_PyObject_create(
         &wips_twist2_PyType,
         obj->base.handler,
@@ -244,7 +244,7 @@ static PyObject *wips_odometry_result_PyObject_get_twists(PyObject *self, void *
     
     return (PyObject *)py_vla;
 }
-static int wips_odometry_result_PyObject_set_twists(PyObject *self, PyObject *value, void *closure) {
+static int wips_odometry_result_PyObject_set_twists(PyObject *self, PyObject *value, void *Py_UNUSED(closure)) {
     wips_odometry_result_PyObject *obj = (wips_odometry_result_PyObject *)self;
     if (!obj->c_obj) {
         PyErr_SetString(PyExc_AttributeError,"Struct is not initialized");
@@ -315,7 +315,7 @@ static int wips_odometry_result_PyObject_set_twists(PyObject *self, PyObject *va
     // Check if old vla is NULL
     if (obj->c_obj->twists) {
         // old vla is not NULL, destroy the buffer
-        for (size_t i = 0; i < obj->c_obj->GET_DETAIL(twists,vlasize)) {
+        for (size_t i = 0; i < obj->c_obj->GET_DETAIL(twists,vlasize); ++i) {
             // Free resources recursively
             wips_twist2_t *old_elem = obj->c_obj->twists + i;
             wips_twist2_free_resources(old_elem);
@@ -345,7 +345,7 @@ static PyGetSetDef wips_odometry_result_PyObject_getsetters[] = {
         NULL
     },
     {NULL}
-}
+};
 
 // wips_PyType
 
@@ -366,7 +366,7 @@ static PyObject *wips_odometry_result_wrap(void *c_obj, wips_PyHandler *handler)
     obj->c_obj = (wips_odometry_result_t *)c_obj;
     wips_PyHandler_incref(handler);
 
-    return obj;
+    return (PyObject *)obj;
 }
 
 static void *wips_odometry_result_unwrap(PyObject *py_obj) {
@@ -647,13 +647,13 @@ static PyMethodDef wips_odometry_result_PyObject_methods[] = {
     {
         "encode",
         wips_odometry_result_PyObject_encode,
-        METH_VARARGS,
+        METH_VARARGS | METH_STATIC,
         "Encodes a struct"
     },
     {
         "decode",
         wips_odometry_result_PyObject_decode,
-        METH_VARARGS,
+        METH_VARARGS | METH_STATIC,
         "Decodes a blob"
     },
     {
@@ -674,7 +674,7 @@ static PyMethodDef wips_odometry_result_PyObject_methods[] = {
 PyTypeObject wips_odometry_result_PyTypeObject = {
     PyVarObject_HEAD_INIT(NULL, 0)
     .tp_name = "wips.odometry_result",
-    .tp_basicsize = GET_SIZE(odometry_result),
+    .tp_basicsize = sizeof(wips_odometry_result_PyObject),
     .tp_flags = Py_TPFLAGS_DEFAULT,
     .tp_base = &wips_struct_PyTypeObject,
     .tp_new = wips_odometry_result_PyObject_new,
@@ -683,55 +683,6 @@ PyTypeObject wips_odometry_result_PyTypeObject = {
     .tp_methods = wips_odometry_result_PyObject_methods,
     .tp_getset = wips_odometry_result_PyObject_getsetters
 };
-
-int wips_odometry_result_PyTypeObject_init(PyObject *m) {
-    if (PyType_Ready(&wips_odometry_result_PyTypeObject) < 0) {
-        return -1;
-    }
-
-    Py_INCREF(&wips_odometry_result_PyTypeObject);
-    if (PyModule_AddObject(m, "odometry_result", (PyObject *)&wips_odometry_result_PyTypeObject) < 0) {
-        Py_DECREF(&wips_odometry_result_PyTypeObject);
-        return -1;
-    }
-
-    PyObject *encode_func = PyObject_GetAttrString((PyObject *)&wips_odometry_result_PyTypeObject, "encode");
-    if (!encode_func) {
-        // failed to retrieve encoder function, give up
-        return -1;
-    }
-
-    PyObject *decode_func = PyObject_GetAttrString((PyObject *)&wips_odometry_result_PyTypeObject, "decode");
-    if (!encode_func) {
-        // failed to retrieve decoder function, give up
-        return -1;
-    }
-
-    PyObject *static_encode_func = PyStaticMethod_New(encode_func);
-    Py_DECREF(encode_func);
-    if (!static_encode_func) {
-        // failed to create static encoder function, give up
-        return -1;
-    }
-    if (PyObject_SetAttrString((PyObject *)&wips_odometry_result_PyTypeObject, "encode", static_encode_func) < 0) {
-        Py_DECREF(static_encode_func);
-        return -1;
-    }
-    Py_DECREF(static_encode_func);
-
-    PyObject *static_decode_func = PyStaticMethod_New(decode_func);
-    Py_DECREF(decode_func);
-    if (!static_decode_func) {
-        // failed to create static decoder function, give up
-        return -1;
-    }
-    if (PyObject_SetAttrString((PyObject *)&wips_odometry_result_PyTypeObject, "decode", static_decode_func) < 0) {
-        Py_DECREF(static_decode_func);
-        return -1;
-    }
-    Py_DECREF(static_decode_func);
-    return 0;
-}
 
 #ifdef __cplusplus
 }

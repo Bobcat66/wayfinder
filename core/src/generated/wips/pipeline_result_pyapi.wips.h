@@ -49,9 +49,7 @@ typedef struct {
 } wips_pipeline_result_PyObject;
 
 extern wips_PyType wips_pipeline_result_PyType;
-extern PyTypeObject wips_pipeline_result_PyObjectType;
-
-int wips_pipeline_result_PyObjectType_init(PyObject *m);
+extern PyTypeObject wips_pipeline_result_PyTypeObject;
 
 #ifdef __cplusplus
 }

@@ -49,9 +49,7 @@ typedef struct {
 } wips_pose3_PyObject;
 
 extern wips_PyType wips_pose3_PyType;
-extern PyTypeObject wips_pose3_PyObjectType;
-
-int wips_pose3_PyObjectType_init(PyObject *m);
+extern PyTypeObject wips_pose3_PyTypeObject;
 
 #ifdef __cplusplus
 }

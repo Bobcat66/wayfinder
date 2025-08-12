@@ -53,7 +53,7 @@ static void _wips_twist2_void_destructor(void *ptr) {
     wips_twist2_destroy((wips_twist2_t *)ptr);
 }
 
-static PyObject *wips_twist2_PyObject_new(PyTypeObject* type, PyObject *args, PyObject *kwds) {
+static PyObject *wips_twist2_PyObject_new(PyTypeObject* type, PyObject *Py_UNUSED(args), PyObject *Py_UNUSED(kwds)) {
     
     wips_twist2_PyObject *obj;
 
@@ -62,14 +62,14 @@ static PyObject *wips_twist2_PyObject_new(PyTypeObject* type, PyObject *args, Py
         obj->base.wips_type = &wips_twist2_PyType;
         obj->base.handler = NULL;
         obj->c_obj = NULL;
-        return (PyObject *)self;
+        return (PyObject *)obj;
     } else {
         PyErr_SetString(PyExc_RuntimeError, "Failed to initialize twist2");
         return NULL;
     }
 }
 
-static int wips_twist2_PyObject_init(PyObject *self, PyObject *args, PyObject *kwds) {
+static int wips_twist2_PyObject_init(PyObject *self, PyObject *Py_UNUSED(args), PyObject *Py_UNUSED(kwds)) {
 
     wips_twist2_PyObject *obj = (wips_twist2_PyObject *)self;
 
@@ -85,7 +85,7 @@ static int wips_twist2_PyObject_init(PyObject *self, PyObject *args, PyObject *k
     }
 
     obj->c_obj = c_obj;
-    obj->handler = handler;
+    obj->base.handler = handler;
 
     return 0;
 }
@@ -95,7 +95,7 @@ static void wips_twist2_PyObject_dealloc(PyObject *self) {
     wips_twist2_PyObject *obj = (wips_twist2_PyObject *)self;
 
     if (obj->base.handler) {
-        wips_PyHandler_decref(obj->handler);
+        wips_PyHandler_decref(obj->base.handler);
         obj->base.handler = NULL;
         obj->base.wips_type = NULL;
         obj->c_obj = NULL;
@@ -105,7 +105,7 @@ static void wips_twist2_PyObject_dealloc(PyObject *self) {
 }
 
 // getsetters
-static PyObject *wips_twist2_PyObject_get_dx(PyObject *self, void *closure) {
+static PyObject *wips_twist2_PyObject_get_dx(PyObject *self, void *Py_UNUSED(closure)) {
     wips_twist2_PyObject *obj = (wips_twist2_PyObject *)self;
     if (!obj->c_obj) {
         PyErr_SetString(PyExc_AttributeError,"Struct is not initialized");
@@ -121,11 +121,11 @@ static PyObject *wips_twist2_PyObject_get_dx(PyObject *self, void *closure) {
     }
     return py_field;
 }
-static int wips_twist2_PyObject_set_dx(PyObject *self, PyObject *value, void *closure) {
+static int wips_twist2_PyObject_set_dx(PyObject *self, PyObject *value, void *Py_UNUSED(closure)) {
     wips_twist2_PyObject *obj = (wips_twist2_PyObject *)self;
     if (!obj->c_obj) {
         PyErr_SetString(PyExc_AttributeError,"Struct is not initialized");
-        return NULL;
+        return -1;
     }
 
     // value is not None
@@ -152,7 +152,7 @@ static int wips_twist2_PyObject_set_dx(PyObject *self, PyObject *value, void *cl
     }
     return 0;
 }
-static PyObject *wips_twist2_PyObject_get_dy(PyObject *self, void *closure) {
+static PyObject *wips_twist2_PyObject_get_dy(PyObject *self, void *Py_UNUSED(closure)) {
     wips_twist2_PyObject *obj = (wips_twist2_PyObject *)self;
     if (!obj->c_obj) {
         PyErr_SetString(PyExc_AttributeError,"Struct is not initialized");
@@ -168,11 +168,11 @@ static PyObject *wips_twist2_PyObject_get_dy(PyObject *self, void *closure) {
     }
     return py_field;
 }
-static int wips_twist2_PyObject_set_dy(PyObject *self, PyObject *value, void *closure) {
+static int wips_twist2_PyObject_set_dy(PyObject *self, PyObject *value, void *Py_UNUSED(closure)) {
     wips_twist2_PyObject *obj = (wips_twist2_PyObject *)self;
     if (!obj->c_obj) {
         PyErr_SetString(PyExc_AttributeError,"Struct is not initialized");
-        return NULL;
+        return -1;
     }
 
     // value is not None
@@ -199,7 +199,7 @@ static int wips_twist2_PyObject_set_dy(PyObject *self, PyObject *value, void *cl
     }
     return 0;
 }
-static PyObject *wips_twist2_PyObject_get_dtheta(PyObject *self, void *closure) {
+static PyObject *wips_twist2_PyObject_get_dtheta(PyObject *self, void *Py_UNUSED(closure)) {
     wips_twist2_PyObject *obj = (wips_twist2_PyObject *)self;
     if (!obj->c_obj) {
         PyErr_SetString(PyExc_AttributeError,"Struct is not initialized");
@@ -215,11 +215,11 @@ static PyObject *wips_twist2_PyObject_get_dtheta(PyObject *self, void *closure) 
     }
     return py_field;
 }
-static int wips_twist2_PyObject_set_dtheta(PyObject *self, PyObject *value, void *closure) {
+static int wips_twist2_PyObject_set_dtheta(PyObject *self, PyObject *value, void *Py_UNUSED(closure)) {
     wips_twist2_PyObject *obj = (wips_twist2_PyObject *)self;
     if (!obj->c_obj) {
         PyErr_SetString(PyExc_AttributeError,"Struct is not initialized");
-        return NULL;
+        return -1;
     }
 
     // value is not None
@@ -251,26 +251,26 @@ static PyGetSetDef wips_twist2_PyObject_getsetters[] = {
     {
         "dx",
         (getter)wips_twist2_PyObject_get_dx,
-        (setter)wips_twist2_PyObject_set_dx,,
+        (setter)wips_twist2_PyObject_set_dx,
         "fp64",
         NULL
     },
     {
         "dy",
         (getter)wips_twist2_PyObject_get_dy,
-        (setter)wips_twist2_PyObject_set_dy,,
+        (setter)wips_twist2_PyObject_set_dy,
         "fp64",
         NULL
     },
     {
         "dtheta",
         (getter)wips_twist2_PyObject_get_dtheta,
-        (setter)wips_twist2_PyObject_set_dtheta,,
+        (setter)wips_twist2_PyObject_set_dtheta,
         "fp64",
         NULL
     },
     {NULL}
-}
+};
 
 // wips_PyType
 
@@ -291,7 +291,7 @@ static PyObject *wips_twist2_wrap(void *c_obj, wips_PyHandler *handler) {
     obj->c_obj = (wips_twist2_t *)c_obj;
     wips_PyHandler_incref(handler);
 
-    return obj;
+    return (PyObject *)obj;
 }
 
 static void *wips_twist2_unwrap(PyObject *py_obj) {
@@ -520,13 +520,13 @@ static PyMethodDef wips_twist2_PyObject_methods[] = {
     {
         "encode",
         wips_twist2_PyObject_encode,
-        METH_VARARGS,
+        METH_VARARGS | METH_STATIC,
         "Encodes a struct"
     },
     {
         "decode",
         wips_twist2_PyObject_decode,
-        METH_VARARGS,
+        METH_VARARGS | METH_STATIC,
         "Decodes a blob"
     },
     {
@@ -547,7 +547,7 @@ static PyMethodDef wips_twist2_PyObject_methods[] = {
 PyTypeObject wips_twist2_PyTypeObject = {
     PyVarObject_HEAD_INIT(NULL, 0)
     .tp_name = "wips.twist2",
-    .tp_basicsize = GET_SIZE(twist2),
+    .tp_basicsize = sizeof(wips_twist2_PyObject),
     .tp_flags = Py_TPFLAGS_DEFAULT,
     .tp_base = &wips_struct_PyTypeObject,
     .tp_new = wips_twist2_PyObject_new,
@@ -556,55 +556,6 @@ PyTypeObject wips_twist2_PyTypeObject = {
     .tp_methods = wips_twist2_PyObject_methods,
     .tp_getset = wips_twist2_PyObject_getsetters
 };
-
-int wips_twist2_PyTypeObject_init(PyObject *m) {
-    if (PyType_Ready(&wips_twist2_PyTypeObject) < 0) {
-        return -1;
-    }
-
-    Py_INCREF(&wips_twist2_PyTypeObject);
-    if (PyModule_AddObject(m, "twist2", (PyObject *)&wips_twist2_PyTypeObject) < 0) {
-        Py_DECREF(&wips_twist2_PyTypeObject);
-        return -1;
-    }
-
-    PyObject *encode_func = PyObject_GetAttrString((PyObject *)&wips_twist2_PyTypeObject, "encode");
-    if (!encode_func) {
-        // failed to retrieve encoder function, give up
-        return -1;
-    }
-
-    PyObject *decode_func = PyObject_GetAttrString((PyObject *)&wips_twist2_PyTypeObject, "decode");
-    if (!encode_func) {
-        // failed to retrieve decoder function, give up
-        return -1;
-    }
-
-    PyObject *static_encode_func = PyStaticMethod_New(encode_func);
-    Py_DECREF(encode_func);
-    if (!static_encode_func) {
-        // failed to create static encoder function, give up
-        return -1;
-    }
-    if (PyObject_SetAttrString((PyObject *)&wips_twist2_PyTypeObject, "encode", static_encode_func) < 0) {
-        Py_DECREF(static_encode_func);
-        return -1;
-    }
-    Py_DECREF(static_encode_func);
-
-    PyObject *static_decode_func = PyStaticMethod_New(decode_func);
-    Py_DECREF(decode_func);
-    if (!static_decode_func) {
-        // failed to create static decoder function, give up
-        return -1;
-    }
-    if (PyObject_SetAttrString((PyObject *)&wips_twist2_PyTypeObject, "decode", static_decode_func) < 0) {
-        Py_DECREF(static_decode_func);
-        return -1;
-    }
-    Py_DECREF(static_decode_func);
-    return 0;
-}
 
 #ifdef __cplusplus
 }
