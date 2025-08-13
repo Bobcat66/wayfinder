@@ -32,9 +32,9 @@
 namespace wf {
     //static auto logger = LoggerManager::getInstance().getLogger("VisionWorkerManager",LogGroup::General);
 
-    VisionWorkerManager::VisionWorkerManager(NetworkTablesManager& ntManager_, HardwareManager& hardwareManager_, InferenceEngineFactory& engineFactory)
+    VisionWorkerManager::VisionWorkerManager(NetworkTablesManager& ntManager_, HardwareManager& hardwareManager_, InferenceEngineFactory& engineFactory, ApriltagPipelineFactory& apriltagPipelineFactory_)
     : ntManager(ntManager_), hardwareManager(hardwareManager_), engineFactory(engineFactory)
-    , WFLoggedStatusfulObject("VisionWorkerManager",LogGroup::General) {}
+    , WFLoggedStatusfulObject("VisionWorkerManager",LogGroup::General), apriltagPipelineFactory(apriltagPipelineFactory_) {}
 
     // TODO: Refactor this with Status codes?
     WFResult<std::shared_ptr<VisionWorker>> VisionWorkerManager::buildVisionWorker(const VisionWorkerConfig& config) {
@@ -51,13 +51,19 @@ namespace wf {
                     if (!std::holds_alternative<ApriltagPipelineConfiguration>(config.pipelineConfig))
                         return WFResult<std::shared_ptr<VisionWorker>>::failure(
                             WFStatus::PIPELINE_BAD_CONFIG,
-                            "Pipeline {} is declared as Apriltag Pipeline yet specifies an incompatible configuration!",config.camera_nickname
+                            "Pipeline {} is declared as Apriltag Pipeline yet specifies an incompatible configuration!",config.name
                         );
-                    auto& intrinsics = hardwareManager.getIntrinsics(config.camera_nickname).value();
-                    if (!intrinsics)
-                        throw intrinsics_not_found(
-                            std::format("Attempted to create apriltag PnP pipeline, but no camera intrinsics were specified for camera {} at the given resolution!",config.camera_nickname)
+                    
+                    auto pipelineConfig = std::get<ApriltagPipelineConfiguration>(config.pipelineConfig);
+                    auto intrinsics_res = hardwareManager.getIntrinsics(config.camera_nickname);
+                    if ((!intrinsics_res) && (pipelineConfig.solvePnP))
+                        return WFResult<std::shared_ptr<VisionWorker>>::failure(
+                            WFStatus::APRILTAG_NO_INTRINSICS,
+                            "Pipeline {} is configured to solve PnP, but no intrinsics were provided", config.name
                         );
+                    CameraIntrinsics intrinsics = intrinsics_res
+                        ? std::move(intrinsics_res.value())
+                        : CameraIntrinsics{};
 
                     // Fetch frame provider from the hardware manager
                     auto frameProviderRes = hardwareManager.getFrameProvider(
@@ -96,37 +102,32 @@ namespace wf {
                         }
                     }
                     CVProcessPipe preprocesser(hardwareFormat.frameFormat,std::move(nodes));
-                    auto pipeline = std::make_unique<ApriltagPipeline>(
-                        std::get<ApriltagPipelineConfiguration>(config.pipelineConfig),
-                        intrinsics.value(),
-                        atagConfig,
-                        atagField
+                    auto pipeline = apriltagPipelineFactory.createPipeline(
+                        pipelineConfig,
+                        intrinsics
                     );
 
                     // Build output consumer
                     auto outputConsumer = std::make_unique<ApriltagPipelineConsumer>(
                         config.name, config.camera_nickname,
-                        intrinsics.value(), 
+                        intrinsics, 
                         config.inputFormat.frameFormat, 
                         config.raw_port, config.processed_port,
                         config.outputFormat,
-                        atagConfig.tagSize,
+                        pipelineConfig.apriltagSize,
                         ntManager.getDataPublisher(config.name)
                     );
                     outputConsumer->enableStreaming(config.stream);
 
                     // Build worker
-                    workers.emplace(
-                        std::piecewise_construct,
-                        std::forward_as_tuple(config.name),
-                        std::forward_as_tuple(
-                            config.name,
-                            frameProvider,
-                            std::move(preprocesser),
-                            std::move(pipeline),
-                            std::move(outputConsumer)
-                        )
+                    auto worker = std::make_shared<VisionWorker>(
+                        config.name,
+                        frameProvider,
+                        std::move(preprocesser),
+                        std::move(pipeline.value()),
+                        std::move(outputConsumer)
                     );
+                    workers.insert({config.name,std::move(worker)});
                 }
             case PipelineType::ObjDetect:
                 throw std::runtime_error("Object Detection not implemented"); // TODO: remove this once implemented
@@ -141,7 +142,7 @@ namespace wf {
         return (it != workers.end());
     }
 
-    VisionWorker& VisionWorkerManager::getWorker(const std::string& name) {
+    WFResult<std::shared_ptr<VisionWorker>> VisionWorkerManager::getWorker(const std::string& name) {
         WF_DEBUGLOG(this->logger(),"Getting worker {}",name);
         auto it = workers.find(name);
         if (it == workers.end()) {
@@ -157,7 +158,7 @@ namespace wf {
             this->logger()->warn("Vision worker {} not found",name);
             return;
         }
-        it->second.start();
+        it->second->start();
     }
 
     void VisionWorkerManager::stopWorker(const std::string& name) {
@@ -167,11 +168,11 @@ namespace wf {
             this->logger()->warn("Worker {} not found",name);
             return;
         }
-        if (!(it->second.isRunning())) {
+        if (!(it->second->isRunning())) {
             WF_DEBUGLOG(this->logger(),"Worker {} already stopped",name);
             return;
         }
-        it->second.stop();
+        it->second->stop();
     }
 
     void VisionWorkerManager::destroyWorker(const std::string& name) {
@@ -182,7 +183,7 @@ namespace wf {
             return;
         }
         WF_DEBUGLOG(this->logger(),"Stopping worker {}",it->first);
-        it->second.stop();
+        it->second->stop();
         workers.erase(it);
     }
 
@@ -190,11 +191,11 @@ namespace wf {
         this->logger()->info("Starting all workers");
         for (auto& [name,worker] : workers) {
             this->logger()->info("Starting worker {}",name);
-            if (worker.isRunning()) { 
+            if (worker->isRunning()) { 
                 WF_DEBUGLOG(this->logger(),"Worker {} already started",name);
                 continue;
             }
-            worker.start();
+            worker->start();
         }
     }
 
@@ -202,11 +203,11 @@ namespace wf {
         this->logger()->info("Stopping all workers");
         for (auto& [name,worker] : workers) {
             this->logger()->info("Stopping worker {}",name);
-            if (!worker.isRunning()) {
+            if (!worker->isRunning()) {
                 WF_DEBUGLOG(this->logger(),"Worker {} already stopped",name);
                 continue;
             }
-            worker.stop();
+            worker->stop();
         }
     }
 
@@ -215,7 +216,7 @@ namespace wf {
         for (auto it = workers.begin(); it != workers.end(); ) {
             this->logger()->info("Destroying worker {}",it->first);
             WF_DEBUGLOG(this->logger(),"Stopping worker {}",it->first);
-            it->second.stop();
+            it->second->stop();
             it = workers.erase(it);
         }
     }

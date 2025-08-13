@@ -26,25 +26,26 @@
 #include "wfcore/hardware/CameraConfiguration.h"
 #include "wfcore/common/json_utils.h"
 #include "wfcore/pipeline/ApriltagPipelineConfiguration.h"
+#include "wfcore/fiducial/ApriltagFieldHandler.h"
 
 namespace wf {
 
     class ApriltagPipeline : public Pipeline {
     public:
-        ApriltagPipeline(ApriltagPipelineConfiguration config_, CameraIntrinsics intrinsics_, ApriltagConfiguration tagConfig_, ApriltagField& tagField_);
+        ApriltagPipeline(ApriltagPipelineConfiguration config_, CameraIntrinsics intrinsics_, ApriltagFieldHandler fieldHandler_);
         WFStatusResult setConfig(const ApriltagPipelineConfiguration& config);
-        WFStatusResult setTagConfig(const ApriltagConfiguration& tagConfig);
-        void setTagField(const ApriltagField& tagField);
         void setIntrinsics(const CameraIntrinsics& intrinsics);
         [[nodiscard]] 
         WFResult<PipelineResult> process(const cv::Mat& data, const FrameMetadata& meta) noexcept override;
         ~ApriltagPipeline() override = default;
     private:
+        WFStatusResult updateFieldHandler();
         WFStatusResult updateDetectorConfig(); // Updates the apriltag detector's configuration
-        ApriltagPipelineConfiguration config;
+        ApriltagPipelineConfiguration config;    
+        bool solvePnP;
         CameraIntrinsics intrinsics;
         ApriltagConfiguration tagConfig;
-        ApriltagField& tagField;
+        ApriltagFieldHandler fieldHandler;
         ApriltagDetector detector;
     };
 }

@@ -72,6 +72,6 @@ namespace wf {
         const CameraHandler* getCamera_(const std::string& nickname) const;
         CameraHandler* getCamera_(const std::string& nickname);
         std::unordered_map<std::string,std::shared_ptr<CameraHandler>> cameras;
-        std::shared_mutex cameras_mtx;
+        mutable std::shared_mutex cameras_mtx;
     };
 }

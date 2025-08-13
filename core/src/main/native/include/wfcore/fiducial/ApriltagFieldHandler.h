@@ -19,28 +19,22 @@
 
 #pragma once
 
-#include "wfcore/processes/VisionWorkerManager.h"
-#include "wfcore/hardware/HardwareManager.h"
-#include "wfcore/network/NetworkTablesManager.h"
+#include "wfcore/fiducial/ApriltagField.h"
 #include "wfcore/configuration/ResourceManager.h"
-#include "wfcore/configuration/WFSystemConfig.h"
-#include "wfcore/pipeline/ApriltagPipelineFactory.h"
+#include "wfcore/common/status.h"
 
+// This handles apriltag fields. TODO: Connect the handlers to a global apriltag field, rather than having each handler maintain its own field
 namespace wf {
-    class WFOrchestrator {
+    class ApriltagFieldHandler {
     public:
-        WFOrchestrator(WFSystemConfig config);
-        void periodic() noexcept;
-        // Stops all wayfinder processes except for the main thread
-        void stopTheWorld();
-        static WFOrchestrator createFromEnv();
+        ApriltagFieldHandler(const ResourceManager& resourceManager_)
+        : resourceManager(resourceManager_) {}
+        WFStatusResult loadField(std::string_view newFieldName);
+        const ApriltagField& getField() const noexcept { return field; }
+        const std::string& getFieldName() const noexcept { return fieldName; }
     private:
-        NetworkTablesManager ntManager_;
-        HardwareManager hardwareManager_;
-        ResourceManager resourceManager_;
-        std::unique_ptr<VisionWorkerManager> workerManager_;
-        InferenceEngineFactory inferenceEngineFactory_;
-        ApriltagPipelineFactory apriltagPipelineFactory_;
-        ApriltagField aprilTagField_;
+        std::string fieldName;
+        ApriltagField field;
+        const ResourceManager& resourceManager;
     };
 }

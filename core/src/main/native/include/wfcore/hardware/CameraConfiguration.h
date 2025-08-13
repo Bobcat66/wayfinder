@@ -67,6 +67,8 @@ namespace wf {
         CameraIntrinsics(cv::Size resolution_, cv::Mat cameraMatrix_, cv::Mat distCoeffs_)
         : resolution(std::move(resolution_)), cameraMatrix(std::move(cameraMatrix_)), distCoeffs(std::move(distCoeffs_)) {}
 
+        CameraIntrinsics() = default;
+
         static WFResult<JSON> toJSON_impl(const CameraIntrinsics& object);
         static WFResult<CameraIntrinsics> fromJSON_impl(const JSON& jobject);
         static const jval::JSONValidationFunctor* getValidator_impl();

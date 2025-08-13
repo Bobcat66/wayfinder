@@ -27,24 +27,26 @@
 namespace impl {
     using namespace wf;
 
-    static const std::unordered_map<InferenceEngineType, InferenceEngineCreatorFactory> yoloEngines = {
+    static const std::unordered_map<InferenceEngineType, InferenceEngineCreatorFactory> yoloEngineCreatorFactories = {
         { InferenceEngineType::CV_CPU, InferenceEngineCreator::getFactory<CPUInferenceEngineYOLO>() }
     };
 
-    static const std::unordered_map<ModelArch, std::unordered_map<InferenceEngineType, InferenceEngineCreatorFactory>> creatorMap = {
-        { ModelArch::YOLO, yoloEngines }
+    static const std::unordered_map<ModelArch, std::unordered_map<InferenceEngineType, InferenceEngineCreatorFactory>> engineCreatorFactories = {
+        { ModelArch::YOLO, yoloEngineCreatorFactories }
     };
 
+    static const auto brokenEngineFactory = InferenceEngineCreator::getFactory<BrokenInferenceEngine>();
+
     static InferenceEngineCreator getInferenceEngineCreator(ModelArch modelArch, InferenceEngineType engineType) {
-        auto archit = creatorMap.find(modelArch);
-        if (archit == creatorMap.end()) {
+        auto archit = engineCreatorFactories.find(modelArch);
+        if (archit == engineCreatorFactories.end()) {
             // Not implemented
-            return InferenceEngineCreator::getFactory<BrokenInferenceEngine>()();
+            return brokenEngineFactory();
         }
         auto etypeit = archit->second.find(engineType);
         if (etypeit == archit->second.end()) {
             // Not implemented
-            return InferenceEngineCreator::getFactory<BrokenInferenceEngine>()();
+            return brokenEngineFactory();
         }
         return (etypeit->second)();
     }

@@ -28,13 +28,14 @@
 #include "wfcore/fiducial/ApriltagConfiguration.h"
 #include "wfcore/common/status.h"
 #include "wfcore/inference/InferenceEngineFactory.h"
+#include "wfcore/pipeline/ApriltagPipelineFactory.h"
 #include <memory>
 
 namespace wf {
 
     class VisionWorkerManager : public WFLoggedStatusfulObject {
     public:
-        VisionWorkerManager(NetworkTablesManager& ntManager_, HardwareManager& hardwareManager_, InferenceEngineFactory& engineFactory_);
+        VisionWorkerManager(NetworkTablesManager& ntManager_, HardwareManager& hardwareManager_, InferenceEngineFactory& engineFactory_, ApriltagPipelineFactory& apriltagPipelineFactory_);
         WFResult<std::shared_ptr<VisionWorker>> buildVisionWorker(const VisionWorkerConfig& config);
         bool workerExists(const std::string& name) const;
         WFResult<std::shared_ptr<VisionWorker>> getWorker(const std::string& name);
@@ -46,10 +47,11 @@ namespace wf {
         void destroyAllWorkers();
         void periodic() noexcept;
     private:
-        std::unordered_map<std::string,VisionWorker> workers;
+        std::unordered_map<std::string,std::shared_ptr<VisionWorker>> workers;
 
         NetworkTablesManager& ntManager;
         HardwareManager& hardwareManager;
         InferenceEngineFactory& engineFactory;
+        ApriltagPipelineFactory& apriltagPipelineFactory;
     };
 }

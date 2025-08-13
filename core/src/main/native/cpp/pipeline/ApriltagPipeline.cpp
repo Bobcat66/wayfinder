@@ -25,15 +25,20 @@
 #include <algorithm>
 #include <wfcore/pipeline/pnp.h>
 #include <cassert>
+#include "wfcore/common/wfexcept.h"
 
 
 namespace wf {
 
     static loggerPtr logger = LoggerManager::getInstance().getLogger("ApriltagPipeline");
 
-    ApriltagPipeline::ApriltagPipeline(ApriltagPipelineConfiguration config_, CameraIntrinsics intrinsics_, ApriltagConfiguration tagConfig_, ApriltagField& tagField_)
-    : config(std::move(config_)), intrinsics(std::move(intrinsics_)), tagConfig(tagConfig_), tagField(tagField_) {
-        updateDetectorConfig();
+    ApriltagPipeline::ApriltagPipeline(ApriltagPipelineConfiguration config_, CameraIntrinsics intrinsics_, ApriltagFieldHandler fieldHandler_)
+    : config(std::move(config_)), intrinsics(std::move(intrinsics_)), tagConfig(config.apriltagFamily,config.apriltagSize), fieldHandler(std::move(fieldHandler_)) {
+        auto fres = updateFieldHandler();
+        if (!fres) throw wf_result_error(fres);
+        
+        auto dres = updateDetectorConfig();
+        if (!dres) throw wf_result_error(dres);
     }
 
     WFStatusResult ApriltagPipeline::setConfig(const ApriltagPipelineConfiguration& config) {
@@ -41,30 +46,27 @@ namespace wf {
         return updateDetectorConfig();
     }
     
-    WFStatusResult ApriltagPipeline::setTagConfig(const ApriltagConfiguration& tagConfig) {
-        this->tagConfig = tagConfig;
-        return updateDetectorConfig();
-    }
-
-    void ApriltagPipeline::setTagField(const ApriltagField& tagField) {
-        this->tagField = tagField;
-    }
-
     void ApriltagPipeline::setIntrinsics(const CameraIntrinsics& intrinsics) {
         this->intrinsics = intrinsics;
     }
 
+    WFStatusResult ApriltagPipeline::updateFieldHandler() {
+        if (fieldHandler.getFieldName() == config.apriltagField) 
+            return WFStatusResult::success();
+
+        return fieldHandler.loadField(config.apriltagField);
+    }
+
     // TODO: Refactor this???
     WFStatusResult ApriltagPipeline::updateDetectorConfig() {     
-        detector.setQuadThresholdParams(config.detQTPs);
-        detector.setConfig(config.detConfig);
         detector.clearFamilies();
 
-        if (auto detres = detector.addFamily(tagConfig.tagFamily)) {
-            return WFStatusResult::success();
-        } else {
-            return WFStatusResult::propagateFail(detres);
-        }
+        auto res = detector.addFamily(tagConfig.tagFamily);
+        if (!res) return res;
+
+        detector.setQuadThresholdParams(config.detQTPs);
+        detector.setConfig(config.detConfig);
+        return WFStatusResult::success();
     }
 
     WFResult<PipelineResult> ApriltagPipeline::process(const cv::Mat& data, const FrameMetadata& meta) noexcept {
@@ -94,7 +96,7 @@ namespace wf {
         auto fieldPose = solvePNPApriltag(
             detections,
             tagConfig,
-            tagField,
+            fieldHandler.getField(),
             intrinsics,
             config.SolvePNPExcludes
         );

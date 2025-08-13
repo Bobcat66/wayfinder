@@ -34,7 +34,6 @@ namespace wf {
         int id;
         gtsam::Pose3 pose;
         Apriltag(int id_, gtsam::Pose3 pose_) : id(id_), pose(std::move(pose)) {}
-        std::string dumpJSON() const;
     };
 
     // Apriltag Layout for an FRC Field

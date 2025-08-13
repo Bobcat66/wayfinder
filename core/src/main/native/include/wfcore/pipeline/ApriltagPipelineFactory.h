@@ -19,28 +19,23 @@
 
 #pragma once
 
-#include "wfcore/processes/VisionWorkerManager.h"
-#include "wfcore/hardware/HardwareManager.h"
-#include "wfcore/network/NetworkTablesManager.h"
+#include "wfcore/pipeline/ApriltagPipeline.h"
+#include "wfcore/pipeline/ApriltagPipelineConfiguration.h"
 #include "wfcore/configuration/ResourceManager.h"
-#include "wfcore/configuration/WFSystemConfig.h"
-#include "wfcore/pipeline/ApriltagPipelineFactory.h"
+#include "wfcore/hardware/HardwareManager.h"
+#include <memory>
 
 namespace wf {
-    class WFOrchestrator {
+    class ApriltagPipelineFactory {
     public:
-        WFOrchestrator(WFSystemConfig config);
-        void periodic() noexcept;
-        // Stops all wayfinder processes except for the main thread
-        void stopTheWorld();
-        static WFOrchestrator createFromEnv();
+        ApriltagPipelineFactory(ResourceManager& resourceManager_) 
+        :resourceManager(resourceManager_) {};
+
+        WFResult<std::unique_ptr<Pipeline>> createPipeline(
+            ApriltagPipelineConfiguration& config,
+            CameraIntrinsics intrinsics
+        );
     private:
-        NetworkTablesManager ntManager_;
-        HardwareManager hardwareManager_;
-        ResourceManager resourceManager_;
-        std::unique_ptr<VisionWorkerManager> workerManager_;
-        InferenceEngineFactory inferenceEngineFactory_;
-        ApriltagPipelineFactory apriltagPipelineFactory_;
-        ApriltagField aprilTagField_;
+        const ResourceManager& resourceManager;
     };
 }
