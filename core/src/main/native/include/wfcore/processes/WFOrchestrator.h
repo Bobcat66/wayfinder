@@ -41,6 +41,5 @@ namespace wf {
         std::unique_ptr<VisionWorkerManager> workerManager_;
         InferenceEngineFactory inferenceEngineFactory_;
         ApriltagPipelineFactory apriltagPipelineFactory_;
-        ApriltagField aprilTagField_;
     };
 }

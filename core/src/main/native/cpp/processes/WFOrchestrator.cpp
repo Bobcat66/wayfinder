@@ -19,8 +19,55 @@
 
 #include "wfcore/processes/WFOrchestrator.h"
 #include "wfcore/common/wfexcept.h"
+#include "wfcore/common/envutils.h"
+#include "wfcore/configuration/WFDefaults.h"
 #include <memory>
 #include "wfcore/configuration/WFDefaults.h"
+#include "wfcore/common/status.h"
+#include "wfcore/common/wfexcept.h"
+#include <filesystem>
+#include <fstream>
+
+namespace impl {
+    using namespace wf;
+    static WFStatusResult loadDefaults() {
+        auto pathstropt = env::getVar("WF_DEFAULTS_PATH");
+        if (!pathstropt) {
+            auto enverr = static_cast<WFStatus>(env::getError());
+            return WFStatusResult::failure(enverr);
+        }
+        auto path = std::filesystem::path(pathstropt.value());
+        if (!std::filesystem::exists(path))
+            return WFStatusResult::failure(
+                WFStatus::FILE_NOT_FOUND,
+                "{} not found",path.string()
+            );
+
+        std::ifstream file(path);
+
+        if (!file.is_open())
+            return WFStatusResult::failure(
+                WFStatus::FILE_NOT_OPENED,
+                "{} not opened",path.string()
+            );
+
+        JSON jobject;
+        try {
+            jobject << file;
+        } catch (const JSON::parse_error& e) {
+            return WFStatusResult::failure(
+                WFStatus::JSON_PARSE,
+                e.what()
+            );
+        }
+
+        auto loadres = WFDefaults::load(jobject);
+        if (!loadres)
+            return loadres;
+        
+        return WFStatusResult::success();
+    }
+}
 
 namespace wf {
     WFOrchestrator::WFOrchestrator(WFSystemConfig config)
@@ -28,22 +75,24 @@ namespace wf {
     , resourceManager_(config.paths.resource_path,config.paths.local_path) 
     , inferenceEngineFactory_(resourceManager_) 
     , apriltagPipelineFactory_(resourceManager_) {
-        ApriltagConfiguration apriltagConfiguration(
-            WFDefaults::getTagFamily(), 
-            WFDefaults::getTagSize()
-        );
         resourceManager_.assignResourceSubdir("fields", config.paths.fields_rsubdir);
-        auto tmp = resourceManager_.loadResourceJSON("fields", "2025-reefscape-welded.json");
-        if(!tmp) {
-            throw std::runtime_error("Bad JSON");
-        }
-        auto value = tmp.value();
-        aprilTagField_ = ApriltagField::fromJSON(value).value();
-
         workerManager_ = std::move(std::make_unique<VisionWorkerManager>(ntManager_, hardwareManager_, inferenceEngineFactory_, apriltagPipelineFactory_));
     }
 
     void WFOrchestrator::periodic() noexcept {
         hardwareManager_.periodic();
+    }
+
+    WFOrchestrator WFOrchestrator::createFromEnv() {
+        auto dres = impl::loadDefaults();
+        if (!dres)
+            throw wf_result_error(dres);
+
+        auto scres = WFSystemConfig::getFromEnv();
+        if (!scres)
+            throw wf_result_error(scres);
+
+        return WFOrchestrator(std::move(scres.value()));
+        
     }
 }

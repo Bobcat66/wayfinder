@@ -27,7 +27,6 @@ User=wayfinder
 Group=wayfinder
 WorkingDirectory=/opt/wayfinder
 Environment=WF_ENV_PATH=etc/wayfinder.env
-Environment=WF_EXEC_PATH=bin/wayfinderd
 ExecStart=/opt/wayfinder/scripts/launch.sh
 Restart=always
 RestartSec=5

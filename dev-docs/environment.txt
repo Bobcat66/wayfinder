@@ -2,6 +2,7 @@ Wayfinder relies on certain environment variables.
 
 WF_ENV_PATH: Absolute path to wayfinder's .env file. This environment variable must be set externally
 
+WF_DEFAULTS_PATH: Path to the system defaults file, relative to the working directory
 WF_DEVICE_NAME: A unique name used by a device to identify itself. Also doubles as the device's local hostname
 WF_TEAM: FRC team number
 WF_SLAM_SERVER: Whether or not this device should act as a SLAM server

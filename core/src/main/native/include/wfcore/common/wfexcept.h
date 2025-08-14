@@ -88,6 +88,9 @@ namespace wf {
     WF_DEFEXCEPT(json_error,UNKNOWN,"JSON Error")
     WF_DEFEXCEPT(unknown_exception,UNKNOWN,"Unknown exception")
     WF_DEFEXCEPT(bad_environment,UNKNOWN,"Bad Environment")
+    WF_DEFEXCEPT(file_not_found,FILE_NOT_FOUND,"File not found")
+    WF_DEFEXCEPT(file_not_opened,FILE_NOT_OPENED,"Failed to open file")
+    WF_DEFEXCEPT(json_parse_error,JSON_PARSE,"JSON Parse error")
 
     class wf_result_error : public wfexception {
     public:
