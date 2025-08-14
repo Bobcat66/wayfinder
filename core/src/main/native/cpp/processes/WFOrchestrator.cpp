@@ -53,7 +53,7 @@ namespace impl {
 
         JSON jobject;
         try {
-            jobject << file;
+            file >> jobject;
         } catch (const JSON::parse_error& e) {
             return WFStatusResult::failure(
                 WFStatus::JSON_PARSE,
