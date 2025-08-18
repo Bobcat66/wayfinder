@@ -22,9 +22,7 @@
 #include "wfcore/common/envutils.h"
 #include "wfcore/configuration/WFDefaults.h"
 #include <memory>
-#include "wfcore/configuration/WFDefaults.h"
 #include "wfcore/common/status.h"
-#include "wfcore/common/wfexcept.h"
 #include <filesystem>
 #include <fstream>
 
@@ -76,7 +74,7 @@ namespace wf {
     , inferenceEngineFactory_(resourceManager_) 
     , apriltagPipelineFactory_(resourceManager_) {
         resourceManager_.assignResourceSubdir("fields", config.paths.fields_rsubdir);
-        workerManager_ = std::move(std::make_unique<VisionWorkerManager>(ntManager_, hardwareManager_, inferenceEngineFactory_, apriltagPipelineFactory_));
+        workerManager_ = std::make_unique<VisionWorkerManager>(ntManager_, hardwareManager_, inferenceEngineFactory_, apriltagPipelineFactory_);
     }
 
     void WFOrchestrator::periodic() noexcept {
