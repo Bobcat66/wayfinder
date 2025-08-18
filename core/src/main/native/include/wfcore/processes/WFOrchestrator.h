@@ -27,18 +27,32 @@
 #include "wfcore/pipeline/ApriltagPipelineFactory.h"
 
 namespace wf {
-    class WFOrchestrator {
+    class WFOrchestrator : public WFLoggedStatusfulObject {
     public:
         WFOrchestrator(WFSystemConfig config);
         void periodic() noexcept;
         // Stops all wayfinder processes except for the main thread
         void stopTheWorld();
+        NetworkTablesManager& getNTManager() {
+            return ntManager_;
+        }
+        HardwareManager& getHardwareManager() {
+            return hardwareManager_;
+        }
+        ResourceManager& getResourceManager() {
+            return resourceManager_;
+        }
+        VisionWorkerManager& getWorkerManager() {
+            return workerManager_;
+        }
+        WFStatusResult configureHardware();
+        WFStatusResult configureWorkers();
         static WFOrchestrator createFromEnv();
     private:
         NetworkTablesManager ntManager_;
         HardwareManager hardwareManager_;
         ResourceManager resourceManager_;
-        std::unique_ptr<VisionWorkerManager> workerManager_;
+        VisionWorkerManager workerManager_;
         InferenceEngineFactory inferenceEngineFactory_;
         ApriltagPipelineFactory apriltagPipelineFactory_;
     };

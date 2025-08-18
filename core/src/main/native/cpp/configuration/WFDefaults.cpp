@@ -22,7 +22,8 @@
 #include "jval/WFDefaults.jval.hpp"
 #include "wfcore/common/jval_compat.h"
 #include "wfcore/common/wfdef.h"
-
+#include "wfcore/common/envutils.h"
+#include <fstream>
 #include <shared_mutex>
 
 namespace impl {
@@ -252,5 +253,43 @@ namespace wf {
         modelColorSpace_ = ImageEncoding::RGB24;
         nmsThreshold_ = 0.5f;
         confThreshold_ = 0.5f;
+    }
+
+    WFStatusResult loadDefaultsFromEnv() {
+        auto pathstropt = env::getVar("WF_DEFAULTS_PATH");
+        if (!pathstropt) {
+            auto enverr = static_cast<WFStatus>(env::getError());
+            return WFStatusResult::failure(enverr);
+        }
+        auto path = std::filesystem::path(pathstropt.value());
+        if (!std::filesystem::exists(path))
+            return WFStatusResult::failure(
+                WFStatus::FILE_NOT_FOUND,
+                "{} not found",path.string()
+            );
+
+        std::ifstream file(path);
+
+        if (!file.is_open())
+            return WFStatusResult::failure(
+                WFStatus::FILE_NOT_OPENED,
+                "{} not opened",path.string()
+            );
+
+        JSON jobject;
+        try {
+            file >> jobject;
+        } catch (const JSON::parse_error& e) {
+            return WFStatusResult::failure(
+                WFStatus::JSON_PARSE,
+                e.what()
+            );
+        }
+
+        auto loadres = WFDefaults::load(jobject);
+        if (!loadres)
+            return loadres;
+        
+        return WFStatusResult::success();
     }
 }

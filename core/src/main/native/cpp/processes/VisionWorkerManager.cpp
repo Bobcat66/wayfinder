@@ -37,7 +37,7 @@ namespace wf {
     , WFLoggedStatusfulObject("VisionWorkerManager",LogGroup::General), apriltagPipelineFactory(apriltagPipelineFactory_) {}
 
     // TODO: Refactor this with Status codes?
-    WFResult<std::shared_ptr<VisionWorker>> VisionWorkerManager::buildVisionWorker(const VisionWorkerConfig& config) {
+    WFResult<std::shared_ptr<VisionWorker>> VisionWorkerManager::buildVisionWorker(VisionWorkerConfig config) {
         this->logger()->info("Building worker {}",config.name);
         switch (config.pipelineType) {
             case PipelineType::Apriltag:
@@ -80,6 +80,14 @@ namespace wf {
                         throw wf_result_error(hardwareFormatRes);
                     
                     auto hardwareFormat = std::move(hardwareFormatRes.value());
+                    // Resolve input format and output format, if they are set to NULL
+                    StreamFormat nullFormat;
+                    if (config.inputFormat == nullFormat) 
+                        config.inputFormat = hardwareFormat;
+
+                    if (config.outputFormat == nullFormat)
+                        config.outputFormat = hardwareFormat;
+
                     // Build preprocesser
                     std::vector<std::unique_ptr<CVProcessNode<cv::Mat>>> nodes;
                     if (config.inputFormat.frameFormat == hardwareFormat.frameFormat) {
@@ -127,12 +135,19 @@ namespace wf {
                         std::move(pipeline.value()),
                         std::move(outputConsumer)
                     );
-                    workers.insert({config.name,std::move(worker)});
+                    workers.insert({config.name,worker});
+                    return worker;
                 }
             case PipelineType::ObjDetect:
-                throw std::runtime_error("Object Detection not implemented"); // TODO: remove this once implemented
+                return WFResult<std::shared_ptr<VisionWorker>>::failure(
+                    WFStatus::NOT_IMPLEMENTED,
+                    "Object Detection not implemented"
+                ); // TODO: remove this once implemented
             default:
-                throw std::runtime_error("How did you do this like actually. It should literally be impossible to get this error");
+                return WFResult<std::shared_ptr<VisionWorker>>::failure(
+                    WFStatus::UNKNOWN,
+                    "How did you do this like actually. It should literally be impossible to get this error"
+                );
         }
     }
 

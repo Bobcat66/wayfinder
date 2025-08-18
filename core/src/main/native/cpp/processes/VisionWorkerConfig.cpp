@@ -22,6 +22,7 @@
 #include "wfcore/common/json_utils.h"
 #include "jval/ObjectDetectionPipelineConfig.jval.hpp"
 #include "jval/ApriltagPipelineConfig.jval.hpp"
+#include "wfcore/utils/LambdaVisitor.h"
 
 namespace impl {
     using namespace wf;
@@ -57,15 +58,6 @@ namespace impl {
             default: return "NullType";
         }
     }
-
-    template <class... Lambdas>
-    struct LambdaVisitor : Lambdas... {
-        using Lambdas::operator()...;
-    };
-
-    // CTAD
-    template<class... Lambdas>
-    LambdaVisitor(Lambdas...) -> LambdaVisitor<Lambdas...>;
 }
 
 namespace wf {
@@ -100,8 +92,8 @@ namespace wf {
         JSON pcfg_jobject;
         WFStatus visitorStatus = WFStatus::OK;
         std::string visitorMsg;
-        std::visit(impl::LambdaVisitor{
-            [&pcfg_jobject,&visitorStatus,&visitorMsg](ApriltagPipelineConfiguration apcfg) -> void {
+        std::visit(LambdaVisitor{
+            [&pcfg_jobject,&visitorStatus,&visitorMsg](const ApriltagPipelineConfiguration& apcfg) -> void {
                 auto res = ApriltagPipelineConfiguration::toJSON(apcfg);
                 if (!res) {
                     // Propagate error to enclosing scope
@@ -111,7 +103,7 @@ namespace wf {
                 }
                 pcfg_jobject = std::move(res.value());
             },
-            [&pcfg_jobject,&visitorStatus,&visitorMsg](ObjectDetectionPipelineConfiguration odpcfg) -> void {
+            [&pcfg_jobject,&visitorStatus,&visitorMsg](const ObjectDetectionPipelineConfiguration& odpcfg) -> void {
                 auto res = ObjectDetectionPipelineConfiguration::toJSON(odpcfg);
                 if (!res) {
                     visitorStatus = res.status();
@@ -135,7 +127,7 @@ namespace wf {
             return WFResult<JSON>::propagateFail(oformat_res);
         
         auto oformat_jobject = std::move(oformat_res.value());
-        
+
         try {
             JSON jobject = {
                 {"camera_nickname",config.camera_nickname},

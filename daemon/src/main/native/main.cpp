@@ -20,7 +20,7 @@
 #include <iostream>
 
 #include "version.h"
-#include "wfcore/processes/VisionWorkerManager.h"
+#include "wfcore/processes/WFOrchestrator.h"
 
 // signals to the launcher
 
@@ -40,5 +40,14 @@
 
 int main() {
     std::cout << "Starting Wayfinder v" << PROJECT_VERSION << std::endl;
+    try {
+        auto wayfinder = wf::WFOrchestrator::createFromEnv();
+        while (true) {
+            wayfinder.periodic();
+        }
+    } catch (...) {
+        // TODO: More descriptive error handling
+        return WAYFINDER_ERROR;
+    }
     return WAYFINDER_SUCCESS;
 }

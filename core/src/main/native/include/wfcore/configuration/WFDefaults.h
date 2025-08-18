@@ -31,7 +31,7 @@
 namespace wf {
     class WFDefaults {
     public:
-        // Loads defaults from environment
+        // Loads defaults from JSON object
         static WFStatusResult load(const JSON& jobject);
         static std::string getTagField();
         static std::string getTagFamily();
@@ -73,4 +73,6 @@ namespace wf {
         float nmsThreshold_;
         float confThreshold_;
     };
+
+    WFStatusResult loadDefaultsFromEnv();
 }

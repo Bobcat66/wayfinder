@@ -36,7 +36,7 @@ namespace wf {
     class VisionWorkerManager : public WFLoggedStatusfulObject {
     public:
         VisionWorkerManager(NetworkTablesManager& ntManager_, HardwareManager& hardwareManager_, InferenceEngineFactory& engineFactory_, ApriltagPipelineFactory& apriltagPipelineFactory_);
-        WFResult<std::shared_ptr<VisionWorker>> buildVisionWorker(const VisionWorkerConfig& config);
+        WFResult<std::shared_ptr<VisionWorker>> buildVisionWorker(VisionWorkerConfig config);
         bool workerExists(const std::string& name) const;
         WFResult<std::shared_ptr<VisionWorker>> getWorker(const std::string& name);
         void startWorker(const std::string& name);

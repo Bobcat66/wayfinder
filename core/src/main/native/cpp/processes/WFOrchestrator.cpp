@@ -21,60 +21,36 @@
 #include "wfcore/common/wfexcept.h"
 #include "wfcore/common/envutils.h"
 #include "wfcore/configuration/WFDefaults.h"
+#include "wfcore/hardware/CameraConfiguration.h"
 #include <memory>
 #include "wfcore/common/status.h"
+#include "wfcore/common/wfexcept.h"
 #include <filesystem>
 #include <fstream>
 
-namespace impl {
-    using namespace wf;
-    static WFStatusResult loadDefaults() {
-        auto pathstropt = env::getVar("WF_DEFAULTS_PATH");
-        if (!pathstropt) {
-            auto enverr = static_cast<WFStatus>(env::getError());
-            return WFStatusResult::failure(enverr);
-        }
-        auto path = std::filesystem::path(pathstropt.value());
-        if (!std::filesystem::exists(path))
-            return WFStatusResult::failure(
-                WFStatus::FILE_NOT_FOUND,
-                "{} not found",path.string()
-            );
-
-        std::ifstream file(path);
-
-        if (!file.is_open())
-            return WFStatusResult::failure(
-                WFStatus::FILE_NOT_OPENED,
-                "{} not opened",path.string()
-            );
-
-        JSON jobject;
-        try {
-            file >> jobject;
-        } catch (const JSON::parse_error& e) {
-            return WFStatusResult::failure(
-                WFStatus::JSON_PARSE,
-                e.what()
-            );
-        }
-
-        auto loadres = WFDefaults::load(jobject);
-        if (!loadres)
-            return loadres;
-        
-        return WFStatusResult::success();
-    }
-}
-
 namespace wf {
     WFOrchestrator::WFOrchestrator(WFSystemConfig config)
-    : ntManager_(config.device_name,config.team,config.nt_server) 
+    : WFLoggedStatusfulObject("WFOrchestrator",LogGroup::General)
+    , ntManager_(config.device_name,config.team,config.nt_server) 
     , resourceManager_(config.paths.resource_path,config.paths.local_path) 
     , inferenceEngineFactory_(resourceManager_) 
-    , apriltagPipelineFactory_(resourceManager_) {
-        resourceManager_.assignResourceSubdir("fields", config.paths.fields_rsubdir);
-        workerManager_ = std::make_unique<VisionWorkerManager>(ntManager_, hardwareManager_, inferenceEngineFactory_, apriltagPipelineFactory_);
+    , apriltagPipelineFactory_(resourceManager_) 
+    , workerManager_(ntManager_, hardwareManager_, inferenceEngineFactory_, apriltagPipelineFactory_) {
+        auto fields_res 
+            = resourceManager_.assignResourceSubdir("fields", config.paths.fields_rsubdir);
+        if (!fields_res) throw wf_result_error(fields_res);
+
+        auto models_res 
+            = resourceManager_.assignResourceSubdir("models", config.paths.models_rsubdir);
+        if (!models_res) throw wf_result_error(models_res);
+
+        auto pipelines_res 
+            = resourceManager_.assignLocalSubdir("pipelines", config.paths.pipeline_lsubdir);
+        if (!pipelines_res) throw wf_result_error(pipelines_res);
+
+        auto hardware_res 
+            = resourceManager_.assignLocalSubdir("hardware", config.paths.hardware_lsubdir);
+        if (!hardware_res) throw wf_result_error(hardware_res);
     }
 
     void WFOrchestrator::periodic() noexcept {
@@ -82,15 +58,72 @@ namespace wf {
     }
 
     WFOrchestrator WFOrchestrator::createFromEnv() {
-        auto dres = impl::loadDefaults();
-        if (!dres)
-            throw wf_result_error(dres);
+        auto dres = loadDefaultsFromEnv();
+        if (!dres) throw wf_result_error(dres);
 
         auto scres = WFSystemConfig::getFromEnv();
-        if (!scres)
-            throw wf_result_error(scres);
+        if (!scres) throw wf_result_error(scres);
 
         return WFOrchestrator(std::move(scres.value()));
         
+    }
+
+    WFStatusResult WFOrchestrator::configureHardware() {
+        auto enum_res = resourceManager_.enumerateLocalSubdir("hardware");
+        if (!enum_res)
+            return WFStatusResult::propagateFail(enum_res);
+        auto config_files = std::move(enum_res.value());
+        std::vector<CameraConfiguration> configs;
+        for (const auto& config_file : config_files) {
+            auto JSONLoadRes = resourceManager_.loadLocalJSON("hardware",config_file);
+            if (!JSONLoadRes) {
+                logger()->error(JSONLoadRes.what());
+                continue;
+            }
+            auto decodeRes = CameraConfiguration::fromJSON(JSONLoadRes.value());
+            if (!decodeRes){
+                logger()->error(decodeRes.what());
+                continue;
+            }
+            configs.push_back(std::move(decodeRes.value()));
+        }
+        for (const auto& config : configs) {
+            auto res = hardwareManager_.registerCamera(config);
+            if (!res) {
+                logger()->warn("Failed to register camera {}",config.nickname);
+            } else {
+                logger()->info("Registered camera {}",config.nickname);
+            }
+        }
+        return WFStatusResult::success();
+    }
+
+    WFStatusResult WFOrchestrator::configureWorkers() {
+        auto enum_res = resourceManager_.enumerateLocalSubdir("pipelines");
+        if (!enum_res)
+            return WFStatusResult::propagateFail(enum_res);
+        auto config_files = std::move(enum_res.value());
+        std::vector<VisionWorkerConfig> configs;
+        for (const auto& config_file : config_files) {
+            auto JSONLoadRes = resourceManager_.loadLocalJSON("pipelines",config_file);
+            if (!JSONLoadRes) {
+                logger()->error(JSONLoadRes.what());
+                continue;
+            }
+            auto decodeRes = VisionWorkerConfig::fromJSON(JSONLoadRes.value());
+            if (!decodeRes){
+                logger()->error(decodeRes.what());
+                continue;
+            }
+            configs.push_back(std::move(decodeRes.value()));
+        }
+        for (auto& config : configs) {
+            auto res = workerManager_.buildVisionWorker(config);
+            if (!res) {
+                logger()->error(res.what());
+                continue;
+            }
+        }
+        return WFStatusResult::success();
     }
 }
