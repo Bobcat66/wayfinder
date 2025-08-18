@@ -74,7 +74,7 @@ namespace wf {
             solveTagRelative
         );
     }
-    WFResult<JSON> toJSON_impl(const ApriltagPipelineConfiguration& object) {
+    WFResult<JSON> ApriltagPipelineConfiguration::toJSON_impl(const ApriltagPipelineConfiguration& object) {
         try {
             JSON jobject = {
                 {"detConfig", {

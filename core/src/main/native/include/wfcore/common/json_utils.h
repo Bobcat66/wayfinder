@@ -29,6 +29,12 @@
 #include <regex>
 #include <limits>
 #include "wfcore/common/jval_compat.h"
+#include <concepts>
+#include "wfcore/common/wfdef.h"
+#include "jval/jvruntime.hpp"
+#include "wfcore/common/jval_compat.h"
+#include <utility>
+#include <memory>
 
 // TODO: Refactor JSON utilities.
 // The way they are structured now, a lot of unnecessary checks are performed
@@ -61,39 +67,105 @@ namespace wf {
     }
 
     template <typename T>
+    using ValidatorDecoder = std::pair<const jval::JSONValidationFunctor*,std::function<WFResult<T>(const JSON&)>>;
+
+    template <typename... Ts>
+    class JSONVariantDecoder {
+    public:
+        JSONVariantDecoder(ValidatorDecoder<Ts>... valdecs) {
+            (addValDec(std::forward<ValidatorDecoder<Ts>>(valdecs)), ...);
+        }
+        WFResult<std::variant<Ts...>> decode(const JSON& jobject) {
+            for (auto& valdec : valdecsvec) {
+                if (!(*valdec.first)(jobject)) continue;
+                // We will propagate forward the first schema that is validated
+                // Errors will be propagated transparently
+                return (valdec.second)(jobject);
+            }
+            return WFResult<std::variant<Ts...>>::failure(
+                WFStatus::JSON_SCHEMA_VIOLATION,
+                "Value does not match any variant schema"
+            );
+        }
+    private:
+        template <typename T>
+        void addValDec(ValidatorDecoder<T> valdec) {
+            auto validator = valdec.first;
+            auto decoder   = std::move(valdec.second);
+            // Constructs a new dynamically allocated ValDec, as we need a level of indirection to store the valdecs in a vector
+            valdecsvec.emplace_back(
+                validator,
+                [decoder = std::move(decoder)](const JSON& jobject) -> WFResult<std::variant<Ts...>> {
+                    auto res = decoder(jobject);
+                    if (!res) return WFResult<std::variant<Ts...>>::propagateFail(res);
+                    return WFResult<std::variant<Ts...>>::success(
+                        std::variant<Ts...>(std::move(res.value()))
+                    );
+                }
+            );
+        }
+        std::vector<ValidatorDecoder<std::variant<Ts...>>> valdecsvec;
+    };
+
+    // CTAD for JSONVariantDecoder
+    template <typename... Ts>
+    JSONVariantDecoder(ValidatorDecoder<Ts>...) -> JSONVariantDecoder<Ts...>;
+
+    template <typename T>
     [[ deprecated ]]
     WFResult<T> jsonCast(const JSON& jobject, bool verbose) {
         return jsonCast<T>(jobject,"JSON Object",verbose);
     }
 
-    // Returns a primitive optional property or a default
+    // Returns an optional property or a default
     template <typename T>
     inline T getJSONOpt(const JSON& jobject,std::string_view property, T defaultValue) {
         return jobject.contains(property) ? jobject[property].get<T>() : defaultValue;
     }
 
     // CRTP-based JSON serializable object interface
-    template <typename DerivedType>
+    template <typename Derived>
     class JSONSerializable {
     public:
-        static WFResult<JSON> toJSON(const DerivedType& object) {
-            return DerivedType::toJSON_impl(object);
+        static WFResult<JSON> toJSON(const Derived& object) {
+            return Derived::toJSON_impl(object);
         }
-        static WFResult<DerivedType> fromJSON(const JSON& jobject) {
-            return DerivedType::fromJSON_impl(jobject);
+        static WFResult<Derived> fromJSON(const JSON& jobject) {
+            return Derived::fromJSON_impl(jobject);
         }
 
         // getValidator_impl() should return a pointer to a persistent singleton validation functor
         static WFStatusResult validate(const JSON& jobject) {
-            return JVResToWF((*DerivedType::getValidator_impl())(jobject));
+            return JVResToWF((*Derived::getValidator_impl())(jobject));
         }
 
         std::string dump() const {
-            auto jres = toJSON(static_cast<const DerivedType&>(*this));
+            auto jres = toJSON(static_cast<const Derived&>(*this));
             if (!jres) [[ unlikely ]] {
                 throw json_error("Error while dumping json: {}",wfstatus_name_view(jres.status()));
             }
             return jres.value().dump();
         }
     };
+
+    // For Nlohmann JSON integration
+    template <typename Derived>
+    void to_json(JSON& j, const Derived& value)
+    requires std::derived_from<Derived, JSONSerializable<Derived>>
+    {
+        auto res = Derived::toJSON(value);
+        if (!res)
+            throw wf_result_error(res);
+        j = std::move(res.value());
+    }
+
+    template <typename Derived>
+    void from_json(const JSON& j, Derived& value)
+    requires std::derived_from<Derived, JSONSerializable<Derived>>
+    {
+        auto res = Derived::fromJSON(j);
+        if (!res)
+            throw wf_result_error(res);
+        value = std::move(res.value());
+    }
 }

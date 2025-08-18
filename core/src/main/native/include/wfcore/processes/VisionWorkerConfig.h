@@ -38,8 +38,8 @@ namespace wf {
         , stream(stream_), raw_port(raw_port_), processed_port(processed_port_)
         , pipelineConfig(std::move(pipelineConfig_)) {}
 
-        static WFResult<VisionWorkerConfig> fromJSON_impl();
-        static WFResult<JSON> toJSON_impl();
+        static WFResult<VisionWorkerConfig> fromJSON_impl(const JSON& jobject);
+        static WFResult<JSON> toJSON_impl(const VisionWorkerConfig& config);
         static const jval::JSONValidationFunctor* getValidator_impl();
     };
 }
