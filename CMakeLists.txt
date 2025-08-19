@@ -55,6 +55,7 @@ else()
     add_subdirectory(thirdparty/gtsam)
     add_subdirectory(thirdparty/spdlog)
     add_subdirectory(thirdparty/nlohmann_json)
+    add_subdirectory(thirdparty/cpp-httplib)
     #add_subdirectory(thirdparty/cpr) # Add this back in when working on Daemon
     add_subdirectory(core)
     add_subdirectory(daemon)
