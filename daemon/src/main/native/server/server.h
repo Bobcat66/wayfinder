@@ -29,6 +29,6 @@ namespace wfserver {
         ~HTTPServer() = default;
     private:
         wf::WFOrchestrator& orchestrator_;
-        std::unique_ptr<httplib::Server> srv_;
+        httplib::Server srv_;
     };
 }

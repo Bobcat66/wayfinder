@@ -18,11 +18,19 @@
  */
 
 #include "server.h"
+#include "wfcore/common/envutils.h"
 
 namespace wfserver {
     HTTPServer::HTTPServer(wf::WFOrchestrator& orchestrator)
     : orchestrator_(orchestrator){
-        
+        auto tempNumOpt = wf::env::getInt("WF_TEAM");
+        if (tempNumOpt.has_value()) {
+            srv_.Get("/api/env/team",[](const httplib::Request& req, httplib::Response& res){
+                res.set_content(tempNumOpt.value(), )
+            });
+        } else {
+
+        }
     }
 }
 
