@@ -16,13 +16,19 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+#pragma once
 
-#include "server.h"
+#include "wfcore/processes/WFOrchestrator.h"
+#include <memory>
+#include <httplib.h>
 
 namespace wfserver {
-    HTTPServer::HTTPServer(wf::WFOrchestrator& orchestrator)
-    : orchestrator_(orchestrator){
-        
-    }
+    class HTTPServer {
+    public:
+        HTTPServer(wf::WFOrchestrator& orchestrator);
+        ~HTTPServer() = default;
+    private:
+        wf::WFOrchestrator& orchestrator_;
+        std::unique_ptr<httplib::Server> srv_;
+    };
 }
-
