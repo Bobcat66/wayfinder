@@ -42,6 +42,8 @@ int main() {
     std::cout << "Starting Wayfinder v" << PROJECT_VERSION << std::endl;
     try {
         auto wayfinder = wf::WFOrchestrator::createFromEnv();
+        wayfinder.configureHardware();
+        wayfinder.configureWorkers();
         while (true) {
             wayfinder.periodic();
         }
