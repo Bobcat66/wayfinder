@@ -61,7 +61,7 @@ namespace jval {
             {
             },
             {
-                { "modelFile", { "engineType", "tensorParams", "modelColorSpace", "modelArch" } }
+                { "modelFile", { "modelArch", "tensorParams", "modelColorSpace", "engineType" } }
             }
         );
         return static_cast<JSONValidationFunctor*>(&validator);

@@ -71,13 +71,13 @@ namespace jval {
                 { "means", get__z42Droot_means_validator() }
             },
             {
-                "stds", 
                 "scale", 
                 "interleaved", 
+                "channels", 
                 "height", 
+                "stds", 
                 "means", 
-                "width", 
-                "channels"
+                "width"
             },
             {
             }

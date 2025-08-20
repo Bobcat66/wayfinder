@@ -45,10 +45,10 @@ namespace jval {
     using namespace impl;
     const JSONValidationFunctor* get_ModelArchitecture_validator() {        
         static JSONEnumValidator validator({
-            "YOLO", 
             "SSD", 
-            "RETINA_NET", 
-            "RCNN"
+            "YOLO", 
+            "RCNN", 
+            "RETINA_NET"
         });
         return static_cast<JSONValidationFunctor*>(&validator);
     }

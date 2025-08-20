@@ -1,6 +1,6 @@
 ##### HTTP API #####
 
-Each top-level collection in the API will support OPTIONS which returns the capabilities
+Each resource suppports OPTIONS
 
 /api/ - Root
 

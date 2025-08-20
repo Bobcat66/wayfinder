@@ -76,10 +76,10 @@ namespace jval {
             },
             {
                 "name", 
-                "pipelineType", 
                 "stream", 
-                "pipelineConfig", 
-                "camera_nickname"
+                "camera_nickname", 
+                "pipelineType", 
+                "pipelineConfig"
             },
             {
             }

@@ -50,8 +50,8 @@ namespace jval {
                 { "confidenceThreshold", getPrimitiveValidator<double>() }
             },
             {
-                "nmsThreshold", 
-                "confidenceThreshold"
+                "confidenceThreshold", 
+                "nmsThreshold"
             },
             {
             }

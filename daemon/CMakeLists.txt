@@ -15,7 +15,7 @@ install(TARGETS wayfinderd RUNTIME DESTINATION bin)
 target_link_libraries(wayfinderd
     PRIVATE
     wfcore
-    cpp-httplib
+    httplib
 )
 
 target_include_directories(wayfinderd

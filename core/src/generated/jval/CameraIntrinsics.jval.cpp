@@ -63,10 +63,10 @@ namespace impl {
                 { "cy", getPrimitiveValidator<double>() }
             },
             {
-                "cx", 
-                "fy", 
                 "cy", 
-                "fx"
+                "cx", 
+                "fx", 
+                "fy"
             },
             {
             }
@@ -93,9 +93,9 @@ namespace jval {
                 { "distortion", get__z42Droot_distortion_validator() }
             },
             {
+                "resolution", 
                 "matrix", 
-                "distortion", 
-                "resolution"
+                "distortion"
             },
             {
             }

@@ -34,41 +34,49 @@
 
 #include "jvexport.h"
 #include "jvruntime.hpp"
-#include "CameraConfig_capi.jval.h"
-#include "CameraConfig.jval.hpp"
-#include "StreamFormat.jval.hpp"
-#include "CameraIntrinsics.jval.hpp"
+#include "OptionsResponse_capi.jval.h"
+#include "OptionsResponse.jval.hpp"
 
 namespace impl {
     using namespace jval;
-    const JSONValidationFunctor* get__z42Droot_backend_validator() {        
-        static JSONEnumValidator validator({
-            "CSCORE", 
-            "GSTREAMER", 
-            "REALSENSE", 
-            "LIBCAMERA"
-        });
-        return static_cast<JSONValidationFunctor*>(&validator);
-    }
-    const JSONValidationFunctor* get__z42Droot_controlAliases_validator() {        
-        static JSONMapValidator validator(
-            getPrimitiveValidator<std::string>(),
-            R"(^(EXPOSURE|AUTO_EXPOSURE|BRIGHTNESS|ISO|SHUTTER|FOCUS|ZOOM|WHITE_BALANCE|AUTO_WHITE_BALANCE|SHARPNESS|SATURATION|CONTRAST|GAMMA|HUE)$)"
-        );
-        return static_cast<JSONValidationFunctor*>(&validator);
-    }
-    const JSONValidationFunctor* get__z42Droot_calibrations_validator() {        
+    const JSONValidationFunctor* get__z42Droot_supportedMethods_validator() {        
         static JSONArrayValidator validator(
-            get_CameraIntrinsics_validator(),
+            getPrimitiveValidator<std::string>(),
             0,
             array_maxsize
         );
         return static_cast<JSONValidationFunctor*>(&validator);
     }
-    const JSONValidationFunctor* get__z42Droot_controls_validator() {        
-        static JSONMapValidator validator(
-            getPrimitiveValidator<int>(),
-            R"(^(EXPOSURE|AUTO_EXPOSURE|BRIGHTNESS|ISO|SHUTTER|FOCUS|ZOOM|WHITE_BALANCE|AUTO_WHITE_BALANCE|SHARPNESS|SATURATION|CONTRAST|GAMMA|HUE)$)"
+    const JSONValidationFunctor* get__z42Droot_specialCases_items_validator();
+    const JSONValidationFunctor* get__z42Droot_specialCases_validator() {        
+        static JSONArrayValidator validator(
+            get__z42Droot_specialCases_items_validator(),
+            0,
+            array_maxsize
+        );
+        return static_cast<JSONValidationFunctor*>(&validator);
+    }
+    const JSONValidationFunctor* get__z42Droot_specialCases_items_supportedMethods_validator();
+    const JSONValidationFunctor* get__z42Droot_specialCases_items_validator() {        
+        static JSONStructValidator validator(
+            {
+                { "url", getPrimitiveValidator<std::string>() }, 
+                { "supportedMethods", get__z42Droot_specialCases_items_supportedMethods_validator() }
+            },
+            {
+                "url", 
+                "supportedMethods"
+            },
+            {
+            }
+        );
+        return static_cast<JSONValidationFunctor*>(&validator);
+    }
+    const JSONValidationFunctor* get__z42Droot_specialCases_items_supportedMethods_validator() {        
+        static JSONArrayValidator validator(
+            getPrimitiveValidator<std::string>(),
+            0,
+            array_maxsize
         );
         return static_cast<JSONValidationFunctor*>(&validator);
     }
@@ -76,25 +84,16 @@ namespace impl {
 
 namespace jval {
     using namespace impl;
-    const JSONValidationFunctor* get_CameraConfig_validator() {        
+    const JSONValidationFunctor* get_OptionsResponse_validator() {        
         static JSONStructValidator validator(
             {
-                { "nickname", getPrimitiveValidator<std::string>() }, 
-                { "devpath", getPrimitiveValidator<std::string>() }, 
-                { "backend", get__z42Droot_backend_validator() }, 
-                { "format", get_StreamFormat_validator() }, 
-                { "controlAliases", get__z42Droot_controlAliases_validator() }, 
-                { "calibrations", get__z42Droot_calibrations_validator() }, 
-                { "controls", get__z42Droot_controls_validator() }
+                { "supportedMethods", get__z42Droot_supportedMethods_validator() }, 
+                { "specialCases", get__z42Droot_specialCases_validator() }
             },
             {
-                "devpath", 
-                "format", 
-                "backend", 
-                "nickname"
+                "supportedMethods"
             },
             {
-                { "controls", { "controlAliases" } }
             }
         );
         return static_cast<JSONValidationFunctor*>(&validator);
@@ -106,7 +105,7 @@ extern "C" {
 
     // Returns a dynamically allocated result pointer. The caller is responsible for its destruction
     JV_WASM_EXPORT
-    jval_res_t* jval_validate_CameraConfig(const char* json_str) {
+    jval_res_t* jval_validate_OptionsResponse(const char* json_str) {
         using namespace jval;
         if (!json_str)
             return JVResult(JVStatus::PARSE_ERROR,{}).c_api();
@@ -115,7 +114,7 @@ extern "C" {
             return JVResult(JVStatus::PARSE_ERROR,{}).c_api();
         try {
             JSON jobject = JSON::parse(json_str);
-            JVResult res = (*get_CameraConfig_validator())(jobject);
+            JVResult res = (*get_OptionsResponse_validator())(jobject);
             return res.c_api();
         } catch (...) {
             return JVResult(JVStatus::UNKNOWN,{}).c_api();

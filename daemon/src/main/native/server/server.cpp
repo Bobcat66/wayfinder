@@ -29,7 +29,9 @@
 #include <cstdlib>
 #include <sys/wait.h>
 #include "wfcore/common/wfassert.h"
-#include <optional>
+#include <type_traits>
+#include "wfcore/common/json_utils.h"
+#include <iomanip>
 
 namespace impl {
     namespace fs = std::filesystem;
@@ -63,16 +65,16 @@ namespace impl {
 
         if (!loaded) {
             // lazily fetch scripts path from environment
-            auto spathstropt = wf::env::getvar("WF_PATH");
-            if (!pathstropt) {
+            auto spathstropt = wf::env::getVar("WF_PATH");
+            if (!spathstropt) {
                 badpath = true;
                 return std::nullopt;
             }
-            if (!fs::exists(fs::path(pathstropt.value()))) {
+            if (!fs::exists(fs::path(spathstropt.value()))) {
                 badpath = true;
                 return std::nullopt;
             }
-            spath = pathstropt.value();
+            spath = spathstropt.value();
             loaded = true;
             return spath;
         }
@@ -96,7 +98,7 @@ namespace impl {
 
         std::ostringstream cmd_oss;
         cmd_oss << scriptPathOpt.value() << "/wfcfg.py";
-        ((cmd_oss << " " << args), ...);
+        ((cmd_oss << " " << std::quoted(args)), ...);
 
         int rc = std::system(cmd_oss.str().c_str());
         
@@ -179,12 +181,29 @@ namespace impl {
             case 511: return "NetworkAuthenticationRequired";
 
             default: 
-                throw "Unexpected HTTP status code!";
+                if (std::is_constant_evaluated()){
+                    throw "Unexpected HTTP status code!";
+                } else {
+                    return "UnknownStatusCode";
+                }
         }
     }
 
+    // For when status is known at compile time
+    template <int Status, typename... Args>
+    std::string getErrorResponse(std::string_view fmt,Args&&... args) {
+        constexpr auto statusMsg = getStatusMsg(Status);
+        return std::format(
+            "{{\"status\":{},\"error\":\"{}\",\"message\":\"{}\"}}",
+            Status,
+            statusMsg,
+            std::vformat(fmt,std::make_format_args(args...))
+        );
+    }
+
+    // For when status is known at runtime
     template <typename... Args>
-    std::string getErrorResponse(int status,std::string_view fmt,Args&&... args) {
+    std::string getErrorResponse(int status, std::string_view fmt,Args&&... args) {
         return std::format(
             "{{\"status\":{},\"error\":\"{}\",\"message\":\"{}\"}}",
             status,
@@ -200,126 +219,61 @@ namespace impl {
         );
     }
 
-    auto makeHandler_env_team_GET(const wf::WFSystemConfig& sysconf) {
-        return [&sysconf](const httplib::Request& req, httplib::Response& res){
-            setContent(
-                res, std::format("{}", sysconf.team)
-            );
-        };
-    }
-
-    auto makeHandler_env_team_PUT() {
-        return [](const httplib::Request& req, httplib::Response& res){
-            if (!isDigitStr(req.body)) {
-                res.status = 422;
-                setContent(
-                    res, getErrorResponse(422,"Content is not a numeric string")
-                );
-                return;
-            }
-            auto invoke_res = invoke_wfcfg("putenv","WF_TEAM",req.body);
-            if (invoke_res == 0) {
-                res.status = 204;
-            } else {
-                res.status = 500;
-                setContent(
-                    res, getErrorResponse(500,"Error while invoking wfcfg subprocess: {}",invoke_res)
-                );
-            }
-        };
-    }
-
-    auto makeHandler_env_devname_GET(const wf::WFSystemConfig& sysconf) {
-        return [&sysconf](const httplib::Request& req, httplib::Response& res){
-            setContent(
-                res, sysconf.device_name
-            );
-        }
-    }
-
-    auto makeHandler_env_devname_PUT() {
-        return [](const httplib::Request& req, httplib::Response& res){
-            if (!isAlnumStr(req.body)) {
-                res.status = 422;
-                setContent(
-                    res, getErrorResponse(422,"Content is not an alphanumeric string")
-                );
-                return;
-            }
-            auto invoke_res = invoke_wfcfg("putenv","WF_DEVICE_NAME",req.body);
-            if (invoke_res == 0) {
-                res.status = 204;
-            } else {
-                res.status = 500;
-                setContent(
-                    res, getErrorResponse(500,"Error while invoking wfcfg subprocess: {}",invoke_res)
-                );
-            }
-        };
-    }
-
     // If the return string is present, the operation failed and the server will return error 500
-    using genericPutConsumer = std::function<std::optional<std::string>>(const std::string&)>;
+    using genericPutConsumer = std::function<std::optional<std::string>(const std::string&)>;
 
+    // ConsumerCallable should be a callable which takes a const std::string& and returns an std::optional<std::string>>
+    // If the return string is present, the operation failed and the server will return error 500
+    // ValidatorCallable should be a callable which takes a const std::string& and returns a bool
+    template <typename ConsumerCallable, typename ValidatorCallable>
     auto makeHandler_generic_PUT(
-        genericPutConsumer consumer,
-        bool (*validator)(const std::string&),
+        ConsumerCallable consumer,
+        ValidatorCallable validator,
         std::string errmsg422 = ""
     ){
         return [consumer,validator,errmsg422](const httplib::Request& req, httplib::Response& res){
             if (!validator(req.body)) {
                 res.status = 422;
-                setContent(res, getErrorResponse(422,errmsg422));
+                setContent(res, getErrorResponse<422>(errmsg422));
                 return;
             }
-            auto cerrmsg = consumer(req.body);
+            std::optional<std::string> cerrmsg = consumer(req.body);
             if (cerrmsg) {
                 res.status = 500;
-                setContent(res, getErrorResponse(500,cerrmsg.value()));
+                setContent(res, getErrorResponse<500>(cerrmsg.value()));
             } else {
-                res.status = 204
+                res.status = 204;
             }
-        }
+        };
     }
 
-    auto makeHandler_generic_PUT(
-        genericPutConsumer consumer,
-        std::function<bool(const std::string&)> validator
-        std::string errmsg422 = ""
-    ){
-        return [consumer,validator,errmsg422](const httplib::Request& req, httplib::Response& res){
-            if (!validator(req.body)) {
-                res.status = 422;
-                setContent(res, getErrorResponse(422,errmsg422));
-                return;
-            }
-            auto cerrmsg = consumer(req.body);
-            if (cerrmsg) {
-                res.status = 500;
-                setContent(res, getErrorResponse(500,cerrmsg.value()));
-            } else {
-                res.status = 204
-            }
-        }
-    }
-
-    auto makeHandler_generic_GET(std::function<std::string(void)> resourceGetter) {
+    // GetterCallable should be a callable taking void args and returning a string-like object
+    template <typename GetterCallable>
+    auto makeHandler_generic_GET(GetterCallable resourceGetter) {
         return [resourceGetter](const httplib::Request& req, httplib::Response& res){
-            setContent(
-                res, resourceGetter()
-            );
-        }
+            setContent(res, resourceGetter());
+        };
+    }
+
+    auto makeHandler_OPTIONS(std::vector<std::string> supportedMethods) {
+        return [supportedMethods](const httplib::Request& req, httplib::Response& res){
+            res.set_header("X-Clacks-Overhead","GNU Terry Pratchett");
+            res.set_header("Allow",join(supportedMethods,", "));
+            res.status = 204;
+        };
     }
 }
 
 namespace wfsrv {
     HTTPServer::HTTPServer(wf::WFOrchestrator& orchestrator)
     : orchestrator_(orchestrator){
+
+        //api/env/team GET PUT OPTIONS
         srv_.Get("/api/env/team",impl::makeHandler_generic_GET(
-            [](){return std::format("{}",orchestrator_.getSystemConfig().team);}
+            [this](){return std::format("{}",this->orchestrator_.getSystemConfig().team);}
         ));
         srv_.Put("/api/env/team",impl::makeHandler_generic_PUT(
-            [](const std::string& content){
+            [](const std::string& content) -> std::optional<std::string> {
                 auto res = impl::invoke_wfcfg("putenv","WF_TEAM",content);
                 if (res == 0) return std::nullopt;
                 return std::format("Error while invoking wfcfg subprocess: {}",res);
@@ -327,10 +281,37 @@ namespace wfsrv {
             impl::isDigitStr,
             "Content is not a numeric string"
         ));
+        srv_.Options("api/env/team",impl::makeHandler_OPTIONS({"GET","PUT","OPTIONS"}));
+
+        //api/env/team GET PUT
         srv_.Get("/api/env/devname",impl::makeHandler_generic_GET(
-            [](){return orchestrator_.getSystemConfig().device_name;}
+            [this](){return this->orchestrator_.getSystemConfig().device_name;}
         ));
-        srv_.Put("/api/env/devname",impl::makeHandler_env_devname_PUT());
+        srv_.Put("/api/env/devname",impl::makeHandler_generic_PUT(
+            [](const std::string& content) -> std::optional<std::string> {
+                auto res = impl::invoke_wfcfg("putenv","WF_DEVICE_NAME",content);
+                if (res == 0) return std::nullopt;
+                return std::format("Error while invoking wfcfg subprocess: {}",res);
+            },
+            impl::isAlnumStr,
+            "Content is not an alphanumeric string"
+        ));
+        srv_.Options("api/env/slam",impl::makeHandler_OPTIONS({"GET","PUT","OPTIONS"}));
+
+        //api/env/slam GET PUT
+        srv_.Get("/api/env/slam",impl::makeHandler_generic_GET(
+            [this](){return std::format("{}",this->orchestrator_.getSystemConfig().slam_server);}
+        ));
+        srv_.Put("/api/env/slam",impl::makeHandler_generic_PUT(
+            [](const std::string& content) -> std::optional<std::string> {
+                auto res = impl::invoke_wfcfg("putenv","WF_SLAM_SERVER",content);
+                if (res == 0) return std::nullopt;
+                return std::format("Error while invoking wfcfg subprocess: {}",res);
+            },
+            impl::isBoolStr,
+            "Content is not a boolean string"
+        ));
+        srv_.Options("api/env/slam",impl::makeHandler_OPTIONS({"GET","PUT","OPTIONS"}));
     }
 }
 

@@ -18,6 +18,8 @@
 # TODO: Right now this is sort of a god class, should modularize and refactor in the future
 # TODO: More robust input validation
 
+# TODO: OPTIONS API has changed to be RFC-compliant, update wfctl client
+
 from http.client import HTTPConnection, RemoteDisconnected, HTTPResponse, _DataType, _HeaderValue
 import socket
 from typing import Union, Mapping, Tuple, List, Dict, Callable, Any, Set
@@ -841,7 +843,7 @@ class Session:
             return bad_command, None
         return self.request("POST","actions/shutdown")
  
-    
+    # TODO: OPTIONS are now conveyed completely in headers and are per-resource
     def getCapabilities(self,resource: str) -> Tuple[int,Union[Set[str],None]]:
         if resource not in self.resourceCapabilities:
             # Resource capabilities not already cached, get them

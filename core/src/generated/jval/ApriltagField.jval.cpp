@@ -87,9 +87,9 @@ namespace impl {
                 { "z", getPrimitiveValidator<double>() }
             },
             {
-                "y", 
                 "z", 
-                "x"
+                "x", 
+                "y"
             },
             {
             }
@@ -120,9 +120,9 @@ namespace impl {
             },
             {
                 "W", 
-                "Z", 
+                "X", 
                 "Y", 
-                "X"
+                "Z"
             },
             {
             }
@@ -155,8 +155,8 @@ namespace jval {
                 { "field", get__z42Droot_field_validator() }
             },
             {
-                "tags", 
-                "field"
+                "field", 
+                "tags"
             },
             {
             }
