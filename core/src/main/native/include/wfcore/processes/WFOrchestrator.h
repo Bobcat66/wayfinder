@@ -45,6 +45,9 @@ namespace wf {
         VisionWorkerManager& getWorkerManager() {
             return workerManager_;
         }
+        const WFSystemConfig getSystemConfig() {
+            return systemConfig_;
+        }
         WFStatusResult configureHardware();
         WFStatusResult configureWorkers();
         static WFOrchestrator createFromEnv();
@@ -55,5 +58,6 @@ namespace wf {
         VisionWorkerManager workerManager_;
         InferenceEngineFactory inferenceEngineFactory_;
         ApriltagPipelineFactory apriltagPipelineFactory_;
+        WFSystemConfig systemConfig_;
     };
 }

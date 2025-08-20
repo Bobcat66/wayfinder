@@ -100,8 +100,8 @@ namespace wf::env {
     }
 
     std::optional<bool> getBool(const char* key, bool verbose) {
-        static const std::string truthy = "ON";
-        static const std::string falsy = "OFF";
+        static const std::string truthy = "true";
+        static const std::string falsy = "false";
         auto env_var = getVar(key,verbose);
         if (!env_var) return std::nullopt;
         if (truthy == env_var.value()) {

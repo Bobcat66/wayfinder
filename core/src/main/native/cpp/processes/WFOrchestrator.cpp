@@ -31,6 +31,7 @@
 namespace wf {
     WFOrchestrator::WFOrchestrator(WFSystemConfig config)
     : WFLoggedStatusfulObject("WFOrchestrator",LogGroup::General)
+    , systemConfig_(config)
     , ntManager_(config.device_name,config.team,config.nt_server) 
     , resourceManager_(config.paths.resource_path,config.paths.local_path) 
     , inferenceEngineFactory_(resourceManager_) 
