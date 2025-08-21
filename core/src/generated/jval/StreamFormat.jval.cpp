@@ -49,8 +49,8 @@ namespace impl {
             },
             {
                 "encoding", 
-                "width", 
-                "height"
+                "height", 
+                "width"
             },
             {
             }
@@ -68,8 +68,8 @@ namespace jval {
                 { "frameFormat", get__z42Droot_frameFormat_validator() }
             },
             {
-                "frameFormat", 
-                "fps"
+                "fps", 
+                "frameFormat"
             },
             {
             }

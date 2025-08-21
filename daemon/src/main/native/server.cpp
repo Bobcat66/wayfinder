@@ -35,6 +35,10 @@
 #include "wfd.h"
 #include <functional>
 #include "wfcore/hardware/CameraConfiguration.h"
+#include "wfcore/common/jval_compat.h"
+#include "jval/CameraConfig.jval.hpp"
+#include "jval/VisionWorkerConfig.jval.hpp"
+#include "jval/JSONPatchRFC6902.jval.hpp"
 
 namespace impl {
     namespace fs = std::filesystem;
@@ -323,6 +327,7 @@ namespace impl {
             } catch (...) {
                 res.status = 500;
                 setContent(res, getErrorResponse<500>("An unknown exception occurred while parsing file name"));
+                return;
             }
             auto resource_res = orch.getResourceManager().loadLocalJSON(subdir,filename);
             if (!resource_res) {
@@ -346,16 +351,17 @@ namespace impl {
     }
 
     // FilenameGetter should take a const http Request and return a string
-    // JSONSerializableType should be a class which implements wf::JSONSerializable, or NullJSONType
-    template <typename JSONSerializableType, typename FilenameGetter>
-    auto makeHandler_local_json_PUT(std::string subdir, FilenameGetter filenameGetter, wf::WFOrchestrator& orch) {
-        return [&orch,subdir,filenameGetter](const httplib::Request& req, httplib::Response& res){
+    // JSONValidatorCallable should be a callable which takes a const JSON& object and returns a JVResult or WFResult (JVResult is preferred)
+    template <typename JSONValidatorCallable, typename FilenameGetter>
+    auto makeHandler_local_json_PUT(std::string subdir, FilenameGetter filenameGetter, wf::WFOrchestrator& orch, JSONValidatorCallable validator) {
+        return [&orch,subdir,filenameGetter,validator](const httplib::Request& req, httplib::Response& res){
             std::string filename;
             try {
                 filename = filenameGetter(req);
             } catch (...) {
                 res.status = 500;
                 setContent(res, getErrorResponse<500>("An unknown exception occurred while parsing file name"));
+                return;
             }
             auto resolve_res = orch.getResourceManager().resolveLocalFile(subdir,filename);
             std::function<void(void)> successHandler; // Handler for successful cases
@@ -394,7 +400,7 @@ namespace impl {
                 setContent(res, getErrorResponse<400>("Request did not contain valid JSON"));
                 return;
             }
-            auto valid_res = JSONSerializableType::validate(req_jobject);
+            auto valid_res = validator(req_jobject);
             if (!valid_res) {
                 res.status = 422;
                 setContent(res, getErrorResponse<422>(valid_res.what()));
@@ -411,18 +417,82 @@ namespace impl {
             return;
         };
     }
+    
+    template <typename JSONValidatorCallable, typename FilenameGetter>
+    auto makeHandler_local_json_PATCH(std::string subdir, FilenameGetter filenameGetter, wf::WFOrchestrator& orch, JSONValidatorCallable validator) {
+        return [&orch,subdir,filenameGetter,validator](const httplib::Request& req, httplib::Response& res) {
+            std::string filename;
+            try {
+                filename = filenameGetter(req);
+            } catch (...) {
+                res.status = 500;
+                setContent(res, getErrorResponse<500>("An unknown exception occurred while parsing file name"));
+                return;
+            }
+            auto json_res = orch.getResourceManager().loadLocalJSON(subdir, filename);
+            if (!json_res) {
+                switch (json_res.status()) {
+                    case wf::WFStatus::CONFIG_SUBDIR_NOT_FOUND:
+                    case wf::WFStatus::FILE_NOT_FOUND:
+                        res.status = 404;
+                        setContent(res, getErrorResponse<404>(json_res.what()));
+                        return;
+                    default:
+                        res.status = 500;
+                        setContent(res, getErrorResponse<500>(json_res.what()));
+                        return;
+                }
+            }
+            auto jobject = std::move(json_res.value());
+            wf::JSON patch;
+            try {
+                patch = wf::JSON::parse(req.body);
+            } catch (const wf::JSON::parse_error& e) {
+                res.status = 400;
+                setContent(res, getErrorResponse<400>("Request did not contain valid JSON"));
+                return;
+            }
+            auto patch_valid_res = (*jval::get_JSONPatchRFC6902_validator())(patch);
+            if (!patch_valid_res) {
+                res.status = 422;
+                setContent(res, getErrorResponse<422>(patch_valid_res.what()));
+                return;
+            }
 
-    // This class can be used as a JSONSerializableType for cases where we want to accept any valid JSON
-    class NullJSONType {
-        static wf::WFStatusResult validate(const wf::JSON&) {
-            return wf::WFStatusResult::success();
-        }
-    };
+            try {
+                jobject.patch(patch);
+            } catch (const wf::JSON::exception& e) {
+                res.status = 422;
+                setContent(res, getErrorResponse<422>(e.what()));
+                return;
+            };
+
+            auto jobject_valid_res = validator(jobject);
+            if (!jobject_valid_res) {
+                res.status = 422;
+                setContent(res, getErrorResponse<422>(
+                    "Patched json violated schema: {}",
+                    jobject_valid_res.what())
+                );
+                return;
+            }
+
+            auto store_res = orch.getResourceManager().storeLocalJSON(subdir,filename,jobject);
+            if (!store_res) {
+                res.status = 500;
+                setContent(res, getErrorResponse<500>(store_res.what()));
+                return;
+            }
+
+            res.status = 204;
+            return;
+        };
+    }
 
     // Overload for when we don't need any validation for a local JSON putter
     template <typename FilenameGetter>
     auto makeHandler_local_json_PUT(std::string subdir, FilenameGetter filenameGetter, wf::WFOrchestrator& orch) {
-        return makeHandler_local_json_PUT<NullJSONType>(subdir,filenameGetter,orch);
+        return makeHandler_local_json_PUT(subdir,filenameGetter,orch,(*jval::getNullValidator()));
     }
 
     // FilenameGetter should take a const http Request and return a string
@@ -484,15 +554,24 @@ namespace impl {
         //api/local/hardware/*.json GET PUT PATCH OPTIONS
         srv.Get("api/local/hardware/([^/]+.json)",makeHandler_local_json_GET(
             "hardware",
-            [](const httplib::Request req){ return req.matches[1].str(); },
+            [](const httplib::Request& req){ return req.matches[1].str(); },
             orch
         ));
-        srv.Put("api/local/hardware/([^/]+.json)",makeHandler_local_json_PUT<wf::CameraConfiguration>(
+        srv.Put("api/local/hardware/([^/]+.json)",makeHandler_local_json_PUT(
             "hardware",
-            [](const httplib::Request req){ return req.matches[1].str(); },
-            orch
+            [](const httplib::Request& req){ return req.matches[1].str(); },
+            orch,
+            jval::asLambda(jval::get_CameraConfig_validator())
         ));
-        // TODO: PATCH and OPTIONS
+        srv.Patch("api/local/hardware/([^/]+.json)",makeHandler_local_json_PATCH(
+            "hardware",
+            [](const httplib::Request& req){ return req.matches[1].str(); },
+            orch,
+            jval::asLambda(jval::get_CameraConfig_validator())
+        ));
+        srv.Options("api/local/hardware/([^/]+.json)",makeHandler_OPTIONS({"OPTIONS","GET","PUT","PATCH"}));
+
+        //TODO: pipelines
 
     }
 }

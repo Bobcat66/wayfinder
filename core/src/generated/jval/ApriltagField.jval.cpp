@@ -71,8 +71,8 @@ namespace impl {
                 { "rotation", get__z42Droot_tags_items_pose_rotation_validator() }
             },
             {
-                "translation", 
-                "rotation"
+                "rotation", 
+                "translation"
             },
             {
             }
@@ -87,9 +87,9 @@ namespace impl {
                 { "z", getPrimitiveValidator<double>() }
             },
             {
+                "y", 
                 "z", 
-                "x", 
-                "y"
+                "x"
             },
             {
             }
@@ -119,10 +119,10 @@ namespace impl {
                 { "Z", getPrimitiveValidator<double>() }
             },
             {
+                "Z", 
                 "W", 
                 "X", 
-                "Y", 
-                "Z"
+                "Y"
             },
             {
             }
@@ -136,8 +136,8 @@ namespace impl {
                 { "width", getPrimitiveValidator<double>() }
             },
             {
-                "width", 
-                "length"
+                "length", 
+                "width"
             },
             {
             }

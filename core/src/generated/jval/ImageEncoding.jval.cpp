@@ -45,17 +45,17 @@ namespace jval {
     using namespace impl;
     const JSONValidationFunctor* get_ImageEncoding_validator() {        
         static JSONEnumValidator validator({
-            "Y16", 
-            "Y8", 
             "BGRA", 
-            "RGBA", 
-            "YUYV", 
-            "UYVY", 
-            "BGR24", 
-            "MJPEG", 
-            "UNKNOWN", 
             "RGB24", 
-            "RGB565"
+            "Y8", 
+            "RGBA", 
+            "BGR24", 
+            "Y16", 
+            "YUYV", 
+            "MJPEG", 
+            "UYVY", 
+            "RGB565", 
+            "UNKNOWN"
         });
         return static_cast<JSONValidationFunctor*>(&validator);
     }

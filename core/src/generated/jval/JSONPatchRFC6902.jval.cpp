@@ -34,55 +34,59 @@
 
 #include "jvexport.h"
 #include "jvruntime.hpp"
-#include "VisionWorkerConfig_capi.jval.h"
-#include "VisionWorkerConfig.jval.hpp"
-#include "StreamFormat.jval.hpp"
-#include "StreamFormat.jval.hpp"
-#include "ObjectDetectionPipelineConfig.jval.hpp"
-#include "ApriltagPipelineConfig.jval.hpp"
+#include "JSONPatchRFC6902_capi.jval.h"
+#include "JSONPatchRFC6902.jval.hpp"
 
 namespace impl {
     using namespace jval;
-    const JSONValidationFunctor* get__z42Droot_pipelineType_validator() {        
-        static JSONEnumValidator validator({
-            "Apriltag", 
-            "ObjDetect"
-        });
-        return static_cast<JSONValidationFunctor*>(&validator);
-    }
-    const JSONValidationFunctor* get__z42Droot_pipelineConfig_validator() {        
-        static JSONUnionValidator validator(
+    const JSONValidationFunctor* get__z42Droot_items_op_validator();
+    const JSONValidationFunctor* get__z42Droot_items_path_validator();
+    const JSONValidationFunctor* get__z42Droot_items_from_validator();
+    const JSONValidationFunctor* get__z42Droot_items_validator() {        
+        static JSONStructValidator validator(
+            {
+                { "op", get__z42Droot_items_op_validator() }, 
+                { "path", get__z42Droot_items_path_validator() }, 
+                { "from", get__z42Droot_items_from_validator() }, 
+                { "value", getNullValidator() }
+            },
+            {
+                "op", 
+                "path"
+            },
             {
             }
         );
+        return static_cast<JSONValidationFunctor*>(&validator);
+    }
+    const JSONValidationFunctor* get__z42Droot_items_op_validator() {        
+        static JSONEnumValidator validator({
+            "remove", 
+            "copy", 
+            "add", 
+            "replace", 
+            "test", 
+            "move"
+        });
+        return static_cast<JSONValidationFunctor*>(&validator);
+    }
+    const JSONValidationFunctor* get__z42Droot_items_path_validator() {        
+        static JSONPatternValidator validator(R"((?:/(?:[^~/]|~0|~1)*)*)");
+        return static_cast<JSONValidationFunctor*>(&validator);
+    }
+    const JSONValidationFunctor* get__z42Droot_items_from_validator() {        
+        static JSONPatternValidator validator(R"((?:/(?:[^~/]|~0|~1)*)*)");
         return static_cast<JSONValidationFunctor*>(&validator);
     }
 }
 
 namespace jval {
     using namespace impl;
-    const JSONValidationFunctor* get_VisionWorkerConfig_validator() {        
-        static JSONStructValidator validator(
-            {
-                { "camera_nickname", getPrimitiveValidator<std::string>() }, 
-                { "name", getPrimitiveValidator<std::string>() }, 
-                { "inputFormat", get_StreamFormat_validator() }, 
-                { "outputFormat", get_StreamFormat_validator() }, 
-                { "stream", getPrimitiveValidator<bool>() }, 
-                { "raw_port", getPrimitiveValidator<int>() }, 
-                { "processed_port", getPrimitiveValidator<int>() }, 
-                { "pipelineType", get__z42Droot_pipelineType_validator() }, 
-                { "pipelineConfig", get__z42Droot_pipelineConfig_validator() }
-            },
-            {
-                "stream", 
-                "name", 
-                "pipelineType", 
-                "camera_nickname", 
-                "pipelineConfig"
-            },
-            {
-            }
+    const JSONValidationFunctor* get_JSONPatchRFC6902_validator() {        
+        static JSONArrayValidator validator(
+            get__z42Droot_items_validator(),
+            0,
+            array_maxsize
         );
         return static_cast<JSONValidationFunctor*>(&validator);
     }
@@ -93,7 +97,7 @@ extern "C" {
 
     // Returns a dynamically allocated result pointer. The caller is responsible for its destruction
     JV_WASM_EXPORT
-    jval_res_t* jval_validate_VisionWorkerConfig(const char* json_str) {
+    jval_res_t* jval_validate_JSONPatchRFC6902(const char* json_str) {
         using namespace jval;
         if (!json_str)
             return JVResult(JVStatus::PARSE_ERROR,{}).c_api();
@@ -102,7 +106,7 @@ extern "C" {
             return JVResult(JVStatus::PARSE_ERROR,{}).c_api();
         try {
             JSON jobject = JSON::parse(json_str);
-            JVResult res = (*get_VisionWorkerConfig_validator())(jobject);
+            JVResult res = (*get_JSONPatchRFC6902_validator())(jobject);
             return res.c_api();
         } catch (...) {
             return JVResult(JVStatus::UNKNOWN,{}).c_api();
