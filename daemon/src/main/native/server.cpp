@@ -272,53 +272,6 @@ namespace impl {
         };
     }
 
-    void configure_env_endpoints(httplib::Server& srv, wf::WFOrchestrator& orch) {
-        //api/env/team GET PUT OPTIONS
-        srv.Get("/api/env/team",makeHandler_generic_GET(
-            [&orch](){return std::format("{}",orch.getSystemConfig().team);}
-        ));
-        srv.Put("/api/env/team",makeHandler_generic_PUT(
-            [](const std::string& content) -> std::optional<std::string> {
-                auto res = invoke_wfcfg("putenv","WF_TEAM",content);
-                if (res == 0) return std::nullopt;
-                return std::format("Error while invoking wfcfg subprocess: {}",res);
-            },
-            isDigitStr,
-            "Content is not a numeric string"
-        ));
-        srv.Options("api/env/team",makeHandler_OPTIONS({"GET","PUT","OPTIONS"}));
-
-        //api/env/team GET PUT OPTIONS
-        srv.Get("/api/env/devname",makeHandler_generic_GET(
-            [&orch](){return orch.getSystemConfig().device_name;}
-        ));
-        srv.Put("/api/env/devname",makeHandler_generic_PUT(
-            [](const std::string& content) -> std::optional<std::string> {
-                auto res = invoke_wfcfg("putenv","WF_DEVICE_NAME",content);
-                if (res == 0) return std::nullopt;
-                return std::format("Error while invoking wfcfg subprocess: {}",res);
-            },
-            isAlnumStr,
-            "Content is not an alphanumeric string"
-        ));
-        srv.Options("api/env/slam",makeHandler_OPTIONS({"GET","PUT","OPTIONS"}));
-
-        //api/env/slam GET PUT OPTIONS
-        srv.Get("/api/env/slam",makeHandler_generic_GET(
-            [&orch](){return std::format("{}",orch.getSystemConfig().slam_server);}
-        ));
-        srv.Put("/api/env/slam",makeHandler_generic_PUT(
-            [](const std::string& content) -> std::optional<std::string> {
-                auto res = invoke_wfcfg("putenv","WF_SLAM_SERVER",content);
-                if (res == 0) return std::nullopt;
-                return std::format("Error while invoking wfcfg subprocess: {}",res);
-            },
-            isBoolStr,
-            "Content is not a boolean string"
-        ));
-        srv.Options("/api/env/slam",makeHandler_OPTIONS({"GET","PUT","OPTIONS"}));
-    }
-
     template <wf::WFResult<wf::JSON> (wf::ResourceManager::*JSONLoader)(const std::string&,const std::string&) const, typename FilenameGetter>
     auto makeHandler_json_GET(std::string subdir, FilenameGetter filenameGetter, wf::WFOrchestrator& orch) {
         return [&orch,subdir,filenameGetter](const httplib::Request& req, httplib::Response& res){
@@ -508,6 +461,41 @@ namespace impl {
         return makeHandler_local_json_PUT(subdir,filenameGetter,orch,jval::asLambda(jval::getNullValidator()));
     }
 
+    template <typename FilenameGetter>
+    auto makeHandler_local_json_DELETE(std::string subdir, FilenameGetter filenameGetter, wf::WFOrchestrator& orch) {
+        return [&orch,subdir,filenameGetter](const httplib::Request& req, httplib::Response& res){
+            std::string filename;
+            try {
+                filename = filenameGetter(req);
+            } catch (...) {
+                res.status = 500;
+                setContent(res, getErrorResponse<500>("An unknown exception occurred while parsing file name"));
+                return;
+            }
+            auto deleteRes = orch.getResourceManager().deleteLocalJSON(subdir,filename);
+            switch (deleteRes.status()) {
+                case wf::WFStatus::OK:
+                    if (!deleteRes) {
+                        // sanity check. This path is only triggered when WFStatus's contract is violated and should never happen
+                        res.status = 500;
+                        setContent(res, getErrorResponse<500>("Attempting to delete file caused an invariant violation (an invalid WFResult reported a nominal status)"));
+                        return;
+                    }
+                    res.status = 204;
+                    return;
+                case wf::WFStatus::CONFIG_SUBDIR_NOT_FOUND:
+                case wf::WFStatus::FILE_NOT_FOUND:
+                    res.status = 404;
+                    setContent(res, getErrorResponse<404>(deleteRes.what()));
+                    return;
+                default:
+                    res.status = 500;
+                    setContent(res, getErrorResponse<500>(deleteRes.what()));
+                    return;
+            }
+        };
+    }
+
     // Both possible enumerators are const methods of resourceManager
     template <wf::WFResult<std::vector<std::string>>(wf::ResourceManager::*Enumerator)(const std::string&) const>
     auto makeHandler_enum_subdir(std::string subdir, wf::WFOrchestrator& orch) {
@@ -547,38 +535,90 @@ namespace impl {
         return makeHandler_enum_subdir<&wf::ResourceManager::enumerateResourceSubdir>(subdir,orch);
     }
 
+    void configure_env_endpoints(httplib::Server& srv, wf::WFOrchestrator& orch) {
+        //api/env/team GET PUT OPTIONS
+        srv.Get("/api/env/team",makeHandler_generic_GET(
+            [&orch](){return std::format("{}",orch.getSystemConfig().team);}
+        ));
+        srv.Put("/api/env/team",makeHandler_generic_PUT(
+            [](const std::string& content) -> std::optional<std::string> {
+                auto res = invoke_wfcfg("putenv","WF_TEAM",content);
+                if (res == 0) return std::nullopt;
+                return std::format("Error while invoking wfcfg subprocess: {}",res);
+            },
+            isDigitStr,
+            "Content is not a numeric string"
+        ));
+        srv.Options("/api/env/team",makeHandler_OPTIONS({"GET","PUT","OPTIONS"}));
+
+        //api/env/team GET PUT OPTIONS
+        srv.Get("/api/env/devname",makeHandler_generic_GET(
+            [&orch](){return orch.getSystemConfig().device_name;}
+        ));
+        srv.Put("/api/env/devname",makeHandler_generic_PUT(
+            [](const std::string& content) -> std::optional<std::string> {
+                auto res = invoke_wfcfg("putenv","WF_DEVICE_NAME",content);
+                if (res == 0) return std::nullopt;
+                return std::format("Error while invoking wfcfg subprocess: {}",res);
+            },
+            isAlnumStr,
+            "Content is not an alphanumeric string"
+        ));
+        srv.Options("/api/env/slam",makeHandler_OPTIONS({"GET","PUT","OPTIONS"}));
+
+        //api/env/slam GET PUT OPTIONS
+        srv.Get("/api/env/slam",makeHandler_generic_GET(
+            [&orch](){return std::format("{}",orch.getSystemConfig().slam_server);}
+        ));
+        srv.Put("/api/env/slam",makeHandler_generic_PUT(
+            [](const std::string& content) -> std::optional<std::string> {
+                auto res = invoke_wfcfg("putenv","WF_SLAM_SERVER",content);
+                if (res == 0) return std::nullopt;
+                return std::format("Error while invoking wfcfg subprocess: {}",res);
+            },
+            isBoolStr,
+            "Content is not a boolean string"
+        ));
+        srv.Options("/api/env/slam",makeHandler_OPTIONS({"GET","PUT","OPTIONS"}));
+    }
+
     void configure_local_endpoints(httplib::Server& srv, wf::WFOrchestrator& orch) {
 
         //api/local/hardware GET OPTIONS
         srv.Get("/api/local/hardware",makeHandler_enum_local_subdir("hardware",orch));
         srv.Options("/api/local/hardware",makeHandler_OPTIONS({"OPTIONS","GET"}));
         
-        //api/local/hardware/*.json GET PUT PATCH OPTIONS
-        srv.Get("api/local/hardware/([^/]+.json)",makeHandler_local_json_GET(
+        //api/local/hardware/*.json GET PUT PATCH DELETE OPTIONS
+        srv.Get("/api/local/hardware/([^/]+.json)",makeHandler_local_json_GET(
             "hardware",
             [](const httplib::Request& req){ return req.matches[1].str(); },
             orch
         ));
-        srv.Put("api/local/hardware/([^/]+.json)",makeHandler_local_json_PUT(
+        srv.Put("/api/local/hardware/([^/]+.json)",makeHandler_local_json_PUT(
             "hardware",
             [](const httplib::Request& req){ return req.matches[1].str(); },
             orch,
             jval::asLambda(jval::get_CameraConfig_validator())
         ));
-        srv.Patch("api/local/hardware/([^/]+.json)",makeHandler_local_json_PATCH(
+        srv.Patch("/api/local/hardware/([^/]+.json)",makeHandler_local_json_PATCH(
             "hardware",
             [](const httplib::Request& req){ return req.matches[1].str(); },
             orch,
             jval::asLambda(jval::get_CameraConfig_validator())
         ));
-        srv.Options("api/local/hardware/([^/]+.json)",makeHandler_OPTIONS({"OPTIONS","GET","PUT","PATCH"}));
+        srv.Delete("/api/local/hardware/([^/]+.json)",makeHandler_local_json_DELETE(
+            "hardware",
+            [](const httplib::Request& req){ return req.matches[1].str(); },
+            orch
+        ));
+        srv.Options("/api/local/hardware/([^/]+.json)",makeHandler_OPTIONS({"OPTIONS","GET","PUT","PATCH","DELETE"}));
 
         //api/local/pipelines GET OPTIONS
         
         srv.Get("/api/local/pipelines",makeHandler_enum_local_subdir("pipelines",orch));
         srv.Options("/api/local/pipelines",makeHandler_OPTIONS({"OPTIONS","GET"}));
         
-        //api/local/hardware/*.json GET PUT PATCH OPTIONS
+        //api/local/hardware/*.json GET PUT PATCH OPTIONS DELETE
         srv.Get("/api/local/pipelines/([^/]+.json)",makeHandler_local_json_GET(
             "pipelines",
             [](const httplib::Request& req){ return req.matches[1].str(); },
@@ -596,7 +636,12 @@ namespace impl {
             orch,
             jval::asLambda(jval::get_VisionWorkerConfig_validator())
         ));
-        srv.Options("/api/local/hardware/([^/]+.json)",makeHandler_OPTIONS({"OPTIONS","GET","PUT","PATCH"}));
+        srv.Delete("/api/local/pipelines/([^/]+.json)",makeHandler_local_json_DELETE(
+            "pipelines",
+            [](const httplib::Request& req){ return req.matches[1].str(); },
+            orch
+        ));
+        srv.Options("/api/local/pipelines/([^/]+.json)",makeHandler_OPTIONS({"OPTIONS","GET","PUT","PATCH","DELETE"}));
     }
 
     void configure_resource_endpoints(httplib::Server& srv, wf::WFOrchestrator& orch) {

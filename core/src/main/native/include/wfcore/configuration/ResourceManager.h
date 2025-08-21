@@ -53,6 +53,7 @@ namespace wf {
         WFResult<std::filesystem::path> resolveResourceFile(const std::string& subdirName, const std::string& filename) const;
         WFStatusResult assignLocalSubdir(const std::string& subdirName,const std::filesystem::path& subdirRelpath);
         WFStatusResult assignResourceSubdir(const std::string& subdirName,const std::filesystem::path& subdirRelpath);
+        WFStatusResult deleteLocalJSON(const std::string& subdirName, const std::string& filename);
     private:
         ResourceManager(const ResourceManager&) = delete;
         ResourceManager& operator=(const ResourceManager&) = delete;

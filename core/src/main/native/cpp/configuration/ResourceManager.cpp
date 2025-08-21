@@ -288,6 +288,37 @@ namespace wf {
         return WFResult<fs::path>::success(std::move(filePath));
     }
 
+    WFStatusResult ResourceManager::deleteLocalJSON(const std::string& subdirName, const std::string& filename) {
+        std::unique_lock lock(mtx);
+        WF_DEBUGLOG(globalLogger(),"Searching for local subdir {}",subdirName);
+        auto it = localSubdirs.find(subdirName);
+        if (it == localSubdirs.end()) 
+            return WFStatusResult::failure(CONFIG_SUBDIR_NOT_FOUND,"'{}' is not recognized as a valid local subdir",subdirName);
+
+        fs::path subdirPath = localDir_ / it->second;
+        if (!fs::exists(subdirPath) || !fs::is_directory(subdirPath)) 
+            return WFStatusResult::failure(CONFIG_BAD_SUBDIR,"'{}' is not a valid directory",subdirPath.string());
+        
+        fs::path filePath = subdirPath / filename;
+        WF_DEBUGLOG(globalLogger(), "Searching for local file '{}'",filePath.string());
+        if (!fs::exists(filePath))
+            return WFStatusResult::failure(FILE_NOT_FOUND,"File '{}' does not exist",filePath.string());
+
+        WF_DEBUGLOG(globalLogger(), "Deleting file {}",filePath.string());
+        try {
+            if (std::filesystem::remove(filePath)) {
+                return WFStatusResult::success();
+            } else {
+                return WFStatusResult::failure(
+                    FILE_NOT_FOUND,
+                    "File '{}' does not exist", filePath.string()
+                );
+            }
+        } catch (const std::filesystem::filesystem_error& e) {
+            return WFStatusResult::failure(UNKNOWN, "Error while deleting {}: {}", filePath.string(), e.what());
+        }
+    }
+
 
 
 
