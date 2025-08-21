@@ -24,4 +24,14 @@
 // header for utility functions to control the daemon process
 namespace wfd {
     std::lock_guard<std::mutex> getLock();
+    // Kills the wayfinder process with exit code 
+    void shutdown();
+    void reload();
+    void restart();
+    void reboot();
+    void clearReqstore();
+    bool shutdownRequested();
+    bool reloadRequested();
+    bool restartRequested();
+    bool rebootRequested();
 }

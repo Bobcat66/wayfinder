@@ -30,7 +30,7 @@
 
 namespace wf {
 
-    // TODO: refactor this
+    // NOTE: ResourceManager's API is stable, and method signatures should not be changed
     class ResourceManager {
     public:
         ResourceManager() = default;

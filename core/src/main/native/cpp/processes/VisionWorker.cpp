@@ -69,6 +69,10 @@ namespace wf {
         running = false;
     }
 
+    VisionWorker::~VisionWorker() {
+        stop();
+    }
+
     void VisionWorker::start() {
         if (running.load()) return;
         running.store(true);
@@ -78,10 +82,8 @@ namespace wf {
     }
 
     void VisionWorker::stop() {
-        if (thread.joinable()) {
+        if (thread.joinable())
             thread.request_stop(); // cooperative stop
-            thread.join();         // waits for thread to exit
-        }
         running.store(false);
     }
 

@@ -22,14 +22,19 @@
 #include "wfcore/processes/WFOrchestrator.h"
 #include <memory>
 #include <httplib.h>
+#include <thread>
 
 namespace wfsrv {
+
     class HTTPServer {
     public:
         HTTPServer(wf::WFOrchestrator& orch);
         ~HTTPServer() = default;
+        void start();
+        void stop();
     private:
         wf::WFOrchestrator& orch_;
         httplib::Server srv_;
+        std::jthread listenerThread;
     };
 }

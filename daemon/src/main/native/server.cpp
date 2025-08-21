@@ -39,6 +39,7 @@
 #include "jval/CameraConfig.jval.hpp"
 #include "jval/VisionWorkerConfig.jval.hpp"
 #include "jval/JSONPatchRFC6902.jval.hpp"
+#include <optional>
 
 namespace impl {
     namespace fs = std::filesystem;
@@ -258,6 +259,7 @@ namespace impl {
     template <typename GetterCallable>
     auto makeHandler_generic_GET(GetterCallable resourceGetter) {
         return [resourceGetter](const httplib::Request& req, httplib::Response& res){
+            res.status = 200;
             setContent(res, resourceGetter());
         };
     }
@@ -317,9 +319,8 @@ namespace impl {
         srv.Options("/api/env/slam",makeHandler_OPTIONS({"GET","PUT","OPTIONS"}));
     }
 
-    // FilenameGetter should take a const http Request and return a string
-    template <typename FilenameGetter>
-    auto makeHandler_local_json_GET(std::string subdir, FilenameGetter filenameGetter, wf::WFOrchestrator& orch) {
+    template <wf::WFResult<wf::JSON> (wf::ResourceManager::*JSONLoader)(const std::string&,const std::string&) const, typename FilenameGetter>
+    auto makeHandler_json_GET(std::string subdir, FilenameGetter filenameGetter, wf::WFOrchestrator& orch) {
         return [&orch,subdir,filenameGetter](const httplib::Request& req, httplib::Response& res){
             std::string filename;
             try {
@@ -329,7 +330,7 @@ namespace impl {
                 setContent(res, getErrorResponse<500>("An unknown exception occurred while parsing file name"));
                 return;
             }
-            auto resource_res = orch.getResourceManager().loadLocalJSON(subdir,filename);
+            auto resource_res = (orch.getResourceManager().*JSONLoader)(subdir,filename);
             if (!resource_res) {
                 switch (resource_res.status()) {
                     case wf::WFStatus::FILE_NOT_FOUND:
@@ -348,6 +349,18 @@ namespace impl {
             setContent(res, content);
             return;
         };
+    }
+
+    // FilenameGetter should take a const http Request and return a string
+    template <typename FilenameGetter>
+    auto makeHandler_local_json_GET(std::string subdir, FilenameGetter filenameGetter, wf::WFOrchestrator& orch) {
+        return makeHandler_json_GET<&wf::ResourceManager::loadLocalJSON>(subdir,filenameGetter,orch);
+    }
+
+    // FilenameGetter should take a const http Request and return a string
+    template <typename FilenameGetter>
+    auto makeHandler_resource_json_GET(std::string subdir, FilenameGetter filenameGetter, wf::WFOrchestrator& orch) {
+        return makeHandler_json_GET<&wf::ResourceManager::loadResourceJSON>(subdir,filenameGetter,orch);
     }
 
     // FilenameGetter should take a const http Request and return a string
@@ -472,8 +485,8 @@ namespace impl {
                 res.status = 422;
                 setContent(res, getErrorResponse<422>(
                     "Patched json violated schema: {}",
-                    jobject_valid_res.what())
-                );
+                    jobject_valid_res.what()
+                ));
                 return;
             }
 
@@ -492,64 +505,53 @@ namespace impl {
     // Overload for when we don't need any validation for a local JSON putter
     template <typename FilenameGetter>
     auto makeHandler_local_json_PUT(std::string subdir, FilenameGetter filenameGetter, wf::WFOrchestrator& orch) {
-        return makeHandler_local_json_PUT(subdir,filenameGetter,orch,(*jval::getNullValidator()));
+        return makeHandler_local_json_PUT(subdir,filenameGetter,orch,jval::asLambda(jval::getNullValidator()));
     }
 
-    // FilenameGetter should take a const http Request and return a string
-    template <typename FilenameGetter>
-    auto makeHandler_resource_json_GET(std::string subdir, FilenameGetter filenameGetter, wf::WFOrchestrator& orch) {
-        return [&orch,subdir,filenameGetter](const httplib::Request& req, httplib::Response& res){
-            auto resource_res = orch.getResourceManager().loadResourceJSON(subdir,filenameGetter(req));
-            if (!resource_res) {
-                switch (resource_res.status()) {
-                    case wf::WFStatus::FILE_NOT_FOUND:
-                    case wf::WFStatus::CONFIG_SUBDIR_NOT_FOUND:
-                        res.status = 404;
-                        setContent(res, getErrorResponse<404>(resource_res.what()));
-                        return;
-                    default:
-                        res.status = 500;
-                        setContent(res, getErrorResponse<500>(resource_res.what()));
-                        return;
-                }
-            }
-            auto content = resource_res.value().dump();
-            res.status = 200;
-            setContent(res, content);
-            return;
-        };
-    }
-
-    void configure_local_endpoints(httplib::Server& srv, wf::WFOrchestrator& orch) {
-
-        //api/local/hardware GET OPTIONS
-        srv.Get("/api/local/hardware",[&orch](const httplib::Request& req, httplib::Response& res){
-            auto hardwareConfigs = orch.getResourceManager().enumerateLocalSubdir("hardware");
-            if (!hardwareConfigs) {
+    // Both possible enumerators are const methods of resourceManager
+    template <wf::WFResult<std::vector<std::string>>(wf::ResourceManager::*Enumerator)(const std::string&) const>
+    auto makeHandler_enum_subdir(std::string subdir, wf::WFOrchestrator& orch) {
+        return [&orch,subdir,Enumerator](const httplib::Request& req, httplib::Response& res){
+            auto files_res = (orch.getResourceManager().*Enumerator)(subdir);
+            if (!files_res) {
                 // we use a switch and not an if just in case we want to add more cases in the future
-                switch (hardwareConfigs.status()) {
+                switch (files_res.status()) {
                     case wf::WFStatus::CONFIG_SUBDIR_NOT_FOUND:
                         res.status = 404;
-                        setContent(res, getErrorResponse<404>(hardwareConfigs.what()));
+                        setContent(res, getErrorResponse<404>(files_res.what()));
                         return;
                     default:
                         res.status = 500;
-                        setContent(res, getErrorResponse<500>(hardwareConfigs.what()));
+                        setContent(res, getErrorResponse<500>(files_res.what()));
                         return;
                 }
             }
             try {
-                wf::JSON configs_jobject = hardwareConfigs.value();
+                wf::JSON files_jobject = files_res.value();
                 res.status = 200;
-                setContent(res, configs_jobject.dump());
+                setContent(res, files_jobject.dump());
                 return;
             } catch (const wf::JSON::exception& e) {
                 res.status = 500;
                 setContent(res, getErrorResponse<500>(e.what()));
                 return;
             }
-        });
-        srv.Options(R"(/api/local/hardware)",makeHandler_OPTIONS({"OPTIONS","GET"}));
+        };
+    }
+
+    auto makeHandler_enum_local_subdir(std::string subdir, wf::WFOrchestrator& orch) {
+        return makeHandler_enum_subdir<&wf::ResourceManager::enumerateLocalSubdir>(subdir,orch);
+    }
+
+    auto makeHandler_enum_resource_subdir(std::string subdir, wf::WFOrchestrator& orch) {
+        return makeHandler_enum_subdir<&wf::ResourceManager::enumerateResourceSubdir>(subdir,orch);
+    }
+
+    void configure_local_endpoints(httplib::Server& srv, wf::WFOrchestrator& orch) {
+
+        //api/local/hardware GET OPTIONS
+        srv.Get("/api/local/hardware",makeHandler_enum_local_subdir("hardware",orch));
+        srv.Options("/api/local/hardware",makeHandler_OPTIONS({"OPTIONS","GET"}));
         
         //api/local/hardware/*.json GET PUT PATCH OPTIONS
         srv.Get("api/local/hardware/([^/]+.json)",makeHandler_local_json_GET(
@@ -571,15 +573,81 @@ namespace impl {
         ));
         srv.Options("api/local/hardware/([^/]+.json)",makeHandler_OPTIONS({"OPTIONS","GET","PUT","PATCH"}));
 
-        //TODO: pipelines
+        //api/local/pipelines GET OPTIONS
+        
+        srv.Get("/api/local/pipelines",makeHandler_enum_local_subdir("pipelines",orch));
+        srv.Options("/api/local/pipelines",makeHandler_OPTIONS({"OPTIONS","GET"}));
+        
+        //api/local/hardware/*.json GET PUT PATCH OPTIONS
+        srv.Get("/api/local/pipelines/([^/]+.json)",makeHandler_local_json_GET(
+            "pipelines",
+            [](const httplib::Request& req){ return req.matches[1].str(); },
+            orch
+        ));
+        srv.Put("/api/local/pipelines/([^/]+.json)",makeHandler_local_json_PUT(
+            "pipelines",
+            [](const httplib::Request& req){ return req.matches[1].str(); },
+            orch,
+            jval::asLambda(jval::get_VisionWorkerConfig_validator())
+        ));
+        srv.Patch("/api/local/pipelines/([^/]+.json)",makeHandler_local_json_PATCH(
+            "hardware",
+            [](const httplib::Request& req){ return req.matches[1].str(); },
+            orch,
+            jval::asLambda(jval::get_VisionWorkerConfig_validator())
+        ));
+        srv.Options("/api/local/hardware/([^/]+.json)",makeHandler_OPTIONS({"OPTIONS","GET","PUT","PATCH"}));
+    }
 
+    void configure_resource_endpoints(httplib::Server& srv, wf::WFOrchestrator& orch) {
+
+        //api/resources/fields GET OPTIONS
+        srv.Get("/api/resources/fields",makeHandler_enum_resource_subdir("fields",orch));
+        srv.Options("/api/resources/fields",makeHandler_OPTIONS({"OPTIONS","GET"}));
+
+        //api/resources/fields/*.json GET OPTIONS
+        srv.Get("/api/resources/fields/([^/]+.json)",makeHandler_resource_json_GET(
+            "resources",
+            [](const httplib::Request& req){ return req.matches[1].str(); },
+            orch
+        ));
+        srv.Options("/api/resources/fields/([^/]+.json)",makeHandler_OPTIONS({"OPTIONS","GET"}));
     }
 }
 
 namespace wfsrv {
     HTTPServer::HTTPServer(wf::WFOrchestrator& orch)
     : orch_(orch){
+        srv_.new_task_queue = [] {
+            // 4 worker threads
+            return new httplib::ThreadPool(4);
+        };
         impl::configure_env_endpoints(srv_,orch_);
+        impl::configure_local_endpoints(srv_,orch_);
+        impl::configure_resource_endpoints(srv_,orch_);
+        
+    }
+
+    void HTTPServer::start() {
+        if (listenerThread.joinable())
+            return; // already running
+
+        listenerThread = std::jthread([&](std::stop_token st){
+            std::stop_callback cb(st, [&](){
+                srv_.stop();
+            });
+
+            auto apiPort = wf::env::getInt("WF_API_PORT",true);
+            if (!apiPort) return;
+
+            // TODO: Handle .listen() failures?
+            srv_.listen("0.0.0.0",apiPort.value());
+        });
+    }
+
+    void HTTPServer::stop() {
+        if (listenerThread.joinable())
+            listenerThread.request_stop();
     }
 }
 

@@ -22,6 +22,7 @@
 #include "version.h"
 #include "wfcore/processes/WFOrchestrator.h"
 #include "wfd.h"
+#include <exception>
 
 // signals to the launcher
 
@@ -46,11 +47,13 @@ int main() {
         orch.configureHardware();
         orch.configureWorkers();
         while (true) {
+            // main loop
             auto lock = wfd::getLock();
             orch.periodic();
         }
-    } catch (...) {
+    } catch (const std::exception& e) {
         // TODO: More descriptive error handling
+        std::cerr << "Caught an unhandled exception: " << e.what() << std::endl;
         return WAYFINDER_ERROR;
     }
     return WAYFINDER_SUCCESS;

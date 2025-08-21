@@ -37,6 +37,7 @@
 #include <mutex>
 namespace wf {
 
+    // TODO: Make a threadsafe destructor
     class VisionWorker : public WFConcurrentLoggedStatusfulObject {
     public:
         VisionWorker(
@@ -46,6 +47,7 @@ namespace wf {
             std::unique_ptr<Pipeline> pipeline_,
             std::unique_ptr<PipelineOutputConsumer> outputConsumer_
         );
+        ~VisionWorker();
         void start();
         void stop();
         const char* getThreadName() const noexcept { return threadName; }

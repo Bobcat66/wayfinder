@@ -18,10 +18,51 @@
  */
 
 #include "wfd.h"
+#include <atomic>
+#include <cstdint>
+
+namespace impl {
+    static std::mutex daemon_mutex;
+    static std::mutex reqs_mutex;
+    enum class Request : uint8_t {
+        NONE = 0x00,
+        SHUTDOWN = 0x01,
+        RELOAD = 0x02,
+        RESTART = 0x03,
+        REBOOT = 0x04
+    };
+    std::atomic<Request> reqstore(Request::NONE);
+}
 
 namespace wfd {
-    static std::mutex daemon_mutex;
     std::lock_guard<std::mutex> getLock() {
-        return std::lock_guard(daemon_mutex);
+        return std::lock_guard(impl::daemon_mutex);
+    }
+    void shutdown() {
+        impl::reqstore.store(impl::Request::SHUTDOWN);
+    }
+    void reload() {
+        impl::reqstore.store(impl::Request::RELOAD);
+    }
+    void restart() {
+        impl::reqstore.store(impl::Request::RESTART);
+    }
+    void reboot() {
+        impl::reqstore.store(impl::Request::REBOOT);
+    }
+    void clearReqstore() {
+        impl::reqstore.store(impl::Request::NONE);
+    }
+    bool shutdownRequested() {
+        return (impl::reqstore.load() == impl::Request::SHUTDOWN);
+    }
+    bool reloadRequested() {
+        return (impl::reqstore.load() == impl::Request::RELOAD);
+    }
+    bool restartRequested() {
+        return (impl::reqstore.load() == impl::Request::RESTART);
+    }
+    bool rebootRequested() {
+        return (impl::reqstore.load() == impl::Request::REBOOT);
     }
 }
