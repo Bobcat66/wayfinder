@@ -499,7 +499,7 @@ namespace impl {
     // Both possible enumerators are const methods of resourceManager
     template <wf::WFResult<std::vector<std::string>>(wf::ResourceManager::*Enumerator)(const std::string&) const>
     auto makeHandler_enum_subdir(std::string subdir, wf::WFOrchestrator& orch) {
-        return [&orch,subdir,Enumerator](const httplib::Request& req, httplib::Response& res){
+        return [&orch,subdir](const httplib::Request& req, httplib::Response& res){
             auto files_res = (orch.getResourceManager().*Enumerator)(subdir);
             if (!files_res) {
                 // we use a switch and not an if just in case we want to add more cases in the future
