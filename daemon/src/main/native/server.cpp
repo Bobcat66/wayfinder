@@ -612,6 +612,10 @@ namespace impl {
             orch
         ));
         srv.Options("/api/resources/fields/([^/]+.json)",makeHandler_OPTIONS({"OPTIONS","GET"}));
+
+        //api/resources/models GET OPTIONS
+        srv.Get("/api/resources/models",makeHandler_enum_resource_subdir("models",orch));
+        srv.Options("/api/resources/models",makeHandler_OPTIONS({"OPTIONS","GET"}));
     }
 }
 

@@ -12,7 +12,7 @@ Each resource supports OPTIONS
 /api/actions/restart - request a restart (restarts the wayfinder program)
 /api/actions/reboot - request a reboot (performs a full system reboot)
 
-/api/summary - Returns a short JSON object describing overall wayfinder status
+/api/summary - Returns a short JSON object describing overall wayfinder status. Only supports GET
 
 /api/env/ - System Environment, only supports PUT and GET
 [there will be resources corresponding 
