@@ -49,6 +49,7 @@ namespace wf {
     }
 
     WFResult<JSON> ResourceManager::loadResourceJSON(const std::string& subdirName,const std::string& filename) const {
+        std::shared_lock lock(mtx);
         JSON jobject;
 
         WF_DEBUGLOG(globalLogger(), "Searching for resource subdir '{}'",subdirName);
@@ -86,6 +87,7 @@ namespace wf {
     }
 
     WFResult<JSON> ResourceManager::loadLocalJSON(const std::string& subdirName,const std::string& filename) const {
+        std::shared_lock lock(mtx);
         JSON jobject;
 
         WF_DEBUGLOG(globalLogger(), "Searching for local subdir '{}'",subdirName);
@@ -125,6 +127,7 @@ namespace wf {
 
     // This will completely overrwrite the file if it already exists, use with caution
     WFStatusResult ResourceManager::storeLocalJSON(const std::string& subdirName, const std::string& filename, const JSON& jobject) const {
+        std::unique_lock lock(mtx);
         WF_DEBUGLOG(globalLogger(),"Searching for local subdir {}",subdirName);
         auto it = localSubdirs.find(subdirName);
         if (it == localSubdirs.end()) 
@@ -149,6 +152,7 @@ namespace wf {
     }
 
     WFResult<std::vector<std::string>> ResourceManager::enumerateResourceSubdir(const std::string& subdirName) const {
+        std::shared_lock lock(mtx);
         WF_DEBUGLOG(globalLogger(),"Enumerating resource subdir {}",subdirName);
         auto it = resourceSubdirs.find(subdirName);
         if (it == resourceSubdirs.end())
@@ -170,6 +174,7 @@ namespace wf {
     }
 
     WFResult<std::vector<std::string>> ResourceManager::enumerateLocalSubdir(const std::string& subdirName) const {
+        std::shared_lock lock(mtx);
         WF_DEBUGLOG(globalLogger(),"Enumerating local subdir {}",subdirName);
         auto it = localSubdirs.find(subdirName);
         if (it == localSubdirs.end())
@@ -191,6 +196,7 @@ namespace wf {
     }
 
     std::vector<std::string> ResourceManager::enumerateResourceSubdirs() const {
+        std::shared_lock lock(mtx);
         std::vector<std::string> subdirs;
         for (const auto& [key,value] : resourceSubdirs) {
             subdirs.emplace_back(key);
@@ -198,6 +204,7 @@ namespace wf {
         return subdirs;
     }
     std::vector<std::string> ResourceManager::enumerateLocalSubdirs() const {
+        std::shared_lock lock(mtx);
         std::vector<std::string> subdirs;
         for (const auto& [key,value] : localSubdirs) {
             subdirs.emplace_back(key);
@@ -205,15 +212,18 @@ namespace wf {
         return subdirs;
     }
     bool ResourceManager::resourceSubdirExists(const std::string& name) const {
+        std::shared_lock lock(mtx);
         auto it = resourceSubdirs.find(name);
         return it != resourceSubdirs.end();
     }
     bool ResourceManager::localSubdirExists(const std::string& name) const {
+        std::shared_lock lock(mtx);
         auto it = localSubdirs.find(name);
         return it != localSubdirs.end();
     }
 
     WFStatusResult ResourceManager::assignLocalSubdir(const std::string& subdirName,const std::filesystem::path& subdirRelpath) {
+        std::unique_lock lock(mtx);
         WF_DEBUGLOG(globalLogger(),"Assigning local subdir {} to relpath {}",subdirName,subdirRelpath.string());
 
         // Validate subdir path
@@ -226,6 +236,7 @@ namespace wf {
     }
 
     WFStatusResult ResourceManager::assignResourceSubdir(const std::string& subdirName,const std::filesystem::path& subdirRelpath) {
+        std::unique_lock lock(mtx);
         WF_DEBUGLOG(globalLogger(),"Assigning resource subdir {} to relpath {}",subdirName,subdirRelpath.string());
 
         // Validate subdir path
@@ -239,6 +250,7 @@ namespace wf {
 
     
     WFResult<fs::path> ResourceManager::resolveLocalFile(const std::string& subdirName, const std::string& filename) const {
+        std::shared_lock lock(mtx);
         // Validate subdir path
         WF_DEBUGLOG(globalLogger(),"Searching for local subdir {}",subdirName);
         auto it = localSubdirs.find(subdirName);
@@ -258,6 +270,7 @@ namespace wf {
 
     }
     WFResult<fs::path> ResourceManager::resolveResourceFile(const std::string& subdirName, const std::string& filename) const {
+        std::shared_lock lock(mtx);
         WF_DEBUGLOG(globalLogger(),"Searching for resource subdir {}",subdirName);
         auto it = resourceSubdirs.find(subdirName);
         if (it == resourceSubdirs.end()) 

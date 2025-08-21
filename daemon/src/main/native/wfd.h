@@ -19,17 +19,9 @@
 
 #pragma once
 
-#include "wfcore/processes/WFOrchestrator.h"
-#include <memory>
-#include <httplib.h>
+#include <mutex>
 
-namespace wfsrv {
-    class HTTPServer {
-    public:
-        HTTPServer(wf::WFOrchestrator& orchestrator);
-        ~HTTPServer() = default;
-    private:
-        wf::WFOrchestrator& orchestrator_;
-        httplib::Server srv_;
-    };
+// header for utility functions to control the daemon process
+namespace wfd {
+    std::lock_guard<std::mutex> getLock();
 }

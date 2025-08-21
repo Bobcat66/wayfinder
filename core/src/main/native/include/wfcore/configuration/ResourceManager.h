@@ -26,6 +26,7 @@
 #include <optional>
 #include <vector>
 #include "wfcore/common/json_utils.h"
+#include <mutex>
 
 namespace wf {
 
@@ -53,6 +54,10 @@ namespace wf {
         WFStatusResult assignLocalSubdir(const std::string& subdirName,const std::filesystem::path& subdirRelpath);
         WFStatusResult assignResourceSubdir(const std::string& subdirName,const std::filesystem::path& subdirRelpath);
     private:
+        ResourceManager(const ResourceManager&) = delete;
+        ResourceManager& operator=(const ResourceManager&) = delete;
+        ResourceManager(ResourceManager&&) = delete;
+        ResourceManager& operator=(ResourceManager&&) = delete;
         // Path to the directory containing wayfinder resources (models, field configs, etc.)
         std::filesystem::path resourceDir_;
         // Path to the directory containing local configuration (hardware config, vision worker config)
@@ -60,5 +65,6 @@ namespace wf {
 
         std::unordered_map<std::string,std::filesystem::path> localSubdirs;
         std::unordered_map<std::string,std::filesystem::path> resourceSubdirs;
+        mutable std::shared_mutex mtx;
     };
 }

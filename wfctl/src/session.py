@@ -19,7 +19,7 @@
 # TODO: More robust input validation
 
 # TODO: OPTIONS API has changed to be RFC-compliant, update wfctl client
-
+# TODO: Drop JSON Pointer query support, re-implement on client side with JSON fragments
 from http.client import HTTPConnection, RemoteDisconnected, HTTPResponse, _DataType, _HeaderValue
 import socket
 from typing import Union, Mapping, Tuple, List, Dict, Callable, Any, Set
@@ -60,6 +60,7 @@ bad_json: int = 4
 bad_command: int = 5
 bad_patch: int = 6
 bad_pointer: int = 7
+bad_header: int = 8
 # 0 = normal
 # 1 = Connection failed
 # 2 = Bad HTTP status
@@ -843,57 +844,21 @@ class Session:
             return bad_command, None
         return self.request("POST","actions/shutdown")
  
-    # TODO: OPTIONS are now conveyed completely in headers and are per-resource
     def getCapabilities(self,resource: str) -> Tuple[int,Union[Set[str],None]]:
         if resource not in self.resourceCapabilities:
             # Resource capabilities not already cached, get them
-            topLevel = resource.split("/")[0]
-            if topLevel not in self.topLevelCapabilities:
-                # top level capabilities not cached, request them
-                err,response = self.request("OPTIONS",topLevel,suppress_status=True)
-                if err != nominal:
-                    # Request failed, give up
-                    if response is not None:
-                        printBadResponse(response)
-                    return err, None
-                try:
-                    # Good response, proceed
-                    # Process top level capabilities
-                    options: Dict = json.loads(response.read().decode('utf-8'))
-                    if not isinstance(options,dict):
-                        raise TypeError("Response is not a JSON Object")
-
-                    tlcaps = ResourceCaps(set(require(options,"supportedMethods")),{})
-                    # Process special cases
-                    for specialCase in options.get("specialCase") or []:
-                        if not isinstance(specialCase,dict):
-                            raise TypeError("Special Case is not a JSON object")
-                        tlcaps.specialCases[require(specialCase,"url")] = set(require(specialCase,"supportedMethods"))
-
-                    # Cache result
-                    self.topLevelCapabilities[topLevel] = tlcaps
-                
-                # Failure modes
-                except json.JSONDecodeError as e:
-                    printerr(f"JSON Error: {e}")
-                    return bad_json, None
-                except KeyError as e:
-                    printerr(f"JSON Schema violation: {e}")
-                    return bad_json, None
-                except TypeError as e:
-                    printerr(f"JSON Schema violation: {e}")
-                    return bad_json, None
-            # Top level capabilities are guaranteed to be cached now
-            caps = self.topLevelCapabilities[topLevel]
-            methods: Set[str]
-            if resource in caps.specialCases:
-                methods = caps.specialCases[resource]
-            else:
-                # Resource is not a special case, default to top level capabilities
-                methods = caps.supportedMethods
-            
-            # Cache result
-            self.resourceCapabilities[resource] = methods
+            err,response = self.request("OPTIONS",resource,suppress_status=True)
+            if err != nominal:
+                # Request failed, give up
+                if response is not None:
+                    printBadResponse(response)
+                return err, None
+            # Good response, proceed
+            allowheader = response.getheader("Allow")
+            if allowheader is None:
+                return bad_header, None
+            options: List[str] = [m.strip() for m in allowheader.split(",")]
+            self.resourceCapabilities[resource] = set(options)
         # Resource capabilities are guaranteed to be cached at this point
         return nominal, self.resourceCapabilities[resource]
 

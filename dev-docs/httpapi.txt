@@ -1,6 +1,6 @@
 ##### HTTP API #####
 
-Each resource suppports OPTIONS
+Each resource supports OPTIONS
 
 /api/ - Root
 
@@ -35,12 +35,10 @@ network configuration, so if dhcp or ip were edited, those changes will not be r
 /api/local/pipelines - Pipeline configuration subdirectory. Sending GET returns an enum of all pipeline config files
 /api/local/graphs - Graph configuration subdirectory(TBA).
 Each config file will be referenced by its name
-(e.g. a pipline configuration file named pipeline0.json would
+(e.g. a pipeline configuration file named pipeline0.json would
 be referenced as api/local/pipelines/pipeline0.json)
-GET requests will also support queries that can reference
-individual fields in the config files with JSON pointers. ?ptr=[json pointer]
 
-/api/live/ - Live configuration, only supports PUT, PATCH and DELETE. Also does NOT support creating new resources
+/api/live/ - Live configuration, only supports GET, PUT, PATCH and DELETE. Also does NOT support creating new resources
 This differs from api/local in that api/local accesses
 the persisted configurations stored on disk, while api/live
 accessed the actual runtime configuration of the system.
@@ -77,7 +75,7 @@ NOTE: editing a file referenced in a wfctl transaction while the transaction is 
 
 quit: exits the wfctl REPL
 
-fetch [resource]: send a GET request to the server (will always be executed immediately, even in transactions). Also supports a ptr query to retrieve individual fields
+fetch [resource]: send a GET request to the server (will always be executed immediately, even in transactions). Also supports JSON pointer fragment to retrieve individual fields
 
 push [resource] [body]: send a PUT request to the server, prints response to stdout
 
@@ -164,7 +162,7 @@ Connecting to 10.12.34.11:8080...
 Connection OK
 Connected to Wayfinder @ 10.12.34.11:8080
 wfctl> transact
-wfctl> fetch local/hardware/camera0?ptr=/controls/AUTO_EXPOSURE
+wfctl> fetch local/hardware/camera0#/controls/AUTO_EXPOSURE
 1
 wfctl> jp local/hardware/camera0 replace /controls/AUTO_EXPOSURE 0
 wfctl> jp local/hardware/camera0 replace /backend "CSCORE"

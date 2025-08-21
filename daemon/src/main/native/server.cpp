@@ -17,7 +17,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "server/server.h"
+#include "server.h"
 #include "wfcore/common/envutils.h"
 #include <cctype>
 #include <format>
@@ -32,6 +32,9 @@
 #include <type_traits>
 #include "wfcore/common/json_utils.h"
 #include <iomanip>
+#include "wfd.h"
+#include <functional>
+#include "wfcore/hardware/CameraConfiguration.h"
 
 namespace impl {
     namespace fs = std::filesystem;
@@ -262,56 +265,242 @@ namespace impl {
             res.status = 204;
         };
     }
+
+    void configure_env_endpoints(httplib::Server& srv, wf::WFOrchestrator& orch) {
+        //api/env/team GET PUT OPTIONS
+        srv.Get("/api/env/team",makeHandler_generic_GET(
+            [&orch](){return std::format("{}",orch.getSystemConfig().team);}
+        ));
+        srv.Put("/api/env/team",makeHandler_generic_PUT(
+            [](const std::string& content) -> std::optional<std::string> {
+                auto res = invoke_wfcfg("putenv","WF_TEAM",content);
+                if (res == 0) return std::nullopt;
+                return std::format("Error while invoking wfcfg subprocess: {}",res);
+            },
+            isDigitStr,
+            "Content is not a numeric string"
+        ));
+        srv.Options("api/env/team",makeHandler_OPTIONS({"GET","PUT","OPTIONS"}));
+
+        //api/env/team GET PUT OPTIONS
+        srv.Get("/api/env/devname",makeHandler_generic_GET(
+            [&orch](){return orch.getSystemConfig().device_name;}
+        ));
+        srv.Put("/api/env/devname",makeHandler_generic_PUT(
+            [](const std::string& content) -> std::optional<std::string> {
+                auto res = invoke_wfcfg("putenv","WF_DEVICE_NAME",content);
+                if (res == 0) return std::nullopt;
+                return std::format("Error while invoking wfcfg subprocess: {}",res);
+            },
+            isAlnumStr,
+            "Content is not an alphanumeric string"
+        ));
+        srv.Options("api/env/slam",makeHandler_OPTIONS({"GET","PUT","OPTIONS"}));
+
+        //api/env/slam GET PUT OPTIONS
+        srv.Get("/api/env/slam",makeHandler_generic_GET(
+            [&orch](){return std::format("{}",orch.getSystemConfig().slam_server);}
+        ));
+        srv.Put("/api/env/slam",makeHandler_generic_PUT(
+            [](const std::string& content) -> std::optional<std::string> {
+                auto res = invoke_wfcfg("putenv","WF_SLAM_SERVER",content);
+                if (res == 0) return std::nullopt;
+                return std::format("Error while invoking wfcfg subprocess: {}",res);
+            },
+            isBoolStr,
+            "Content is not a boolean string"
+        ));
+        srv.Options("/api/env/slam",makeHandler_OPTIONS({"GET","PUT","OPTIONS"}));
+    }
+
+    // FilenameGetter should take a const http Request and return a string
+    template <typename FilenameGetter>
+    auto makeHandler_local_json_GET(std::string subdir, FilenameGetter filenameGetter, wf::WFOrchestrator& orch) {
+        return [&orch,subdir,filenameGetter](const httplib::Request& req, httplib::Response& res){
+            std::string filename;
+            try {
+                filename = filenameGetter(req);
+            } catch (...) {
+                res.status = 500;
+                setContent(res, getErrorResponse<500>("An unknown exception occurred while parsing file name"));
+            }
+            auto resource_res = orch.getResourceManager().loadLocalJSON(subdir,filename);
+            if (!resource_res) {
+                switch (resource_res.status()) {
+                    case wf::WFStatus::FILE_NOT_FOUND:
+                    case wf::WFStatus::CONFIG_SUBDIR_NOT_FOUND:
+                        res.status = 404;
+                        setContent(res, getErrorResponse<404>(resource_res.what()));
+                        return;
+                    default:
+                        res.status = 500;
+                        setContent(res, getErrorResponse<500>(resource_res.what()));
+                        return;
+                }
+            }
+            auto content = resource_res.value().dump();
+            res.status = 200;
+            setContent(res, content);
+            return;
+        };
+    }
+
+    // FilenameGetter should take a const http Request and return a string
+    // JSONSerializableType should be a class which implements wf::JSONSerializable, or NullJSONType
+    template <typename JSONSerializableType, typename FilenameGetter>
+    auto makeHandler_local_json_PUT(std::string subdir, FilenameGetter filenameGetter, wf::WFOrchestrator& orch) {
+        return [&orch,subdir,filenameGetter](const httplib::Request& req, httplib::Response& res){
+            std::string filename;
+            try {
+                filename = filenameGetter(req);
+            } catch (...) {
+                res.status = 500;
+                setContent(res, getErrorResponse<500>("An unknown exception occurred while parsing file name"));
+            }
+            auto resolve_res = orch.getResourceManager().resolveLocalFile(subdir,filename);
+            std::function<void(void)> successHandler; // Handler for successful cases
+            switch (resolve_res.status()) {
+                // Determines successful status code
+                case wf::WFStatus::OK:
+                    if (!resolve_res) {
+                        // sanity check. This path is only triggered when WFStatus's contract is violated and should never happen
+                        res.status = 500;
+                        setContent(res, getErrorResponse<500>("Attempting to resolve file caused an invariant violation (an invalid WFResult reported a nominal status)"));
+                        return;
+                    }
+                    successHandler = [&res](){ res.status = 204; };
+                    break;
+                case wf::WFStatus::FILE_NOT_FOUND: 
+                    successHandler = [&res,&filename,&subdir](){
+                        res.status = 201;
+                        res.set_header("Location", std::format("/api/local/{}/{}",subdir,filename));
+                    };
+                    break;
+                case wf::WFStatus::CONFIG_SUBDIR_NOT_FOUND:
+                    res.status = 404;
+                    setContent(res, getErrorResponse<404>(resolve_res.what()));
+                    return;
+                default:
+                    res.status = 500;
+                    setContent(res, getErrorResponse<500>(resolve_res.what()));
+                    return;
+            }
+            // Implementation
+            wf::JSON req_jobject;
+            try {
+                req_jobject = wf::JSON::parse(req.body);
+            } catch (const wf::JSON::parse_error& e) {
+                res.status = 400;
+                setContent(res, getErrorResponse<400>("Request did not contain valid JSON"));
+                return;
+            }
+            auto valid_res = JSONSerializableType::validate(req_jobject);
+            if (!valid_res) {
+                res.status = 422;
+                setContent(res, getErrorResponse<422>(valid_res.what()));
+                return;
+            }
+            auto store_res = orch.getResourceManager().storeLocalJSON(subdir,filename,req_jobject);
+            if (!store_res) {
+                res.status = 500;
+                setContent(res, getErrorResponse<500>(store_res.what()));
+                return;
+            }
+
+            successHandler();
+            return;
+        };
+    }
+
+    // This class can be used as a JSONSerializableType for cases where we want to accept any valid JSON
+    class NullJSONType {
+        static wf::WFStatusResult validate(const wf::JSON&) {
+            return wf::WFStatusResult::success();
+        }
+    };
+
+    // Overload for when we don't need any validation for a local JSON putter
+    template <typename FilenameGetter>
+    auto makeHandler_local_json_PUT(std::string subdir, FilenameGetter filenameGetter, wf::WFOrchestrator& orch) {
+        return makeHandler_local_json_PUT<NullJSONType>(subdir,filenameGetter,orch);
+    }
+
+    // FilenameGetter should take a const http Request and return a string
+    template <typename FilenameGetter>
+    auto makeHandler_resource_json_GET(std::string subdir, FilenameGetter filenameGetter, wf::WFOrchestrator& orch) {
+        return [&orch,subdir,filenameGetter](const httplib::Request& req, httplib::Response& res){
+            auto resource_res = orch.getResourceManager().loadResourceJSON(subdir,filenameGetter(req));
+            if (!resource_res) {
+                switch (resource_res.status()) {
+                    case wf::WFStatus::FILE_NOT_FOUND:
+                    case wf::WFStatus::CONFIG_SUBDIR_NOT_FOUND:
+                        res.status = 404;
+                        setContent(res, getErrorResponse<404>(resource_res.what()));
+                        return;
+                    default:
+                        res.status = 500;
+                        setContent(res, getErrorResponse<500>(resource_res.what()));
+                        return;
+                }
+            }
+            auto content = resource_res.value().dump();
+            res.status = 200;
+            setContent(res, content);
+            return;
+        };
+    }
+
+    void configure_local_endpoints(httplib::Server& srv, wf::WFOrchestrator& orch) {
+
+        //api/local/hardware GET OPTIONS
+        srv.Get("/api/local/hardware",[&orch](const httplib::Request& req, httplib::Response& res){
+            auto hardwareConfigs = orch.getResourceManager().enumerateLocalSubdir("hardware");
+            if (!hardwareConfigs) {
+                // we use a switch and not an if just in case we want to add more cases in the future
+                switch (hardwareConfigs.status()) {
+                    case wf::WFStatus::CONFIG_SUBDIR_NOT_FOUND:
+                        res.status = 404;
+                        setContent(res, getErrorResponse<404>(hardwareConfigs.what()));
+                        return;
+                    default:
+                        res.status = 500;
+                        setContent(res, getErrorResponse<500>(hardwareConfigs.what()));
+                        return;
+                }
+            }
+            try {
+                wf::JSON configs_jobject = hardwareConfigs.value();
+                res.status = 200;
+                setContent(res, configs_jobject.dump());
+                return;
+            } catch (const wf::JSON::exception& e) {
+                res.status = 500;
+                setContent(res, getErrorResponse<500>(e.what()));
+                return;
+            }
+        });
+        srv.Options(R"(/api/local/hardware)",makeHandler_OPTIONS({"OPTIONS","GET"}));
+        
+        //api/local/hardware/*.json GET PUT PATCH OPTIONS
+        srv.Get("api/local/hardware/([^/]+.json)",makeHandler_local_json_GET(
+            "hardware",
+            [](const httplib::Request req){ return req.matches[1].str(); },
+            orch
+        ));
+        srv.Put("api/local/hardware/([^/]+.json)",makeHandler_local_json_PUT<wf::CameraConfiguration>(
+            "hardware",
+            [](const httplib::Request req){ return req.matches[1].str(); },
+            orch
+        ));
+        // TODO: PATCH and OPTIONS
+
+    }
 }
 
 namespace wfsrv {
-    HTTPServer::HTTPServer(wf::WFOrchestrator& orchestrator)
-    : orchestrator_(orchestrator){
-
-        //api/env/team GET PUT OPTIONS
-        srv_.Get("/api/env/team",impl::makeHandler_generic_GET(
-            [this](){return std::format("{}",this->orchestrator_.getSystemConfig().team);}
-        ));
-        srv_.Put("/api/env/team",impl::makeHandler_generic_PUT(
-            [](const std::string& content) -> std::optional<std::string> {
-                auto res = impl::invoke_wfcfg("putenv","WF_TEAM",content);
-                if (res == 0) return std::nullopt;
-                return std::format("Error while invoking wfcfg subprocess: {}",res);
-            },
-            impl::isDigitStr,
-            "Content is not a numeric string"
-        ));
-        srv_.Options("api/env/team",impl::makeHandler_OPTIONS({"GET","PUT","OPTIONS"}));
-
-        //api/env/team GET PUT
-        srv_.Get("/api/env/devname",impl::makeHandler_generic_GET(
-            [this](){return this->orchestrator_.getSystemConfig().device_name;}
-        ));
-        srv_.Put("/api/env/devname",impl::makeHandler_generic_PUT(
-            [](const std::string& content) -> std::optional<std::string> {
-                auto res = impl::invoke_wfcfg("putenv","WF_DEVICE_NAME",content);
-                if (res == 0) return std::nullopt;
-                return std::format("Error while invoking wfcfg subprocess: {}",res);
-            },
-            impl::isAlnumStr,
-            "Content is not an alphanumeric string"
-        ));
-        srv_.Options("api/env/slam",impl::makeHandler_OPTIONS({"GET","PUT","OPTIONS"}));
-
-        //api/env/slam GET PUT
-        srv_.Get("/api/env/slam",impl::makeHandler_generic_GET(
-            [this](){return std::format("{}",this->orchestrator_.getSystemConfig().slam_server);}
-        ));
-        srv_.Put("/api/env/slam",impl::makeHandler_generic_PUT(
-            [](const std::string& content) -> std::optional<std::string> {
-                auto res = impl::invoke_wfcfg("putenv","WF_SLAM_SERVER",content);
-                if (res == 0) return std::nullopt;
-                return std::format("Error while invoking wfcfg subprocess: {}",res);
-            },
-            impl::isBoolStr,
-            "Content is not a boolean string"
-        ));
-        srv_.Options("api/env/slam",impl::makeHandler_OPTIONS({"GET","PUT","OPTIONS"}));
+    HTTPServer::HTTPServer(wf::WFOrchestrator& orch)
+    : orch_(orch){
+        impl::configure_env_endpoints(srv_,orch_);
     }
 }
 
