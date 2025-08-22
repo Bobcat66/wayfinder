@@ -183,6 +183,9 @@
   - name: timestamp
     type: u64
   
+  - name: server_timestamp
+    type: i64
+  
   - name: pipeline_type
     type: u8
   
@@ -240,7 +243,7 @@
   name: odometry_result
   fields:
   - name: timestamps
-    type: u64
+    type: i64
     vla: True
   
   - name: twists

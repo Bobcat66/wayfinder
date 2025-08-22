@@ -82,6 +82,8 @@ wips_status_t wips_pipeline_result_copy(wips_pipeline_result_t *dest,const wips_
     wips_pipeline_result_free_resources(dest);
     dest->timestamp = src->timestamp;
     
+    dest->server_timestamp = src->server_timestamp;
+    
     dest->pipeline_type = src->pipeline_type;
     
     dest->DETAILvlasize__tag_detections = src->DETAILvlasize__tag_detections;
@@ -161,6 +163,10 @@ wips_result_t wips_encode_pipeline_result(wips_blob_t *data, wips_pipeline_resul
     result = wips_encode_u64(data, &(in->timestamp));
     bytesEncoded += result.bytes_processed;
     if (result.status_code != WIPS_STATUS_OK) return wips_make_result(bytesEncoded,result.status_code);
+    WIPS_TRACELOG("Encoding pipeline_result field server_timestamp (i64)\n");
+    result = wips_encode_i64(data, &(in->server_timestamp));
+    bytesEncoded += result.bytes_processed;
+    if (result.status_code != WIPS_STATUS_OK) return wips_make_result(bytesEncoded,result.status_code);
     WIPS_TRACELOG("Encoding pipeline_result field pipeline_type (u8)\n");
     result = wips_encode_u8(data, &(in->pipeline_type));
     bytesEncoded += result.bytes_processed;
@@ -215,6 +221,10 @@ wips_result_t wips_decode_pipeline_result(wips_pipeline_result_t *out, wips_blob
     wips_result_t result;
     WIPS_TRACELOG("Decoding pipeline_result field timestamp (u64)\n");
     result = wips_decode_u64(&(out->timestamp), data);
+    bytesDecoded += result.bytes_processed;
+    if (result.status_code != WIPS_STATUS_OK) return wips_make_result(bytesDecoded,result.status_code);
+    WIPS_TRACELOG("Decoding pipeline_result field server_timestamp (i64)\n");
+    result = wips_decode_i64(&(out->server_timestamp), data);
     bytesDecoded += result.bytes_processed;
     if (result.status_code != WIPS_STATUS_OK) return wips_make_result(bytesDecoded,result.status_code);
     WIPS_TRACELOG("Decoding pipeline_result field pipeline_type (u8)\n");

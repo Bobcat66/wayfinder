@@ -120,9 +120,9 @@ static PyObject *wips_odometry_result_PyObject_get_timestamps(PyObject *self, vo
     }
 
     wips_vlaref_t vlaref;
-    GET_VLAREF(&vlaref,u64,obj->c_obj,timestamps);
+    GET_VLAREF(&vlaref,i64,obj->c_obj,timestamps);
     wips_vla_PyObject *py_vla = wips_vla_PyObject_create(
-        &wips_u64_PyType,
+        &wips_i64_PyType,
         obj->base.handler,
         vlaref
     );
@@ -156,13 +156,13 @@ static int wips_odometry_result_PyObject_set_timestamps(PyObject *self, PyObject
     size_t new_vlasize = (size_t)seqlen;
 
     // Verify sequence objects, construct C array
-    wips_u64_t *new_vlabuffer = (wips_u64_t *)calloc(new_vlasize,GET_SIZE(u64));
+    wips_i64_t *new_vlabuffer = (wips_i64_t *)calloc(new_vlasize,GET_SIZE(i64));
     if (!new_vlabuffer) {
         // Failed allocation, give up
         PyErr_NoMemory();
         return -1;
     }
-    wips_PyType *elemtype = &wips_u64_PyType;
+    wips_PyType *elemtype = &wips_i64_PyType;
     for (Py_ssize_t i = 0; i < seqlen; ++i) {
         PyObject *seq_elem = PySequence_GetItem(value,i);
         if (!seq_elem) {
@@ -180,15 +180,15 @@ static int wips_odometry_result_PyObject_set_timestamps(PyObject *self, PyObject
             Py_DECREF(seq_elem);
             return -1;
         }
-        wips_u64_t *c_src = (wips_u64_t *)(elemtype->unwrapper(seq_elem));
+        wips_i64_t *c_src = (wips_i64_t *)(elemtype->unwrapper(seq_elem));
         if (!c_src) {
             // Failed to unwrap element, give up
             free(new_vlabuffer);
             Py_DECREF(seq_elem);
             return -1;
         }
-        wips_u64_t *c_dest = new_vlabuffer + i;
-        wips_status_t copy_status = wips_u64_copy(
+        wips_i64_t *c_dest = new_vlabuffer + i;
+        wips_status_t copy_status = wips_i64_copy(
             c_dest,
             c_src
         );
@@ -206,8 +206,8 @@ static int wips_odometry_result_PyObject_set_timestamps(PyObject *self, PyObject
         // old vla is not NULL, destroy the buffer
         for (size_t i = 0; i < obj->c_obj->GET_DETAIL(timestamps,vlasize); ++i) {
             // Free resources recursively
-            wips_u64_t *old_elem = obj->c_obj->timestamps + i;
-            wips_u64_free_resources(old_elem);
+            wips_i64_t *old_elem = obj->c_obj->timestamps + i;
+            wips_i64_free_resources(old_elem);
         }
         // Free the buffer itself
         free(obj->c_obj->timestamps);
@@ -334,7 +334,7 @@ static PyGetSetDef wips_odometry_result_PyObject_getsetters[] = {
         "timestamps",
         (getter)wips_odometry_result_PyObject_get_timestamps,
         (setter)wips_odometry_result_PyObject_set_timestamps,
-        "Sequence[u64]",
+        "Sequence[i64]",
         NULL
     },
     {
@@ -393,7 +393,7 @@ static PyObject *wips_odometry_result_extractor(void *obj) {
 
     wips_odometry_result_t *c_obj = (wips_odometry_result_t *)obj;
     {
-        wips_PyType *elemtype = &wips_u64_PyType;
+        wips_PyType *elemtype = &wips_i64_PyType;
 
         size_t length = c_obj->GET_DETAIL(timestamps,vlasize);
         Py_ssize_t pylength;

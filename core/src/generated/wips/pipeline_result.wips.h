@@ -39,13 +39,14 @@ extern "C" {
 #endif
 
 #include "wips_runtime.h"
+#include "object_detection.wips.h"
 #include "apriltag_detection.wips.h"
 #include "apriltag_relative_pose_observation.wips.h"
-#include "object_detection.wips.h"
 #include "apriltag_field_pose_observation.wips.h"
 
 typedef struct {
     wips_u64_t timestamp;
+    wips_i64_t server_timestamp;
     wips_u8_t pipeline_type;
     wips_u32_t DETAILvlasize__tag_detections;
     wips_apriltag_detection_t *tag_detections;

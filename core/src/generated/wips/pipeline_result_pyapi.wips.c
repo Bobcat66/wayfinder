@@ -43,9 +43,9 @@ extern "C" {
 
 #define PY_SSIZE_T_CLEAN
 #include "pipeline_result_pyapi.wips.h"
+#include "object_detection_pyapi.wips.h"
 #include "apriltag_detection_pyapi.wips.h"
 #include "apriltag_relative_pose_observation_pyapi.wips.h"
-#include "object_detection_pyapi.wips.h"
 #include "apriltag_field_pose_observation_pyapi.wips.h"
 
 #define WIPS_INTERNAL
@@ -147,6 +147,53 @@ static int wips_pipeline_result_PyObject_set_timestamp(PyObject *self, PyObject 
     }
     wips_u64_t *c_dest = &(obj->c_obj->timestamp);
     wips_status_t copy_status = wips_u64_copy(
+        c_dest,
+        c_src
+    );
+    if (copy_status != WIPS_STATUS_OK) {
+        PyErr_SetString(PyExc_RuntimeError,"Failed to copy value");
+        return -1;
+    }
+    return 0;
+}
+static PyObject *wips_pipeline_result_PyObject_get_server_timestamp(PyObject *self, void *Py_UNUSED(closure)) {
+    wips_pipeline_result_PyObject *obj = (wips_pipeline_result_PyObject *)self;
+    if (!obj->c_obj) {
+        PyErr_SetString(PyExc_AttributeError,"Struct is not initialized");
+        return NULL;
+    }
+
+    wips_PyType *fieldtype = &wips_i64_PyType;
+    void *c_field = (void *)(&(obj->c_obj->server_timestamp));
+    PyObject *py_field = fieldtype->wrapper(c_field,obj->base.handler);
+    if (!py_field) {
+        // Failed to wrap value, propagate error
+        return NULL;
+    }
+    return py_field;
+}
+static int wips_pipeline_result_PyObject_set_server_timestamp(PyObject *self, PyObject *value, void *Py_UNUSED(closure)) {
+    wips_pipeline_result_PyObject *obj = (wips_pipeline_result_PyObject *)self;
+    if (!obj->c_obj) {
+        PyErr_SetString(PyExc_AttributeError,"Struct is not initialized");
+        return -1;
+    }
+
+    // value is not None
+    // verify value is of the correct type
+    wips_PyType *valtype = &wips_i64_PyType;
+    if (Py_TYPE(value) != valtype->python_type) {
+        PyErr_SetString(PyExc_TypeError,"Argument type does not match field type");
+        return -1;
+    }
+    // assign value
+    wips_i64_t *c_src = (wips_i64_t *)(valtype->unwrapper(value));
+    if (!c_src) {
+        // Failed to unwrap value, propagate error
+        return -1;
+    }
+    wips_i64_t *c_dest = &(obj->c_obj->server_timestamp);
+    wips_status_t copy_status = wips_i64_copy(
         c_dest,
         c_src
     );
@@ -607,6 +654,13 @@ static PyGetSetDef wips_pipeline_result_PyObject_getsetters[] = {
         NULL
     },
     {
+        "server_timestamp",
+        (getter)wips_pipeline_result_PyObject_get_server_timestamp,
+        (setter)wips_pipeline_result_PyObject_set_server_timestamp,
+        "i64",
+        NULL
+    },
+    {
         "pipeline_type",
         (getter)wips_pipeline_result_PyObject_get_pipeline_type,
         (setter)wips_pipeline_result_PyObject_set_pipeline_type,
@@ -699,6 +753,24 @@ static PyObject *wips_pipeline_result_extractor(void *obj) {
             return NULL;
         }
         if (PyDict_SetItemString(dict, "timestamp", value) != 0) {
+            // Failed to assign value, give up and propagate error
+            Py_DECREF(dict);
+            Py_DECREF(value);
+            return NULL;
+        }
+        // Prevent memory leaks, dict assignment does not steal reference
+        Py_DECREF(value);
+    }
+    {
+        wips_PyType *valtype = &wips_i64_PyType;
+        void *c_value = (void *)(&(c_obj->server_timestamp));
+        PyObject *value = valtype->extractor(c_value);
+        if (!value) {
+            // failed to extract, give up
+            Py_DECREF(dict);
+            return NULL;
+        }
+        if (PyDict_SetItemString(dict, "server_timestamp", value) != 0) {
             // Failed to assign value, give up and propagate error
             Py_DECREF(dict);
             Py_DECREF(value);

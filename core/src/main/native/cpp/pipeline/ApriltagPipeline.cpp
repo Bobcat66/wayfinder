@@ -102,6 +102,7 @@ namespace wf {
         );
         return PipelineResult::ApriltagResult(
             meta.micros,
+            meta.server_time_us,
             std::move(detections),
             std::move(atagPoses),
             std::move(fieldPose)

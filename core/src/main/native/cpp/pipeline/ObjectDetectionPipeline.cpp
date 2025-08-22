@@ -90,6 +90,7 @@ namespace wf {
 
         return PipelineResult::ObjectDetectionResult(
             meta.micros,
+            meta.server_time_us,
             std::move(detections)
         );
     }

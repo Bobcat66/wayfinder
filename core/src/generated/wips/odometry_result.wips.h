@@ -43,7 +43,7 @@ extern "C" {
 
 typedef struct {
     wips_u32_t DETAILvlasize__timestamps;
-    wips_u64_t *timestamps;
+    wips_i64_t *timestamps;
     wips_u32_t DETAILvlasize__twists;
     wips_twist2_t *twists;
 } wips_odometry_result_t;
