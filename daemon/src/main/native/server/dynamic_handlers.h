@@ -22,6 +22,7 @@
 #include "wfcore/common/status.h"
 #include "wfcore/configuration/ResourceManager.h"
 #include "server/server_utils.h"
+#include "jval/JSONPatchRFC6902.jval.hpp"
 
 namespace wfsrv {
 

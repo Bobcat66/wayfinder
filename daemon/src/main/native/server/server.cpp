@@ -18,35 +18,25 @@
  */
 
 #include "server/server.h"
+#include "server/server_utils.h"
+#include "server/basic_handlers.h"
+#include "server/env_handlers.h"
+#include "server/dynamic_handlers.h"
 #include "wfcore/common/envutils.h"
 #include <cctype>
 #include <format>
 #include <vector>
 #include <string>
-#include <filesystem>
 #include <optional>
-#include <sstream>
 #include <cstdlib>
-#include <sys/wait.h>
 #include "wfcore/common/wfassert.h"
-#include <type_traits>
 #include "wfcore/common/json_utils.h"
-#include <iomanip>
 #include "wfd.h"
-#include <functional>
-#include <regex>
 #include "wfcore/hardware/CameraConfiguration.h"
 #include "wfcore/common/jval_compat.h"
 #include "jval/CameraConfig.jval.hpp"
 #include "jval/VisionWorkerConfig.jval.hpp"
-#include "jval/JSONPatchRFC6902.jval.hpp"
-#include <optional>
-#include <cstdio> 
 #include <iostream>
-#include "server/server_utils.h"
-#include "server/basic_handlers.h"
-#include "server/env_handlers.h"
-#include "server/dynamic_handlers.h"
 
 namespace impl {
     using namespace wfsrv;
