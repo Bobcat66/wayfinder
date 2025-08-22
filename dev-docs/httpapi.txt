@@ -14,13 +14,15 @@ Each resource supports OPTIONS
 
 /api/summary - Returns a short JSON object describing overall wayfinder status. Only supports GET
 
-/api/env/ - System Environment, only supports PUT and GET
+/api/env/ - System Environment
 [there will be resources corresponding 
 to some (but not all) environment
 variables under the /api/env/ collection]
-/api/env/team - Team number
-/api/env/devname - Device name/hostname
-/api/env/slam - whether or not SLAM is enabled
+/api/env/live/ - Live system environment, only supports GET
+/api/env/local/ - Stored system environment, supports GET and PUT
+/api/env/*/team - Team number
+/api/env/*/devname - Device name/hostname
+/api/env/*/slam - whether or not SLAM is enabled
 (Not an exhaustive list)
 
 

@@ -104,7 +104,7 @@ def putenv(key: str, val: str) -> int:
     envpath = os.environ.get("WF_ENV_PATH")
     if (envpath is None):
         return 1
-    res = sed_s(envpath,f"^{re.escape(key)}=.*",f"{key}=\"{val}\"")
+    res = sed_s(envpath,f"^{re.escape(key)}=.*",f"{key}={val}")
     if (res == 0):
         with open(envpath,'a') as f:
             f.write(f"\n{key}=\"{val}\"")

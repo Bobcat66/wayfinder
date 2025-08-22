@@ -17,4 +17,5 @@ WF_NT_SERVER: whether or not the coprocessor should host a NetworkTables server
 WF_EXEC: path to the wayfinderd executable, relative to the working directory
 WF_SCRIPTS: path to wayfinder auxiliary scripts, relative to the working directory
 
-In general, the working directory will be /opt/wayfinder in deployment
+In general, the working directory will be /opt/wayfinder in deployment. values that are meant to be strings should
+be quoted, values meant to be interpreted as doubles/ints/bools should be left unquoted. bools are denoted with true and false
