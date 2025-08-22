@@ -75,5 +75,6 @@ utility for configuration, for users that want a greater level of control than w
 launch.sh: launch.sh is wayfinder's launch system. It is in charge of starting and stopping the wayfinderd process, as well as loading environment
 variables
 
+TODO: Time synchronization. Right now Wayfinder relies on the built-in nt::Now function for server time, maybe implement something more robust in the future
 
 

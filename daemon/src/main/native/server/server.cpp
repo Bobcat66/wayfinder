@@ -94,10 +94,6 @@ namespace impl {
         srv.Options("/api/env/local/slam",makeHandler_OPTIONS({"GET","PUT","OPTIONS"}));
     }
 
-    void configure_network_endpoints(httplib::Server& srv, wf::WFOrchestrator& orch) {
-
-    }
-
     void configure_local_endpoints(httplib::Server& srv, wf::WFOrchestrator& orch) {
 
         //api/local/hardware GET OPTIONS

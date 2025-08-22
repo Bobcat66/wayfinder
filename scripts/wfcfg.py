@@ -185,9 +185,6 @@ if __name__ == "__main__":
     parser_sethost = subparsers.add_parser("sethost",help="Set hostname to device name (FOR INTERNAL USE ONLY)")
     parser_sethost.set_defaults(func=sethost_cli)
 
-    parser_devname = subparsers.add_parser("devname",help="Sets device name")
-    parser_devname.add_argument("name",type=str,help="new device name")
-
     parser_dump = subparsers.add_parser("dump",help="Dumps wayfinder environment")
     parser_dump.set_defaults(func=dump_cli)
 
