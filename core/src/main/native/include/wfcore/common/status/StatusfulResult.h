@@ -77,8 +77,9 @@ namespace wf {
         }
 
         // Applies mapper to the wrapped value, and returns a StatusfulResult wrapping the result
+        // This is equivalent to the monadic operation bind(), so mapper must itself return a statusful result
         template <typename F>
-        auto and_then(F&& mapper) const -> decltype(mapper(std::declval<T>())) {
+        auto and_then(F&& mapper) const -> decltype(mapper(std::declval<const T&>())) {
             using ResultType = decltype(mapper(std::declval<T>()));
             static_assert(std::is_same_v<typename ResultType::status_type, status_type>, 
                 "Mapper must return StatusfulResult with same status_type");

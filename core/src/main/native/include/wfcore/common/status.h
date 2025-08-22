@@ -158,6 +158,7 @@ namespace wf {
             case WFStatus::HARDWARE_BAD_CAMERA:         return "HARDWARE_BAD_CAMERA";
             case WFStatus::HARDWARE_NO_CALIB:           return "HARDWARE_NO_CALIB";
             case WFStatus::HARDWARE_DISABLED:           return "HARDWARE_DISABLED";
+            case WFStatus::HARDWARE_CONNECTING:         return "HARDWARE_CONNECTING";
             case WFStatus::HARDWARE_UNKNOWN:            return "HARDWARE_UNKNOWN";
 
             case WFStatus::NETWORK_BASE:                return "NETWORK_BASE";

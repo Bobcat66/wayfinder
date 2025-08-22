@@ -44,7 +44,7 @@ namespace impl {
     void configure_env_endpoints(httplib::Server& srv, wf::WFOrchestrator& orch) {
         //api/env/live/team GET OPTIONS
         srv.Get("/api/env/live/team",makeHandler_int_GET(
-            [&orch](){return std::format("{}",orch.getSystemConfig().team);}
+            [&orch](){ return std::format("{}",orch.getSystemConfig().team); }
         ));
         srv.Options("/api/env/live/team",makeHandler_OPTIONS({"GET","OPTIONS"}));
 
@@ -147,7 +147,7 @@ namespace impl {
             jval::asLambda(jval::get_VisionWorkerConfig_validator())
         ));
         srv.Patch("/api/local/pipelines/([^/]+.json)",makeHandler_local_file_PATCH(
-            "hardware",
+            "pipelines",
             [](const httplib::Request& req){ return req.matches[1].str(); },
             orch,
             jval::asLambda(jval::get_VisionWorkerConfig_validator())
