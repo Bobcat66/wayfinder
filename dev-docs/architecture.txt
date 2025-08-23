@@ -76,5 +76,7 @@ launch.sh: launch.sh is wayfinder's launch system. It is in charge of starting a
 variables
 
 TODO: Time synchronization. Right now Wayfinder relies on the built-in nt::Now function for server time, maybe implement something more robust in the future
+Wayfinder has a UDP Time synchronization system based on PTP. It operates on subnet broadcast (10.TE.AM.255) on port 30001. User code should not broadcast on port
+30001
 
 

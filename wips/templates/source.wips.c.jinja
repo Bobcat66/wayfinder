@@ -151,6 +151,36 @@ wips_result_t wips_encode_{{ name }}(wips_blob_t *data, wips_{{ name }}_t *in) {
     WIPS_TRACELOG("Encoded {{ name }}\n");
     return wips_make_result(bytesEncoded,WIPS_STATUS_OK);
 }
+wips_result_t wips_encode_nrb_{{ name }}(wips_blob_t *data, wips_{{ name }}_t *in) {
+    WIPS_TRACELOG("No resize buffer (nrb) encoding {{ name }}\n");
+    WIPS_Assert(data != NULL && in != NULL,0);
+    size_t bytesEncoded = 0;
+    wips_result_t result;
+{%- for field in fields -%}
+{%- if field.vla == True %}
+    WIPS_TRACELOG("NRB encoding {{ name }} field {{ field.name }} ({{ field.type }},VLA,size=%u)\n",in->GET_DETAIL({{ field.name }},vlasize));
+    for (wips_u32_t i = 0; i < in->GET_DETAIL({{ field.name }},vlasize); i++) {
+        result = wips_encode_nrb_{{ field.type }}(data, in->{{ field.name }} + i);
+        bytesEncoded += result.bytes_processed;
+        if (result.status_code != WIPS_STATUS_OK) return wips_make_result(bytesEncoded,result.status_code);
+    }
+{%- elif field.optional == True %}
+    WIPS_TRACELOG("NRB encoding {{ name }} field {{ field.name }} ({{ field.type }},optional,present=%u)\n",in->GET_DETAIL({{ field.name }},optpresent));
+    if (in->GET_DETAIL({{ field.name }},optpresent)) {
+        result = wips_encode_nrb_{{ field.type }}(data, &(in->{{ field.name }}));
+        bytesEncoded += result.bytes_processed;
+        if (result.status_code != WIPS_STATUS_OK) return wips_make_result(bytesEncoded,result.status_code);
+    }
+{%- else %}
+    WIPS_TRACELOG("NRB encoding {{ name }} field {{ field.name }} ({{ field.type }})\n");
+    result = wips_encode_nrb_{{ field.type }}(data, &(in->{{ field.name }}));
+    bytesEncoded += result.bytes_processed;
+    if (result.status_code != WIPS_STATUS_OK) return wips_make_result(bytesEncoded,result.status_code);
+{%- endif %}
+{%- endfor %}
+    WIPS_TRACELOG("NRB Encoded {{ name }}\n");
+    return wips_make_result(bytesEncoded,WIPS_STATUS_OK);
+}
 wips_result_t wips_decode_{{ name }}(wips_{{ name }}_t *out, wips_blob_t *data) {
     WIPS_TRACELOG("Decoding {{ name }}\n");
     WIPS_Assert(out != NULL && data != NULL,0);

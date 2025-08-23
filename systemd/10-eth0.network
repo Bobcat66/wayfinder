@@ -26,6 +26,7 @@ Name=eth0
 
 [Network]
 DHCP=yes
+Multicast=yes
 MulticastDNS=yes
 LinkLocalAddressing=ipv4
 IPv4LLStartAddress=169.254.42.42

@@ -130,7 +130,7 @@ namespace wf {
         }
 
         static constexpr StatusfulResult failure(status_type code) noexcept {
-            return { code, std::nullopt };
+            return { code };
         }
 
         template <typename... Args>

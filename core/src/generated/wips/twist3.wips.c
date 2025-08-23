@@ -104,6 +104,38 @@ wips_result_t wips_encode_twist3(wips_blob_t *data, wips_twist3_t *in) {
     WIPS_TRACELOG("Encoded twist3\n");
     return wips_make_result(bytesEncoded,WIPS_STATUS_OK);
 }
+wips_result_t wips_encode_nrb_twist3(wips_blob_t *data, wips_twist3_t *in) {
+    WIPS_TRACELOG("No resize buffer (nrb) encoding twist3\n");
+    WIPS_Assert(data != NULL && in != NULL,0);
+    size_t bytesEncoded = 0;
+    wips_result_t result;
+    WIPS_TRACELOG("NRB encoding twist3 field dx (fp64)\n");
+    result = wips_encode_nrb_fp64(data, &(in->dx));
+    bytesEncoded += result.bytes_processed;
+    if (result.status_code != WIPS_STATUS_OK) return wips_make_result(bytesEncoded,result.status_code);
+    WIPS_TRACELOG("NRB encoding twist3 field dy (fp64)\n");
+    result = wips_encode_nrb_fp64(data, &(in->dy));
+    bytesEncoded += result.bytes_processed;
+    if (result.status_code != WIPS_STATUS_OK) return wips_make_result(bytesEncoded,result.status_code);
+    WIPS_TRACELOG("NRB encoding twist3 field dz (fp64)\n");
+    result = wips_encode_nrb_fp64(data, &(in->dz));
+    bytesEncoded += result.bytes_processed;
+    if (result.status_code != WIPS_STATUS_OK) return wips_make_result(bytesEncoded,result.status_code);
+    WIPS_TRACELOG("NRB encoding twist3 field rx (fp64)\n");
+    result = wips_encode_nrb_fp64(data, &(in->rx));
+    bytesEncoded += result.bytes_processed;
+    if (result.status_code != WIPS_STATUS_OK) return wips_make_result(bytesEncoded,result.status_code);
+    WIPS_TRACELOG("NRB encoding twist3 field ry (fp64)\n");
+    result = wips_encode_nrb_fp64(data, &(in->ry));
+    bytesEncoded += result.bytes_processed;
+    if (result.status_code != WIPS_STATUS_OK) return wips_make_result(bytesEncoded,result.status_code);
+    WIPS_TRACELOG("NRB encoding twist3 field rz (fp64)\n");
+    result = wips_encode_nrb_fp64(data, &(in->rz));
+    bytesEncoded += result.bytes_processed;
+    if (result.status_code != WIPS_STATUS_OK) return wips_make_result(bytesEncoded,result.status_code);
+    WIPS_TRACELOG("NRB Encoded twist3\n");
+    return wips_make_result(bytesEncoded,WIPS_STATUS_OK);
+}
 wips_result_t wips_decode_twist3(wips_twist3_t *out, wips_blob_t *data) {
     WIPS_TRACELOG("Decoding twist3\n");
     WIPS_Assert(out != NULL && data != NULL,0);

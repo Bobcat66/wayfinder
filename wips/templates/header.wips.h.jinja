@@ -64,6 +64,7 @@ void wips_{{ name }}_destroy(wips_{{ name }}_t *struct_ptr);
 wips_status_t wips_{{ name }}_copy(wips_{{ name }}_t *dest, const wips_{{ name }}_t *src);
 
 wips_result_t wips_encode_{{ name }}(wips_blob_t *data, wips_{{ name }}_t *in);
+wips_result_t wips_encode_nrb_{{ name }}(wips_blob_t *data, wips_{{ name }}_t *in);
 wips_result_t wips_decode_{{ name }}(wips_{{ name }}_t *out, wips_blob_t *data);
 
 extern wips_vlamethods_t wips_{{ name }}_vlamethods;

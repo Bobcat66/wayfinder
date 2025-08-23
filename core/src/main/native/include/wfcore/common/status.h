@@ -81,6 +81,12 @@ namespace wf {
         HARDWARE_UNKNOWN =          0x004fffff,
 
         NETWORK_BASE =              0x00500000,
+        NETWORK_BAD_SOCK =          0x00500001,
+        NETWORK_BAD_SEND =          0x00500002,
+        NETWORK_BAD_RECV =          0x00500003,
+        NETWORK_WAITING =           0x00500004,
+        NETWORK_BAD_SOCKOPT =       0x00500005,
+        NETWORK_BAD_ADDR =          0x00500006,
         NETWORK_UNKNOWN =           0x005fffff,
 
         JSON_BASE =                 0x00600000,
@@ -162,6 +168,12 @@ namespace wf {
             case WFStatus::HARDWARE_UNKNOWN:            return "HARDWARE_UNKNOWN";
 
             case WFStatus::NETWORK_BASE:                return "NETWORK_BASE";
+            case WFStatus::NETWORK_BAD_SOCK:            return "NETWORK_BAD_SOCK";
+            case WFStatus::NETWORK_BAD_SEND:            return "NETWORK_BAD_SEND";
+            case WFStatus::NETWORK_BAD_RECV:            return "NETWORK_BAD_RECV";
+            case WFStatus::NETWORK_WAITING:             return "NETWORK_WAITING";
+            case WFStatus::NETWORK_BAD_SOCKOPT:         return "NETWORK_BAD_SOCKOPT";
+            case WFStatus::NETWORK_BAD_ADDR:            return "NETWORK_BAD_ADDR";
             case WFStatus::NETWORK_UNKNOWN:             return "NETWORK_UNKNOWN";
 
             case WFStatus::JSON_BASE:                   return "JSON_BASE";

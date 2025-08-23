@@ -54,6 +54,7 @@ extern "C" {
 #define WIPS_STATUS_OVERFLOW 0x03 // Overflow error
 #define WIPS_STATUS_BAD_ASSERT 0x04 // Failed assertion
 #define WIPS_STATUS_UNDERFLOW 0x05 // Underflow error
+#define WIPS_STATUS_BUF_OVERFLOW 0x06 // Buffer overflow
 #define WIPS_STATUS_UNKNOWN 0xff // Unknown error
 
 typedef unsigned char wips_status_t;
@@ -143,40 +144,58 @@ typedef struct {
     size_t allocated; // The amount of memory allocated
 } wips_blob_t;
 
+// Dynamically allocates a blob. In general, blobs created with wips_blob_create are the
+// safest to use, and have the fewest footguns. Use this unless you know what you're doing
 wips_blob_t *wips_blob_create(size_t size);
 
+// Deprecated for public use, For internal use only. Use wips_blob_stackwrap instead
 wips_blob_t *wips_blob_wrap(unsigned char *base, size_t size);
+
+// Creates a blob on the stack. Blobs created with this method cannot be destroyed normally
+// The caller is in charge of lifetime ownership for the base pointer
+wips_blob_t wips_blob_stackwrap(unsigned char *base, size_t size);
 
 void wips_blob_destroy(wips_blob_t *bin);
 
 wips_result_t wips_encode_u8(wips_blob_t *data, wips_u8_t *in);
+wips_result_t wips_encode_nrb_u8(wips_blob_t *data, wips_u8_t *in);
 wips_result_t wips_decode_u8(wips_u8_t *out, wips_blob_t *data);
 
 wips_result_t wips_encode_i8(wips_blob_t *data, wips_i8_t *in);
+wips_result_t wips_encode_nrb_i8(wips_blob_t *data, wips_i8_t *in);
 wips_result_t wips_decode_i8(wips_i8_t *out, wips_blob_t *data);
 
 wips_result_t wips_encode_u16(wips_blob_t *data, wips_u16_t *in);
+wips_result_t wips_encode_nrb_u16(wips_blob_t *data, wips_u16_t *in);
 wips_result_t wips_decode_u16(wips_u16_t *out, wips_blob_t *data);
 
 wips_result_t wips_encode_i16(wips_blob_t *data, wips_i16_t *in);
+wips_result_t wips_encode_nrb_i16(wips_blob_t *data, wips_i16_t *in);
 wips_result_t wips_decode_i16(wips_i16_t *out, wips_blob_t *data);
 
 wips_result_t wips_encode_u32(wips_blob_t *data, wips_u32_t *in);
+wips_result_t wips_encode_nrb_u32(wips_blob_t *data, wips_u32_t *in);
 wips_result_t wips_decode_u32(wips_u32_t *out, wips_blob_t *data);
 
 wips_result_t wips_encode_i32(wips_blob_t *data, wips_i32_t *in);
+wips_result_t wips_encode_nrb_i32(wips_blob_t *data, wips_i32_t *in);
 wips_result_t wips_decode_i32(wips_i32_t *out, wips_blob_t *data);
 
 wips_result_t wips_encode_u64(wips_blob_t *data, wips_u64_t *in);
+wips_result_t wips_encode_nrb_u64(wips_blob_t *data, wips_u64_t *in);
 wips_result_t wips_decode_u64(wips_u64_t *out, wips_blob_t *data);
 
 wips_result_t wips_encode_i64(wips_blob_t *data, wips_i64_t *in);
+wips_result_t wips_encode_nrb_i64(wips_blob_t *data, wips_i64_t *in);
 wips_result_t wips_decode_i64(wips_i64_t *out, wips_blob_t *data);
 
+
 wips_result_t wips_encode_fp32(wips_blob_t *data, wips_fp32_t *in);
+wips_result_t wips_encode_nrb_fp32(wips_blob_t *data, wips_fp32_t *in);
 wips_result_t wips_decode_fp32(wips_fp32_t *out, wips_blob_t *data);
 
 wips_result_t wips_encode_fp64(wips_blob_t *data, wips_fp64_t *in);
+wips_result_t wips_encode_nrb_fp64(wips_blob_t *data, wips_fp64_t *in);
 wips_result_t wips_decode_fp64(wips_fp64_t *out, wips_blob_t *data);
 
 void wips_u8_free_resources(wips_u8_t *data);

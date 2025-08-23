@@ -214,6 +214,66 @@ wips_result_t wips_encode_pipeline_result(wips_blob_t *data, wips_pipeline_resul
     WIPS_TRACELOG("Encoded pipeline_result\n");
     return wips_make_result(bytesEncoded,WIPS_STATUS_OK);
 }
+wips_result_t wips_encode_nrb_pipeline_result(wips_blob_t *data, wips_pipeline_result_t *in) {
+    WIPS_TRACELOG("No resize buffer (nrb) encoding pipeline_result\n");
+    WIPS_Assert(data != NULL && in != NULL,0);
+    size_t bytesEncoded = 0;
+    wips_result_t result;
+    WIPS_TRACELOG("NRB encoding pipeline_result field timestamp (u64)\n");
+    result = wips_encode_nrb_u64(data, &(in->timestamp));
+    bytesEncoded += result.bytes_processed;
+    if (result.status_code != WIPS_STATUS_OK) return wips_make_result(bytesEncoded,result.status_code);
+    WIPS_TRACELOG("NRB encoding pipeline_result field server_timestamp (i64)\n");
+    result = wips_encode_nrb_i64(data, &(in->server_timestamp));
+    bytesEncoded += result.bytes_processed;
+    if (result.status_code != WIPS_STATUS_OK) return wips_make_result(bytesEncoded,result.status_code);
+    WIPS_TRACELOG("NRB encoding pipeline_result field pipeline_type (u8)\n");
+    result = wips_encode_nrb_u8(data, &(in->pipeline_type));
+    bytesEncoded += result.bytes_processed;
+    if (result.status_code != WIPS_STATUS_OK) return wips_make_result(bytesEncoded,result.status_code);
+    WIPS_TRACELOG("NRB encoding pipeline_result field DETAILvlasize__tag_detections (u32)\n");
+    result = wips_encode_nrb_u32(data, &(in->DETAILvlasize__tag_detections));
+    bytesEncoded += result.bytes_processed;
+    if (result.status_code != WIPS_STATUS_OK) return wips_make_result(bytesEncoded,result.status_code);
+    WIPS_TRACELOG("NRB encoding pipeline_result field tag_detections (apriltag_detection,VLA,size=%u)\n",in->GET_DETAIL(tag_detections,vlasize));
+    for (wips_u32_t i = 0; i < in->GET_DETAIL(tag_detections,vlasize); i++) {
+        result = wips_encode_nrb_apriltag_detection(data, in->tag_detections + i);
+        bytesEncoded += result.bytes_processed;
+        if (result.status_code != WIPS_STATUS_OK) return wips_make_result(bytesEncoded,result.status_code);
+    }
+    WIPS_TRACELOG("NRB encoding pipeline_result field DETAILvlasize__tag_poses (u32)\n");
+    result = wips_encode_nrb_u32(data, &(in->DETAILvlasize__tag_poses));
+    bytesEncoded += result.bytes_processed;
+    if (result.status_code != WIPS_STATUS_OK) return wips_make_result(bytesEncoded,result.status_code);
+    WIPS_TRACELOG("NRB encoding pipeline_result field tag_poses (apriltag_relative_pose_observation,VLA,size=%u)\n",in->GET_DETAIL(tag_poses,vlasize));
+    for (wips_u32_t i = 0; i < in->GET_DETAIL(tag_poses,vlasize); i++) {
+        result = wips_encode_nrb_apriltag_relative_pose_observation(data, in->tag_poses + i);
+        bytesEncoded += result.bytes_processed;
+        if (result.status_code != WIPS_STATUS_OK) return wips_make_result(bytesEncoded,result.status_code);
+    }
+    WIPS_TRACELOG("NRB encoding pipeline_result field DETAILoptpresent__field_pose (u8)\n");
+    result = wips_encode_nrb_u8(data, &(in->DETAILoptpresent__field_pose));
+    bytesEncoded += result.bytes_processed;
+    if (result.status_code != WIPS_STATUS_OK) return wips_make_result(bytesEncoded,result.status_code);
+    WIPS_TRACELOG("NRB encoding pipeline_result field field_pose (apriltag_field_pose_observation,optional,present=%u)\n",in->GET_DETAIL(field_pose,optpresent));
+    if (in->GET_DETAIL(field_pose,optpresent)) {
+        result = wips_encode_nrb_apriltag_field_pose_observation(data, &(in->field_pose));
+        bytesEncoded += result.bytes_processed;
+        if (result.status_code != WIPS_STATUS_OK) return wips_make_result(bytesEncoded,result.status_code);
+    }
+    WIPS_TRACELOG("NRB encoding pipeline_result field DETAILvlasize__object_detections (u32)\n");
+    result = wips_encode_nrb_u32(data, &(in->DETAILvlasize__object_detections));
+    bytesEncoded += result.bytes_processed;
+    if (result.status_code != WIPS_STATUS_OK) return wips_make_result(bytesEncoded,result.status_code);
+    WIPS_TRACELOG("NRB encoding pipeline_result field object_detections (object_detection,VLA,size=%u)\n",in->GET_DETAIL(object_detections,vlasize));
+    for (wips_u32_t i = 0; i < in->GET_DETAIL(object_detections,vlasize); i++) {
+        result = wips_encode_nrb_object_detection(data, in->object_detections + i);
+        bytesEncoded += result.bytes_processed;
+        if (result.status_code != WIPS_STATUS_OK) return wips_make_result(bytesEncoded,result.status_code);
+    }
+    WIPS_TRACELOG("NRB Encoded pipeline_result\n");
+    return wips_make_result(bytesEncoded,WIPS_STATUS_OK);
+}
 wips_result_t wips_decode_pipeline_result(wips_pipeline_result_t *out, wips_blob_t *data) {
     WIPS_TRACELOG("Decoding pipeline_result\n");
     WIPS_Assert(out != NULL && data != NULL,0);

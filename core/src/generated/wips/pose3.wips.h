@@ -60,6 +60,7 @@ void wips_pose3_destroy(wips_pose3_t *struct_ptr);
 wips_status_t wips_pose3_copy(wips_pose3_t *dest, const wips_pose3_t *src);
 
 wips_result_t wips_encode_pose3(wips_blob_t *data, wips_pose3_t *in);
+wips_result_t wips_encode_nrb_pose3(wips_blob_t *data, wips_pose3_t *in);
 wips_result_t wips_decode_pose3(wips_pose3_t *out, wips_blob_t *data);
 
 extern wips_vlamethods_t wips_pose3_vlamethods;

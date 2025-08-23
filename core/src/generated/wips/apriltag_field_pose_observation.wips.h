@@ -62,6 +62,7 @@ void wips_apriltag_field_pose_observation_destroy(wips_apriltag_field_pose_obser
 wips_status_t wips_apriltag_field_pose_observation_copy(wips_apriltag_field_pose_observation_t *dest, const wips_apriltag_field_pose_observation_t *src);
 
 wips_result_t wips_encode_apriltag_field_pose_observation(wips_blob_t *data, wips_apriltag_field_pose_observation_t *in);
+wips_result_t wips_encode_nrb_apriltag_field_pose_observation(wips_blob_t *data, wips_apriltag_field_pose_observation_t *in);
 wips_result_t wips_decode_apriltag_field_pose_observation(wips_apriltag_field_pose_observation_t *out, wips_blob_t *data);
 
 extern wips_vlamethods_t wips_apriltag_field_pose_observation_vlamethods;

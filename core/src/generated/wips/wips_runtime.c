@@ -62,6 +62,15 @@ wips_blob_t *wips_blob_wrap(unsigned char *base, size_t size) {
     return newbin;
 }
 
+
+wips_blob_t wips_blob_stackwrap(unsigned char *base, size_t size) {
+    WIPS_FatalAssert(base != NULL);
+    wips_blob_t newblob;
+    newblob.base = base;
+    newblob.offset = 0;
+    newblob.allocated = size;
+}
+
 void wips_blob_destroy(wips_blob_t *bin) {
     if (!bin) return;
     free(bin->base);

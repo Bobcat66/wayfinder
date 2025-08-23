@@ -145,6 +145,34 @@ wips_result_t wips_encode_odometry_result(wips_blob_t *data, wips_odometry_resul
     WIPS_TRACELOG("Encoded odometry_result\n");
     return wips_make_result(bytesEncoded,WIPS_STATUS_OK);
 }
+wips_result_t wips_encode_nrb_odometry_result(wips_blob_t *data, wips_odometry_result_t *in) {
+    WIPS_TRACELOG("No resize buffer (nrb) encoding odometry_result\n");
+    WIPS_Assert(data != NULL && in != NULL,0);
+    size_t bytesEncoded = 0;
+    wips_result_t result;
+    WIPS_TRACELOG("NRB encoding odometry_result field DETAILvlasize__timestamps (u32)\n");
+    result = wips_encode_nrb_u32(data, &(in->DETAILvlasize__timestamps));
+    bytesEncoded += result.bytes_processed;
+    if (result.status_code != WIPS_STATUS_OK) return wips_make_result(bytesEncoded,result.status_code);
+    WIPS_TRACELOG("NRB encoding odometry_result field timestamps (i64,VLA,size=%u)\n",in->GET_DETAIL(timestamps,vlasize));
+    for (wips_u32_t i = 0; i < in->GET_DETAIL(timestamps,vlasize); i++) {
+        result = wips_encode_nrb_i64(data, in->timestamps + i);
+        bytesEncoded += result.bytes_processed;
+        if (result.status_code != WIPS_STATUS_OK) return wips_make_result(bytesEncoded,result.status_code);
+    }
+    WIPS_TRACELOG("NRB encoding odometry_result field DETAILvlasize__twists (u32)\n");
+    result = wips_encode_nrb_u32(data, &(in->DETAILvlasize__twists));
+    bytesEncoded += result.bytes_processed;
+    if (result.status_code != WIPS_STATUS_OK) return wips_make_result(bytesEncoded,result.status_code);
+    WIPS_TRACELOG("NRB encoding odometry_result field twists (twist2,VLA,size=%u)\n",in->GET_DETAIL(twists,vlasize));
+    for (wips_u32_t i = 0; i < in->GET_DETAIL(twists,vlasize); i++) {
+        result = wips_encode_nrb_twist2(data, in->twists + i);
+        bytesEncoded += result.bytes_processed;
+        if (result.status_code != WIPS_STATUS_OK) return wips_make_result(bytesEncoded,result.status_code);
+    }
+    WIPS_TRACELOG("NRB Encoded odometry_result\n");
+    return wips_make_result(bytesEncoded,WIPS_STATUS_OK);
+}
 wips_result_t wips_decode_odometry_result(wips_odometry_result_t *out, wips_blob_t *data) {
     WIPS_TRACELOG("Decoding odometry_result\n");
     WIPS_Assert(out != NULL && data != NULL,0);

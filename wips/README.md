@@ -14,6 +14,8 @@ worth noting for posterity.
 
 Note: in general, the values returned by getters should be treated as invalidated after the original object is destroyed or modified
 
+If a blob uses a stack-allocated buffer, NEVER use the normal encode functions. use the NRB encode functions instead
+
 WIPS Feature Macros:
 WIPS_OPTION_TRACEBACK - Enables traceback, useful for debugging
 WIPS_OPTION_BUILD_PYTHON - Enables compilation of a python binding layer for WIPS

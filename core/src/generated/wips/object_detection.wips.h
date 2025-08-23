@@ -64,6 +64,7 @@ void wips_object_detection_destroy(wips_object_detection_t *struct_ptr);
 wips_status_t wips_object_detection_copy(wips_object_detection_t *dest, const wips_object_detection_t *src);
 
 wips_result_t wips_encode_object_detection(wips_blob_t *data, wips_object_detection_t *in);
+wips_result_t wips_encode_nrb_object_detection(wips_blob_t *data, wips_object_detection_t *in);
 wips_result_t wips_decode_object_detection(wips_object_detection_t *out, wips_blob_t *data);
 
 extern wips_vlamethods_t wips_object_detection_vlamethods;

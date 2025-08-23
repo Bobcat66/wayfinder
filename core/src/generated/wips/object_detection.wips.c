@@ -124,6 +124,58 @@ wips_result_t wips_encode_object_detection(wips_blob_t *data, wips_object_detect
     WIPS_TRACELOG("Encoded object_detection\n");
     return wips_make_result(bytesEncoded,WIPS_STATUS_OK);
 }
+wips_result_t wips_encode_nrb_object_detection(wips_blob_t *data, wips_object_detection_t *in) {
+    WIPS_TRACELOG("No resize buffer (nrb) encoding object_detection\n");
+    WIPS_Assert(data != NULL && in != NULL,0);
+    size_t bytesEncoded = 0;
+    wips_result_t result;
+    WIPS_TRACELOG("NRB encoding object_detection field object_class (i32)\n");
+    result = wips_encode_nrb_i32(data, &(in->object_class));
+    bytesEncoded += result.bytes_processed;
+    if (result.status_code != WIPS_STATUS_OK) return wips_make_result(bytesEncoded,result.status_code);
+    WIPS_TRACELOG("NRB encoding object_detection field confidence (fp32)\n");
+    result = wips_encode_nrb_fp32(data, &(in->confidence));
+    bytesEncoded += result.bytes_processed;
+    if (result.status_code != WIPS_STATUS_OK) return wips_make_result(bytesEncoded,result.status_code);
+    WIPS_TRACELOG("NRB encoding object_detection field percent_area (fp32)\n");
+    result = wips_encode_nrb_fp32(data, &(in->percent_area));
+    bytesEncoded += result.bytes_processed;
+    if (result.status_code != WIPS_STATUS_OK) return wips_make_result(bytesEncoded,result.status_code);
+    WIPS_TRACELOG("NRB encoding object_detection field topleft_x_pixels (fp64)\n");
+    result = wips_encode_nrb_fp64(data, &(in->topleft_x_pixels));
+    bytesEncoded += result.bytes_processed;
+    if (result.status_code != WIPS_STATUS_OK) return wips_make_result(bytesEncoded,result.status_code);
+    WIPS_TRACELOG("NRB encoding object_detection field topleft_y_pixels (fp64)\n");
+    result = wips_encode_nrb_fp64(data, &(in->topleft_y_pixels));
+    bytesEncoded += result.bytes_processed;
+    if (result.status_code != WIPS_STATUS_OK) return wips_make_result(bytesEncoded,result.status_code);
+    WIPS_TRACELOG("NRB encoding object_detection field bottomright_x_pixels (fp64)\n");
+    result = wips_encode_nrb_fp64(data, &(in->bottomright_x_pixels));
+    bytesEncoded += result.bytes_processed;
+    if (result.status_code != WIPS_STATUS_OK) return wips_make_result(bytesEncoded,result.status_code);
+    WIPS_TRACELOG("NRB encoding object_detection field bottomright_y_pixels (fp64)\n");
+    result = wips_encode_nrb_fp64(data, &(in->bottomright_y_pixels));
+    bytesEncoded += result.bytes_processed;
+    if (result.status_code != WIPS_STATUS_OK) return wips_make_result(bytesEncoded,result.status_code);
+    WIPS_TRACELOG("NRB encoding object_detection field topleft_x_norm (fp64)\n");
+    result = wips_encode_nrb_fp64(data, &(in->topleft_x_norm));
+    bytesEncoded += result.bytes_processed;
+    if (result.status_code != WIPS_STATUS_OK) return wips_make_result(bytesEncoded,result.status_code);
+    WIPS_TRACELOG("NRB encoding object_detection field topleft_y_norm (fp64)\n");
+    result = wips_encode_nrb_fp64(data, &(in->topleft_y_norm));
+    bytesEncoded += result.bytes_processed;
+    if (result.status_code != WIPS_STATUS_OK) return wips_make_result(bytesEncoded,result.status_code);
+    WIPS_TRACELOG("NRB encoding object_detection field bottomright_x_norm (fp64)\n");
+    result = wips_encode_nrb_fp64(data, &(in->bottomright_x_norm));
+    bytesEncoded += result.bytes_processed;
+    if (result.status_code != WIPS_STATUS_OK) return wips_make_result(bytesEncoded,result.status_code);
+    WIPS_TRACELOG("NRB encoding object_detection field bottomright_y_norm (fp64)\n");
+    result = wips_encode_nrb_fp64(data, &(in->bottomright_y_norm));
+    bytesEncoded += result.bytes_processed;
+    if (result.status_code != WIPS_STATUS_OK) return wips_make_result(bytesEncoded,result.status_code);
+    WIPS_TRACELOG("NRB Encoded object_detection\n");
+    return wips_make_result(bytesEncoded,WIPS_STATUS_OK);
+}
 wips_result_t wips_decode_object_detection(wips_object_detection_t *out, wips_blob_t *data) {
     WIPS_TRACELOG("Decoding object_detection\n");
     WIPS_Assert(out != NULL && data != NULL,0);

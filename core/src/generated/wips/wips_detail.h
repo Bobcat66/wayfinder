@@ -172,9 +172,28 @@ struct tm* wips_localtime(const time_t* timer);
             data->allocated = new_allocated;                                                                    \
             data->base = newBase;                                                                               \
         }                                                                                                       \
-        memcpy(data->base+data->offset,in, GET_SIZE(wips_typename));                                            \
+        memcpy(data->base+data->offset, in, GET_SIZE(wips_typename));                                           \
         data->offset = newOffset;                                                                               \
         WIPS_TRACELOG("Finished encoding %s\n",STRINGIZE(wips_typename));                                       \
+        return wips_make_result(GET_SIZE(wips_typename),WIPS_STATUS_OK);                                        \
+    }
+
+#define DEFINE_TRIVIAL_ENCODE_NRB(wips_typename)                                                                \
+    wips_result_t wips_encode_nrb_##wips_typename(wips_blob_t* data, GET_CTYPE(wips_typename)* in){             \
+        WIPS_Assert(out != NULL && data != NULL,0);                                                             \
+        WIPS_TRACELOG("No resize buffer (nrb) encoding %s\n",STRINGIZE(wips_typename));                         \
+        if (data->offset > (SIZE_MAX - GET_SIZE(wips_typename))){                                               \
+            WIPS_DEBUGLOG("Fatal error while nrb encoding %s: Integer overflow\n",STRINGIZE(wips_typename));    \
+            return wips_make_result(0,WIPS_STATUS_OVERFLOW);                                                    \
+        }                                                                                                       \
+        size_t newOffset = data->offset + GET_SIZE(wips_typename);                                              \
+        if (newOffset > data->allocated){                                                                       \
+            WIPS_DEBUGLOG("Fatal error while nrb encoding %s: Buffer overflow\n",STRINGIZE(wips_typename));     \
+            return wips_make_result(0,WIPS_STATUS_BUF_OVERFLOW);                                                \
+        }                                                                                                       \
+        memcpy(data->base+data->offset, in, GET_SIZE(wips_typename));                                           \
+        data->offset = newOffset;                                                                               \
+        WIPS_TRACELOG("Finished nrb encoding %s\n",STRINGIZE(wips_typename));                                   \
         return wips_make_result(GET_SIZE(wips_typename),WIPS_STATUS_OK);                                        \
     }
     

@@ -39,39 +39,27 @@ extern "C" {
 #endif
 
 #include "wips_runtime.h"
-#include "apriltag_detection.wips.h"
-#include "apriltag_field_pose_observation.wips.h"
-#include "object_detection.wips.h"
-#include "apriltag_relative_pose_observation.wips.h"
 
 typedef struct {
-    wips_u64_t timestamp;
-    wips_i64_t server_timestamp;
-    wips_u8_t pipeline_type;
-    wips_u32_t DETAILvlasize__tag_detections;
-    wips_apriltag_detection_t *tag_detections;
-    wips_u32_t DETAILvlasize__tag_poses;
-    wips_apriltag_relative_pose_observation_t *tag_poses;
-    wips_u8_t DETAILoptpresent__field_pose;
-    wips_apriltag_field_pose_observation_t field_pose;
-    wips_u32_t DETAILvlasize__object_detections;
-    wips_object_detection_t *object_detections;
-} wips_pipeline_result_t;
+    wips_u32_t packet_id;
+    wips_i64_t timestamp;
+    wips_u8_t flags;
+} wips_timesync_packet_t;
 
 // Recursive function to free all memory allocated by the struct and its members. Does NOT free the struct itself if it was dynamically allocated.
 // Warning: Calling this function on a struct that has not been written to from a WIPS binary will result in undefined behavior.
 // This function is intended to be used when the struct is no longer needed, to prevent memory leaks.
-void wips_pipeline_result_free_resources(wips_pipeline_result_t *struct_ptr);
-wips_pipeline_result_t *wips_pipeline_result_create();
-void wips_pipeline_result_destroy(wips_pipeline_result_t *struct_ptr);
+void wips_timesync_packet_free_resources(wips_timesync_packet_t *struct_ptr);
+wips_timesync_packet_t *wips_timesync_packet_create();
+void wips_timesync_packet_destroy(wips_timesync_packet_t *struct_ptr);
 
-wips_status_t wips_pipeline_result_copy(wips_pipeline_result_t *dest, const wips_pipeline_result_t *src);
+wips_status_t wips_timesync_packet_copy(wips_timesync_packet_t *dest, const wips_timesync_packet_t *src);
 
-wips_result_t wips_encode_pipeline_result(wips_blob_t *data, wips_pipeline_result_t *in);
-wips_result_t wips_encode_nrb_pipeline_result(wips_blob_t *data, wips_pipeline_result_t *in);
-wips_result_t wips_decode_pipeline_result(wips_pipeline_result_t *out, wips_blob_t *data);
+wips_result_t wips_encode_timesync_packet(wips_blob_t *data, wips_timesync_packet_t *in);
+wips_result_t wips_encode_nrb_timesync_packet(wips_blob_t *data, wips_timesync_packet_t *in);
+wips_result_t wips_decode_timesync_packet(wips_timesync_packet_t *out, wips_blob_t *data);
 
-extern wips_vlamethods_t wips_pipeline_result_vlamethods;
+extern wips_vlamethods_t wips_timesync_packet_vlamethods;
 
 #ifdef __cplusplus
 }

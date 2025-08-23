@@ -65,6 +65,7 @@ void wips_apriltag_detection_destroy(wips_apriltag_detection_t *struct_ptr);
 wips_status_t wips_apriltag_detection_copy(wips_apriltag_detection_t *dest, const wips_apriltag_detection_t *src);
 
 wips_result_t wips_encode_apriltag_detection(wips_blob_t *data, wips_apriltag_detection_t *in);
+wips_result_t wips_encode_nrb_apriltag_detection(wips_blob_t *data, wips_apriltag_detection_t *in);
 wips_result_t wips_decode_apriltag_detection(wips_apriltag_detection_t *out, wips_blob_t *data);
 
 extern wips_vlamethods_t wips_apriltag_detection_vlamethods;

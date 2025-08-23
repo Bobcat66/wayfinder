@@ -100,6 +100,34 @@ wips_result_t wips_encode_apriltag_relative_pose_observation(wips_blob_t *data, 
     WIPS_TRACELOG("Encoded apriltag_relative_pose_observation\n");
     return wips_make_result(bytesEncoded,WIPS_STATUS_OK);
 }
+wips_result_t wips_encode_nrb_apriltag_relative_pose_observation(wips_blob_t *data, wips_apriltag_relative_pose_observation_t *in) {
+    WIPS_TRACELOG("No resize buffer (nrb) encoding apriltag_relative_pose_observation\n");
+    WIPS_Assert(data != NULL && in != NULL,0);
+    size_t bytesEncoded = 0;
+    wips_result_t result;
+    WIPS_TRACELOG("NRB encoding apriltag_relative_pose_observation field fiducial_id (i32)\n");
+    result = wips_encode_nrb_i32(data, &(in->fiducial_id));
+    bytesEncoded += result.bytes_processed;
+    if (result.status_code != WIPS_STATUS_OK) return wips_make_result(bytesEncoded,result.status_code);
+    WIPS_TRACELOG("NRB encoding apriltag_relative_pose_observation field cam_pose_0 (pose3)\n");
+    result = wips_encode_nrb_pose3(data, &(in->cam_pose_0));
+    bytesEncoded += result.bytes_processed;
+    if (result.status_code != WIPS_STATUS_OK) return wips_make_result(bytesEncoded,result.status_code);
+    WIPS_TRACELOG("NRB encoding apriltag_relative_pose_observation field error_0 (fp64)\n");
+    result = wips_encode_nrb_fp64(data, &(in->error_0));
+    bytesEncoded += result.bytes_processed;
+    if (result.status_code != WIPS_STATUS_OK) return wips_make_result(bytesEncoded,result.status_code);
+    WIPS_TRACELOG("NRB encoding apriltag_relative_pose_observation field cam_pose_1 (pose3)\n");
+    result = wips_encode_nrb_pose3(data, &(in->cam_pose_1));
+    bytesEncoded += result.bytes_processed;
+    if (result.status_code != WIPS_STATUS_OK) return wips_make_result(bytesEncoded,result.status_code);
+    WIPS_TRACELOG("NRB encoding apriltag_relative_pose_observation field error_1 (fp64)\n");
+    result = wips_encode_nrb_fp64(data, &(in->error_1));
+    bytesEncoded += result.bytes_processed;
+    if (result.status_code != WIPS_STATUS_OK) return wips_make_result(bytesEncoded,result.status_code);
+    WIPS_TRACELOG("NRB Encoded apriltag_relative_pose_observation\n");
+    return wips_make_result(bytesEncoded,WIPS_STATUS_OK);
+}
 wips_result_t wips_decode_apriltag_relative_pose_observation(wips_apriltag_relative_pose_observation_t *out, wips_blob_t *data) {
     WIPS_TRACELOG("Decoding apriltag_relative_pose_observation\n");
     WIPS_Assert(out != NULL && data != NULL,0);
