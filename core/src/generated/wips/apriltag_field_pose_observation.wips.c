@@ -259,6 +259,37 @@ wips_result_t wips_decode_apriltag_field_pose_observation(wips_apriltag_field_po
     return wips_make_result(bytesDecoded,WIPS_STATUS_OK);
 }
 
+void wips_apriltag_field_pose_observation_hton(wips_apriltag_field_pose_observation_t *data) {
+    WIPS_TRACELOG("Converting apriltag_field_pose_observation to network order\n");
+    wips_u32_hton(&(data->DETAILvlasize__tags_used));
+    if (data->tags_used) {
+        for (wips_u32_t i = 0; i < data->GET_DETAIL(tags_used,vlasize); ++i) {
+            wips_i32_hton(data->tags_used + i);
+        }
+    }
+    wips_pose3_hton(&(data->field_pose_0));
+    wips_fp64_hton(&(data->error_0));
+    wips_u8_hton(&(data->DETAILoptpresent__field_pose_1));
+    wips_pose3_hton(&(data->field_pose_1));
+    wips_u8_hton(&(data->DETAILoptpresent__error_1));
+    wips_fp64_hton(&(data->error_1));
+}
+void wips_apriltag_field_pose_observation_ntoh(wips_apriltag_field_pose_observation_t *data) {
+    WIPS_TRACELOG("Converting apriltag_field_pose_observation to host order\n");
+    wips_u32_ntoh(&(data->DETAILvlasize__tags_used));
+    if (data->tags_used) {
+        for (wips_u32_t i = 0; i < data->GET_DETAIL(tags_used,vlasize); ++i) {
+            wips_i32_ntoh(data->tags_used + i);
+        }
+    }
+    wips_pose3_ntoh(&(data->field_pose_0));
+    wips_fp64_ntoh(&(data->error_0));
+    wips_u8_ntoh(&(data->DETAILoptpresent__field_pose_1));
+    wips_pose3_ntoh(&(data->field_pose_1));
+    wips_u8_ntoh(&(data->DETAILoptpresent__error_1));
+    wips_fp64_ntoh(&(data->error_1));
+}
+
 DEFINE_VLAGETTER(apriltag_field_pose_observation)
 DEFINE_VLASETTER(apriltag_field_pose_observation)
 DEFINE_VLAPUSHBACK(apriltag_field_pose_observation)

@@ -22,6 +22,7 @@
 #include <atomic>
 #include "wfcore/network/UDPIP_Sock.h"
 #include <thread>
+#include <memory>
 
 namespace wf {
     class TimeClient {
@@ -34,14 +35,18 @@ namespace wf {
         int64_t getNow();
         int64_t getOffset();
     private:
+        // Returns the offset between the PHC and wpi::Now in microseconds
+        int64_t getOffset();
         void listen();
         void pingpong();
         std::jthread worker;
-        struct sockaddr_in bc_addr; // Address for UDP broadcast messages
-        struct sockaddr_in uc_addr; // Address for unicast UDP messages to the RIO
+        struct sockaddr_in servaddr;
+        socklen_t servaddr_len;
         UDPIP_Sock sock;
-        std::atomic_int64_t offset{0};
+        std::atomic_int64_t masterOffset{0};
         // Hardware capabilities
         unsigned int tsopts = 0;
+        int phcfd; // PTP hardware clock file descriptor
+        void* phc_caps;
     };
 }

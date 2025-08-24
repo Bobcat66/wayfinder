@@ -62,6 +62,9 @@ wips_result_t wips_encode_twist3(wips_blob_t *data, wips_twist3_t *in);
 wips_result_t wips_encode_nrb_twist3(wips_blob_t *data, wips_twist3_t *in);
 wips_result_t wips_decode_twist3(wips_twist3_t *out, wips_blob_t *data);
 
+void wips_twist3_hton(wips_twist3_t *data);
+void wips_twist3_ntoh(wips_twist3_t *data);
+
 extern wips_vlamethods_t wips_twist3_vlamethods;
 
 #ifdef __cplusplus

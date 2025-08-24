@@ -241,6 +241,37 @@ wips_result_t wips_decode_apriltag_detection(wips_apriltag_detection_t *out, wip
     return wips_make_result(bytesDecoded,WIPS_STATUS_OK);
 }
 
+void wips_apriltag_detection_hton(wips_apriltag_detection_t *data) {
+    WIPS_TRACELOG("Converting apriltag_detection to network order\n");
+    wips_i32_hton(&(data->fiducial_id));
+    wips_fp64_hton(&(data->corner0_x));
+    wips_fp64_hton(&(data->corner0_y));
+    wips_fp64_hton(&(data->corner1_x));
+    wips_fp64_hton(&(data->corner1_y));
+    wips_fp64_hton(&(data->corner2_x));
+    wips_fp64_hton(&(data->corner2_y));
+    wips_fp64_hton(&(data->corner3_x));
+    wips_fp64_hton(&(data->corner3_y));
+    wips_fp64_hton(&(data->decision_margin));
+    wips_fp64_hton(&(data->hamming_distance));
+    wips_u8_hton(&(data->tag_family_id));
+}
+void wips_apriltag_detection_ntoh(wips_apriltag_detection_t *data) {
+    WIPS_TRACELOG("Converting apriltag_detection to host order\n");
+    wips_i32_ntoh(&(data->fiducial_id));
+    wips_fp64_ntoh(&(data->corner0_x));
+    wips_fp64_ntoh(&(data->corner0_y));
+    wips_fp64_ntoh(&(data->corner1_x));
+    wips_fp64_ntoh(&(data->corner1_y));
+    wips_fp64_ntoh(&(data->corner2_x));
+    wips_fp64_ntoh(&(data->corner2_y));
+    wips_fp64_ntoh(&(data->corner3_x));
+    wips_fp64_ntoh(&(data->corner3_y));
+    wips_fp64_ntoh(&(data->decision_margin));
+    wips_fp64_ntoh(&(data->hamming_distance));
+    wips_u8_ntoh(&(data->tag_family_id));
+}
+
 DEFINE_VLAGETTER(apriltag_detection)
 DEFINE_VLASETTER(apriltag_detection)
 DEFINE_VLAPUSHBACK(apriltag_detection)

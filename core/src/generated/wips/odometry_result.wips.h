@@ -61,6 +61,9 @@ wips_result_t wips_encode_odometry_result(wips_blob_t *data, wips_odometry_resul
 wips_result_t wips_encode_nrb_odometry_result(wips_blob_t *data, wips_odometry_result_t *in);
 wips_result_t wips_decode_odometry_result(wips_odometry_result_t *out, wips_blob_t *data);
 
+void wips_odometry_result_hton(wips_odometry_result_t *data);
+void wips_odometry_result_ntoh(wips_odometry_result_t *data);
+
 extern wips_vlamethods_t wips_odometry_result_vlamethods;
 
 #ifdef __cplusplus

@@ -68,6 +68,9 @@ wips_result_t wips_encode_apriltag_detection(wips_blob_t *data, wips_apriltag_de
 wips_result_t wips_encode_nrb_apriltag_detection(wips_blob_t *data, wips_apriltag_detection_t *in);
 wips_result_t wips_decode_apriltag_detection(wips_apriltag_detection_t *out, wips_blob_t *data);
 
+void wips_apriltag_detection_hton(wips_apriltag_detection_t *data);
+void wips_apriltag_detection_ntoh(wips_apriltag_detection_t *data);
+
 extern wips_vlamethods_t wips_apriltag_detection_vlamethods;
 
 #ifdef __cplusplus

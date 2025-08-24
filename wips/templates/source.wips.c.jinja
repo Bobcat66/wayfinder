@@ -225,6 +225,35 @@ wips_result_t wips_decode_{{ name }}(wips_{{ name }}_t *out, wips_blob_t *data) 
     return wips_make_result(bytesDecoded,WIPS_STATUS_OK);
 }
 
+void wips_{{ name }}_hton(wips_{{ name }}_t *data) {
+    WIPS_TRACELOG("Converting {{ name }} to network order\n");
+{%- for field in fields %}
+{%- if field.vla == True %}
+    if (data->{{ field.name }}) {
+        for (wips_u32_t i = 0; i < data->GET_DETAIL({{ field.name }},vlasize); ++i) {
+            wips_{{ field.type }}_hton(data->{{ field.name }} + i);
+        }
+    }
+{%- else %}
+    wips_{{ field.type }}_hton(&(data->{{ field.name }}));
+{%- endif %}
+{%- endfor %}
+}
+void wips_{{ name }}_ntoh(wips_{{ name }}_t *data) {
+    WIPS_TRACELOG("Converting {{ name }} to host order\n");
+{%- for field in fields %}
+{%- if field.vla == True %}
+    if (data->{{ field.name }}) {
+        for (wips_u32_t i = 0; i < data->GET_DETAIL({{ field.name }},vlasize); ++i) {
+            wips_{{ field.type }}_ntoh(data->{{ field.name }} + i);
+        }
+    }
+{%- else %}
+    wips_{{ field.type }}_ntoh(&(data->{{ field.name }}));
+{%- endif %}
+{%- endfor %}
+}
+
 DEFINE_VLAGETTER({{ name }})
 DEFINE_VLASETTER({{ name }})
 DEFINE_VLAPUSHBACK({{ name }})

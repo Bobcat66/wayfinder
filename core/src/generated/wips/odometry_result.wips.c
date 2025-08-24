@@ -228,6 +228,37 @@ wips_result_t wips_decode_odometry_result(wips_odometry_result_t *out, wips_blob
     return wips_make_result(bytesDecoded,WIPS_STATUS_OK);
 }
 
+void wips_odometry_result_hton(wips_odometry_result_t *data) {
+    WIPS_TRACELOG("Converting odometry_result to network order\n");
+    wips_u32_hton(&(data->DETAILvlasize__timestamps));
+    if (data->timestamps) {
+        for (wips_u32_t i = 0; i < data->GET_DETAIL(timestamps,vlasize); ++i) {
+            wips_i64_hton(data->timestamps + i);
+        }
+    }
+    wips_u32_hton(&(data->DETAILvlasize__twists));
+    if (data->twists) {
+        for (wips_u32_t i = 0; i < data->GET_DETAIL(twists,vlasize); ++i) {
+            wips_twist2_hton(data->twists + i);
+        }
+    }
+}
+void wips_odometry_result_ntoh(wips_odometry_result_t *data) {
+    WIPS_TRACELOG("Converting odometry_result to host order\n");
+    wips_u32_ntoh(&(data->DETAILvlasize__timestamps));
+    if (data->timestamps) {
+        for (wips_u32_t i = 0; i < data->GET_DETAIL(timestamps,vlasize); ++i) {
+            wips_i64_ntoh(data->timestamps + i);
+        }
+    }
+    wips_u32_ntoh(&(data->DETAILvlasize__twists));
+    if (data->twists) {
+        for (wips_u32_t i = 0; i < data->GET_DETAIL(twists,vlasize); ++i) {
+            wips_twist2_ntoh(data->twists + i);
+        }
+    }
+}
+
 DEFINE_VLAGETTER(odometry_result)
 DEFINE_VLASETTER(odometry_result)
 DEFINE_VLAPUSHBACK(odometry_result)

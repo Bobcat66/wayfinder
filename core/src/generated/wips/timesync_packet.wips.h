@@ -59,6 +59,9 @@ wips_result_t wips_encode_timesync_packet(wips_blob_t *data, wips_timesync_packe
 wips_result_t wips_encode_nrb_timesync_packet(wips_blob_t *data, wips_timesync_packet_t *in);
 wips_result_t wips_decode_timesync_packet(wips_timesync_packet_t *out, wips_blob_t *data);
 
+void wips_timesync_packet_hton(wips_timesync_packet_t *data);
+void wips_timesync_packet_ntoh(wips_timesync_packet_t *data);
+
 extern wips_vlamethods_t wips_timesync_packet_vlamethods;
 
 #ifdef __cplusplus

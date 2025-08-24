@@ -169,6 +169,25 @@ wips_result_t wips_decode_twist3(wips_twist3_t *out, wips_blob_t *data) {
     return wips_make_result(bytesDecoded,WIPS_STATUS_OK);
 }
 
+void wips_twist3_hton(wips_twist3_t *data) {
+    WIPS_TRACELOG("Converting twist3 to network order\n");
+    wips_fp64_hton(&(data->dx));
+    wips_fp64_hton(&(data->dy));
+    wips_fp64_hton(&(data->dz));
+    wips_fp64_hton(&(data->rx));
+    wips_fp64_hton(&(data->ry));
+    wips_fp64_hton(&(data->rz));
+}
+void wips_twist3_ntoh(wips_twist3_t *data) {
+    WIPS_TRACELOG("Converting twist3 to host order\n");
+    wips_fp64_ntoh(&(data->dx));
+    wips_fp64_ntoh(&(data->dy));
+    wips_fp64_ntoh(&(data->dz));
+    wips_fp64_ntoh(&(data->rx));
+    wips_fp64_ntoh(&(data->ry));
+    wips_fp64_ntoh(&(data->rz));
+}
+
 DEFINE_VLAGETTER(twist3)
 DEFINE_VLASETTER(twist3)
 DEFINE_VLAPUSHBACK(twist3)

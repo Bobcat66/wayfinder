@@ -133,6 +133,19 @@ wips_result_t wips_decode_twist2(wips_twist2_t *out, wips_blob_t *data) {
     return wips_make_result(bytesDecoded,WIPS_STATUS_OK);
 }
 
+void wips_twist2_hton(wips_twist2_t *data) {
+    WIPS_TRACELOG("Converting twist2 to network order\n");
+    wips_fp64_hton(&(data->dx));
+    wips_fp64_hton(&(data->dy));
+    wips_fp64_hton(&(data->dtheta));
+}
+void wips_twist2_ntoh(wips_twist2_t *data) {
+    WIPS_TRACELOG("Converting twist2 to host order\n");
+    wips_fp64_ntoh(&(data->dx));
+    wips_fp64_ntoh(&(data->dy));
+    wips_fp64_ntoh(&(data->dtheta));
+}
+
 DEFINE_VLAGETTER(twist2)
 DEFINE_VLASETTER(twist2)
 DEFINE_VLAPUSHBACK(twist2)

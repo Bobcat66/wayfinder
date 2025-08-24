@@ -65,6 +65,9 @@ wips_result_t wips_encode_apriltag_field_pose_observation(wips_blob_t *data, wip
 wips_result_t wips_encode_nrb_apriltag_field_pose_observation(wips_blob_t *data, wips_apriltag_field_pose_observation_t *in);
 wips_result_t wips_decode_apriltag_field_pose_observation(wips_apriltag_field_pose_observation_t *out, wips_blob_t *data);
 
+void wips_apriltag_field_pose_observation_hton(wips_apriltag_field_pose_observation_t *data);
+void wips_apriltag_field_pose_observation_ntoh(wips_apriltag_field_pose_observation_t *data);
+
 extern wips_vlamethods_t wips_apriltag_field_pose_observation_vlamethods;
 
 #ifdef __cplusplus

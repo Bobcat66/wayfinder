@@ -67,6 +67,9 @@ wips_result_t wips_encode_{{ name }}(wips_blob_t *data, wips_{{ name }}_t *in);
 wips_result_t wips_encode_nrb_{{ name }}(wips_blob_t *data, wips_{{ name }}_t *in);
 wips_result_t wips_decode_{{ name }}(wips_{{ name }}_t *out, wips_blob_t *data);
 
+void wips_{{ name }}_hton(wips_{{ name }}_t *data);
+void wips_{{ name }}_ntoh(wips_{{ name }}_t *data);
+
 extern wips_vlamethods_t wips_{{ name }}_vlamethods;
 
 #ifdef __cplusplus

@@ -157,6 +157,23 @@ wips_result_t wips_decode_apriltag_relative_pose_observation(wips_apriltag_relat
     return wips_make_result(bytesDecoded,WIPS_STATUS_OK);
 }
 
+void wips_apriltag_relative_pose_observation_hton(wips_apriltag_relative_pose_observation_t *data) {
+    WIPS_TRACELOG("Converting apriltag_relative_pose_observation to network order\n");
+    wips_i32_hton(&(data->fiducial_id));
+    wips_pose3_hton(&(data->cam_pose_0));
+    wips_fp64_hton(&(data->error_0));
+    wips_pose3_hton(&(data->cam_pose_1));
+    wips_fp64_hton(&(data->error_1));
+}
+void wips_apriltag_relative_pose_observation_ntoh(wips_apriltag_relative_pose_observation_t *data) {
+    WIPS_TRACELOG("Converting apriltag_relative_pose_observation to host order\n");
+    wips_i32_ntoh(&(data->fiducial_id));
+    wips_pose3_ntoh(&(data->cam_pose_0));
+    wips_fp64_ntoh(&(data->error_0));
+    wips_pose3_ntoh(&(data->cam_pose_1));
+    wips_fp64_ntoh(&(data->error_1));
+}
+
 DEFINE_VLAGETTER(apriltag_relative_pose_observation)
 DEFINE_VLASETTER(apriltag_relative_pose_observation)
 DEFINE_VLAPUSHBACK(apriltag_relative_pose_observation)

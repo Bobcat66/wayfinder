@@ -67,6 +67,9 @@ wips_result_t wips_encode_object_detection(wips_blob_t *data, wips_object_detect
 wips_result_t wips_encode_nrb_object_detection(wips_blob_t *data, wips_object_detection_t *in);
 wips_result_t wips_decode_object_detection(wips_object_detection_t *out, wips_blob_t *data);
 
+void wips_object_detection_hton(wips_object_detection_t *data);
+void wips_object_detection_ntoh(wips_object_detection_t *data);
+
 extern wips_vlamethods_t wips_object_detection_vlamethods;
 
 #ifdef __cplusplus

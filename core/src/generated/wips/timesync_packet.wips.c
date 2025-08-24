@@ -133,6 +133,19 @@ wips_result_t wips_decode_timesync_packet(wips_timesync_packet_t *out, wips_blob
     return wips_make_result(bytesDecoded,WIPS_STATUS_OK);
 }
 
+void wips_timesync_packet_hton(wips_timesync_packet_t *data) {
+    WIPS_TRACELOG("Converting timesync_packet to network order\n");
+    wips_u32_hton(&(data->packet_id));
+    wips_i64_hton(&(data->timestamp));
+    wips_u8_hton(&(data->flags));
+}
+void wips_timesync_packet_ntoh(wips_timesync_packet_t *data) {
+    WIPS_TRACELOG("Converting timesync_packet to host order\n");
+    wips_u32_ntoh(&(data->packet_id));
+    wips_i64_ntoh(&(data->timestamp));
+    wips_u8_ntoh(&(data->flags));
+}
+
 DEFINE_VLAGETTER(timesync_packet)
 DEFINE_VLASETTER(timesync_packet)
 DEFINE_VLAPUSHBACK(timesync_packet)

@@ -63,6 +63,9 @@ wips_result_t wips_encode_pose3(wips_blob_t *data, wips_pose3_t *in);
 wips_result_t wips_encode_nrb_pose3(wips_blob_t *data, wips_pose3_t *in);
 wips_result_t wips_decode_pose3(wips_pose3_t *out, wips_blob_t *data);
 
+void wips_pose3_hton(wips_pose3_t *data);
+void wips_pose3_ntoh(wips_pose3_t *data);
+
 extern wips_vlamethods_t wips_pose3_vlamethods;
 
 #ifdef __cplusplus

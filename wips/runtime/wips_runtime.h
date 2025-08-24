@@ -220,6 +220,33 @@ wips_status_t wips_i64_copy(wips_i64_t *dest, const wips_i64_t *src);
 wips_status_t wips_fp32_copy(wips_fp32_t *dest, const wips_fp32_t *src);
 wips_status_t wips_fp64_copy(wips_fp64_t *dest, const wips_fp64_t *src);
 
+void wips_u8_hton(wips_u8_t *data);
+void wips_u8_ntoh(wips_u8_t *data);
+
+void wips_i8_hton(wips_i8_t *data);
+void wips_i8_ntoh(wips_i8_t *data);
+
+void wips_u16_hton(wips_u16_t *data);
+void wips_u16_ntoh(wips_u16_t *data);
+
+void wips_i16_hton(wips_i16_t *data);
+void wips_i16_ntoh(wips_i16_t *data);
+
+void wips_u32_hton(wips_u32_t *data);
+void wips_u32_ntoh(wips_u32_t *data);
+
+void wips_i32_hton(wips_i32_t *data);
+void wips_i32_ntoh(wips_i32_t *data);
+
+void wips_u64_hton(wips_u64_t *data);
+void wips_u64_ntoh(wips_u64_t *data);
+
+void wips_fp32_hton(wips_fp32_t *data);
+void wips_fp32_ntoh(wips_fp32_t *data);
+
+void wips_fp64_hton(wips_fp64_t *data);
+void wips_fp64_ntoh(wips_fp64_t *data);
+
 extern wips_vlamethods_t wips_u8_vlamethods;
 extern wips_vlamethods_t wips_i8_vlamethods;
 extern wips_vlamethods_t wips_u16_vlamethods;

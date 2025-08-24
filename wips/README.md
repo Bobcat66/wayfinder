@@ -16,6 +16,8 @@ Note: in general, the values returned by getters should be treated as invalidate
 
 If a blob uses a stack-allocated buffer, NEVER use the normal encode functions. use the NRB encode functions instead
 
+TODO: Add network byte ordering support to WIPS python API
+
 WIPS Feature Macros:
 WIPS_OPTION_TRACEBACK - Enables traceback, useful for debugging
 WIPS_OPTION_BUILD_PYTHON - Enables compilation of a python binding layer for WIPS

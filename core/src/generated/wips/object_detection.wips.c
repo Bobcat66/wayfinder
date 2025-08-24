@@ -229,6 +229,35 @@ wips_result_t wips_decode_object_detection(wips_object_detection_t *out, wips_bl
     return wips_make_result(bytesDecoded,WIPS_STATUS_OK);
 }
 
+void wips_object_detection_hton(wips_object_detection_t *data) {
+    WIPS_TRACELOG("Converting object_detection to network order\n");
+    wips_i32_hton(&(data->object_class));
+    wips_fp32_hton(&(data->confidence));
+    wips_fp32_hton(&(data->percent_area));
+    wips_fp64_hton(&(data->topleft_x_pixels));
+    wips_fp64_hton(&(data->topleft_y_pixels));
+    wips_fp64_hton(&(data->bottomright_x_pixels));
+    wips_fp64_hton(&(data->bottomright_y_pixels));
+    wips_fp64_hton(&(data->topleft_x_norm));
+    wips_fp64_hton(&(data->topleft_y_norm));
+    wips_fp64_hton(&(data->bottomright_x_norm));
+    wips_fp64_hton(&(data->bottomright_y_norm));
+}
+void wips_object_detection_ntoh(wips_object_detection_t *data) {
+    WIPS_TRACELOG("Converting object_detection to host order\n");
+    wips_i32_ntoh(&(data->object_class));
+    wips_fp32_ntoh(&(data->confidence));
+    wips_fp32_ntoh(&(data->percent_area));
+    wips_fp64_ntoh(&(data->topleft_x_pixels));
+    wips_fp64_ntoh(&(data->topleft_y_pixels));
+    wips_fp64_ntoh(&(data->bottomright_x_pixels));
+    wips_fp64_ntoh(&(data->bottomright_y_pixels));
+    wips_fp64_ntoh(&(data->topleft_x_norm));
+    wips_fp64_ntoh(&(data->topleft_y_norm));
+    wips_fp64_ntoh(&(data->bottomright_x_norm));
+    wips_fp64_ntoh(&(data->bottomright_y_norm));
+}
+
 DEFINE_VLAGETTER(object_detection)
 DEFINE_VLASETTER(object_detection)
 DEFINE_VLAPUSHBACK(object_detection)

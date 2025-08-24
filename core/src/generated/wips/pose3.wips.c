@@ -181,6 +181,27 @@ wips_result_t wips_decode_pose3(wips_pose3_t *out, wips_blob_t *data) {
     return wips_make_result(bytesDecoded,WIPS_STATUS_OK);
 }
 
+void wips_pose3_hton(wips_pose3_t *data) {
+    WIPS_TRACELOG("Converting pose3 to network order\n");
+    wips_fp64_hton(&(data->x));
+    wips_fp64_hton(&(data->y));
+    wips_fp64_hton(&(data->z));
+    wips_fp64_hton(&(data->wq));
+    wips_fp64_hton(&(data->xq));
+    wips_fp64_hton(&(data->yq));
+    wips_fp64_hton(&(data->zq));
+}
+void wips_pose3_ntoh(wips_pose3_t *data) {
+    WIPS_TRACELOG("Converting pose3 to host order\n");
+    wips_fp64_ntoh(&(data->x));
+    wips_fp64_ntoh(&(data->y));
+    wips_fp64_ntoh(&(data->z));
+    wips_fp64_ntoh(&(data->wq));
+    wips_fp64_ntoh(&(data->xq));
+    wips_fp64_ntoh(&(data->yq));
+    wips_fp64_ntoh(&(data->zq));
+}
+
 DEFINE_VLAGETTER(pose3)
 DEFINE_VLASETTER(pose3)
 DEFINE_VLAPUSHBACK(pose3)

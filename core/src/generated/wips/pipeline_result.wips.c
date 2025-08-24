@@ -374,6 +374,59 @@ wips_result_t wips_decode_pipeline_result(wips_pipeline_result_t *out, wips_blob
     return wips_make_result(bytesDecoded,WIPS_STATUS_OK);
 }
 
+void wips_pipeline_result_hton(wips_pipeline_result_t *data) {
+    WIPS_TRACELOG("Converting pipeline_result to network order\n");
+    wips_u64_hton(&(data->timestamp));
+    wips_i64_hton(&(data->server_timestamp));
+    wips_u8_hton(&(data->pipeline_type));
+    wips_u32_hton(&(data->DETAILvlasize__tag_detections));
+    if (data->tag_detections) {
+        for (wips_u32_t i = 0; i < data->GET_DETAIL(tag_detections,vlasize); ++i) {
+            wips_apriltag_detection_hton(data->tag_detections + i);
+        }
+    }
+    wips_u32_hton(&(data->DETAILvlasize__tag_poses));
+    if (data->tag_poses) {
+        for (wips_u32_t i = 0; i < data->GET_DETAIL(tag_poses,vlasize); ++i) {
+            wips_apriltag_relative_pose_observation_hton(data->tag_poses + i);
+        }
+    }
+    wips_u8_hton(&(data->DETAILoptpresent__field_pose));
+    wips_apriltag_field_pose_observation_hton(&(data->field_pose));
+    wips_u32_hton(&(data->DETAILvlasize__object_detections));
+    if (data->object_detections) {
+        for (wips_u32_t i = 0; i < data->GET_DETAIL(object_detections,vlasize); ++i) {
+            wips_object_detection_hton(data->object_detections + i);
+        }
+    }
+}
+void wips_pipeline_result_ntoh(wips_pipeline_result_t *data) {
+    WIPS_TRACELOG("Converting pipeline_result to host order\n");
+    wips_u64_ntoh(&(data->timestamp));
+    wips_i64_ntoh(&(data->server_timestamp));
+    wips_u8_ntoh(&(data->pipeline_type));
+    wips_u32_ntoh(&(data->DETAILvlasize__tag_detections));
+    if (data->tag_detections) {
+        for (wips_u32_t i = 0; i < data->GET_DETAIL(tag_detections,vlasize); ++i) {
+            wips_apriltag_detection_ntoh(data->tag_detections + i);
+        }
+    }
+    wips_u32_ntoh(&(data->DETAILvlasize__tag_poses));
+    if (data->tag_poses) {
+        for (wips_u32_t i = 0; i < data->GET_DETAIL(tag_poses,vlasize); ++i) {
+            wips_apriltag_relative_pose_observation_ntoh(data->tag_poses + i);
+        }
+    }
+    wips_u8_ntoh(&(data->DETAILoptpresent__field_pose));
+    wips_apriltag_field_pose_observation_ntoh(&(data->field_pose));
+    wips_u32_ntoh(&(data->DETAILvlasize__object_detections));
+    if (data->object_detections) {
+        for (wips_u32_t i = 0; i < data->GET_DETAIL(object_detections,vlasize); ++i) {
+            wips_object_detection_ntoh(data->object_detections + i);
+        }
+    }
+}
+
 DEFINE_VLAGETTER(pipeline_result)
 DEFINE_VLASETTER(pipeline_result)
 DEFINE_VLAPUSHBACK(pipeline_result)
