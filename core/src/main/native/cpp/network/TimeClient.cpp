@@ -86,6 +86,11 @@ namespace impl {
     }
 
 }
+
+// NOTE: This code is particularly vulnerable to subtle sign-conversion logic errors.
+// I'm 99% sure I did everything correctly, but just in case, this code should be
+// audited if there are any otherwise unexplainable bugs in the future, especially regarding pose accuracy
+// Especially the PHC offset calculation logic
 namespace wf {
     static loggerPtr tcLogger = LoggerManager::getInstance().getLogger("TimeClient",LogGroup::Network);
     // TODO: Maybe make TimeClient a statusful object?
@@ -161,7 +166,7 @@ namespace wf {
             }
             phc_caps = new ptp_clock_caps;
             if (ioctl(phcfd, PTP_CLOCK_GETCAPS, phc_caps) < 0) {
-                delete phc_caps;
+                delete static_cast<ptp_clock_caps*>(phc_caps);
                 close(phcfd);
                 throw wf_status_error(WFStatus::NETWORK_UNKNOWN,"Failed to query PHC capabilities: {}",strerror(errno));
             }
@@ -173,7 +178,7 @@ namespace wf {
 
     TimeClient::~TimeClient() {
         if (phcfd >= 0) { close(phcfd); }
-        if (phc_caps) { delete phc_caps; }
+        if (phc_caps) { delete static_cast<ptp_clock_caps*>(phc_caps); }
     }
 
     void TimeClient::pingpong() {
@@ -420,16 +425,24 @@ namespace wf {
             tcLogger->error("Failed to calculate offset between system clock and PHC");
             return impl::wpi_sys_offset();
         }
-        double avgSysOffset; // average offset between the PHC and SYSTEM clock, in nanoseconds
+        int64_t accumulator = 0; // average offset between the PHC and SYSTEM clock, in nanoseconds
         for (int i = 0; i < WFTS_PHC_SAMPLES; ++i) {
             int64_t sys_t0 = (swoffset.ts[i][0].sec * 1e9) + swoffset.ts[i][0].nsec;
             int64_t phc_t1 = (swoffset.ts[i][1].sec * 1e9) + swoffset.ts[i][1].nsec;
             int64_t sys_t2 = (swoffset.ts[i][2].sec * 1e9) + swoffset.ts[i][2].nsec;
             int64_t delay = (sys_t2 - sys_t0)/2;
             int64_t sys_offset = sys_t0 - phc_t1 + delay;
-            avgSysOffset += (((double)sys_offset)/WFTS_PHC_SAMPLES);   
+            accumulator += sys_offset;   
         }
-        int64_t avgWpiOffset = ((int64_t)(avgSysOffset/1000) + impl::wpi_sys_offset());
-        return avgWpiOffset;
+        double avgSysOffsetNs = static_cast<double>(accumulator) / WFTS_PHC_SAMPLES;
+        int64_t avgWpiOffsetUs = -static_cast<int64_t>(avgSysOffsetNs / 1000.0) + impl::wpi_sys_offset();
+        return avgWpiOffsetUs;
+    }
+
+    int64_t TimeClient::getNow() {
+        return wpi::Now() - masterOffset.load();
+    }
+    int64_t TimeClient::getMasterOffset() {
+        return masterOffset.load();
     }
 }

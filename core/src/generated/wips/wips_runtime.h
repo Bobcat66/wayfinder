@@ -241,6 +241,9 @@ void wips_i32_ntoh(wips_i32_t *data);
 void wips_u64_hton(wips_u64_t *data);
 void wips_u64_ntoh(wips_u64_t *data);
 
+void wips_i64_hton(wips_i64_t *data);
+void wips_i64_ntoh(wips_i64_t *data);
+
 void wips_fp32_hton(wips_fp32_t *data);
 void wips_fp32_ntoh(wips_fp32_t *data);
 

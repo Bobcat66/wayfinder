@@ -220,7 +220,7 @@ struct tm* wips_localtime(const time_t* timer);
 
 #define DEFINE_TRIVIAL_ENCODE_NRB(wips_typename)                                                                \
     wips_result_t wips_encode_nrb_##wips_typename(wips_blob_t* data, GET_CTYPE(wips_typename)* in){             \
-        WIPS_Assert(out != NULL && data != NULL,0);                                                             \
+        WIPS_Assert(in != NULL && data != NULL,0);                                                              \
         WIPS_TRACELOG("No resize buffer (nrb) encoding %s\n",STRINGIZE(wips_typename));                         \
         if (data->offset > (SIZE_MAX - GET_SIZE(wips_typename))){                                               \
             WIPS_DEBUGLOG("Fatal error while nrb encoding %s: Integer overflow\n",STRINGIZE(wips_typename));    \

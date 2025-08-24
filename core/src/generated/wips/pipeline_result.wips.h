@@ -39,9 +39,9 @@ extern "C" {
 #endif
 
 #include "wips_runtime.h"
-#include "apriltag_field_pose_observation.wips.h"
-#include "object_detection.wips.h"
 #include "apriltag_relative_pose_observation.wips.h"
+#include "object_detection.wips.h"
+#include "apriltag_field_pose_observation.wips.h"
 #include "apriltag_detection.wips.h"
 
 typedef struct {

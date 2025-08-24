@@ -33,7 +33,7 @@ namespace wf {
         void start();
         void stop();
         int64_t getNow();
-        int64_t getOffset();
+        int64_t getMasterOffset();
     private:
         // Returns the offset between the PHC and wpi::Now in microseconds
         int64_t getOffset();
