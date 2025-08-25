@@ -25,7 +25,7 @@
 #include <unordered_map>
 #include "wfcore/video/video_utils.h"
 #include "wfcore/common/wfassert.h"
-#include "ntcore.h"
+#include "wfcore/network/MasterTime.h"
 
 
 namespace wf {
@@ -60,7 +60,7 @@ namespace wf {
         WF_FatalAssert(data.isContinuous());
         std::memcpy(data.data, raw_buffer_.data, totalBytes);
 
-        return FrameMetadata(micros, nt::Now(), format);
+        return FrameMetadata(micros, getMasterTime(), format);
     }
 
     WFResult<StreamFormat> CSCameraSink::getStreamFormat() const noexcept {

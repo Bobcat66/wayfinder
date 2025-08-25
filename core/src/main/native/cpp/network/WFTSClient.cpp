@@ -17,7 +17,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "wfcore/network/TimeClient.h"
+#include "wfcore/network/WFTSClient.h"
 #include "wfcore/common/wfexcept.h"
 #include "wips/timesync_packet.wips.h"
 #include "wfcore/common/logging.h"
@@ -39,15 +39,17 @@
 #define WFTS_MSG_BROADCAST          0b00000010 // Whether or not the message is broadcasted
 #define WFTS_MSG_CRITICAL           0b00000100 // Whether or not the message is time-critical
 #define WFTS_MSG_HASTIME            0b00001000 // Whether or not the message has a meaningful timestamp
-#define WFTS_MSG_UNICAST            0b00010000 // Whether or not the message is unicasted
-#define WFTS_MSG_NONCRITICAL        0b00100000 // Whether or not the message is noncritical
+#define WFTS_MSG_ERROR              0b10000000 // Error flag
 
 // Flag combos for different types of messages
 
-#define WFTS_MSG_SYNCFLAGS      (WFTS_MSG_LEADER | WFTS_MSG_BROADCAST | WFTS_MSG_CRITICAL)                          // Required flags for a sync message
-#define WFTS_MSG_FOLLOWUPFLAGS  (WFTS_MSG_LEADER | WFTS_MSG_BROADCAST | WFTS_MSG_HASTIME | WFTS_MSG_NONCRITICAL)    // Required flags for a followup message
-#define WFTS_MSG_DELAYREQFLAGS  (WFTS_MSG_CRITICAL | WFTS_MSG_UNICAST)                                              // Required flags for a delayreq message
-#define WFTS_MSG_DELAYRESPFLAGS (WFTS_MSG_LEADER | WFTS_MSG_CRITICAL | WFTS_MSG_HASTIME | WFTS_MSG_UNICAST)         // Required flags for a delayresp message
+#define WFTS_MSG_SYNCFLAGS          (WFTS_MSG_LEADER | WFTS_MSG_BROADCAST | WFTS_MSG_CRITICAL)    // Required flags for a sync message
+#define WFTS_MSG_FOLLOWUPFLAGS      (WFTS_MSG_LEADER | WFTS_MSG_BROADCAST | WFTS_MSG_HASTIME)     // Required flags for a followup message
+#define WFTS_MSG_FOLLOWUPNFLAGS     (WFTS_MSG_CRITICAL)                                           // Disallowed flags for a followup message
+#define WFTS_MSG_DELAYREQFLAGS      (WFTS_MSG_CRITICAL)                                           // Required flags for a delayreq message
+#define WFTS_MSG_DELAYREQNFLAGS     (WFTS_MSG_LEADER | WFTS_MSG_BROADCAST | WFTS_MSG_HASTIME)     // Disallowed flags for a delayreq message
+#define WFTS_MSG_DELAYRESPFLAGS     (WFTS_MSG_LEADER | WFTS_MSG_HASTIME)                          // Required flags for a delayresp message
+#define WFTS_MSG_DELAYRESPNFLAGS    (WFTS_MSG_BROADCAST | WFTS_MSG_CRITICAL)                      // Disallowed flags for a delayresp message
 
 #define WFTS_CLIENT_PORT 30001
 #define WFTS_SERVER_PORT 30001
@@ -56,7 +58,7 @@
 
 #define WFTS_PHC_SAMPLES 5 // the number of samples to take when synchronizing the PHC to the system clock
 
-#define WFTS_TIMEOUT_US 100000 // The number of microseconds the socket will wait for a packet before timing out
+#define WFTS_TIMEOUT_US 40000 // The number of microseconds the socket will wait for a packet before timing out
 
 namespace impl {
     // everything is in microseconds
@@ -79,10 +81,14 @@ namespace impl {
     // defined as sys(t) - wpi(t)
     int64_t wpi_sys_offset() {
         auto t0 = std::chrono::system_clock::now();
-        auto t1 = wpi::Now();
+        auto t1 = static_cast<int64_t>(wpi::Now());
         return std::chrono::duration_cast<std::chrono::microseconds>(
             t0.time_since_epoch()
         ).count() - t1;
+    }
+
+    bool flagcheck(uint8_t flags, uint8_t reqs, uint8_t disallowed = 0) {
+        return ((flags & reqs) == reqs) && ((flags & disallowed) == 0);
     }
 
 }
@@ -92,9 +98,9 @@ namespace impl {
 // audited if there are any otherwise unexplainable bugs in the future, especially regarding pose accuracy
 // Especially the PHC offset calculation logic
 namespace wf {
-    static loggerPtr tcLogger = LoggerManager::getInstance().getLogger("TimeClient",LogGroup::Network);
-    // TODO: Maybe make TimeClient a statusful object?
-    TimeClient::TimeClient(const char* broadcast_ip, const char* unicast_ip) 
+    static loggerPtr tcLogger = LoggerManager::getInstance().getLogger("WFTSClient",LogGroup::Network);
+    // TODO: Maybe make WFTSClient a statusful object?
+    WFTSClient::WFTSClient() 
     : sock(WFTS_CLIENT_PORT) , servaddr{0}, servaddr_len{sizeof(servaddr)} {
 
         // Poll hardware timestamping capabilities
@@ -132,9 +138,11 @@ namespace wf {
         if ((tsi.so_timestamping & SOF_TIMESTAMPING_TX_HARDWARE) && (tsi.so_timestamping & SOF_TIMESTAMPING_RX_HARDWARE)) {
             tcLogger->info("Hardware timestamping support detected");
             tsopts |= (SOF_TIMESTAMPING_TX_HARDWARE | SOF_TIMESTAMPING_RX_HARDWARE);
+            hwsupport = true;
         } else {
             tcLogger->info("Hardware timestamping support not detected, falling back to software timestamping");
             tsopts |= (SOF_TIMESTAMPING_TX_SOFTWARE | SOF_TIMESTAMPING_RX_SOFTWARE);
+            hwsupport = false;
         }
 
         tsopts |= (SOF_TIMESTAMPING_RAW_HARDWARE | SOF_TIMESTAMPING_SOFTWARE);
@@ -176,12 +184,29 @@ namespace wf {
         }
     }
 
-    TimeClient::~TimeClient() {
+    WFTSClient::~WFTSClient() {
         if (phcfd >= 0) { close(phcfd); }
         if (phc_caps) { delete static_cast<ptp_clock_caps*>(phc_caps); }
     }
 
-    void TimeClient::pingpong() {
+    void WFTSClient::start() {
+        if (worker.joinable()) return;
+        worker = std::jthread([this](std::stop_token st){
+            while (!st.stop_requested()) {
+                this->pingpong();
+            }
+        });
+    }
+
+    void WFTSClient::stop() {
+        if (worker.joinable()) {
+            worker.request_stop();
+            worker.join();  // blocks until the worker finishes
+        }
+    }
+
+    // TODO: Maybe rewrite this as an actual state machine?
+    void WFTSClient::pingpong() {
 
         auto offset = getOffset();
         impl::PingPongTimes timestamps;
@@ -222,9 +247,13 @@ namespace wf {
             tcLogger->error("Failed to decode sync message");
             return;
         }
-        if (!(sync_packet.flags & WFTS_MSG_SYNCFLAGS)) {
+        if (!impl::flagcheck(sync_packet.flags, WFTS_MSG_SYNCFLAGS)) {
             // Packet does not have expected flags, discard it
-            tcLogger->error("sync message did not have expected flags set.");
+            tcLogger->error("Sync message {} did not have expected flags set.",sync_packet.packet_id);
+            return;
+        }
+        if (sync_packet.flags & WFTS_MSG_ERROR) {
+            tcLogger->error("Sync message {} had the error flag set",sync_packet.packet_id);
             return;
         }
         servaddr_len = sync_msg.msg_namelen;
@@ -267,14 +296,19 @@ namespace wf {
                 return;
             }
 
-            if (!(followup_packet.flags & (WFTS_MSG_BROADCAST | WFTS_MSG_LEADER | WFTS_MSG_HASTIME))) {
-                // Packet does not have expected flags, discard it
-                tcLogger->error("followup message did not have expected flags set.");
+            if (followup_packet.packet_id != (lastPacketID + 1)) {
+                tcLogger->error("Followup message {} did not have the expected packet ID {}", followup_packet.packet_id, (lastPacketID + 1));
                 return;
             }
 
-            if (followup_packet.packet_id != (lastPacketID + 1)) {
-                tcLogger->error("followup message did not have the correct packet ID.");
+            if (!impl::flagcheck(followup_packet.flags, WFTS_MSG_FOLLOWUPFLAGS, WFTS_MSG_FOLLOWUPNFLAGS)) {
+                // Packet does not have expected flags, discard it
+                tcLogger->error("Followup message {} did not have expected flags set.", followup_packet.packet_id);
+                return;
+            }
+
+            if (followup_packet.flags & WFTS_MSG_ERROR) {
+                tcLogger->error("Followup message {} had error flag set", followup_packet.packet_id);
                 return;
             }
 
@@ -289,8 +323,8 @@ namespace wf {
         // Prepare packet
         wips_timesync_packet_t delayreq_packet;
         delayreq_packet.flags = WFTS_MSG_DELAYREQFLAGS;
-        // Delayreq packets have the same packet ID as the most recent broadcast received by the client
-        delayreq_packet.packet_id = lastPacketID;
+        // Delayreq packets have the same packet ID as the most recent broadcast received by the client + 1
+        delayreq_packet.packet_id = lastPacketID + 1;
         delayreq_packet.timestamp = 0;
 
         char delayreq_payload[WFTS_TSPACKET_SIZE];
@@ -326,6 +360,8 @@ namespace wf {
             tcLogger->error(delayreq_res.what());
             return;
         }
+
+        lastPacketID++;
 
         // By this point, the kernel has stored the transmission time of the delayreq msg in the error queue
         // To retrieve it, we need to send a recv request to the socket with the MSG_ERRQUEUE flag
@@ -384,14 +420,21 @@ namespace wf {
             return;
         }
 
-        // Check message
-        if (!(delayresp_packet.flags & WFTS_MSG_DELAYRESPFLAGS)) {
-            tcLogger->error("Delayresp did not have expected flags");
+        // On unicast delayresp messages the server increments the packetID that the delayreq was sent with
+        if (delayresp_packet.packet_id != lastPacketID + 1) {
+            tcLogger->error("Delayresp {} did not have expected packet ID {}", delayresp_packet.packet_id, lastPacketID + 1);
             return;
         }
-        // On unicast delayresp messages the server mirrors the packetID that the delayreq was sent with
-        if (delayresp_packet.packet_id != lastPacketID) {
-            tcLogger->error("Delayresp did not have expected packet ID");
+
+        // Check message
+        if (!impl::flagcheck(delayresp_packet.flags, WFTS_MSG_DELAYRESPFLAGS, WFTS_MSG_DELAYRESPNFLAGS)) {
+            tcLogger->error("Delayresp {} did not have expected flags", delayresp_packet.packet_id);
+            return;
+        }
+
+        // Check for error
+        if (delayresp_packet.flags & WFTS_MSG_ERROR) {
+            tcLogger->error("Delayresp {} had error flag set", delayresp_packet.packet_id);
         }
         timestamps.t3 = delayresp_packet.timestamp;
 
@@ -401,7 +444,7 @@ namespace wf {
     }
 
     // Either returns the offset between the PHC and wpi::now, or the system realtime clock and wpi::now
-    int64_t TimeClient::getOffset() {
+    int64_t WFTSClient::getOffset() {
         if (phcfd < 0) {
             // phcfd is negative, we are using system timestamps
             return impl::wpi_sys_offset();
@@ -439,10 +482,10 @@ namespace wf {
         return avgWpiOffsetUs;
     }
 
-    int64_t TimeClient::getNow() {
+    int64_t WFTSClient::getNow() {
         return wpi::Now() - masterOffset.load();
     }
-    int64_t TimeClient::getMasterOffset() {
+    int64_t WFTSClient::getMasterOffset() {
         return masterOffset.load();
     }
 }

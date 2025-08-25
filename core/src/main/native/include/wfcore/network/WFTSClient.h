@@ -25,11 +25,10 @@
 #include <memory>
 
 namespace wf {
-    class TimeClient {
+    class WFTSClient {
     public:
-        // In general, broadcast_ip should be 10.TE.AM.255, and unicast_ip should be 10.TE.AM.2
-        TimeClient(const char* broadcast_ip, const char* unicast_ip);
-        ~TimeClient();
+        WFTSClient();
+        ~WFTSClient();
         void start();
         void stop();
         int64_t getNow();
@@ -37,7 +36,6 @@ namespace wf {
     private:
         // Returns the offset between the PHC and wpi::Now in microseconds
         int64_t getOffset();
-        void listen();
         void pingpong();
         std::jthread worker;
         struct sockaddr_in servaddr;

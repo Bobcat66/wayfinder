@@ -1,0 +1,70 @@
+##### Wayfinder Timesync #####
+For RIO-Coprocessor time synchronization, Wayfinder uses a PTP-like time synchronization scheme,
+called Wayfinder Timesync (WFTS). WFTS operates over UDP/IP broadcast to the RoboRIO's subnet (10.TE.AM.255).
+Each message consists of a Wayfinder Timesync packet, which is exactly 13 bytes long. Each WFTS packet
+starts with a 4-byte unsigned integer packet ID, followed by an 8 byte signed integer timestamp, and a
+1 byte unsigned char flags bitfield. All timestamps are given in microseconds. The WFTS Message flags
+(as well as their respective numerical values) are given below:
+Name                   Decimal      Hex         Binary     
+MSG_LEADER             1            0x01        0b00000001
+MSG_BROADCAST          2            0x02        0b00000010
+MSG_CRITICAL           4            0x04        0b00000100
+MSG_HASTIME            8            0x08        0b00001000
+RESERVED               16           0x10        0b00010000
+RESERVED               32           0x20        0b00100000
+RESERVED               64           0x40        0b01000000              
+MSG_ERROR              128          0x80        0b10000000
+0x10, 0x20, and 0x40 are reserved, and should be ignored
+A WFTS network consists of exactly one master clock (generally the RoboRIO), and an arbitrary number of slave clocks
+(generally coprocessors). 
+There are four types of messages in WFTS:
+
+SYNC: The master clock will broadcast a SYNC message at some fixed frequency (50hz), which may contain
+its transmission timestamp. A SYNC message MUST have the MSG_LEADER, MSG_BROADCAST, and MSG_CRITICAL flags set, and
+may have the MSG_HASTIME flag set. A SYNC message MUST have a unique message ID, not associated with any previous or future message.
+Slave clocks should timestamp the reception of a SYNC message, as close to the NIC as possible (Hardware timestamping is optimal, but
+failing that slaves should fall back to kernelspace software timestamping. Userspace software timestamping should be an absolute last
+resort). The master should timestamp the transmission of SYNC.
+The transmission time of SYNC according to the master clock is t0, and the reception time of SYNC according to the slave clock
+is t1;
+
+FOLLOWUP: If the SYNC message did not contain its transmission time, the Master will broadcast a FOLLOWUP message containing t0.
+Slaves do NOT have to timestamp FOLLOWUP reception. The FOLLOWUP message MUST
+have the MSG_LEADER, MSG_BROADCAST, and MSG_HASTIME flags set. FOLLOWUP CANNOT have the MSG_CRITICAL flag set. A FOLLOWUP
+should be sent immediately following a SYNC IFF the SYNC does not have the MSG_HASTIME flag set. FOLLOWUP's packet ID should 
+be exactly one greater than SYNC's ID.
+
+DELAYREQ: Upon reception of the packet containing t0 (either SYNC or FOLLOWUP), the slave will unicast DELAYREQ to the
+Master. DELAYREQ MUST have the MSG_CRITICAL flag set, and CANNOT have the MSG_LEADER, MSG_BROADCAST, or MSG_HASTIME flags set.
+DELAYREQ's packet ID MUST be one greater than the packet ID of the message containing t0 (either SYNC or FOLLOWUP).
+The slave should timestamp the transmission of DELAYREQ, and the master should timestamp the reception of DELAYREQ.
+The transmission time of DELAYREQ according to the slave clock is t2, and the reception time of DELAYREQ according to the master clock is t3
+
+DELAYRESP: Upon reception of DELAYREQ from a slave, the master will unicast DELAYRESP to the slave. DELAYRESP will contain t3.
+DELAYRESP MUST have MSG_HASTIME and MSG_LEADER set, and CANNOT have MSG_BROADCAST or MSG_CRITICAL set. DELAYRESP packet ID will be
+1 greater than DELAYREQ ID
+
+A full exchange of these messages constitutes one "pingpong"
+
+If at any point the slave receives a message with the error flag set, it will immediately abort the current pingpong and
+wait for a new sync message. This is also the case if any of the message requirements (packet id, flags) are broken. This is
+so that pingpongs with lost or reordered packets are automatically discarded. The master will handle DELAYREQs on a first-come
+first-serve basis until the next SYNC is broadcast, at which point the master will respond to DELAYREQs with packet IDs suggesting 
+they are from the old SYNC with an error message.
+
+##### Computing the offset #####
+
+By the end of a pingpong, the slave will have t0, t1, t2, t3, and needs to compute the offset o (s(t) - m(t)), while
+accounting for network delay. From the definitions of t0 and t1, it follows:
+o + delay = t1 - t0
+And it follows from the definitions of t2 and t3 that:
+-o + delay = t3 - t2
+These equations, when solved for o, yield:
+o = t1 - t0 - delay
+o = t2 - t3 + delay
+and can be combined into
+2o = t1 - t0 - delay - t3 + t2 + delay
+which can be rewritten as
+o = (t1 - t0 - t3 + t2)/2
+
+All WFTS messages will be broadcast on port 30001
