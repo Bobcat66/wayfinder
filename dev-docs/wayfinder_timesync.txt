@@ -3,8 +3,8 @@ For RIO-Coprocessor time synchronization, Wayfinder uses a PTP-like time synchro
 called Wayfinder Timesync (WFTS). WFTS operates over UDP/IP broadcast to the RoboRIO's subnet (10.TE.AM.255).
 Each message consists of a Wayfinder Timesync packet, which is exactly 13 bytes long. Each WFTS packet
 starts with a 4-byte unsigned integer packet ID, followed by an 8 byte signed integer timestamp, and a
-1 byte unsigned char flags bitfield. All timestamps are given in microseconds. The WFTS Message flags
-(as well as their respective numerical values) are given below:
+1 byte unsigned char flags bitfield. All timestamps are given in microseconds, and all values are in
+litte-endian order. The WFTS Message flags (as well as their respective numerical values) are given below:
 Name                   Decimal      Hex         Binary     
 MSG_LEADER             1            0x01        0b00000001
 MSG_BROADCAST          2            0x02        0b00000010

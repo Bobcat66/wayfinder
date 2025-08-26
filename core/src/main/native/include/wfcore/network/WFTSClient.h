@@ -40,7 +40,6 @@ namespace wf {
     private:
         // Returns the offset between the PHC and wpi::Now in microseconds
         int64_t getOffset();
-        void pingpong();
         void cleanup();
         // a function pointer to a function which consumes calculated offsets
         void (*masterOffsetConsumer)(int64_t);
