@@ -51,13 +51,9 @@
 #define WFTS_MSG_DELAYRESPFLAGS     (WFTS_MSG_LEADER | WFTS_MSG_HASTIME)                          // Required flags for a delayresp message
 #define WFTS_MSG_DELAYRESPNFLAGS    (WFTS_MSG_BROADCAST | WFTS_MSG_CRITICAL)                      // Disallowed flags for a delayresp message
 
-#define WFTS_CLIENT_PORT 30001
 #define WFTS_SERVER_PORT 30001
-
 #define WFTS_TSPACKET_SIZE 13 // This is the size of the *packed* packet, the WIPS struct is padded
-
 #define WFTS_PHC_SAMPLES 5 // the number of samples to take when synchronizing the PHC to the system clock
-
 #define WFTS_TIMEOUT_US 40000 // The number of microseconds the socket will wait for a packet before timing out
 
 namespace impl {
@@ -100,87 +96,97 @@ namespace impl {
 namespace wf {
     static loggerPtr tcLogger = LoggerManager::getInstance().getLogger("WFTSClient",LogGroup::Network);
     // TODO: Maybe make WFTSClient a statusful object?
-    WFTSClient::WFTSClient() 
-    : sock(WFTS_CLIENT_PORT) , servaddr{0}, servaddr_len{sizeof(servaddr)} {
+    WFTSClient::WFTSClient(std::unique_ptr<Socket> sock_, void (*masterOffsetConsumer_)(int64_t)) 
+    : sock(std::move(sock_)) , servaddr{0}, servaddr_len{sizeof(servaddr)}
+    , masterOffsetConsumer(masterOffsetConsumer_) {
 
-        // Poll hardware timestamping capabilities
-        const char* iface = "eth0"; // Wayfinder always uses the eth0 interface for network communications
-        struct ifreq ifr;
-        memset(&ifr, 0, sizeof(ifr));
-        strncpy(ifr.ifr_name, iface, sizeof(ifr.ifr_name)-1);
-
-        struct ethtool_ts_info tsi;
-        memset(&tsi, 0, sizeof(tsi));
-        tsi.cmd = ETHTOOL_GET_TS_INFO;
-        ifr.ifr_data = reinterpret_cast<char*>(&tsi);
-
-        if (ioctl(sock.GetFD(), SIOCETHTOOL, &ifr) < 0) {
-            // TODO: Special error code for this?
-            throw wf_status_error(WFStatus::NETWORK_UNKNOWN, "Failed to retrieve eth0 NIC hardware information: {}", strerror(errno));
+        int enable = 1;
+        // Enable broadcast support on the socket
+        auto broadcast_res = sock->SetSockOpt(SOL_SOCKET, SO_BROADCAST, &enable, sizeof(enable));
+        if (!broadcast_res) {
+            throw wf_result_error(broadcast_res);
         }
 
         struct timeval timeout;
         timeout.tv_sec = 0;
         timeout.tv_usec = WFTS_TIMEOUT_US;
 
-        auto rcvtimeo_res = sock.SetSockOpt(SOL_SOCKET, SO_RCVTIMEO, &timeout, sizeof(timeout));
+        auto rcvtimeo_res = sock->SetSockOpt(SOL_SOCKET, SO_RCVTIMEO, &timeout, sizeof(timeout));
         if (!rcvtimeo_res) {
             throw wf_result_error(rcvtimeo_res);
         }
-        auto sndtimeo_res = sock.SetSockOpt(SOL_SOCKET, SO_SNDTIMEO, &timeout, sizeof(timeout));
+        auto sndtimeo_res = sock->SetSockOpt(SOL_SOCKET, SO_SNDTIMEO, &timeout, sizeof(timeout));
         if (!sndtimeo_res) {
             throw wf_result_error(sndtimeo_res);
         }
 
-        bool hwsupport;
-
-        // construct tsopts bitfield
-        if ((tsi.so_timestamping & SOF_TIMESTAMPING_TX_HARDWARE) && (tsi.so_timestamping & SOF_TIMESTAMPING_RX_HARDWARE)) {
-            tcLogger->info("Hardware timestamping support detected");
-            tsopts |= (SOF_TIMESTAMPING_TX_HARDWARE | SOF_TIMESTAMPING_RX_HARDWARE);
-            hwsupport = true;
-        } else {
-            tcLogger->info("Hardware timestamping support not detected, falling back to software timestamping");
-            tsopts |= (SOF_TIMESTAMPING_TX_SOFTWARE | SOF_TIMESTAMPING_RX_SOFTWARE);
-            hwsupport = false;
-        }
-
         tsopts |= (SOF_TIMESTAMPING_RAW_HARDWARE | SOF_TIMESTAMPING_SOFTWARE);
 
-        // Apply tsopts to socket
-        auto tsres = sock.SetSockOpt(SOL_SOCKET, SO_TIMESTAMPING, &tsopts, sizeof(tsopts));
-        if (!tsres) {
-            throw wf_result_error(tsres);
-        }
+        auto fdopt = sock->getfd();
 
+        if (fdopt) {
+            // socket has a file descriptor, poll eth0 hardware timestamping capabilites
+            const char* iface = "eth0"; // Wayfinder always uses the eth0 interface for network communications
+            struct ifreq ifr;
+            memset(&ifr, 0, sizeof(ifr));
+            strncpy(ifr.ifr_name, iface, sizeof(ifr.ifr_name)-1);
 
-        int enable = 1;
-        // Enable broadcast support on the socket
-        auto broadcast_res = sock.SetSockOpt(SOL_SOCKET, SO_BROADCAST, &enable, sizeof(enable));
-        if (!broadcast_res) {
-            throw wf_result_error(broadcast_res);
-        }
+            struct ethtool_ts_info tsi;
+            memset(&tsi, 0, sizeof(tsi));
+            tsi.cmd = ETHTOOL_GET_TS_INFO;
+            ifr.ifr_data = reinterpret_cast<char*>(&tsi);
 
-        // Open PHC file
-        if (hwsupport) {
-            if (tsi.phc_index < 0) {
-                close(phcfd);
-                throw wf_status_error(WFStatus::NETWORK_UNKNOWN, "NIC Reported hardware timestamping capabilities but does not have a valid PHC");
+            if (ioctl(fdopt.value(), SIOCETHTOOL, &ifr) < 0) {
+                // TODO: Special error code for this?
+                throw wf_status_error(WFStatus::NETWORK_UNKNOWN, "Failed to retrieve eth0 NIC hardware information: {}", strerror(errno));
             }
-            auto pathstr = std::format("/dev/ptp{}",tsi.phc_index);
-            phcfd = open(pathstr.c_str(),O_RDONLY);
-            if (phcfd < 0) {
-                throw wf_status_error(WFStatus::BAD_ACQUIRE,"Failed to acquire PHC: {}",strerror(errno));
+
+            bool hwsupport;
+            // construct tsopts bitfield
+            if ((tsi.so_timestamping & SOF_TIMESTAMPING_TX_HARDWARE) && (tsi.so_timestamping & SOF_TIMESTAMPING_RX_HARDWARE)) {
+                tcLogger->info("Hardware timestamping support detected");
+                tsopts |= (SOF_TIMESTAMPING_TX_HARDWARE | SOF_TIMESTAMPING_RX_HARDWARE);
+                hwsupport = true;
+            } else {
+                tcLogger->info("Hardware timestamping support not detected, falling back to software timestamping");
+                tsopts |= (SOF_TIMESTAMPING_TX_SOFTWARE | SOF_TIMESTAMPING_RX_SOFTWARE);
+                hwsupport = false;
             }
-            phc_caps = new ptp_clock_caps;
-            if (ioctl(phcfd, PTP_CLOCK_GETCAPS, phc_caps) < 0) {
-                delete static_cast<ptp_clock_caps*>(phc_caps);
-                close(phcfd);
-                throw wf_status_error(WFStatus::NETWORK_UNKNOWN,"Failed to query PHC capabilities: {}",strerror(errno));
+
+            // Open PHC file
+            if (hwsupport) {
+                if (tsi.phc_index < 0) {
+                    close(phcfd);
+                    throw wf_status_error(WFStatus::NETWORK_UNKNOWN, "NIC Reported hardware timestamping capabilities but does not have a valid PHC");
+                }
+                auto pathstr = std::format("/dev/ptp{}",tsi.phc_index);
+                phcfd = open(pathstr.c_str(),O_RDONLY);
+                if (phcfd < 0) {
+                    throw wf_status_error(WFStatus::BAD_ACQUIRE,"Failed to acquire PHC: {}",strerror(errno));
+                }
+                phc_caps = new ptp_clock_caps;
+                if (ioctl(phcfd, PTP_CLOCK_GETCAPS, phc_caps) < 0) {
+                    delete static_cast<ptp_clock_caps*>(phc_caps);
+                    close(phcfd);
+                    throw wf_status_error(WFStatus::NETWORK_UNKNOWN,"Failed to query PHC capabilities: {}",strerror(errno));
+                }
+            } else {
+                phc_caps = nullptr;
+                phcfd = -1;
             }
+
         } else {
+            // We are using a mock socket, default to software timestamping
             phc_caps = nullptr;
             phcfd = -1;
+            tsopts |= (SOF_TIMESTAMPING_TX_SOFTWARE | SOF_TIMESTAMPING_RX_SOFTWARE);
+        }
+
+        // Apply tsopts to socket
+        auto tsres = sock->SetSockOpt(SOL_SOCKET, SO_TIMESTAMPING, &tsopts, sizeof(tsopts));
+        if (!tsres) {
+            if (phcfd >= 0) close(phcfd);
+            throw wf_result_error(tsres);
         }
     }
 
@@ -231,7 +237,7 @@ namespace wf {
         sync_msg.msg_controllen = sizeof(sync_control);
 
         // Poll socket, block until message is received
-        auto sync_res = sock.RecvMsg(&sync_msg);
+        auto sync_res = sock->RecvMsg(&sync_msg);
         if (!sync_res) {
             // the socket is configured to block, it'll never return NETWORK_WAITING
             tcLogger->error(sync_res.what());
@@ -279,7 +285,11 @@ namespace wf {
             // Two-stage synchronization, wait for followup message with t0
             char followup_buffer[WFTS_TSPACKET_SIZE];
 
-            auto followup_res = sock.Recv(&servaddr, &servaddr_len, followup_buffer, WFTS_TSPACKET_SIZE);
+            auto followup_res = sock->RecvFrom(
+                followup_buffer, WFTS_TSPACKET_SIZE, 0, 
+                reinterpret_cast<sockaddr*>(&servaddr),
+                &servaddr_len
+            );
             if (!followup_res) {
                 // the socket is configured to block, it'll never return NETWORK_WAITING
                 tcLogger->error(followup_res.what());
@@ -355,7 +365,7 @@ namespace wf {
         }
 
         // Send message over unicast UDP to server
-        auto delayreq_res = sock.SendMsg(&delayreq_msg);
+        auto delayreq_res = sock->SendMsg(&delayreq_msg);
         if (!delayreq_res) {
             tcLogger->error(delayreq_res.what());
             return;
@@ -377,7 +387,7 @@ namespace wf {
         delayreq_ctrl_msg.msg_control = delayreq_control;
         delayreq_ctrl_msg.msg_controllen = sizeof(delayreq_control);
 
-        auto delayreq_ctrl_res = sock.RecvMsg(&delayreq_ctrl_msg,MSG_ERRQUEUE);
+        auto delayreq_ctrl_res = sock->RecvMsg(&delayreq_ctrl_msg,MSG_ERRQUEUE);
         if (!delayreq_ctrl_res) {
             tcLogger->error(delayreq_ctrl_res.what());
             return;
@@ -402,7 +412,11 @@ namespace wf {
         // Prepare message
         char delayresp_payload[WFTS_TSPACKET_SIZE];
 
-        auto delayresp_res = sock.Recv(&servaddr, &servaddr_len, delayresp_payload, sizeof(delayresp_payload));
+        auto delayresp_res = sock->RecvFrom(
+            delayresp_payload, sizeof(delayresp_payload), 0, 
+            reinterpret_cast<sockaddr*>(&servaddr), 
+            &servaddr_len
+        );
         if (!delayresp_res) {
             tcLogger->error(delayresp_res.what());
             return;
@@ -440,7 +454,7 @@ namespace wf {
 
         // Step 4: Compute offset
         auto masterOffset_tmp = (timestamps.t1 - timestamps.t0 - timestamps.t3 + timestamps.t2)/2;
-        masterOffset.store(masterOffset_tmp);
+        masterOffsetConsumer(masterOffset_tmp);
     }
 
     // Either returns the offset between the PHC and wpi::now, or the system realtime clock and wpi::now
@@ -480,12 +494,5 @@ namespace wf {
         double avgSysOffsetNs = static_cast<double>(accumulator) / WFTS_PHC_SAMPLES;
         int64_t avgWpiOffsetUs = -static_cast<int64_t>(avgSysOffsetNs / 1000.0) + impl::wpi_sys_offset();
         return avgWpiOffsetUs;
-    }
-
-    int64_t WFTSClient::getNow() {
-        return wpi::Now() - masterOffset.load();
-    }
-    int64_t WFTSClient::getMasterOffset() {
-        return masterOffset.load();
     }
 }

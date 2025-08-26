@@ -21,27 +21,36 @@
 
 #include <memory>
 #include "wfcore/common/status.h"
+#include <shared_mutex>
+#include <atomic>
 
 namespace wf {
-    class WFOrchestrator;
+    class WFTSClient;
     using TimeSupplier = int64_t(*)(void);
 
     class WFTSClientHandler {
-        // We only want the WFOrchestrator to be able to access/control the handler
-        friend class WFOrchestrator;
-    private: // Unnecessary, but helps with clarity
+    public:
         static WFTSClientHandler& getInstance() {
             static WFTSClientHandler inst;
             return inst;
         }
+        // startClient and stopClient are NOT safe to call, they are meant to only be called by the WFTSManager's listener
         WFStatusResult startClient();
         WFStatusResult stopClient();
         TimeSupplier getTimeSupplier();
+    private:
         WFTSClientHandler();
-        ~WFTSClientHandler() = default;
+        ~WFTSClientHandler();
+        static int64_t getWFTSTime() noexcept;
+        static void loadMasterOffset(int64_t masterOffset_) {
+            WFTSClientHandler::getInstance().masterOffset.store(masterOffset_);
+        }
         WFTSClientHandler(const WFTSClientHandler&) = delete;
         WFTSClientHandler& operator=(const WFTSClientHandler&) = delete;
         WFTSClientHandler(WFTSClientHandler&&) = delete;
         WFTSClientHandler& operator=(WFTSClientHandler&&) = delete;
+        std::unique_ptr<WFTSClient> client;
+        std::shared_mutex mtx;
+        std::atomic_int64_t masterOffset{0};
     };
 }

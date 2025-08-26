@@ -33,9 +33,9 @@ namespace wf {
         UDPIP_Sock(uint16_t port, const char* addr = nullptr);
         ~UDPIP_Sock();
         // returns raw socket file descriptor
-        int GetFD() { return sockfd; }
+        int getfd() { return sockfd; }
         // returns the actual errno, for richer programmatic error handling beyond the WFStatusResults
-        int GetErrno() { return sockerr; }
+        int geterr() { return sockerr; }
         //send and recv return simple WFstatus codes, errno should be checked for more descriptive error messages
         WFStatusResult Send(const struct sockaddr_in* addr, socklen_t addrlen, void* buf, size_t len, int flags = 0);
         WFStatusResult Recv(struct sockaddr_in* addr, socklen_t* addrlen, void* buf, size_t len, int flags = 0);

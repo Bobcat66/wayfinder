@@ -36,7 +36,8 @@ namespace wf {
     , resourceManager_(config.paths.resource_path,config.paths.local_path) 
     , inferenceEngineFactory_(resourceManager_) 
     , apriltagPipelineFactory_(resourceManager_) 
-    , workerManager_(ntManager_, hardwareManager_, inferenceEngineFactory_, apriltagPipelineFactory_) {
+    , workerManager_(ntManager_, hardwareManager_, inferenceEngineFactory_, apriltagPipelineFactory_)
+    , wftsManager_(ntManager_) {
         auto fields_res 
             = resourceManager_.assignResourceSubdir("fields", config.paths.fields_rsubdir);
         if (!fields_res) throw wf_result_error(fields_res);

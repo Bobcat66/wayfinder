@@ -20,28 +20,37 @@
 #pragma once
 
 #include <atomic>
-#include "wfcore/network/UDPIP_Sock.h"
+#include "wfcore/network/Socket.h"
 #include <thread>
 #include <memory>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+
+#define WFTS_CLIENT_PORT 30001
 
 namespace wf {
+
+    // WIP
+    enum class WFTSClientState {
+        AWAIT_SYNC,
+        
+    };
     class WFTSClient {
     public:
-        WFTSClient();
+        WFTSClient(std::unique_ptr<Socket> sock_, void (*masterOffsetConsumer_)(int64_t));
         ~WFTSClient();
         void start();
         void stop();
-        int64_t getNow();
-        int64_t getMasterOffset();
     private:
         // Returns the offset between the PHC and wpi::Now in microseconds
         int64_t getOffset();
         void pingpong();
+        // a function pointer to a function which consumes calculated offsets
+        void (*masterOffsetConsumer)(int64_t);
         std::jthread worker;
         struct sockaddr_in servaddr;
         socklen_t servaddr_len;
-        UDPIP_Sock sock;
-        std::atomic_int64_t masterOffset{0};
+        std::unique_ptr<Socket> sock;
         // Hardware capabilities
         unsigned int tsopts = 0;
         int phcfd; // PTP hardware clock file descriptor

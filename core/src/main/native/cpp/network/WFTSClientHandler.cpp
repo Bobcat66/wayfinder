@@ -20,59 +20,41 @@
 #include "wfcore/network/WFTSClientHandler.h"
 #include "wfcore/common/wfassert.h"
 #include "wfcore/network/WFTSClient.h"
-
-namespace impl {
-    using namespace wf;
-    class WFTSClientHandler_impl {
-    public:
-        static WFTSClientHandler_impl& getInstance() {
-            static WFTSClientHandler_impl inst;
-            return inst;
-        }
-        WFStatusResult startClient() {
-            if (client) return WFStatusResult::success();
-            try {
-                client = std::make_unique<WFTSClient>();
-                return WFStatusResult::success();
-            } catch (const wfexception& e) {
-                return WFStatusResult::failure(e.status(),e.what());
-            }
-        }
-        WFStatusResult stopClient() {
-            if (client) {
-                client->stop();
-                client.reset();
-            }
-            return WFStatusResult::success();
-        }
-        TimeSupplier getTimeSupplier() {
-            return WFTSClientHandler_impl::getWFTSTime;
-        }
-    private:
-        WFTSClientHandler_impl();
-        ~WFTSClientHandler_impl() = default;
-        static int64_t getWFTSTime() {
-            auto& inst = WFTSClientHandler_impl::getInstance();
-            WF_FatalAssert(inst.client);
-            return inst.client->getMasterOffset();
-        }
-        WFTSClientHandler_impl(const WFTSClientHandler_impl&) = delete;
-        WFTSClientHandler_impl& operator=(const WFTSClientHandler_impl&) = delete;
-        WFTSClientHandler_impl(WFTSClientHandler_impl&&) = delete;
-        WFTSClientHandler_impl& operator=(WFTSClientHandler_impl&&) = delete;
-        std::unique_ptr<WFTSClient> client;
-    };
-}
+#include <ntcore.h>
+#include <mutex>
+#include <wpi/timestamp.h>
+#include "wfcore/network/UDPIPSocket.h"
 
 namespace wf {
     WFStatusResult WFTSClientHandler::startClient() {
-        return impl::WFTSClientHandler_impl::getInstance().startClient();
+        if (client) return WFStatusResult::success();
+        try {
+            std::unique_ptr<Socket> sock = std::make_unique<UDPIPSocket>(WFTS_CLIENT_PORT);
+            client = std::make_unique<WFTSClient>(std::move(sock),&WFTSClientHandler::loadMasterOffset);
+            return WFStatusResult::success();
+        } catch (const wfexception& e) {
+            return WFStatusResult::failure(e.status(),e.what());
+        }
     }
+
     WFStatusResult WFTSClientHandler::stopClient() {
-        return impl::WFTSClientHandler_impl::getInstance().stopClient();
+        if (client) {
+            client->stop();
+            client.reset();
+        }
+        return WFStatusResult::success();
     }
+
     TimeSupplier WFTSClientHandler::getTimeSupplier() {
-        return impl::WFTSClientHandler_impl::getInstance().getTimeSupplier();
+        return WFTSClientHandler::getWFTSTime;
     }
-    
+
+    int64_t WFTSClientHandler::getWFTSTime() noexcept {
+        return static_cast<int64_t>(wpi::Now()) - WFTSClientHandler::getInstance().masterOffset.load(std::memory_order_relaxed);
+    }
+
+    WFTSClientHandler::WFTSClientHandler() = default;
+
+    WFTSClientHandler::~WFTSClientHandler() = default;
+
 }

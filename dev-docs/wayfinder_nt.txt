@@ -1,0 +1,10 @@
+Wayfinder uses a special NT Table (wayfinder/control) to send and receive control messages. The control table
+has the following topics:
+
+WFTS (bool): This is published by the RoboRIO, and signals to coprocessors whether or not the RoboRIO is acting as a WFTS server
+
+SLAMNode (string): This is published by the RoboRIO, and signals to the coprocessors which one of them is to act as the SLAM node.
+The RoboRIO can also leave it empty and not assign a SLAM server
+
+
+
