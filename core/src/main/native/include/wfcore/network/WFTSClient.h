@@ -21,6 +21,7 @@
 
 #include <atomic>
 #include "wfcore/network/Socket.h"
+#include "wfcore/utils/FiniteStateMachine.h"
 #include <thread>
 #include <memory>
 #include <netinet/in.h>
@@ -29,12 +30,7 @@
 #define WFTS_CLIENT_PORT 30001
 
 namespace wf {
-
-    // WIP
-    enum class WFTSClientState {
-        AWAIT_SYNC,
-        
-    };
+    
     class WFTSClient {
     public:
         WFTSClient(std::unique_ptr<Socket> sock_, void (*masterOffsetConsumer_)(int64_t));
@@ -45,6 +41,7 @@ namespace wf {
         // Returns the offset between the PHC and wpi::Now in microseconds
         int64_t getOffset();
         void pingpong();
+        void cleanup();
         // a function pointer to a function which consumes calculated offsets
         void (*masterOffsetConsumer)(int64_t);
         std::jthread worker;
@@ -55,5 +52,7 @@ namespace wf {
         unsigned int tsopts = 0;
         int phcfd; // PTP hardware clock file descriptor
         void* phc_caps;
+        void* fsmClosure;
+        std::unique_ptr<FiniteStateMachine> stateMachine;
     };
 }

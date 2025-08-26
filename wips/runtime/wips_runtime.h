@@ -149,11 +149,11 @@ typedef struct {
 wips_blob_t *wips_blob_create(size_t size);
 
 // Deprecated for public use, For internal use only. Use wips_blob_stackwrap instead
-wips_blob_t *wips_blob_wrap(unsigned char *base, size_t size);
+wips_blob_t *wips_blob_wrap(void *base, size_t size);
 
 // Creates a blob on the stack. Blobs created with this method cannot be destroyed normally
 // The caller is in charge of lifetime ownership for the base pointer
-wips_blob_t wips_blob_stackwrap(unsigned char *base, size_t size);
+wips_blob_t wips_blob_stackwrap(void *base, size_t size);
 
 void wips_blob_destroy(wips_blob_t *bin);
 

@@ -52,21 +52,21 @@ wips_blob_t *wips_blob_create(size_t size) {
     return newbin;
 }
 
-wips_blob_t *wips_blob_wrap(unsigned char *base, size_t size) {
+wips_blob_t *wips_blob_wrap(void *base, size_t size) {
     WIPS_FatalAssert(base != NULL);
     wips_blob_t *newbin = malloc(sizeof(wips_blob_t));
     if (!newbin) return NULL;
-    newbin->base = base;
+    newbin->base = (unsigned char *)base;
     newbin->offset = 0;
     newbin->allocated = size;
     return newbin;
 }
 
 
-wips_blob_t wips_blob_stackwrap(unsigned char *base, size_t size) {
+wips_blob_t wips_blob_stackwrap(void *base, size_t size) {
     WIPS_FatalAssert(base != NULL);
     wips_blob_t newblob;
-    newblob.base = base;
+    newblob.base = (unsigned char *)base;
     newblob.offset = 0;
     newblob.allocated = size;
 }
