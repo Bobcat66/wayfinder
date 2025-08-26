@@ -249,3 +249,13 @@
   - name: twists
     type: twist2
     vla: True
+---
+# Timesync packet
+  name: timesync_packet
+  fields:
+  - name: packet_id # The server tags each packet with a packet id, clients will respond with the last packet ID they have received
+    type: u32
+  - name: timestamp
+    type: i64
+  - name: flags
+    type: u8

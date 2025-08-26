@@ -108,6 +108,42 @@ wips_result_t wips_encode_pose3(wips_blob_t *data, wips_pose3_t *in) {
     WIPS_TRACELOG("Encoded pose3\n");
     return wips_make_result(bytesEncoded,WIPS_STATUS_OK);
 }
+wips_result_t wips_encode_nrb_pose3(wips_blob_t *data, wips_pose3_t *in) {
+    WIPS_TRACELOG("No resize buffer (nrb) encoding pose3\n");
+    WIPS_Assert(data != NULL && in != NULL,0);
+    size_t bytesEncoded = 0;
+    wips_result_t result;
+    WIPS_TRACELOG("NRB encoding pose3 field x (fp64)\n");
+    result = wips_encode_nrb_fp64(data, &(in->x));
+    bytesEncoded += result.bytes_processed;
+    if (result.status_code != WIPS_STATUS_OK) return wips_make_result(bytesEncoded,result.status_code);
+    WIPS_TRACELOG("NRB encoding pose3 field y (fp64)\n");
+    result = wips_encode_nrb_fp64(data, &(in->y));
+    bytesEncoded += result.bytes_processed;
+    if (result.status_code != WIPS_STATUS_OK) return wips_make_result(bytesEncoded,result.status_code);
+    WIPS_TRACELOG("NRB encoding pose3 field z (fp64)\n");
+    result = wips_encode_nrb_fp64(data, &(in->z));
+    bytesEncoded += result.bytes_processed;
+    if (result.status_code != WIPS_STATUS_OK) return wips_make_result(bytesEncoded,result.status_code);
+    WIPS_TRACELOG("NRB encoding pose3 field wq (fp64)\n");
+    result = wips_encode_nrb_fp64(data, &(in->wq));
+    bytesEncoded += result.bytes_processed;
+    if (result.status_code != WIPS_STATUS_OK) return wips_make_result(bytesEncoded,result.status_code);
+    WIPS_TRACELOG("NRB encoding pose3 field xq (fp64)\n");
+    result = wips_encode_nrb_fp64(data, &(in->xq));
+    bytesEncoded += result.bytes_processed;
+    if (result.status_code != WIPS_STATUS_OK) return wips_make_result(bytesEncoded,result.status_code);
+    WIPS_TRACELOG("NRB encoding pose3 field yq (fp64)\n");
+    result = wips_encode_nrb_fp64(data, &(in->yq));
+    bytesEncoded += result.bytes_processed;
+    if (result.status_code != WIPS_STATUS_OK) return wips_make_result(bytesEncoded,result.status_code);
+    WIPS_TRACELOG("NRB encoding pose3 field zq (fp64)\n");
+    result = wips_encode_nrb_fp64(data, &(in->zq));
+    bytesEncoded += result.bytes_processed;
+    if (result.status_code != WIPS_STATUS_OK) return wips_make_result(bytesEncoded,result.status_code);
+    WIPS_TRACELOG("NRB Encoded pose3\n");
+    return wips_make_result(bytesEncoded,WIPS_STATUS_OK);
+}
 wips_result_t wips_decode_pose3(wips_pose3_t *out, wips_blob_t *data) {
     WIPS_TRACELOG("Decoding pose3\n");
     WIPS_Assert(out != NULL && data != NULL,0);
@@ -143,6 +179,27 @@ wips_result_t wips_decode_pose3(wips_pose3_t *out, wips_blob_t *data) {
     if (result.status_code != WIPS_STATUS_OK) return wips_make_result(bytesDecoded,result.status_code);
     WIPS_TRACELOG("Decoded pose3\n");
     return wips_make_result(bytesDecoded,WIPS_STATUS_OK);
+}
+
+void wips_pose3_hton(wips_pose3_t *data) {
+    WIPS_TRACELOG("Converting pose3 to network order\n");
+    wips_fp64_hton(&(data->x));
+    wips_fp64_hton(&(data->y));
+    wips_fp64_hton(&(data->z));
+    wips_fp64_hton(&(data->wq));
+    wips_fp64_hton(&(data->xq));
+    wips_fp64_hton(&(data->yq));
+    wips_fp64_hton(&(data->zq));
+}
+void wips_pose3_ntoh(wips_pose3_t *data) {
+    WIPS_TRACELOG("Converting pose3 to host order\n");
+    wips_fp64_ntoh(&(data->x));
+    wips_fp64_ntoh(&(data->y));
+    wips_fp64_ntoh(&(data->z));
+    wips_fp64_ntoh(&(data->wq));
+    wips_fp64_ntoh(&(data->xq));
+    wips_fp64_ntoh(&(data->yq));
+    wips_fp64_ntoh(&(data->zq));
 }
 
 DEFINE_VLAGETTER(pose3)

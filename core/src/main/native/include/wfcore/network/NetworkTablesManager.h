@@ -37,9 +37,11 @@ namespace wf {
     public:
         NetworkTablesManager(const std::string& device_name,int team,bool server);
         const std::shared_ptr<nt::NetworkTable> getRootTable() const {return devRootTable;} 
+        const std::shared_ptr<nt::NetworkTable> getControlTable() const { return wfControlTable; }
         std::weak_ptr<NTDataPublisher> getDataPublisher(const std::string& name);
     private:
         std::shared_ptr<nt::NetworkTable> devRootTable;
+        std::shared_ptr<nt::NetworkTable> wfControlTable;
         std::unordered_map<std::string, std::shared_ptr<NTDataPublisher>> dataPublishers;
     };
 }

@@ -34,38 +34,25 @@
 
 #pragma once
 
+#ifdef WIPS_OPTION_BUILD_PYTHON
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-#include "wips_runtime.h"
-#include "twist2.wips.h"
+#include "wips_pyapi.h"
+#include "timesync_packet.wips.h"
 
 typedef struct {
-    wips_u32_t DETAILvlasize__timestamps;
-    wips_i64_t *timestamps;
-    wips_u32_t DETAILvlasize__twists;
-    wips_twist2_t *twists;
-} wips_odometry_result_t;
+    wips_struct_PyObject base;
+    wips_timesync_packet_t *c_obj;
+} wips_timesync_packet_PyObject;
 
-// Recursive function to free all memory allocated by the struct and its members. Does NOT free the struct itself if it was dynamically allocated.
-// Warning: Calling this function on a struct that has not been written to from a WIPS binary will result in undefined behavior.
-// This function is intended to be used when the struct is no longer needed, to prevent memory leaks.
-void wips_odometry_result_free_resources(wips_odometry_result_t *struct_ptr);
-wips_odometry_result_t *wips_odometry_result_create();
-void wips_odometry_result_destroy(wips_odometry_result_t *struct_ptr);
-
-wips_status_t wips_odometry_result_copy(wips_odometry_result_t *dest, const wips_odometry_result_t *src);
-
-wips_result_t wips_encode_odometry_result(wips_blob_t *data, wips_odometry_result_t *in);
-wips_result_t wips_encode_nrb_odometry_result(wips_blob_t *data, wips_odometry_result_t *in);
-wips_result_t wips_decode_odometry_result(wips_odometry_result_t *out, wips_blob_t *data);
-
-void wips_odometry_result_hton(wips_odometry_result_t *data);
-void wips_odometry_result_ntoh(wips_odometry_result_t *data);
-
-extern wips_vlamethods_t wips_odometry_result_vlamethods;
+extern wips_PyType wips_timesync_packet_PyType;
+extern PyTypeObject wips_timesync_packet_PyTypeObject;
 
 #ifdef __cplusplus
 }
 #endif
+
+#endif // WIPS_OPTION_BUILD_PYTHON

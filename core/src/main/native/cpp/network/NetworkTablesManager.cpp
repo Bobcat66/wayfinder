@@ -45,6 +45,7 @@ namespace wf {
             inst.StartClient4(device_name);
             inst.SetServerTeam(team);
             this->devRootTable = inst.GetTable(std::format("wayfinder/{}",device_name));
+            this->wfControlTable = inst.GetTable("wayfinder/control");
         } else {
             // Server not implemented
         }

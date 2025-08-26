@@ -128,6 +128,62 @@ wips_result_t wips_encode_apriltag_detection(wips_blob_t *data, wips_apriltag_de
     WIPS_TRACELOG("Encoded apriltag_detection\n");
     return wips_make_result(bytesEncoded,WIPS_STATUS_OK);
 }
+wips_result_t wips_encode_nrb_apriltag_detection(wips_blob_t *data, wips_apriltag_detection_t *in) {
+    WIPS_TRACELOG("No resize buffer (nrb) encoding apriltag_detection\n");
+    WIPS_Assert(data != NULL && in != NULL,0);
+    size_t bytesEncoded = 0;
+    wips_result_t result;
+    WIPS_TRACELOG("NRB encoding apriltag_detection field fiducial_id (i32)\n");
+    result = wips_encode_nrb_i32(data, &(in->fiducial_id));
+    bytesEncoded += result.bytes_processed;
+    if (result.status_code != WIPS_STATUS_OK) return wips_make_result(bytesEncoded,result.status_code);
+    WIPS_TRACELOG("NRB encoding apriltag_detection field corner0_x (fp64)\n");
+    result = wips_encode_nrb_fp64(data, &(in->corner0_x));
+    bytesEncoded += result.bytes_processed;
+    if (result.status_code != WIPS_STATUS_OK) return wips_make_result(bytesEncoded,result.status_code);
+    WIPS_TRACELOG("NRB encoding apriltag_detection field corner0_y (fp64)\n");
+    result = wips_encode_nrb_fp64(data, &(in->corner0_y));
+    bytesEncoded += result.bytes_processed;
+    if (result.status_code != WIPS_STATUS_OK) return wips_make_result(bytesEncoded,result.status_code);
+    WIPS_TRACELOG("NRB encoding apriltag_detection field corner1_x (fp64)\n");
+    result = wips_encode_nrb_fp64(data, &(in->corner1_x));
+    bytesEncoded += result.bytes_processed;
+    if (result.status_code != WIPS_STATUS_OK) return wips_make_result(bytesEncoded,result.status_code);
+    WIPS_TRACELOG("NRB encoding apriltag_detection field corner1_y (fp64)\n");
+    result = wips_encode_nrb_fp64(data, &(in->corner1_y));
+    bytesEncoded += result.bytes_processed;
+    if (result.status_code != WIPS_STATUS_OK) return wips_make_result(bytesEncoded,result.status_code);
+    WIPS_TRACELOG("NRB encoding apriltag_detection field corner2_x (fp64)\n");
+    result = wips_encode_nrb_fp64(data, &(in->corner2_x));
+    bytesEncoded += result.bytes_processed;
+    if (result.status_code != WIPS_STATUS_OK) return wips_make_result(bytesEncoded,result.status_code);
+    WIPS_TRACELOG("NRB encoding apriltag_detection field corner2_y (fp64)\n");
+    result = wips_encode_nrb_fp64(data, &(in->corner2_y));
+    bytesEncoded += result.bytes_processed;
+    if (result.status_code != WIPS_STATUS_OK) return wips_make_result(bytesEncoded,result.status_code);
+    WIPS_TRACELOG("NRB encoding apriltag_detection field corner3_x (fp64)\n");
+    result = wips_encode_nrb_fp64(data, &(in->corner3_x));
+    bytesEncoded += result.bytes_processed;
+    if (result.status_code != WIPS_STATUS_OK) return wips_make_result(bytesEncoded,result.status_code);
+    WIPS_TRACELOG("NRB encoding apriltag_detection field corner3_y (fp64)\n");
+    result = wips_encode_nrb_fp64(data, &(in->corner3_y));
+    bytesEncoded += result.bytes_processed;
+    if (result.status_code != WIPS_STATUS_OK) return wips_make_result(bytesEncoded,result.status_code);
+    WIPS_TRACELOG("NRB encoding apriltag_detection field decision_margin (fp64)\n");
+    result = wips_encode_nrb_fp64(data, &(in->decision_margin));
+    bytesEncoded += result.bytes_processed;
+    if (result.status_code != WIPS_STATUS_OK) return wips_make_result(bytesEncoded,result.status_code);
+    WIPS_TRACELOG("NRB encoding apriltag_detection field hamming_distance (fp64)\n");
+    result = wips_encode_nrb_fp64(data, &(in->hamming_distance));
+    bytesEncoded += result.bytes_processed;
+    if (result.status_code != WIPS_STATUS_OK) return wips_make_result(bytesEncoded,result.status_code);
+    WIPS_TRACELOG("NRB encoding apriltag_detection field tag_family_id (u8)\n");
+    result = wips_encode_nrb_u8(data, &(in->tag_family_id));
+    bytesEncoded += result.bytes_processed;
+    if (result.status_code != WIPS_STATUS_OK) return wips_make_result(bytesEncoded,result.status_code);
+    WIPS_TRACELOG("NRB Encoded apriltag_detection\n");
+    return wips_make_result(bytesEncoded,WIPS_STATUS_OK);
+}
 wips_result_t wips_decode_apriltag_detection(wips_apriltag_detection_t *out, wips_blob_t *data) {
     WIPS_TRACELOG("Decoding apriltag_detection\n");
     WIPS_Assert(out != NULL && data != NULL,0);
@@ -183,6 +239,37 @@ wips_result_t wips_decode_apriltag_detection(wips_apriltag_detection_t *out, wip
     if (result.status_code != WIPS_STATUS_OK) return wips_make_result(bytesDecoded,result.status_code);
     WIPS_TRACELOG("Decoded apriltag_detection\n");
     return wips_make_result(bytesDecoded,WIPS_STATUS_OK);
+}
+
+void wips_apriltag_detection_hton(wips_apriltag_detection_t *data) {
+    WIPS_TRACELOG("Converting apriltag_detection to network order\n");
+    wips_i32_hton(&(data->fiducial_id));
+    wips_fp64_hton(&(data->corner0_x));
+    wips_fp64_hton(&(data->corner0_y));
+    wips_fp64_hton(&(data->corner1_x));
+    wips_fp64_hton(&(data->corner1_y));
+    wips_fp64_hton(&(data->corner2_x));
+    wips_fp64_hton(&(data->corner2_y));
+    wips_fp64_hton(&(data->corner3_x));
+    wips_fp64_hton(&(data->corner3_y));
+    wips_fp64_hton(&(data->decision_margin));
+    wips_fp64_hton(&(data->hamming_distance));
+    wips_u8_hton(&(data->tag_family_id));
+}
+void wips_apriltag_detection_ntoh(wips_apriltag_detection_t *data) {
+    WIPS_TRACELOG("Converting apriltag_detection to host order\n");
+    wips_i32_ntoh(&(data->fiducial_id));
+    wips_fp64_ntoh(&(data->corner0_x));
+    wips_fp64_ntoh(&(data->corner0_y));
+    wips_fp64_ntoh(&(data->corner1_x));
+    wips_fp64_ntoh(&(data->corner1_y));
+    wips_fp64_ntoh(&(data->corner2_x));
+    wips_fp64_ntoh(&(data->corner2_y));
+    wips_fp64_ntoh(&(data->corner3_x));
+    wips_fp64_ntoh(&(data->corner3_y));
+    wips_fp64_ntoh(&(data->decision_margin));
+    wips_fp64_ntoh(&(data->hamming_distance));
+    wips_u8_ntoh(&(data->tag_family_id));
 }
 
 DEFINE_VLAGETTER(apriltag_detection)

@@ -59,7 +59,11 @@ void wips_twist3_destroy(wips_twist3_t *struct_ptr);
 wips_status_t wips_twist3_copy(wips_twist3_t *dest, const wips_twist3_t *src);
 
 wips_result_t wips_encode_twist3(wips_blob_t *data, wips_twist3_t *in);
+wips_result_t wips_encode_nrb_twist3(wips_blob_t *data, wips_twist3_t *in);
 wips_result_t wips_decode_twist3(wips_twist3_t *out, wips_blob_t *data);
+
+void wips_twist3_hton(wips_twist3_t *data);
+void wips_twist3_ntoh(wips_twist3_t *data);
 
 extern wips_vlamethods_t wips_twist3_vlamethods;
 

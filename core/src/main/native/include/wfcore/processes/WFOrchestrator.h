@@ -25,6 +25,7 @@
 #include "wfcore/configuration/ResourceManager.h"
 #include "wfcore/configuration/WFSystemConfig.h"
 #include "wfcore/pipeline/ApriltagPipelineFactory.h"
+#include "wfcore/network/WFTSManager.h"
 
 namespace wf {
     class WFOrchestrator : public WFLoggedStatusfulObject {
@@ -59,5 +60,6 @@ namespace wf {
         InferenceEngineFactory inferenceEngineFactory_;
         ApriltagPipelineFactory apriltagPipelineFactory_;
         WFSystemConfig systemConfig_;
+        WFTSManager wftsManager_;
     };
 }
