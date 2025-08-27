@@ -23,7 +23,7 @@
 #include <opencv2/opencv.hpp>
 #include "wfcore/video/processing.h"
 #include <iostream>
-#include "wfcore/pipeline/pnp.h"
+#include "wfcore/fiducial/pose/pnp.h"
 
 static cv::Mat createIntrinsicsMatrix(double fx, double fy, double cx, double cy) {
     return (cv::Mat_<double>(3, 3) <<

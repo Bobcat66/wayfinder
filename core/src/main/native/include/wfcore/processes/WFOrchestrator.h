@@ -24,7 +24,7 @@
 #include "wfcore/network/NetworkTablesManager.h"
 #include "wfcore/configuration/ResourceManager.h"
 #include "wfcore/configuration/WFSystemConfig.h"
-#include "wfcore/pipeline/ApriltagPipelineFactory.h"
+#include "wfcore/pipeline/pipelines/ApriltagPipelineFactory.h"
 #include "wfcore/network/WFTSManager.h"
 
 namespace wf {
@@ -51,6 +51,8 @@ namespace wf {
         }
         WFStatusResult configureHardware();
         WFStatusResult configureWorkers();
+        WFStatusResult setCameraConfig(const std::string& nickname, CameraConfiguration config);
+        WFResult<CameraConfiguration> getCameraConfig(const std::string& nickname);
         static WFOrchestrator createFromEnv();
     private:
         NetworkTablesManager ntManager_;

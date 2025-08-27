@@ -17,26 +17,25 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "wfcore/pipeline/ApriltagPipelineFactory.h"
-#include "wfcore/common/wfexcept.h"
+#pragma once
+
+#include <variant>
+#include "wfcore/pipeline/config/ApriltagPipelineConfiguration.h"
+#include "wfcore/pipeline/config/ObjectDetectionPipelineConfiguration.h"
+#include "wfcore/pipeline/PipelineType.h"
+#include "wfcore/utils/LambdaVisitor.h"
 
 namespace wf {
-    WFResult<std::unique_ptr<Pipeline>> ApriltagPipelineFactory::createPipeline(
-        ApriltagPipelineConfiguration& config,
-        CameraIntrinsics intrinsics
-    ) {
-        ApriltagFieldHandler handler(resourceManager);
-        try {
-            return std::make_unique<ApriltagPipeline>(
-                config,
-                std::move(intrinsics),
-                handler
-            );
-        } catch (const wfexception& e) {
-            return WFResult<std::unique_ptr<Pipeline>>::failure(
-                e.status(),
-                e.what()
-            );
-        }
+    using PipelineConfigVariant = std::variant<
+        ApriltagPipelineConfiguration,
+        ObjectDetectionPipelineConfiguration
+    >;
+
+    constexpr inline PipelineType getConfigType(const PipelineConfigVariant& cfg) {
+        return std::visit(LambdaVisitor{
+            [](const ApriltagPipelineConfiguration& apcfg) { return PipelineType::Apriltag; },
+            [](const ObjectDetectionPipelineConfiguration& odpcfg) { return PipelineType::ObjDetect; }
+        }, cfg);
     }
+
 }

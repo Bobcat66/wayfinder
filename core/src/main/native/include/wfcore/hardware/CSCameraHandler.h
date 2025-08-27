@@ -33,7 +33,7 @@ namespace wf {
 
         CameraBackend getBackend() const noexcept { return CameraBackend::CSCORE; }
 
-        WFResult<std::shared_ptr<FrameProvider>> getFrameProvider(const std::string& name) override;
+        WFResult<std::shared_ptr<CameraSink>> getCameraSink(const std::string& name) override;
 
         std::string getDevPath() const { return devpath_; }
 

@@ -17,7 +17,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "wfcore/pipeline/ObjectDetectionPipelineConfiguration.h"
+#include "wfcore/pipeline/config/ObjectDetectionPipelineConfiguration.h"
 #include "wfcore/common/wfdef.h"
 #include "wfcore/common/logging.h"
 #include "wfcore/common/envutils.h"

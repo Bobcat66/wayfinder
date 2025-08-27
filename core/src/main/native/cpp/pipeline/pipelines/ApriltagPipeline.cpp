@@ -18,12 +18,12 @@
  */
 
 
-#include "wfcore/pipeline/ApriltagPipeline.h"
+#include "wfcore/pipeline/pipelines/ApriltagPipeline.h"
 #include "wfcore/hardware/CameraConfiguration.h"
 #include "wfcore/common/wfassert.h"
 #include "wfcore/common/logging.h"
 #include <algorithm>
-#include <wfcore/pipeline/pnp.h>
+#include <wfcore/fiducial/pose/pnp.h>
 #include <cassert>
 #include "wfcore/common/wfexcept.h"
 
@@ -41,8 +41,10 @@ namespace wf {
         if (!dres) throw wf_result_error(dres);
     }
 
-    WFStatusResult ApriltagPipeline::setConfig(const ApriltagPipelineConfiguration& config) {
-        this->config = config;
+    WFStatusResult ApriltagPipeline::setConfig(PipelineConfigVariant config) {
+        if (getConfigType(config) != PipelineType::Apriltag)
+            return WFStatusResult::failure(WFStatus::PIPELINE_BAD_CONFIG);
+        this->config = std::get<ApriltagPipelineConfiguration>(config);
         return updateDetectorConfig();
     }
     
@@ -79,6 +81,15 @@ namespace wf {
         std::erase_if(detections, [this](ApriltagDetection detection) {
             return this->config.detectorExcludes.contains(detection.id);
         });
+        if (!config.solvePnP) {
+            return PipelineResult::ApriltagResult(
+                meta.micros,
+                meta.server_time_us,
+                std::move(detections),
+                {},
+                {}
+            );
+        }
 
         std::vector<ApriltagRelativePoseObservation> atagPoses;
         if (config.solveTagRelative) {

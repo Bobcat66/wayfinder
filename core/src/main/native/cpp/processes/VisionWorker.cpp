@@ -21,9 +21,11 @@
 #include "wfcore/video/video_utils.h"
 #include "wfcore/common/logging.h"
 #include "wfcore/video/video_types.h"
+#include "wfcore/pipeline/visitors/PipelineConfigApplier.h"
 #include <pthread.h>
 
 namespace impl {
+    using namespace wf;
     [[ nodiscard ]]
     static inline bool validateFrame(const cv::Mat& frame,const wf::FrameMetadata& meta) noexcept {
         return (frame.rows == meta.format.height) 
@@ -44,7 +46,7 @@ namespace wf {
     
     VisionWorker::VisionWorker(
         std::string name_,
-        std::shared_ptr<FrameProvider> frameProvider_,
+        std::shared_ptr<CameraSink> frameProvider_,
         CVProcessPipe<cv::Mat> preprocesser_, 
         std::unique_ptr<Pipeline> pipeline_,
         std::unique_ptr<PipelineOutputConsumer> outputConsumer_
@@ -82,9 +84,17 @@ namespace wf {
     }
 
     void VisionWorker::stop() {
-        if (thread.joinable())
+        if (thread.joinable()){
             thread.request_stop(); // cooperative stop
+            thread.join();
+            thread = std::jthread{};
+        }
         running.store(false);
+    }
+
+
+    VisionWorkerConfig VisionWorker::getConfig() {
+        auto nickname = frameProvider->getCameraNickname();
     }
 
     // TODO: Add more robust error handling

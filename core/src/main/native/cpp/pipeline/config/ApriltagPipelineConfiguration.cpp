@@ -17,7 +17,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "wfcore/pipeline/ApriltagPipelineConfiguration.h"
+#include "wfcore/pipeline/config/ApriltagPipelineConfiguration.h"
 #include "jval/ApriltagPipelineConfig.jval.hpp"
 #include "wfcore/configuration/WFDefaults.h"
 

@@ -27,14 +27,25 @@
 #include <vector>
 #include <optional>
 #include <cstdint>
+#include "wfcore/pipeline/config/pipeline_config.h"
 
 namespace wf {
+
+    class ApriltagPipeline;
+    class ObjectDetectionPipeline;
+    struct PipelineVisitor {
+        virtual WFStatusResult visit(ApriltagPipeline& pipeline) = 0;
+        virtual WFStatusResult visit(ObjectDetectionPipeline& pipeline) = 0;
+    };
 
     class Pipeline {
     public:
         [[nodiscard]] 
         virtual WFResult<PipelineResult> process(const cv::Mat& data, const FrameMetadata& meta) noexcept = 0;
         virtual ~Pipeline() = default;
+        // The dependencies pointer to enable injecting dependencies needed for config changes (Like inference engine factories, resource managers, etc.)
+        virtual PipelineType getType() const = 0;
+        virtual WFStatusResult accept(PipelineVisitor& visitor) = 0;
     };
     
 }

@@ -49,13 +49,13 @@ namespace wf {
         enable();
     }
 
-    WFResult<std::shared_ptr<FrameProvider>> CSCameraHandler::getFrameProvider(const std::string& name){
-        if (!ok()) return WFResult<std::shared_ptr<FrameProvider>>::failure(getStatus(),getError());
+    WFResult<std::shared_ptr<CameraSink>> CSCameraHandler::getCameraSink(const std::string& name){
+        if (!ok()) return WFResult<std::shared_ptr<CameraSink>>::failure(getStatus(),getError());
         auto it = sinks_.find(name);
         if (it != sinks_.end()) {
             // If a frame provider with that name already exists in the sink registry and the pointer is valid, return it
             if (auto locked = it->second.lock()) 
-                return WFResult<std::shared_ptr<FrameProvider>>::success(std::move(locked));
+                return WFResult<std::shared_ptr<CameraSink>>::success(std::move(locked));
             // If the pointer is not valid, remove the entry from the sink registry
             sinks_.erase(it);
         }
@@ -64,7 +64,7 @@ namespace wf {
         std::weak_ptr<CSCameraSink> provider_registry_ref(provider);
         sinks_.insert({name,provider_registry_ref});
         // TODO: Check if operation was successful
-        return WFResult<std::shared_ptr<FrameProvider>>::success(std::move(provider));
+        return WFResult<std::shared_ptr<CameraSink>>::success(std::move(provider));
     }
 
     WFStatusResult CSCameraHandler::setStreamFormat(const StreamFormat& format) {

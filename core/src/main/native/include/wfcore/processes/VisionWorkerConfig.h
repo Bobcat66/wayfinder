@@ -3,8 +3,8 @@
 #include <string>
 #include <variant>
 #include "wfcore/pipeline/Pipeline.h"
-#include "wfcore/pipeline/ApriltagPipeline.h"
-#include "wfcore/pipeline/ObjectDetectionPipeline.h"
+#include "wfcore/pipeline/pipelines/ApriltagPipeline.h"
+#include "wfcore/pipeline/pipelines/ObjectDetectionPipeline.h"
 #include "wfcore/video/video_types.h"
 #include "wfcore/common/json_utils.h"
 
@@ -18,10 +18,7 @@ namespace wf {
         int raw_port;
         int processed_port;
         PipelineType pipelineType;
-        std::variant<
-            ApriltagPipelineConfiguration,
-            ObjectDetectionPipelineConfiguration
-        > pipelineConfig;
+        PipelineConfigVariant pipelineConfig;
 
         VisionWorkerConfig(
             std::string camera_nickname_, std::string name_,
@@ -29,10 +26,7 @@ namespace wf {
             bool stream_,
             int raw_port_, int processed_port_,
             PipelineType pipelineType_,
-            std::variant<
-                ApriltagPipelineConfiguration,
-                ObjectDetectionPipelineConfiguration
-            > pipelineConfig_
+            PipelineConfigVariant pipelineConfig_
         ) : camera_nickname(std::move(camera_nickname_)), name(std::move(name_))
         , inputFormat(std::move(inputFormat_)), outputFormat(std::move(outputFormat_))
         , stream(stream_), raw_port(raw_port_), processed_port(processed_port_)

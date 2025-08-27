@@ -128,4 +128,12 @@ namespace wf {
         }
         return WFStatusResult::success();
     }
+
+    WFResult<CameraConfiguration> WFOrchestrator::getCameraConfig(const std::string& nickname) {
+        return hardwareManager_.getCameraConfiguration(nickname);
+    }
+
+    WFStatusResult WFOrchestrator::setCameraConfig(const std::string& nickname, CameraConfiguration config) {
+        
+    }
 }

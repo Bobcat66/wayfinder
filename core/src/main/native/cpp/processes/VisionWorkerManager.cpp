@@ -29,6 +29,10 @@
 #include <format>
 #include <stdexcept>
 
+namespace impl {
+    using namespace wf;
+}
+
 namespace wf {
     //static auto logger = LoggerManager::getInstance().getLogger("VisionWorkerManager",LogGroup::General);
 
@@ -66,7 +70,7 @@ namespace wf {
                         : CameraIntrinsics{};
 
                     // Fetch frame provider from the hardware manager
-                    auto frameProviderRes = hardwareManager.getFrameProvider(
+                    auto frameProviderRes = hardwareManager.getCameraSink(
                         config.camera_nickname,
                         std::format("{}_frameprovider",config.camera_nickname)
                     );
@@ -166,6 +170,7 @@ namespace wf {
         return it->second;
     }
 
+    // TODO: Switch to WFResult
     void VisionWorkerManager::startWorker(const std::string& name) {
         this->logger()->info("Starting worker {}",name);
         auto it = workers.find(name);

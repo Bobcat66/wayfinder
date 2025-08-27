@@ -24,7 +24,7 @@
 #include "wfcore/video/video_types.h"
 #include "wfcore/inference/Tensorizer.h"
 #include "wfcore/hardware/CameraConfiguration.h"
-#include "wfcore/pipeline/ObjectDetectionPipelineConfiguration.h"
+#include "wfcore/pipeline/config/ObjectDetectionPipelineConfiguration.h"
 
 #include <string>
 #include <memory>
@@ -34,14 +34,24 @@ namespace wf {
 
     class ObjectDetectionPipeline : public Pipeline {
     public:
-        ObjectDetectionPipeline(ImageEncoding modelColorSpace_, std::unique_ptr<InferenceEngine> engine_, CameraIntrinsics intrinsics_);
+        ObjectDetectionPipeline(ObjectDetectionPipelineConfiguration config_, ImageEncoding modelColorSpace_, std::unique_ptr<InferenceEngine> engine_, CameraIntrinsics intrinsics_);
         [[nodiscard]] 
         WFResult<PipelineResult> process(const cv::Mat& data, const FrameMetadata& meta) noexcept override;
         InferenceEngineType getEngineType() const noexcept { return engine->getEngineType(); }
         ModelArch getModelArch() const noexcept { return engine->getModelArch(); }
         ImageEncoding getModelColorSpace() const noexcept { };
-        static std::unique_ptr<InferenceEngine> buildInferenceEngine(const ObjectDetectionPipelineConfiguration& config);
+        //static std::unique_ptr<InferenceEngine> buildInferenceEngine(const ObjectDetectionPipelineConfiguration& config);
+        PipelineType getType() const override {
+            return PipelineType::ObjDetect;
+        }
+        PipelineConfigVariant getPipelineConfig() const {
+            return config;
+        }
+        WFStatusResult accept(PipelineVisitor& visitor) override {
+            visitor.visit(*this);
+        }
     private:
+        ObjectDetectionPipelineConfiguration config;
         void updatePostprocParams();
         std::unique_ptr<InferenceEngine> engine;
         ImageEncoding modelColorSpace;

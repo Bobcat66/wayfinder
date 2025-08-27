@@ -24,7 +24,7 @@
 #include "wfcore/fiducial/ApriltagConfiguration.h"
 #include "wfcore/fiducial/ApriltagField.h"
 #include "wfcore/fiducial/ApriltagDetection.h"
-#include "wfcore/pipeline/pnpresults.h"
+#include "wfcore/fiducial/pose/pnpresults.h"
 
 #include <opencv2/core.hpp>
 #include <gtsam/geometry/Pose3.h>

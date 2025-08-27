@@ -20,20 +20,12 @@
 
 #pragma once
 
-#include "wfcore/video/video_types.h"
-#include "wfcore/common/status/ConcurrentStatusfulObject.h"
-
-#include <string>
-#include <opencv2/core.hpp>
+#include "wfcore/video/FrameProvider.h"
+#include "wfcore/common/status.h"
 
 namespace wf {
-
-    // FrameProvider does not fully subclass StatusfulObject because they can also just act as proxies for the status of their handlers
-    class FrameProvider {
+    class CameraSink : public FrameProvider {
     public:
-        virtual FrameMetadata getFrame(cv::Mat& mat) = 0;
-        virtual ~FrameProvider() noexcept = default;
-        virtual std::string getName() const = 0;
-        virtual WFResult<StreamFormat> getStreamFormat() const noexcept = 0;
+        virtual WFResult<std::string> getCameraNickname() const = 0;
     };
 }

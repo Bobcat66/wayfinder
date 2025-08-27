@@ -31,8 +31,9 @@
 #include "wfcore/common/status.h"
 #include "wfcore/pipeline/Pipeline.h"
 #include "wfcore/pipeline/output/PipelineOutputConsumer.h"
-#include "wfcore/video/FrameProvider.h"
+#include "wfcore/hardware/CameraSink.h"
 #include "wfcore/video/processing/CVProcessPipe.h"
+#include "wfcore/processes/VisionWorkerConfig.h"
 
 #include <mutex>
 namespace wf {
@@ -42,7 +43,7 @@ namespace wf {
     public:
         VisionWorker(
             std::string name_,
-            std::shared_ptr<FrameProvider> frameProvider_, 
+            std::shared_ptr<CameraSink> frameProvider_, 
             CVProcessPipe<cv::Mat> preprocessor_,
             std::unique_ptr<Pipeline> pipeline_,
             std::unique_ptr<PipelineOutputConsumer> outputConsumer_
@@ -50,6 +51,7 @@ namespace wf {
         ~VisionWorker();
         void start();
         void stop();
+        VisionWorkerConfig getConfig();
         const char* getThreadName() const noexcept { return threadName; }
         const std::string& getName() const noexcept { return name; }
         const bool isRunning() const noexcept { return running.load(); }
@@ -62,7 +64,7 @@ namespace wf {
         CVProcessPipe<cv::Mat> preprocesser;
         std::unique_ptr<Pipeline> pipeline;
         std::unique_ptr<PipelineOutputConsumer> outputConsumer;
-        std::shared_ptr<FrameProvider> frameProvider;
+        std::shared_ptr<CameraSink> frameProvider;
         cv::Mat rawFrameBuffer;
         cv::Mat ppFrameBuffer;
     };

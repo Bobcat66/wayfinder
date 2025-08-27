@@ -28,7 +28,7 @@
 #include "wfcore/fiducial/ApriltagConfiguration.h"
 #include "wfcore/common/status.h"
 #include "wfcore/inference/InferenceEngineFactory.h"
-#include "wfcore/pipeline/ApriltagPipelineFactory.h"
+#include "wfcore/pipeline/pipelines/ApriltagPipelineFactory.h"
 #include <memory>
 
 namespace wf {

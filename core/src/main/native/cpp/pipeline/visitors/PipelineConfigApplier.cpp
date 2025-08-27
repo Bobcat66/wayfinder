@@ -1,3 +1,4 @@
+
 /*
  * SPDX-License-Identifier: GPL-3.0-or-later
  *
@@ -17,23 +18,13 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-
-#pragma once
-
-#include "wfcore/video/video_types.h"
-#include "wfcore/common/status/ConcurrentStatusfulObject.h"
-
-#include <string>
-#include <opencv2/core.hpp>
+#include "wfcore/pipeline/visitors/PipelineConfigApplier.h"
 
 namespace wf {
-
-    // FrameProvider does not fully subclass StatusfulObject because they can also just act as proxies for the status of their handlers
-    class FrameProvider {
-    public:
-        virtual FrameMetadata getFrame(cv::Mat& mat) = 0;
-        virtual ~FrameProvider() noexcept = default;
-        virtual std::string getName() const = 0;
-        virtual WFResult<StreamFormat> getStreamFormat() const noexcept = 0;
-    };
+    WFStatusResult PipelineConfigApplier::visit(ApriltagPipeline& pipeline) {
+        return pipeline.setConfig(config_);
+    }
+    WFStatusResult PipelineConfigApplier::visit(ObjectDetectionPipeline& config) {
+        return WFStatusResult::failure(WFStatus::NOT_IMPLEMENTED);
+    }
 }

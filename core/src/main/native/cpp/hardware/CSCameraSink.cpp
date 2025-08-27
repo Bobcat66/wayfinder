@@ -70,10 +70,11 @@ namespace wf {
             : WFResult<StreamFormat>::failure(BAD_ACQUIRE);
     }
 
-    WFResult<std::string> CSCameraSink::getDevPath() const {
+
+    WFResult<std::string> CSCameraSink::getCameraNickname() const {
         auto locked = handler_.lock();
         return locked 
-            ? WFResult<std::string>::success(locked->getDevPath())
+            ? WFResult<std::string>::success(locked->getNickname())
             : WFResult<std::string>::failure(BAD_ACQUIRE);
     }
 

@@ -26,7 +26,7 @@
 #include <vector>
 #include "wfcore/inference/InferenceEngine.h"
 #include "wfcore/fiducial/ApriltagDetection.h"
-#include "wfcore/pipeline/pnp.h"
+#include "wfcore/fiducial/pose/pnp.h"
 
 namespace wf {
     bool drawTag3D(

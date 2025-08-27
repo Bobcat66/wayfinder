@@ -17,23 +17,26 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-
-#pragma once
-
-#include "wfcore/video/video_types.h"
-#include "wfcore/common/status/ConcurrentStatusfulObject.h"
-
-#include <string>
-#include <opencv2/core.hpp>
+#include "wfcore/pipeline/pipelines/ApriltagPipelineFactory.h"
+#include "wfcore/common/wfexcept.h"
 
 namespace wf {
-
-    // FrameProvider does not fully subclass StatusfulObject because they can also just act as proxies for the status of their handlers
-    class FrameProvider {
-    public:
-        virtual FrameMetadata getFrame(cv::Mat& mat) = 0;
-        virtual ~FrameProvider() noexcept = default;
-        virtual std::string getName() const = 0;
-        virtual WFResult<StreamFormat> getStreamFormat() const noexcept = 0;
-    };
+    WFResult<std::unique_ptr<Pipeline>> ApriltagPipelineFactory::createPipeline(
+        ApriltagPipelineConfiguration& config,
+        CameraIntrinsics intrinsics
+    ) {
+        ApriltagFieldHandler handler(resourceManager);
+        try {
+            return std::make_unique<ApriltagPipeline>(
+                config,
+                std::move(intrinsics),
+                handler
+            );
+        } catch (const wfexception& e) {
+            return WFResult<std::unique_ptr<Pipeline>>::failure(
+                e.status(),
+                e.what()
+            );
+        }
+    }
 }

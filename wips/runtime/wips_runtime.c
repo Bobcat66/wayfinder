@@ -132,34 +132,42 @@ wips_status_t wips_u8_copy(wips_u8_t *dest, const wips_u8_t *src) {
     *dest = *src;
     return WIPS_STATUS_OK;
 }
+
 wips_status_t wips_i8_copy(wips_i8_t *dest, const wips_i8_t *src) {
     *dest = *src;
     return WIPS_STATUS_OK;
 }
+
 wips_status_t wips_u16_copy(wips_u16_t *dest, const wips_u16_t *src) {
     *dest = *src;
     return WIPS_STATUS_OK;
 }
+
 wips_status_t wips_i16_copy(wips_i16_t *dest, const wips_i16_t *src) {
     *dest = *src;
     return WIPS_STATUS_OK;
 }
+
 wips_status_t wips_u32_copy(wips_u32_t *dest, const wips_u32_t *src) {
     *dest = *src;
     return WIPS_STATUS_OK;
 }
+
 wips_status_t wips_i32_copy(wips_i32_t *dest, const wips_i32_t *src) {
     *dest = *src;
     return WIPS_STATUS_OK;
 }
+
 wips_status_t wips_u64_copy(wips_u64_t *dest, const wips_u64_t *src) {
     *dest = *src;
     return WIPS_STATUS_OK;
 }
+
 wips_status_t wips_i64_copy(wips_i64_t *dest, const wips_i64_t *src) {
     *dest = *src;
     return WIPS_STATUS_OK;
 }
+
 wips_status_t wips_fp32_copy(wips_fp32_t *dest, const wips_fp32_t *src) {
     *dest = *src;
     return WIPS_STATUS_OK;

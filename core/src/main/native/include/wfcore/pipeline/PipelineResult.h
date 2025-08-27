@@ -20,7 +20,7 @@
 #pragma once
 
 #include <vector>
-#include "wfcore/pipeline/pnpresults.h"
+#include "wfcore/fiducial/pose/pnpresults.h"
 #include "wfcore/fiducial/ApriltagDetection.h"
 #include "wfcore/pipeline/PipelineType.h"
 #include "wfcore/inference/ObjectDetection.h"

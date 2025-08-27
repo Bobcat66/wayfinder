@@ -19,8 +19,8 @@
 
 #pragma once
 
-#include "wfcore/pipeline/ApriltagPipeline.h"
-#include "wfcore/pipeline/ApriltagPipelineConfiguration.h"
+#include "wfcore/pipeline/pipelines/ApriltagPipeline.h"
+#include "wfcore/pipeline/config/ApriltagPipelineConfiguration.h"
 #include "wfcore/configuration/ResourceManager.h"
 #include "wfcore/hardware/HardwareManager.h"
 #include <memory>

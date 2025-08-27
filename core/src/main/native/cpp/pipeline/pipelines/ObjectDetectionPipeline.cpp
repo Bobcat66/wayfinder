@@ -18,7 +18,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "wfcore/pipeline/ObjectDetectionPipeline.h"
+#include "wfcore/pipeline/pipelines/ObjectDetectionPipeline.h"
 #include "wfcore/common/wfexcept.h"
 #include "wfcore/inference/CPUInferenceEngineYOLO.h"
 #include "wfcore/video/video_utils.h"
@@ -27,8 +27,8 @@
 
 namespace wf {
 
-    ObjectDetectionPipeline::ObjectDetectionPipeline(ImageEncoding modelColorSpace_, std::unique_ptr<InferenceEngine> engine_, CameraIntrinsics intrinsics_)
-    : modelColorSpace(modelColorSpace_), engine(std::move(engine_)), intrinsics(std::move(intrinsics_)) {
+    ObjectDetectionPipeline::ObjectDetectionPipeline(ObjectDetectionPipelineConfiguration config_, ImageEncoding modelColorSpace_, std::unique_ptr<InferenceEngine> engine_, CameraIntrinsics intrinsics_)
+    : config(std::move(config_)), modelColorSpace(modelColorSpace_), engine(std::move(engine_)), intrinsics(std::move(intrinsics_)) {
         updatePostprocParams();
     }
     WFResult<PipelineResult> ObjectDetectionPipeline::process(const cv::Mat& data, const FrameMetadata& meta) noexcept {

@@ -23,7 +23,7 @@
 #include <filesystem>
 #include <string>
 #include "wfcore/video/video_types.h"
-#include "wfcore/video/FrameProvider.h"
+#include "wfcore/hardware/CameraSink.h"
 #include "wfcore/hardware/CameraHandler.h"
 #include "wfcore/common/status.h"
 #include <memory>
@@ -45,7 +45,7 @@ namespace wf {
 
         WFResult<CameraBackend> getBackend(const std::string& nickname) const;
 
-        WFResult<std::shared_ptr<FrameProvider>> getFrameProvider(const std::string& nickname, const std::string& provider_name);
+        WFResult<std::shared_ptr<CameraSink>> getCameraSink(const std::string& nickname, const std::string& provider_name);
 
         WFStatusResult setStreamFormat(const std::string& nickname, const StreamFormat& format);
 

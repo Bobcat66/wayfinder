@@ -18,7 +18,7 @@
  */
 
 
-#include "wfcore/pipeline/pnp.h"
+#include "wfcore/fiducial/pose/pnp.h"
 
 #include "wfcore/utils/cv2gtsam_interface.h"
 #include "wfcore/utils/coordinates.h"

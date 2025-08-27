@@ -25,7 +25,7 @@
 #include "wfcore/fiducial/ApriltagConfiguration.h"
 #include "wfcore/hardware/CameraConfiguration.h"
 #include "wfcore/common/json_utils.h"
-#include "wfcore/pipeline/ApriltagPipelineConfiguration.h"
+#include "wfcore/pipeline/config/ApriltagPipelineConfiguration.h"
 #include "wfcore/fiducial/ApriltagFieldHandler.h"
 
 namespace wf {
@@ -33,16 +33,22 @@ namespace wf {
     class ApriltagPipeline : public Pipeline {
     public:
         ApriltagPipeline(ApriltagPipelineConfiguration config_, CameraIntrinsics intrinsics_, ApriltagFieldHandler fieldHandler_);
-        WFStatusResult setConfig(const ApriltagPipelineConfiguration& config);
+        // This is an old API, It should not be invoked directly. Use visitors instead
+        WFStatusResult setConfig(PipelineConfigVariant config);
         void setIntrinsics(const CameraIntrinsics& intrinsics);
         [[nodiscard]] 
         WFResult<PipelineResult> process(const cv::Mat& data, const FrameMetadata& meta) noexcept override;
         ~ApriltagPipeline() override = default;
+        PipelineType getType() const override {
+            return PipelineType::Apriltag;
+        }
+        WFStatusResult accept(PipelineVisitor& visitor) override {
+            visitor.visit(*this);
+        }
     private:
         WFStatusResult updateFieldHandler();
         WFStatusResult updateDetectorConfig(); // Updates the apriltag detector's configuration
-        ApriltagPipelineConfiguration config;    
-        bool solvePnP;
+        ApriltagPipelineConfiguration config;
         CameraIntrinsics intrinsics;
         ApriltagConfiguration tagConfig;
         ApriltagFieldHandler fieldHandler;

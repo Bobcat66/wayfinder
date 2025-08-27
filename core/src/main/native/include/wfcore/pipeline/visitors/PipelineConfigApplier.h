@@ -17,23 +17,21 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-
 #pragma once
 
-#include "wfcore/video/video_types.h"
-#include "wfcore/common/status/ConcurrentStatusfulObject.h"
-
-#include <string>
-#include <opencv2/core.hpp>
+#include "wfcore/pipeline/config/pipeline_config.h"
+#include "wfcore/pipeline/pipelines/ApriltagPipeline.h"
+#include "wfcore/pipeline/pipelines/ObjectDetectionPipeline.h"
+#include "wfcore/common/status.h"
 
 namespace wf {
-
-    // FrameProvider does not fully subclass StatusfulObject because they can also just act as proxies for the status of their handlers
-    class FrameProvider {
+    class PipelineConfigApplier : public PipelineVisitor {
     public:
-        virtual FrameMetadata getFrame(cv::Mat& mat) = 0;
-        virtual ~FrameProvider() noexcept = default;
-        virtual std::string getName() const = 0;
-        virtual WFResult<StreamFormat> getStreamFormat() const noexcept = 0;
+        template <typename T>
+        PipelineConfigApplier(T config) : config_(config) {}
+        WFStatusResult visit(ApriltagPipeline& pipeline) override;
+        WFStatusResult visit(ObjectDetectionPipeline& pipeline) override;
+    private:
+        PipelineConfigVariant config_;
     };
 }
