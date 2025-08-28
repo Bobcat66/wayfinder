@@ -51,8 +51,8 @@ namespace impl {
                 { "value", getNullValidator() }
             },
             {
-                "op", 
-                "path"
+                "path", 
+                "op"
             },
             {
             }
@@ -61,12 +61,12 @@ namespace impl {
     }
     const JSONValidationFunctor* get__z42Droot_items_op_validator() {        
         static JSONEnumValidator validator({
-            "remove", 
-            "copy", 
             "add", 
-            "replace", 
+            "copy", 
             "test", 
-            "move"
+            "replace", 
+            "move", 
+            "remove"
         });
         return static_cast<JSONValidationFunctor*>(&validator);
     }

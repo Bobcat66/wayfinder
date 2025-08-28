@@ -26,7 +26,7 @@
 
 namespace impl {
     using namespace wf;
-    static WFResult<std::variant<ApriltagPipelineConfiguration,ObjectDetectionPipelineConfiguration>> getPipelineConfig(const JSON& jobject) {
+    static WFResult<PipelineConfigVariant> getPipelineConfig(const JSON& jobject) {
         static JSONVariantDecoder<ApriltagPipelineConfiguration,ObjectDetectionPipelineConfiguration> decoder(
             {
                 jval::get_ApriltagPipelineConfig_validator(),
@@ -42,7 +42,15 @@ namespace impl {
             }
         );
 
-        return decoder.decode(jobject);
+        auto decodeRes = decoder.decode(jobject);
+        if (!decodeRes) {
+            return WFResult<PipelineConfigVariant>::propagateFail(decodeRes);
+        }
+
+        return std::visit(LambdaVisitor{
+            [](const ObjectDetectionPipelineConfiguration& config) -> PipelineConfigVariant { return config; },
+            [](const ApriltagPipelineConfiguration& config) -> PipelineConfigVariant { return config; }
+        }, decodeRes.value());
     }
     static PipelineType decodePipelineType(const JSON& jobject) {
         auto str = jobject.get<std::string>();
@@ -78,7 +86,7 @@ namespace wf {
             std::in_place,
             jobject["camera_nickname"].get<std::string>(),
             jobject["name"].get<std::string>(),
-            getJSONOpt(jobject,"inputFormat",StreamFormat()),
+            getJSONOpt(jobject,"inputFormat",FrameFormat()),
             getJSONOpt(jobject,"outputFormat",StreamFormat()),
             jobject["stream"].get<bool>(),
             getJSONOpt(jobject,"raw_port",0),
@@ -93,6 +101,10 @@ namespace wf {
         WFStatus visitorStatus = WFStatus::OK;
         std::string visitorMsg;
         std::visit(LambdaVisitor{
+            [&visitorStatus,&visitorMsg](const std::monostate&) -> void {
+                visitorStatus = WFStatus::PIPELINE_BAD_CONFIG;
+                visitorMsg = "Pipeline config variant is empty!";
+            },
             [&pcfg_jobject,&visitorStatus,&visitorMsg](const ApriltagPipelineConfiguration& apcfg) -> void {
                 auto res = ApriltagPipelineConfiguration::toJSON(apcfg);
                 if (!res) {
@@ -116,7 +128,7 @@ namespace wf {
         if (visitorStatus != WFStatus::OK)
             return WFResult<JSON>::failure(visitorStatus,visitorMsg);
 
-        auto iformat_res = StreamFormat::toJSON(config.inputFormat);
+        auto iformat_res = FrameFormat::toJSON(config.inputFormat);
         if (!iformat_res)
             return WFResult<JSON>::propagateFail(iformat_res);
         

@@ -47,9 +47,7 @@ namespace wf {
         PipelineConfigVariant getPipelineConfig() const {
             return config;
         }
-        WFStatusResult accept(PipelineVisitor& visitor) override {
-            visitor.visit(*this);
-        }
+        WFStatusResult accept(PipelineVisitor& visitor) override { return visitor(*this); }
     private:
         ObjectDetectionPipelineConfiguration config;
         void updatePostprocParams();

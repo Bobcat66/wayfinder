@@ -46,6 +46,7 @@ namespace wf {
         void stopAllWorkers();
         void destroyAllWorkers();
         void periodic() noexcept;
+        WFResult<VisionWorkerConfig> getWorkerConfig(const std::string& name);
     private:
         std::unordered_map<std::string,std::shared_ptr<VisionWorker>> workers;
 

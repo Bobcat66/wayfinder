@@ -36,27 +36,10 @@
 #include "jvruntime.hpp"
 #include "StreamFormat_capi.jval.h"
 #include "StreamFormat.jval.hpp"
-#include "ImageEncoding.jval.hpp"
+#include "FrameFormat.jval.hpp"
 
 namespace impl {
     using namespace jval;
-    const JSONValidationFunctor* get__z42Droot_frameFormat_validator() {        
-        static JSONStructValidator validator(
-            {
-                { "width", getPrimitiveValidator<int>() }, 
-                { "height", getPrimitiveValidator<int>() }, 
-                { "encoding", get_ImageEncoding_validator() }
-            },
-            {
-                "encoding", 
-                "height", 
-                "width"
-            },
-            {
-            }
-        );
-        return static_cast<JSONValidationFunctor*>(&validator);
-    }
 }
 
 namespace jval {
@@ -65,11 +48,11 @@ namespace jval {
         static JSONStructValidator validator(
             {
                 { "fps", getPrimitiveValidator<double>() }, 
-                { "frameFormat", get__z42Droot_frameFormat_validator() }
+                { "frameFormat", get_FrameFormat_validator() }
             },
             {
-                "fps", 
-                "frameFormat"
+                "frameFormat", 
+                "fps"
             },
             {
             }

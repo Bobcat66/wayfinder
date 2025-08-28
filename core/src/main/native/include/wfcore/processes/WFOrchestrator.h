@@ -53,6 +53,13 @@ namespace wf {
         WFStatusResult configureWorkers();
         WFStatusResult setCameraConfig(const std::string& nickname, CameraConfiguration config);
         WFResult<CameraConfiguration> getCameraConfig(const std::string& nickname);
+        WFResult<JSON> getCameraConfig_JSON(const std::string& nickname) {
+            return getCameraConfig(nickname).and_then(CameraConfiguration::toJSON);
+        }
+        WFResult<VisionWorkerConfig> getWorkerConfig(const std::string& name);
+        WFResult<JSON> getWorkerConfig_JSON(const std::string& name) {
+            return getWorkerConfig(name).and_then(VisionWorkerConfig::toJSON);
+        }
         static WFOrchestrator createFromEnv();
     private:
         NetworkTablesManager ntManager_;

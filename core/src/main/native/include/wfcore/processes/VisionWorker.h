@@ -51,13 +51,14 @@ namespace wf {
         ~VisionWorker();
         void start();
         void stop();
-        VisionWorkerConfig getConfig();
-        const char* getThreadName() const noexcept { return threadName; }
+        WFResult<VisionWorkerConfig> getConfig();
+        WFStatusResult applyConfig(VisionWorkerConfig& config);
+        const char* getThreadName() const noexcept { return threadName.c_str(); }
         const std::string& getName() const noexcept { return name; }
         const bool isRunning() const noexcept { return running.load(); }
     private:
         void run(std::stop_token stoken) noexcept;
-        const char* threadName;
+        std::string threadName;
         std::string name;
         std::jthread thread;
         std::atomic_bool running;

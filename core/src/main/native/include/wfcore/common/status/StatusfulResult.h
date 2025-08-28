@@ -79,8 +79,8 @@ namespace wf {
         // Applies mapper to the wrapped value, and returns a StatusfulResult wrapping the result
         // This is equivalent to the monadic operation bind(), so mapper must itself return a statusful result
         template <typename F>
-        auto and_then(F&& mapper) const -> decltype(mapper(std::declval<const T&>())) {
-            using ResultType = decltype(mapper(std::declval<T>()));
+        auto and_then(F&& mapper) const {
+            using ResultType = decltype(mapper(std::declval<const T&>()));
             static_assert(std::is_same_v<typename ResultType::status_type, status_type>, 
                 "Mapper must return StatusfulResult with same status_type");
             static_assert(ResultType::nominal_status == nominal_status, 
@@ -91,7 +91,25 @@ namespace wf {
                 if (hasMsg()) return ResultType::failure(status(),what());
                 return ResultType::failure(status());
             }
-            return mapper(optval.value());
+            return std::invoke(std::forward<F>(mapper), optval.value());
+        }
+
+        // Applies mapper to the wrapped value, and returns a StatusfulResult wrapping the result
+        // This is equivalent to the monadic operation bind(), so mapper must itself return a statusful result
+        template <typename F>
+        auto and_then(F&& mapper) {
+            using ResultType = decltype(mapper(std::declval<T&>()));
+            static_assert(std::is_same_v<typename ResultType::status_type, status_type>, 
+                "Mapper must return StatusfulResult with same status_type");
+            static_assert(ResultType::nominal_status == nominal_status, 
+                "Mapper must use same nominal_status");
+            static_assert(ResultType::StringMapper == StringMapper,
+                "Mapper must use same StringMapper");
+            if (!ok()){
+                if (hasMsg()) return ResultType::failure(status(),what());
+                return ResultType::failure(status());
+            }
+            return std::invoke(std::forward<F>(mapper), optval.value());
         }
         
         // Returns the message string if present, lazily constructs a default if not

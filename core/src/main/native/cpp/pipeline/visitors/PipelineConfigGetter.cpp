@@ -1,3 +1,4 @@
+
 /*
  * SPDX-License-Identifier: GPL-3.0-or-later
  *
@@ -17,21 +18,14 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#pragma once
-
-#include "wfcore/pipeline/config/pipeline_config.h"
-#include "wfcore/pipeline/pipelines/ApriltagPipeline.h"
-#include "wfcore/pipeline/pipelines/ObjectDetectionPipeline.h"
-#include "wfcore/common/status.h"
+#include "wfcore/pipeline/visitors/PipelineConfigGetter.h"
 
 namespace wf {
-    class PipelineConfigApplier : public PipelineVisitor {
-    public:
-        template <typename T>
-        PipelineConfigApplier(T config) : config_(config) {}
-        WFStatusResult operator()(ApriltagPipeline& pipeline) override;
-        WFStatusResult operator()(ObjectDetectionPipeline& pipeline) override;
-    private:
-        PipelineConfigVariant config_;
-    };
+    WFStatusResult PipelineConfigGetter::operator()(ApriltagPipeline& pipeline) {
+        config = pipeline.getConfig();
+        return WFStatusResult::success();
+    }
+    WFStatusResult PipelineConfigGetter::operator()(ObjectDetectionPipeline& pipeline) {
+        return WFStatusResult::failure(WFStatus::NOT_IMPLEMENTED);
+    }
 }

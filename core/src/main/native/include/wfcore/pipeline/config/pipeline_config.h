@@ -25,14 +25,17 @@
 #include "wfcore/pipeline/PipelineType.h"
 #include "wfcore/utils/LambdaVisitor.h"
 
+
 namespace wf {
     using PipelineConfigVariant = std::variant<
+        std::monostate,
         ApriltagPipelineConfiguration,
         ObjectDetectionPipelineConfiguration
     >;
 
     constexpr inline PipelineType getConfigType(const PipelineConfigVariant& cfg) {
         return std::visit(LambdaVisitor{
+            [](const std::monostate&) { return PipelineType::NullType; },
             [](const ApriltagPipelineConfiguration& apcfg) { return PipelineType::Apriltag; },
             [](const ObjectDetectionPipelineConfiguration& odpcfg) { return PipelineType::ObjDetect; }
         }, cfg);

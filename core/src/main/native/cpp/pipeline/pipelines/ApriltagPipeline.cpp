@@ -26,6 +26,7 @@
 #include <wfcore/fiducial/pose/pnp.h>
 #include <cassert>
 #include "wfcore/common/wfexcept.h"
+#include <type_traits>
 
 
 namespace wf {

@@ -45,7 +45,7 @@ namespace wf {
     };
 
     // TODO: Change order to be (width,height,encoding)
-    struct FrameFormat {
+    struct FrameFormat : public JSONSerializable<FrameFormat> {
         ImageEncoding encoding;
         int width;
         int height;
@@ -63,6 +63,10 @@ namespace wf {
         cv::Size size() const {
             return cv::Size(width,height);
         }
+
+        static WFResult<JSON> toJSON_impl(const FrameFormat& object);
+        static WFResult<FrameFormat> fromJSON_impl(const JSON& jobject);
+        static const jval::JSONValidationFunctor* getValidator_impl();
     };
 
     struct StreamFormat : public JSONSerializable<StreamFormat> {

@@ -12,7 +12,7 @@ namespace wf {
     struct VisionWorkerConfig : public JSONSerializable<VisionWorkerConfig> {
         std::string camera_nickname;
         std::string name;
-        StreamFormat inputFormat; // Format of the input stream
+        FrameFormat inputFormat; // Format of the input stream
         StreamFormat outputFormat; // Format of the output stream
         bool stream;
         int raw_port;
@@ -22,7 +22,7 @@ namespace wf {
 
         VisionWorkerConfig(
             std::string camera_nickname_, std::string name_,
-            StreamFormat inputFormat_, StreamFormat outputFormat_,
+            FrameFormat inputFormat_, StreamFormat outputFormat_,
             bool stream_,
             int raw_port_, int processed_port_,
             PipelineType pipelineType_,

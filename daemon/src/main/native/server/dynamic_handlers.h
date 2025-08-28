@@ -289,4 +289,35 @@ namespace wfsrv {
     inline auto makeHandler_enum_resource_subdir(std::string subdir, wf::WFOrchestrator& orch) {
         return makeHandler_enum_subdir<&wf::ResourceManager::enumerateResourceSubdir>(subdir,orch);
     }
+    
+    template <wf::WFResult<wf::JSON> (wf::WFOrchestrator::*resourceGetter)(const std::string& name), typename NameGetter>
+    inline auto makeHandler_live_resource_GET(NameGetter nameGetter, wf::WFOrchestrator& orch) {
+        return [&orch,nameGetter](const httplib::Request& req, httplib::Response& res){
+            std::string name;
+            try {
+                name = nameGetter(req);
+            } catch (...) {
+                res.status = 500;
+                setContent(res, getErrorResponse<500>("An unknown exception occurred while parsing resource name"));
+                return;
+            }
+            wf::WFResult<wf::JSON> json_res = (orch.*resourceGetter)(name);
+            if (!json_res) {
+                // TODO: more descriptive return codes
+                res.status = 500;
+                setContent(res, getErrorResponse<500>(json_res.what()));
+                return;
+            }
+            try {
+                wf::JSON jobject = json_res.value();
+                res.status = 200;
+                setContent(res, jobject.dump());
+                return;
+            } catch (const wf::JSON::exception& e) {
+                res.status = 500;
+                setContent(res, getErrorResponse<500>(e.what()));
+                return;
+            }
+        }
+    }
 }

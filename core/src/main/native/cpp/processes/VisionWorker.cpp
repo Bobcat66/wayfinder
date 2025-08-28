@@ -22,7 +22,12 @@
 #include "wfcore/common/logging.h"
 #include "wfcore/video/video_types.h"
 #include "wfcore/pipeline/visitors/PipelineConfigApplier.h"
+#include "wfcore/pipeline/visitors/PipelineConfigGetter.h"
 #include <pthread.h>
+#include "wfcore/pipeline/output/visitors/PortGetter.h"
+#include "wfcore/pipeline/output/visitors/OutputFormatGetter.h"
+#include "wfcore/pipeline/output/visitors/StreamVisitors.h"
+#include <chrono>
 
 namespace impl {
     using namespace wf;
@@ -33,10 +38,10 @@ namespace impl {
             && (frame.type() == wf::getCVTypeFromEncoding(meta.format.encoding));
     }
 
-    const char* setThreadName(const std::string& name) {
+    std::string setThreadName(const std::string& name) {
         // pthread_setname_np limits names to 16 characters including null terminator
         pthread_setname_np(pthread_self(), name.substr(0, 15).c_str());
-        return name.substr(0, 15).c_str();
+        return name.substr(0, 15);
     }
 }
 
@@ -62,8 +67,8 @@ namespace wf {
             throw wf_result_error(sfres);
         auto rawformat = sfres.value().frameFormat;
         rawFrameBuffer.create(
-            rawformat.width,
             rawformat.height,
+            rawformat.width,
             getCVTypeFromEncoding(
                 rawformat.encoding
             )
@@ -77,10 +82,13 @@ namespace wf {
 
     void VisionWorker::start() {
         if (running.load()) return;
-        running.store(true);
-        thread = std::jthread([this](std::stop_token stoken){
-            this->run(stoken);
-        });
+        try {
+            thread = std::jthread([this](std::stop_token stoken){
+                this->run(stoken);
+            });
+        } catch (...) {
+            throw;
+        }
     }
 
     void VisionWorker::stop() {
@@ -89,19 +97,62 @@ namespace wf {
             thread.join();
             thread = std::jthread{};
         }
-        running.store(false);
     }
 
 
-    VisionWorkerConfig VisionWorker::getConfig() {
-        auto nickname = frameProvider->getCameraNickname();
+    WFResult<VisionWorkerConfig> VisionWorker::getConfig() {
+        bool wasRunning = running.load();
+        if (wasRunning) stop();
+        // acquire nickname
+        auto nickResult = frameProvider->getCameraNickname();
+        if (!nickResult) return WFResult<VisionWorkerConfig>::propagateFail(nickResult);
+        // acquire pipeline configuration
+        PipelineConfigGetter pcget;
+        auto getResult = pipeline->accept(pcget);
+        if (!getResult) return WFResult<VisionWorkerConfig>::propagateFail(getResult);
+
+        // Acquire input format from preprocessor
+        auto inputFormat = preprocesser.getOutformat();
+
+        OutputFormatGetter ofget;
+        auto ofgetResult = outputConsumer->accept(ofget);
+        if (!ofgetResult) return WFResult<VisionWorkerConfig>::propagateFail(ofgetResult);
+
+        StreamGetter sget;
+        auto sgetResult = outputConsumer->accept(sget);
+        if (!sgetResult) return WFResult<VisionWorkerConfig>::propagateFail(sgetResult);
+
+        PortGetter pget;
+        auto pgetResult = outputConsumer->accept(pget);
+        if (!pgetResult) return WFResult<VisionWorkerConfig>::propagateFail(pgetResult);
+        
+        PipelineType ptype = pipeline->getType();
+
+        if (wasRunning) start();
+
+        return VisionWorkerConfig(
+            nickResult.value(),
+            name,
+            inputFormat,
+            ofget.outputFormat,
+            sget.streaming,
+            pget.rawPort,
+            pget.processedPort,
+            ptype,
+            pcget.get()
+        );
     }
 
     // TODO: Add more robust error handling
     void VisionWorker::run(std::stop_token stoken) noexcept {
+        running.store(true);
         threadName = impl::setThreadName(name);
         while (!stoken.stop_requested()) {
-            if (!ok()) continue;
+            try {
+            if (!ok()) {
+                std::this_thread::sleep_for(std::chrono::milliseconds(5));
+                continue;
+            }
             auto rawmeta = frameProvider->getFrame(rawFrameBuffer);
             if (!rawmeta) {
                 //const auto errmsg(frameProvider.getError().value());
@@ -123,7 +174,11 @@ namespace wf {
                 this->reportError(res);
                 continue;
             }
-            outputConsumer->accept(ppFrameBuffer,ppmeta,res.value());
+            outputConsumer->consume(ppFrameBuffer,ppmeta,res.value());
+            } catch (...) {
+                this->reportError(WFStatus::UNKNOWN,"An unknown exception occurred");
+                continue;
+            }
         }
         running.store(false);
     }

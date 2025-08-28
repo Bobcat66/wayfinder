@@ -25,13 +25,23 @@
 #include "wfcore/common/status.h"
 
 namespace wf {
-    class PipelineConfigApplier : public PipelineVisitor {
+    class PipelineConfigGetter : public PipelineVisitor {
     public:
-        template <typename T>
-        PipelineConfigApplier(T config) : config_(config) {}
         WFStatusResult operator()(ApriltagPipeline& pipeline) override;
         WFStatusResult operator()(ObjectDetectionPipeline& pipeline) override;
+        template <typename T>
+        WFResult<T> as() { 
+            try {
+                return std::get<T>(config);
+            } catch (const std::bad_variant_access& e) {
+                return WFResult<T>::failure(WFStatus::BAD_VARIANT,"Bad variant access");
+            }
+        }
+        PipelineType getType() {
+            return getConfigType(config);
+        }
+        PipelineConfigVariant get() { return config; }
     private:
-        PipelineConfigVariant config_;
+        PipelineConfigVariant config;
     };
 }

@@ -34,8 +34,8 @@ namespace wf {
     class ApriltagPipeline;
     class ObjectDetectionPipeline;
     struct PipelineVisitor {
-        virtual WFStatusResult visit(ApriltagPipeline& pipeline) = 0;
-        virtual WFStatusResult visit(ObjectDetectionPipeline& pipeline) = 0;
+        virtual WFStatusResult operator()(ApriltagPipeline& pipeline) = 0;
+        virtual WFStatusResult operator()(ObjectDetectionPipeline& pipeline) = 0;
     };
 
     class Pipeline {

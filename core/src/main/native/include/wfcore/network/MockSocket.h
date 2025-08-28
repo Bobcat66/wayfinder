@@ -19,19 +19,18 @@
 
 #pragma once
 
-#include "wfcore/pipeline/config/pipeline_config.h"
-#include "wfcore/pipeline/pipelines/ApriltagPipeline.h"
-#include "wfcore/pipeline/pipelines/ObjectDetectionPipeline.h"
-#include "wfcore/common/status.h"
+#include "wfcore/network/Socket.h"
 
 namespace wf {
-    class PipelineConfigApplier : public PipelineVisitor {
+    class MockTimeSocket : public Socket {
     public:
-        template <typename T>
-        PipelineConfigApplier(T config) : config_(config) {}
-        WFStatusResult operator()(ApriltagPipeline& pipeline) override;
-        WFStatusResult operator()(ObjectDetectionPipeline& pipeline) override;
+        std::optional<int> getfd() override; 
+        int geterr() override { return 0; };
+        WFStatusResult SendMsg(const struct msghdr* msg, int flags = 0) override;
+        WFStatusResult RecvMsg(struct msghdr* msg, int flags = 0) override;
+        WFStatusResult SetSockOpt(int level, int option, const void* optval, socklen_t optlen) override;
+        WFStatusResult GetSockOpt(int level, int option, void* optval, socklen_t* optlen) override;
     private:
-        PipelineConfigVariant config_;
-    };
+        int opts = 0;
+    }
 }

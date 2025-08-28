@@ -174,6 +174,24 @@ namespace impl {
         srv.Get("/api/resources/models",makeHandler_enum_resource_subdir("models",orch));
         srv.Options("/api/resources/models",makeHandler_OPTIONS({"OPTIONS","GET"}));
     }
+
+    void configure_live_endpoints(httplib::Server& srv, wf::WFOrchestrator& orch) {
+        srv.Get(
+            "/api/live/hardware/([^/]+)",
+            makeHandler_live_resource_GET<wf::WFOrchestrator::getCameraConfig_JSON>(
+                [](const httplib::Request& req){ return req.matches[1].str(); },
+                orch
+            )
+        );
+
+        srv.Get(
+            "/api/live/pipelines/([^/]+)",
+            makeHandler_live_resource_GET<wf::WFOrchestrator::getWorkerConfig_JSON>(
+                [](const httplib::Request& req){ return req.matches[1].str(); },
+                orch
+            )
+        );
+    }
 }
 
 namespace wfsrv {

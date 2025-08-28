@@ -32,6 +32,7 @@ namespace wf {
         const std::string& getName() const noexcept override;
         const StreamFormat& getStreamFormat() const noexcept override;
         int setStreamFormat(StreamFormat newformat) override;
+        int getPort() { return port; }
     private:
         StreamFormat format;
         cs::CvSource source;

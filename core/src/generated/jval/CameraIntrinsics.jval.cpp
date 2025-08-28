@@ -46,8 +46,8 @@ namespace impl {
                 { "height", getPrimitiveValidator<int>() }
             },
             {
-                "height", 
-                "width"
+                "width", 
+                "height"
             },
             {
             }
@@ -63,10 +63,10 @@ namespace impl {
                 { "cy", getPrimitiveValidator<double>() }
             },
             {
-                "cy", 
+                "fy", 
                 "fx", 
                 "cx", 
-                "fy"
+                "cy"
             },
             {
             }
@@ -93,9 +93,9 @@ namespace jval {
                 { "distortion", get__z42Droot_distortion_validator() }
             },
             {
-                "distortion", 
+                "matrix", 
                 "resolution", 
-                "matrix"
+                "distortion"
             },
             {
             }

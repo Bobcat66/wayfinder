@@ -35,6 +35,9 @@ namespace wf {
         ApriltagPipeline(ApriltagPipelineConfiguration config_, CameraIntrinsics intrinsics_, ApriltagFieldHandler fieldHandler_);
         // This is an old API, It should not be invoked directly. Use visitors instead
         WFStatusResult setConfig(PipelineConfigVariant config);
+        ApriltagPipelineConfiguration getConfig() {
+            return config;
+        }
         void setIntrinsics(const CameraIntrinsics& intrinsics);
         [[nodiscard]] 
         WFResult<PipelineResult> process(const cv::Mat& data, const FrameMetadata& meta) noexcept override;
@@ -42,9 +45,7 @@ namespace wf {
         PipelineType getType() const override {
             return PipelineType::Apriltag;
         }
-        WFStatusResult accept(PipelineVisitor& visitor) override {
-            visitor.visit(*this);
-        }
+        WFStatusResult accept(PipelineVisitor& visitor) override { return visitor(*this); }
     private:
         WFStatusResult updateFieldHandler();
         WFStatusResult updateDetectorConfig(); // Updates the apriltag detector's configuration

@@ -21,10 +21,10 @@
 #include "wfcore/pipeline/visitors/PipelineConfigApplier.h"
 
 namespace wf {
-    WFStatusResult PipelineConfigApplier::visit(ApriltagPipeline& pipeline) {
+    WFStatusResult PipelineConfigApplier::operator()(ApriltagPipeline& pipeline) {
         return pipeline.setConfig(config_);
     }
-    WFStatusResult PipelineConfigApplier::visit(ObjectDetectionPipeline& config) {
+    WFStatusResult PipelineConfigApplier::operator()(ObjectDetectionPipeline& config) {
         return WFStatusResult::failure(WFStatus::NOT_IMPLEMENTED);
     }
 }

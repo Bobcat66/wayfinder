@@ -4,15 +4,7 @@
     "type": "struct",
     "properties": {
         "fps": { "type": "number" },
-        "frameFormat": {
-            "type": "struct",
-            "properties": {
-                "width": { "type": "integer" },
-                "height": { "type": "integer" },
-                "encoding": { "$ref": "ImageEncoding" }
-            },
-            "required": ["width","height","encoding"]
-        }
+        "frameFormat": { "$ref" : "FrameFormat" }
     },
     "required": ["fps","frameFormat"]
 }

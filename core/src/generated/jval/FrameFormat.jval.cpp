@@ -34,8 +34,9 @@
 
 #include "jvexport.h"
 #include "jvruntime.hpp"
-#include "InferenceEngineType_capi.jval.h"
-#include "InferenceEngineType.jval.hpp"
+#include "FrameFormat_capi.jval.h"
+#include "FrameFormat.jval.hpp"
+#include "ImageEncoding.jval.hpp"
 
 namespace impl {
     using namespace jval;
@@ -43,19 +44,21 @@ namespace impl {
 
 namespace jval {
     using namespace impl;
-    const JSONValidationFunctor* get_InferenceEngineType_validator() {        
-        static JSONEnumValidator validator({
-            "HailoRT", 
-            "CUDA", 
-            "RKNN", 
-            "CV_VULKAN", 
-            "CV_CPU", 
-            "ROCm", 
-            "CV_OPENCL", 
-            "OpenVINO", 
-            "EdgeTPU", 
-            "CoreML"
-        });
+    const JSONValidationFunctor* get_FrameFormat_validator() {        
+        static JSONStructValidator validator(
+            {
+                { "width", getPrimitiveValidator<int>() }, 
+                { "height", getPrimitiveValidator<int>() }, 
+                { "encoding", get_ImageEncoding_validator() }
+            },
+            {
+                "width", 
+                "height", 
+                "encoding"
+            },
+            {
+            }
+        );
         return static_cast<JSONValidationFunctor*>(&validator);
     }
 }
@@ -65,7 +68,7 @@ extern "C" {
 
     // Returns a dynamically allocated result pointer. The caller is responsible for its destruction
     JV_WASM_EXPORT
-    jval_res_t* jval_validate_InferenceEngineType(const char* json_str) {
+    jval_res_t* jval_validate_FrameFormat(const char* json_str) {
         using namespace jval;
         if (!json_str)
             return JVResult(JVStatus::PARSE_ERROR,{}).c_api();
@@ -74,7 +77,7 @@ extern "C" {
             return JVResult(JVStatus::PARSE_ERROR,{}).c_api();
         try {
             JSON jobject = JSON::parse(json_str);
-            JVResult res = (*get_InferenceEngineType_validator())(jobject);
+            JVResult res = (*get_FrameFormat_validator())(jobject);
             return res.c_api();
         } catch (...) {
             return JVResult(JVStatus::UNKNOWN,{}).c_api();

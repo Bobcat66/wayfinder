@@ -36,7 +36,7 @@
 #include "jvruntime.hpp"
 #include "VisionWorkerConfig_capi.jval.h"
 #include "VisionWorkerConfig.jval.hpp"
-#include "StreamFormat.jval.hpp"
+#include "FrameFormat.jval.hpp"
 #include "StreamFormat.jval.hpp"
 #include "ObjectDetectionPipelineConfig.jval.hpp"
 #include "ApriltagPipelineConfig.jval.hpp"
@@ -66,7 +66,7 @@ namespace jval {
             {
                 { "camera_nickname", getPrimitiveValidator<std::string>() }, 
                 { "name", getPrimitiveValidator<std::string>() }, 
-                { "inputFormat", get_StreamFormat_validator() }, 
+                { "inputFormat", get_FrameFormat_validator() }, 
                 { "outputFormat", get_StreamFormat_validator() }, 
                 { "stream", getPrimitiveValidator<bool>() }, 
                 { "raw_port", getPrimitiveValidator<int>() }, 
@@ -75,10 +75,10 @@ namespace jval {
                 { "pipelineConfig", get__z42Droot_pipelineConfig_validator() }
             },
             {
-                "stream", 
-                "name", 
-                "pipelineType", 
                 "camera_nickname", 
+                "pipelineType", 
+                "name", 
+                "stream", 
                 "pipelineConfig"
             },
             {

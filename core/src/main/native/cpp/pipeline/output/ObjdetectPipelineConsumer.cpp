@@ -36,6 +36,7 @@ namespace wf {
     , rawServer(streamFormat,std::format("{}_raw",pipelineName),rawPort)
     , processedServer(streamFormat,std::format("{}_processed",pipelineName),processedPort)
     , ntpub(std::move(ntpub_))
+    , outputFormat(streamFormat) 
     {
         if (!(streamFormat.frameFormat.encoding == ImageEncoding::BGR24)) {
             throw invalid_image_encoding("As of now, output pixel format for OpenCV stream MUST be BGR24");
@@ -65,13 +66,13 @@ namespace wf {
         prePostprocessor = std::make_unique<CVProcessPipe<cv::Mat>>(inputFormat,std::move(nodes));
     }
 
-    bool ObjdetectPipelineConsumer::accept(cv::Mat& data, FrameMetadata meta, PipelineResult& result) noexcept {
+    bool ObjdetectPipelineConsumer::consume(cv::Mat& data, FrameMetadata meta, PipelineResult& result) noexcept {
         if (auto shared = ntpub.lock()) {
             shared->publishPipelineResult(result);
         } else {
             return false;
         }
-        if (this->streamingEnabled_) {
+        if (this->streamingEnabled) {
             // TODO: characterize
             auto rmeta = prePostprocessor->processFrame(data,pp_rawbuf,meta);
             pp_rawbuf.copyTo(pp_procbuf);
@@ -84,5 +85,12 @@ namespace wf {
             processedServer.acceptFrame(pp_procbuf,rmeta);
         }
         return true;
+    }
+
+    int ObjdetectPipelineConsumer::getRawPort() {
+        return rawServer.getPort();
+    }
+    int ObjdetectPipelineConsumer::getProcessedPort() {
+        return processedServer.getPort();
     }
 }
