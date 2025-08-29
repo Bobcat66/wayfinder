@@ -50,7 +50,7 @@
 #define MKSRV_DRQSRV_SSIGERR 2  // Send error signal to client
 
 
-#define MKSRV_SYNCFREQ_US 20000
+#define MKSRV_SYNCFREQ_US 100000
 
 namespace impl {
     using namespace wf;
@@ -92,17 +92,17 @@ namespace wf {
         MockTimeServer(int sockfd_, int64_t offset_us_, bool sync_hastime_ = false)
         : sockfd(sockfd_), offset_us(offset_us_)
         , sync_hastime(sync_hastime_) {
-            int tsopts = SOF_TIMESTAMPING_RX_SOFTWARE | SOF_TIMESTAMPING_TX_SOFTWARE;
+            int tsopts = SOF_TIMESTAMPING_RX_SOFTWARE | SOF_TIMESTAMPING_TX_SOFTWARE | SOF_TIMESTAMPING_SOFTWARE;
             if (setsockopt(sockfd, SOL_SOCKET, SO_TIMESTAMPING, &tsopts, sizeof(tsopts)) < 0)
                 throw wf_status_error(WFStatus::NETWORK_BAD_SOCKOPT, strerror(errno));
-            int flags = fcntl(sockfd, F_GETFL, 0);
-            if (flags < 0) throw wf_status_error(WFStatus::POSIX_ERROR, strerror(errno));
-            if (fcntl(sockfd, F_SETFL, flags | O_NONBLOCK) < 0) throw wf_status_error(WFStatus::POSIX_ERROR, strerror(errno));
+            //int flags = fcntl(sockfd, F_GETFL, 0);
+            //if (flags < 0) throw wf_status_error(WFStatus::POSIX_ERROR, strerror(errno));
+            //if (fcntl(sockfd, F_SETFL, flags | O_NONBLOCK) < 0) throw wf_status_error(WFStatus::POSIX_ERROR, strerror(errno));
             server_fsm = std::make_unique<FiniteStateMachine>(impl::dispatch,this);
             dreqsrv_fsm = std::make_unique<FiniteStateMachine>(impl::dreqsrv_fsm_dispatch,this);
             worker = std::jthread([this](std::stop_token st){
                 while (!st.stop_requested()) {
-                    this->server_fsm->run();
+                    this->server_fsm->step();
                 }
             });
         }
@@ -140,8 +140,10 @@ namespace wf {
 
     wfts_msg_record::wfts_msg_record(bool received_, const void* payload_, const void* controls_)
     : received(received_) {
-        memcpy(payload,payload_,WFTS_TSPACKET_SIZE);
-        memcpy(controls,controls_,512);
+        memset(payload, 0, sizeof(payload));
+        memset(controls, 0, sizeof(controls));
+        if (payload_) memcpy(payload,payload_,WFTS_TSPACKET_SIZE);
+        if (controls_) memcpy(controls,controls_,512);
     }
     bool wfts_msg_record::operator==(const wfts_msg_record& other) const {
         if (other.received != received) return false;
@@ -163,6 +165,7 @@ namespace wf {
             packet.timestamp,
             packet.flags
         );
+        
     }
     std::string wfts_msg_record::controls_str(size_t rowlen) const {
         return impl::dumpBuf(controls, 512, rowlen);
@@ -192,7 +195,7 @@ namespace wf {
                 // Socket would block, this is semi-nominal, return a lightweight WFStatusResult with no message
                 return WFStatusResult::failure(WFStatus::NETWORK_WAITING);
             }
-            return WFStatusResult::failure(WFStatus::NETWORK_BAD_SEND,strerror(errno));
+            return WFStatusResult::failure(WFStatus::NETWORK_BAD_SEND,strerror(sockerr));
         }
         sockerr = 0;
         wfts_msg_record msgrec(false,msg->msg_iov[0].iov_base,msg->msg_control);
@@ -202,13 +205,16 @@ namespace wf {
 
 
     WFStatusResult MockTimeSocket::RecvMsg(struct msghdr* msg, int flags) {
+        // WF_DEBUGLOG(globalLogger(), "[MockTimeSocket] RecvMsg");
         if (recvmsg(local_fd, msg, flags) < 0) {
+            // WF_DEBUGLOG(globalLogger(), "[MockTimeSocket] RecvMsg failed");
             sockerr = errno;
+            WF_DEBUGLOG(globalLogger(), "Failed recvmsg: {}", strerror(sockerr));
             if (sockerr == EWOULDBLOCK || sockerr == EAGAIN) {
                 // Socket would block, this is semi-nominal, return a lightweight WFStatusResult with no message
                 return WFStatusResult::failure(WFStatus::NETWORK_WAITING);
             }
-            return WFStatusResult::failure(WFStatus::NETWORK_BAD_RECV,strerror(errno));
+            return WFStatusResult::failure(WFStatus::NETWORK_BAD_RECV,strerror(sockerr));
         }
         sockerr = 0;
         wfts_msg_record msgrec(true,msg->msg_iov[0].iov_base,msg->msg_control);
@@ -243,13 +249,13 @@ namespace impl {
     }
 
     uint32_t send_sync_impl(FSMInterface* iface, void* rawClosure) {
-        WF_DEBUGLOG(globalLogger(), "SHIFTING TO SEND_SYNC");
         auto closure = getClosure(rawClosure);
         closure->timestamp_sync();
         memset(closure->controlBuf, 0, 512);
         memset(closure->payloadBuf, 0, WFTS_TSPACKET_SIZE);
         closure->syncPacketID = closure->lastPacketID + 1;
         closure->lastPacketID = closure->syncPacketID;
+        WF_DEBUGLOG(globalLogger(), "SENDING SYNC {}",closure->syncPacketID);
         if (closure->sync_hastime) {
             // Send a one-stage sync message
             wips_timesync_packet_t packet;
@@ -269,7 +275,7 @@ namespace impl {
             return MKSRV_SERVE_DELAYREQS;
         } else {
             // Send a two-stage sync message
-            WF_DEBUGLOG(globalLogger(), "Two stage sync");
+            // WF_DEBUGLOG(globalLogger(), "Two stage sync");
 
             // Prepare message
             wips_timesync_packet_t packet;
@@ -305,12 +311,13 @@ namespace impl {
     }
 
     uint32_t process_syncctl_impl(FSMInterface* iface, void* rawClosure) {
-        WF_DEBUGLOG(globalLogger(), "SHIFTING TO PROCESS_SYNCCTL");
+        // WF_DEBUGLOG(globalLogger(), "SHIFTING TO PROCESS_SYNCCTL");
+        
         auto closure = getClosure(rawClosure);
-        /*
+        
         memset(closure->controlBuf, 0, sizeof(closure->controlBuf));
         memset(closure->payloadBuf, 0, sizeof(closure->payloadBuf));
-
+        
         struct msghdr msg;
         struct iovec iov = { nullptr, 0 }; // dummy iovec
         
@@ -321,10 +328,22 @@ namespace impl {
         msg.msg_control = closure->controlBuf;
         msg.msg_controllen = sizeof(closure->controlBuf);
 
-        if (recvmsg(closure->sockfd, &msg, MSG_ERRQUEUE) < 0) {
-            globalLogger()->error("MockServer failed to process SYNCCTL: {}",strerror(errno));
-            return MKSRV_SEND_SIGERR;
-        }
+        auto retry = false;
+        do {
+            if (recvmsg(closure->sockfd, &msg, MSG_ERRQUEUE) < 0) {
+                // Error path
+                if (errno == EWOULDBLOCK || errno == EAGAIN) {
+                    retry = true;
+                    WF_DEBUGLOG(globalLogger(), "MockServer timed out while processing SYNCCTL: {}", strerror(errno));
+                    std::this_thread::sleep_for(std::chrono::microseconds(20));
+                    continue;
+                }
+                globalLogger()->error("MockServer failed to process SYNCCTL: {}",strerror(errno));
+                return MKSRV_SEND_SIGERR;
+            }
+            // Success path
+            retry = false;
+        } while (retry);
         // Parse ancillary data
         struct cmsghdr* cmsg;
         // loop through all control messages in socket response
@@ -335,14 +354,14 @@ namespace impl {
                 break;
             }
         }
-        */
-        closure->tscache = wpi::Now();
+        
+        // closure->tscache = wpi::Now();
 
         return MKSRV_SEND_FOLLOWUP;
     }
 
     uint32_t send_followup_impl(FSMInterface* iface, void* rawClosure) {
-        WF_DEBUGLOG(globalLogger(), "SHIFTING TO SEND_FOLLOWUP");
+        // WF_DEBUGLOG(globalLogger(), "SHIFTING TO SEND_FOLLOWUP");
         auto closure = getClosure(rawClosure);
         wips_timesync_packet_t packet;
         packet.flags = WFTS_MSG_FOLLOWUPFLAGS;
@@ -360,12 +379,12 @@ namespace impl {
     // This uses a simplified implementation of the DREQSRV FSM, as we only need to handle one client
     // This model is conceptually similar to how it would be implemented in a real server
     uint32_t serve_delayreqs_impl(FSMInterface* iface, void* rawClosure) {
-        WF_DEBUGLOG(globalLogger(), "SHIFTING TO SERVE_DELAYREQS");
+        // WF_DEBUGLOG(globalLogger(), "SHIFTING TO SERVE_DELAYREQS");
         auto closure = getClosure(rawClosure);
         closure->dreqsrv_fsm->reset(MKSRV_DRQSRV_AWAIT);
-        WF_DEBUGLOG(globalLogger(), "[MockServer] Beginning Dreqs event loop");
+        // WF_DEBUGLOG(globalLogger(), "[MockServer] Beginning Dreqs event loop");
         while (closure->time_since_sync() < MKSRV_SYNCFREQ_US) {
-            WF_DEBUGLOG(globalLogger(), "[MockServer] Polling socket for Dreqs");
+            // WF_DEBUGLOG(globalLogger(), "[MockServer] Polling socket for Dreqs");
             // Calculate remaining time until next SYNC
             int64_t remaining_us = MKSRV_SYNCFREQ_US - closure->time_since_sync();
             int timeout_ms = static_cast<int>((remaining_us + 999) / 1000); // round up to milliseconds
@@ -376,9 +395,12 @@ namespace impl {
             pfd.revents = 0;
 
             int ret = poll(&pfd, 1, timeout_ms);
+            // WF_DEBUGLOG(globalLogger(), "[MockServer] poll");
             if (ret > 0) {
                 if (pfd.revents & POLLIN) {
-                    // Socket has data — run FSM once to process a DELAYREQ
+                    // WF_DEBUGLOG(globalLogger(), "[MockServer] POLLIN detected");
+                    // Socket has data — run FSM until halting to process a DELAYREQ
+                    closure->dreqsrv_fsm->reset(MKSRV_DRQSRV_AWAIT);
                     closure->dreqsrv_fsm->run();
                 }
             } else if (ret == 0) {
@@ -420,7 +442,7 @@ namespace impl {
     }
 
     uint32_t drqsrv_await_impl(FSMInterface* iface, void* rawClosure) {
-        WF_DEBUGLOG(globalLogger(), "SHIFTING TO DRQSRV_AWAIT");
+        // WF_DEBUGLOG(globalLogger(), "SHIFTING TO DRQSRV_AWAIT");
         auto closure = getClosure(rawClosure);
         struct msghdr msg;
         struct iovec iov;
@@ -472,7 +494,7 @@ namespace impl {
     }
 
     uint32_t drqsrv_respond_impl(FSMInterface* iface, void* rawClosure) {
-        WF_DEBUGLOG(globalLogger(), "SHIFTING TO DRQSRV_RESPOND");
+        // WF_DEBUGLOG(globalLogger(), "SHIFTING TO DRQSRV_RESPOND");
         auto closure = getClosure(rawClosure);
         wips_timesync_packet_t packet;
         packet.packet_id = (closure->lastPacketID + 2);
@@ -484,10 +506,13 @@ namespace impl {
             globalLogger()->error("MockServer Failed to encode DELAYRESP");
             return MKSRV_DRQSRV_SSIGERR;
         }
+        // WF_DEBUGLOG(globalLogger(), "Sending DELAYRESP");
         if (sendto(closure->sockfd, closure->payloadBuf, sizeof(closure->payloadBuf), 0, nullptr, 0) < 0) {
             globalLogger()->error("MockServer Failed to send DELAYRESP: {}", strerror(errno));
             return MKSRV_DRQSRV_SSIGERR;
         }
+        // WF_DEBUGLOG(globalLogger(), "Sent DELAYRESP");
+        iface->halt();
         return MKSRV_DRQSRV_AWAIT;
     }
 
@@ -502,6 +527,7 @@ namespace impl {
             globalLogger()->error("MockServer failed to send SIGERR: {}",strerror(errno));
             return MKSRV_DRQSRV_SSIGERR; // attempt to send SIGERR until successful
         }
+        iface->halt();
         return MKSRV_DRQSRV_AWAIT;
     }
 

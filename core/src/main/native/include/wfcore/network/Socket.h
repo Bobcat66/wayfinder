@@ -22,6 +22,7 @@
 #include <optional>
 #include <sys/socket.h>
 #include "wfcore/common/status.h"
+#include "wfcore/common/logging.h"
 
 namespace wf {
     class Socket {

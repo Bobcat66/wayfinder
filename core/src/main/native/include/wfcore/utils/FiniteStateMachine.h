@@ -58,7 +58,9 @@ namespace wf {
         // Returns 0 if the machine did not halt, 1 if the machine did halt, and all negative values are reserved as error codes.
         // In general, error codes are reserved for structural errors (e.g. a malformed statemap). Errors in business logic should
         // be reported and propagated with states
-        int run();
+        int step();
+        // Runs the machine until it halts
+        void run();
         // sends a halt signal to the FSM. This is marked const because I am restricting callback access to the FSM with a const qualifier
         // ts is lowkey scuffed, but whatever
         void halt() { this->halted = true; }

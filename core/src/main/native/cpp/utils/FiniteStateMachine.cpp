@@ -36,7 +36,7 @@ namespace wf {
     // Returns 0 if the machine did not halt, 1 if the machine did halt, and all negative values are reserved as error codes.
     // In general, error codes are reserved for structural errors (e.g. a malformed statemap). Errors in business logic should
     // be reported and propagated with states
-    int FiniteStateMachine::run() {
+    int FiniteStateMachine::step() {
         if (halted) {
             // Machine is halted, return immediately
             return fsmHalted;
@@ -45,5 +45,11 @@ namespace wf {
         if (!handler) return fsmBadState;
         state = handler(&interface, closure);
         return halted ? fsmHalted : fsmRunning;
+    }
+    void FiniteStateMachine::run() {
+        int ret = 0;
+        while (ret == 0) {
+            ret = step();
+        }
     }
 }

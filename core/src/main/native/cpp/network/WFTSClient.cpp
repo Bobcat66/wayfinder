@@ -36,7 +36,7 @@
 
 #define WFTS_SERVER_PORT 30001
 #define WFTS_PHC_SAMPLES 5 // the number of samples to take when synchronizing the PHC to the system clock
-#define WFTS_TIMEOUT_US 40000 // The number of microseconds the socket will wait for a packet before timing out
+#define WFTS_TIMEOUT_US 500000 // The number of microseconds the socket will wait for a packet before timing out
 
 #define WFTS_AWAIT_SYNC 0
 #define WFTS_PROCESS_SYNC 1
@@ -108,14 +108,11 @@ namespace impl {
     // reads rx timestamp from control messages and sets t1, shifts to PROCESS_SYNC
     // Shifts to AWAIT_SYNC on failure
     uint32_t await_sync_impl(FSMInterface* iface, void* rawClosure) {
-        WF_DEBUGLOG(tcLogger, "SHIFTING TO AWAIT_SYNC");
+        WF_DEBUGLOG(tcLogger, "AWAITING SYNC");
         wfts_fsm_closure* closure = getClosure(rawClosure);
         clearBuffers(closure);
-        WF_DEBUGLOG(tcLogger, "Cleared closure buffers");
         memset(&(closure->timestamps), 0, sizeof(closure->timestamps));
-        WF_DEBUGLOG(tcLogger, "Cleared timestamps");
         closure->offset = (closure->client->*(closure->getOffset))();
-        WF_DEBUGLOG(tcLogger, "Preparing msg");
         struct msghdr msg;
         struct iovec iov;
 
@@ -131,13 +128,11 @@ namespace impl {
 
         auto res = closure->sock->RecvMsg(&msg);
         closure->servaddr_len = msg.msg_namelen;
-        WF_DEBUGLOG(tcLogger, "received message");
 
         if (!res) {
             tcLogger->error(res.what());
             return WFTS_AWAIT_SYNC;
         }
-        WF_DEBUGLOG(tcLogger, "parsing ancillary data");
         // Parse ancillary data (rx timestamp)
         struct cmsghdr* cmsg;
         // loop through all control messages in socket response
@@ -202,14 +197,16 @@ namespace impl {
         WF_DEBUGLOG(tcLogger, "SHIFTING TO AWAIT_FOLLOWUP");
         wfts_fsm_closure* closure = getClosure(rawClosure);
         clearBuffers(closure);
-
+        //WF_DEBUGLOG(tcLogger, "{}", closure->servaddr_len);
+        //WF_DEBUGLOG(tcLogger, "Cleared buffers");
         auto res = closure->sock->RecvFrom(
             closure->payloadBuf,
             sizeof(closure->payloadBuf), 
             0,
-            reinterpret_cast<sockaddr *>(&(closure->servaddr)),
+            reinterpret_cast<sockaddr*>(&(closure->servaddr)),
             &(closure->servaddr_len)
         );
+        //WF_DEBUGLOG(tcLogger, "Received FOLLOWUP");
 
         if (!res) {
             tcLogger->error(res.what());
@@ -288,8 +285,8 @@ namespace impl {
         msg.msg_namelen = closure->servaddr_len;
         msg.msg_iov = &iov;
         msg.msg_iovlen = 1;
-        msg.msg_control = closure->controlBuf;
-        msg.msg_controllen = sizeof(closure->controlBuf);
+        msg.msg_control = nullptr;
+        msg.msg_controllen = 0;
 
         // Send
         auto res = closure->sock->SendMsg(&msg);
@@ -330,6 +327,7 @@ namespace impl {
         // loop through all control messages in socket response
         for (cmsg = CMSG_FIRSTHDR(&msg); cmsg != NULL; cmsg = CMSG_NXTHDR(&msg, cmsg)) {
             if (cmsg->cmsg_type == SCM_TIMESTAMPING) {
+                WF_DEBUGLOG(tcLogger, "Timestamp retrieved from CTL");
                 struct timespec* ts = reinterpret_cast<struct timespec*>(CMSG_DATA(cmsg));
                 // pmo stands for "pointer memory offset", and nothing else
                 int pmo = (closure->tsopts & SOF_TIMESTAMPING_TX_HARDWARE) ? 2 : 0;
@@ -561,7 +559,7 @@ namespace wf {
         if (worker.joinable()) return;
         worker = std::jthread([this](std::stop_token st){
             while (!st.stop_requested()) {
-                this->stateMachine->run();
+                this->stateMachine->step();
             }
         });
     }
