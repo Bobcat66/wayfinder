@@ -89,8 +89,8 @@ namespace wf {
     struct MockTimeServer {
     public:
         // The socket FD is managed externally
-        MockTimeServer(int sockfd_, int64_t offset_us_, int64_t network_delay_, bool sync_hastime_ = false)
-        : sockfd(sockfd_), offset_us(offset_us_), network_delay(network_delay_)
+        MockTimeServer(int sockfd_, int64_t offset_us_, bool sync_hastime_ = false)
+        : sockfd(sockfd_), offset_us(offset_us_)
         , sync_hastime(sync_hastime_) {
             int tsopts = SOF_TIMESTAMPING_RX_SOFTWARE | SOF_TIMESTAMPING_TX_SOFTWARE;
             if (setsockopt(sockfd, SOL_SOCKET, SO_TIMESTAMPING, &tsopts, sizeof(tsopts)) < 0)
@@ -121,7 +121,6 @@ namespace wf {
         uint32_t syncPacketID = 0;
         uint32_t lastPacketID = 0;
         const int64_t offset_us;
-        const int64_t network_delay;
         const int sockfd;
         const bool sync_hastime;
         char payloadBuf[13];
@@ -169,7 +168,7 @@ namespace wf {
         return impl::dumpBuf(controls, 512, rowlen);
     }
 
-    MockTimeSocket::MockTimeSocket(MsgConsumer msgConsumer_, int32_t network_delay_us_, int32_t offset_us_, bool sync_hastime) 
+    MockTimeSocket::MockTimeSocket(MsgConsumer msgConsumer_, int32_t offset_us_, bool sync_hastime) 
     : msgConsumer(msgConsumer_) {
         sockerr = 0;
         int sockfds[2];
@@ -178,6 +177,7 @@ namespace wf {
         }
         local_fd = sockfds[0];
         remote_fd = sockfds[1];
+        mockServer = std::make_unique<MockTimeServer>(remote_fd, offset_us_);
     }
 
     MockTimeSocket::~MockTimeSocket() noexcept {
@@ -243,6 +243,7 @@ namespace impl {
     }
 
     uint32_t send_sync_impl(FSMInterface* iface, void* rawClosure) {
+        WF_DEBUGLOG(globalLogger(), "SHIFTING TO SEND_SYNC");
         auto closure = getClosure(rawClosure);
         closure->timestamp_sync();
         memset(closure->controlBuf, 0, 512);
@@ -268,6 +269,7 @@ namespace impl {
             return MKSRV_SERVE_DELAYREQS;
         } else {
             // Send a two-stage sync message
+            WF_DEBUGLOG(globalLogger(), "Two stage sync");
 
             // Prepare message
             wips_timesync_packet_t packet;
@@ -287,12 +289,12 @@ namespace impl {
             iov.iov_base = closure->payloadBuf;
             iov.iov_len = sizeof(closure->payloadBuf);
 
-            msg.msg_name = NULL;
+            msg.msg_name = nullptr;
             msg.msg_namelen = 0;
             msg.msg_iov = &iov;
             msg.msg_iovlen = 1;
-            msg.msg_control = closure->controlBuf;
-            msg.msg_controllen = sizeof(closure->controlBuf);
+            msg.msg_control = nullptr;
+            msg.msg_controllen = 0;
 
             if (sendmsg(closure->sockfd, &msg, 0) < 0) {
                 globalLogger()->error("MockServer failed to send SYNC: {}",strerror(errno));
@@ -303,7 +305,9 @@ namespace impl {
     }
 
     uint32_t process_syncctl_impl(FSMInterface* iface, void* rawClosure) {
+        WF_DEBUGLOG(globalLogger(), "SHIFTING TO PROCESS_SYNCCTL");
         auto closure = getClosure(rawClosure);
+        /*
         memset(closure->controlBuf, 0, sizeof(closure->controlBuf));
         memset(closure->payloadBuf, 0, sizeof(closure->payloadBuf));
 
@@ -321,7 +325,6 @@ namespace impl {
             globalLogger()->error("MockServer failed to process SYNCCTL: {}",strerror(errno));
             return MKSRV_SEND_SIGERR;
         }
-
         // Parse ancillary data
         struct cmsghdr* cmsg;
         // loop through all control messages in socket response
@@ -332,11 +335,14 @@ namespace impl {
                 break;
             }
         }
+        */
+        closure->tscache = wpi::Now();
 
         return MKSRV_SEND_FOLLOWUP;
     }
 
     uint32_t send_followup_impl(FSMInterface* iface, void* rawClosure) {
+        WF_DEBUGLOG(globalLogger(), "SHIFTING TO SEND_FOLLOWUP");
         auto closure = getClosure(rawClosure);
         wips_timesync_packet_t packet;
         packet.flags = WFTS_MSG_FOLLOWUPFLAGS;
@@ -354,9 +360,12 @@ namespace impl {
     // This uses a simplified implementation of the DREQSRV FSM, as we only need to handle one client
     // This model is conceptually similar to how it would be implemented in a real server
     uint32_t serve_delayreqs_impl(FSMInterface* iface, void* rawClosure) {
+        WF_DEBUGLOG(globalLogger(), "SHIFTING TO SERVE_DELAYREQS");
         auto closure = getClosure(rawClosure);
-        closure->dreqsrv_fsm.reset(MKSRV_DRQSRV_AWAIT);
+        closure->dreqsrv_fsm->reset(MKSRV_DRQSRV_AWAIT);
+        WF_DEBUGLOG(globalLogger(), "[MockServer] Beginning Dreqs event loop");
         while (closure->time_since_sync() < MKSRV_SYNCFREQ_US) {
+            WF_DEBUGLOG(globalLogger(), "[MockServer] Polling socket for Dreqs");
             // Calculate remaining time until next SYNC
             int64_t remaining_us = MKSRV_SYNCFREQ_US - closure->time_since_sync();
             int timeout_ms = static_cast<int>((remaining_us + 999) / 1000); // round up to milliseconds
@@ -385,6 +394,7 @@ namespace impl {
     }
 
     uint32_t send_sigerr_impl(FSMInterface* iface, void* rawClosure) {
+        WF_DEBUGLOG(globalLogger(), "SHIFTING TO SEND_SIGERR");
         auto closure = getClosure(rawClosure);
         wips_timesync_packet_t packet;
         packet.flags = WFTS_MSG_BROADCAST | WFTS_MSG_ERROR | WFTS_MSG_LEADER;
@@ -410,6 +420,7 @@ namespace impl {
     }
 
     uint32_t drqsrv_await_impl(FSMInterface* iface, void* rawClosure) {
+        WF_DEBUGLOG(globalLogger(), "SHIFTING TO DRQSRV_AWAIT");
         auto closure = getClosure(rawClosure);
         struct msghdr msg;
         struct iovec iov;
@@ -461,6 +472,7 @@ namespace impl {
     }
 
     uint32_t drqsrv_respond_impl(FSMInterface* iface, void* rawClosure) {
+        WF_DEBUGLOG(globalLogger(), "SHIFTING TO DRQSRV_RESPOND");
         auto closure = getClosure(rawClosure);
         wips_timesync_packet_t packet;
         packet.packet_id = (closure->lastPacketID + 2);
@@ -480,6 +492,7 @@ namespace impl {
     }
 
     uint32_t drqsrv_ssigerr_impl(FSMInterface* iface, void* rawClosure) {
+        WF_DEBUGLOG(globalLogger(), "SHIFTING TO DRQSRV_SSIGERR");
         auto closure = getClosure(rawClosure);
         wips_timesync_packet_t packet;
         packet.flags = WFTS_MSG_ERROR | WFTS_MSG_LEADER;

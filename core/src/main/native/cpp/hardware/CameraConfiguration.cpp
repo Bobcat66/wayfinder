@@ -228,6 +228,7 @@ namespace wf {
     WFResult<CameraConfiguration> CameraConfiguration::fromJSON_impl(const JSON& jobject) {
 
         auto valid = validate(jobject);
+        WF_DEBUGLOG(jsonLogger(), "Validated jobject");
         if (!valid) return WFResult<CameraConfiguration>::propagateFail(valid);
 
         // control aliases
@@ -235,6 +236,7 @@ namespace wf {
         for (const auto& [control,alias] : jobject["controlAliases"].items()) {
             controlAliases[impl::camControlMap.at(control)] = alias.get<std::string>();
         }
+        WF_DEBUGLOG(jsonLogger(), "Parsed control aliases");
 
         std::vector<CameraIntrinsics> calibvec;
         // calibrations
@@ -247,6 +249,7 @@ namespace wf {
                 }
             }
         }
+        WF_DEBUGLOG(jsonLogger(), "Parsed calibvecs");
 
         std::unordered_map<CamControl,int> controls;
         if(jobject.contains("controls")) {
@@ -254,11 +257,13 @@ namespace wf {
                 controls[impl::camControlMap.at(control)] = value.get<int>();
             }
         }
+        WF_DEBUGLOG(jsonLogger(), "Parsed controls");
 
         StreamFormat format;
         auto fres = StreamFormat::fromJSON(jobject["format"]);
         if (!fres) return WFResult<CameraConfiguration>::propagateFail(fres);
         format = std::move(fres.value());
+        WF_DEBUGLOG(jsonLogger(), "Parsed streamFormat");
 
         return WFResult<CameraConfiguration>::success(
             std::in_place,

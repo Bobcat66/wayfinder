@@ -50,7 +50,7 @@ namespace wf {
     class MockTimeSocket : public Socket {
     public:
         // optConsumer and msgConsumer are callbacks for logging socket options and messages sent and received by the socket
-        MockTimeSocket(MsgConsumer msgConsumer_, int32_t network_delay_us, int32_t offset_us, bool sync_hastime = false);
+        MockTimeSocket(MsgConsumer msgConsumer_, int32_t offset_us, bool sync_hastime = false);
         ~MockTimeSocket() noexcept;
         WFStatusResult SendMsg(const struct msghdr* msg, int flags = 0) override;
         WFStatusResult RecvMsg(struct msghdr* msg, int flags = 0) override;

@@ -43,7 +43,7 @@ namespace wf {
         }
         auto handler = dispatcher(state,dispatchContext);
         if (!handler) return fsmBadState;
-        handler(&interface, closure);
+        state = handler(&interface, closure);
         return halted ? fsmHalted : fsmRunning;
     }
 }

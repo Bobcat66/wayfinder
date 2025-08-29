@@ -69,6 +69,7 @@ wips_blob_t wips_blob_stackwrap(void *base, size_t size) {
     newblob.base = (unsigned char *)base;
     newblob.offset = 0;
     newblob.allocated = size;
+    return newblob;
 }
 
 void wips_blob_destroy(wips_blob_t *bin) {

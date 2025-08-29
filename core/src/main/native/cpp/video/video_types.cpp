@@ -83,12 +83,11 @@ namespace wf {
         auto valid = validate(jobject);
         if (!valid) return WFResult<FrameFormat>::propagateFail(valid);
 
-        auto ff_jobject = jobject["frameFormat"];
         return WFResult<FrameFormat>::success(
             std::in_place,
-            impl::parseEncoding(ff_jobject["encoding"].get<std::string>()),
-            ff_jobject["width"].get<int>(),
-            ff_jobject["height"].get<int>()
+            impl::parseEncoding(jobject["encoding"].get<std::string>()),
+            jobject["width"].get<int>(),
+            jobject["height"].get<int>()
         );
     }
 
