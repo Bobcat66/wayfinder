@@ -44,7 +44,7 @@ namespace wf {
         // a function pointer to a function which consumes calculated offsets
         void (*masterOffsetConsumer)(int64_t);
         std::jthread worker;
-        struct sockaddr_in servaddr;
+        struct sockaddr_storage servaddr;
         socklen_t servaddr_len;
         std::unique_ptr<Socket> sock;
         // Hardware capabilities

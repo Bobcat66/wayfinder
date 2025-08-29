@@ -50,6 +50,7 @@ namespace wf {
         NOT_IMPLEMENTED =           0x00000007,
         BAD_ACQUIRE =               0x00000008,
         BAD_VARIANT =               0x00000009,
+        POSIX_ERROR =               0x0000000a,
         UNKNOWN =                   0x000fffff,
 
         PIPELINE_BASE =             0x00100000,
@@ -138,6 +139,7 @@ namespace wf {
             case WFStatus::NOT_IMPLEMENTED:             return "NOT_IMPLEMENTED";
             case WFStatus::BAD_ACQUIRE:                 return "BAD_ACQUIRE";
             case WFStatus::BAD_VARIANT:                 return "BAD_VARIANT";
+            case WFStatus::POSIX_ERROR:                 return "POSIX_ERROR";
             case WFStatus::UNKNOWN:                     return "UNKNOWN";
 
             case WFStatus::PIPELINE_BASE:               return "PIPELINE_BASE";

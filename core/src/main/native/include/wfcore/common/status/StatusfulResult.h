@@ -34,9 +34,12 @@ namespace wf {
     // such as success/failure, optionality, or side effects. It provides a way to 
     // chain operations on the wrapped value, automatically handling the context 
     // (like errors or missing values) so that the code stays clean and easy to read.
-    template <typename T,status_code status_type, status_type nominal_status, const char* (*StringMapper) (status_type)>
+    template <typename T,status_code status_type, status_type nominal_status, const char* (*string_mapper) (status_type)>
     class StatusfulResult {
     public:
+        using StatusType = status_type;
+        static constexpr StatusType Nominal = nominal_status;
+        static constexpr const char* (*StringMapper)(status_type) = string_mapper;
         constexpr StatusfulResult(status_type status, std::optional<T> val = std::nullopt) noexcept
         : status_(status), optval(std::move(val)), msg_(std::nullopt) {}
 
@@ -81,9 +84,9 @@ namespace wf {
         template <typename F>
         auto and_then(F&& mapper) const {
             using ResultType = decltype(mapper(std::declval<const T&>()));
-            static_assert(std::is_same_v<typename ResultType::status_type, status_type>, 
+            static_assert(std::is_same_v<typename ResultType::StatusType, StatusType>, 
                 "Mapper must return StatusfulResult with same status_type");
-            static_assert(ResultType::nominal_status == nominal_status, 
+            static_assert(ResultType::Nominal == Nominal, 
                 "Mapper must use same nominal_status");
             static_assert(ResultType::StringMapper == StringMapper,
                 "Mapper must use same StringMapper");
@@ -99,9 +102,9 @@ namespace wf {
         template <typename F>
         auto and_then(F&& mapper) {
             using ResultType = decltype(mapper(std::declval<T&>()));
-            static_assert(std::is_same_v<typename ResultType::status_type, status_type>, 
+            static_assert(std::is_same_v<typename ResultType::StatusType, StatusType>, 
                 "Mapper must return StatusfulResult with same status_type");
-            static_assert(ResultType::nominal_status == nominal_status, 
+            static_assert(ResultType::Nominal == Nominal, 
                 "Mapper must use same nominal_status");
             static_assert(ResultType::StringMapper == StringMapper,
                 "Mapper must use same StringMapper");

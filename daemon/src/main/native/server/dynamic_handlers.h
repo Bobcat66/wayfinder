@@ -318,6 +318,6 @@ namespace wfsrv {
                 setContent(res, getErrorResponse<500>(e.what()));
                 return;
             }
-        }
+        };
     }
 }

@@ -32,27 +32,9 @@
 #include <unistd.h>
 #include <wpi/timestamp.h>
 #include <chrono>
-
-// Flags
-
-#define WFTS_MSG_LEADER             0b00000001 // Whether or not the message is from the leader
-#define WFTS_MSG_BROADCAST          0b00000010 // Whether or not the message is broadcasted
-#define WFTS_MSG_CRITICAL           0b00000100 // Whether or not the message is time-critical
-#define WFTS_MSG_HASTIME            0b00001000 // Whether or not the message has a meaningful timestamp
-#define WFTS_MSG_ERROR              0b10000000 // Error flag
-
-// Flag combos for different types of messages
-
-#define WFTS_MSG_SYNCFLAGS          (WFTS_MSG_LEADER | WFTS_MSG_BROADCAST | WFTS_MSG_CRITICAL)    // Required flags for a sync message
-#define WFTS_MSG_FOLLOWUPFLAGS      (WFTS_MSG_LEADER | WFTS_MSG_BROADCAST | WFTS_MSG_HASTIME)     // Required flags for a followup message
-#define WFTS_MSG_FOLLOWUPNFLAGS     (WFTS_MSG_CRITICAL)                                           // Disallowed flags for a followup message
-#define WFTS_MSG_DELAYREQFLAGS      (WFTS_MSG_CRITICAL)                                           // Required flags for a delayreq message
-#define WFTS_MSG_DELAYREQNFLAGS     (WFTS_MSG_LEADER | WFTS_MSG_BROADCAST | WFTS_MSG_HASTIME)     // Disallowed flags for a delayreq message
-#define WFTS_MSG_DELAYRESPFLAGS     (WFTS_MSG_LEADER | WFTS_MSG_HASTIME)                          // Required flags for a delayresp message
-#define WFTS_MSG_DELAYRESPNFLAGS    (WFTS_MSG_BROADCAST | WFTS_MSG_CRITICAL)                      // Disallowed flags for a delayresp message
+#include "wfdetail/wfts/wfts_defs.h"
 
 #define WFTS_SERVER_PORT 30001
-#define WFTS_TSPACKET_SIZE 13 // This is the size of the *packed* packet, the WIPS struct is padded
 #define WFTS_PHC_SAMPLES 5 // the number of samples to take when synchronizing the PHC to the system clock
 #define WFTS_TIMEOUT_US 40000 // The number of microseconds the socket will wait for a packet before timing out
 
@@ -66,6 +48,7 @@
 #define WFTS_PROCESS_DELAYRESP 7
 #define WFTS_COMPUTE_OFFSET 8
 
+// TODO: Implement retries
 namespace impl {
     using namespace wf;
     static loggerPtr tcLogger = LoggerManager::getInstance().getLogger("WFTSClient",LogGroup::Network);
@@ -88,7 +71,7 @@ namespace impl {
 
     // returns the offset of the system clock relative to wpi::Now()
     // defined as sys(t) - wpi(t)
-    int64_t wpi_sys_offset() {
+    static int64_t wpi_sys_offset() {
         auto t0 = std::chrono::system_clock::now();
         auto t1 = static_cast<int64_t>(wpi::Now());
         return std::chrono::duration_cast<std::chrono::microseconds>(
@@ -96,16 +79,12 @@ namespace impl {
         ).count() - t1;
     }
 
-    bool flagcheck(uint8_t flags, uint8_t reqs, uint8_t disallowed = 0) {
-        return ((flags & reqs) == reqs) && ((flags & disallowed) == 0);
-    }
-
     // Internal interface for WFTS State Machine callbacks
     struct wfts_fsm_closure {
         WFTSClient* client;
         int64_t (WFTSClient::*getOffset)();
         void (*masterOffsetConsumer)(int64_t);
-        struct sockaddr_in& servaddr;
+        struct sockaddr_storage& servaddr;
         socklen_t& servaddr_len;
         std::unique_ptr<Socket>& sock;
         unsigned int& tsopts;
@@ -116,7 +95,7 @@ namespace impl {
         char payloadBuf[WFTS_TSPACKET_SIZE];
     };
 
-    wfts_fsm_closure* getClosure(void* raw) {
+    static wfts_fsm_closure* getClosure(void* raw) {
         return static_cast<wfts_fsm_closure*>(raw);
     }
 
@@ -191,7 +170,7 @@ namespace impl {
         }
 
         // Check flags
-        if (!impl::flagcheck(packet.flags, WFTS_MSG_SYNCFLAGS)) {
+        if (!detail::flagcheck(packet.flags, WFTS_MSG_SYNCFLAGS)) {
             // Packet does not have expected flags, discard it
             tcLogger->error("Sync message {} did not have expected flags set.",packet.packet_id);
             return WFTS_AWAIT_SYNC;
@@ -256,7 +235,7 @@ namespace impl {
         }
 
         // Check flags
-        if (!impl::flagcheck(packet.flags, WFTS_MSG_FOLLOWUPFLAGS, WFTS_MSG_FOLLOWUPNFLAGS)) {
+        if (!detail::flagcheck(packet.flags, WFTS_MSG_FOLLOWUPFLAGS, WFTS_MSG_FOLLOWUPNFLAGS)) {
             // Packet does not have expected flags, discard it
             tcLogger->error("Followup message {} did not have expected flags set.",packet.packet_id);
             return WFTS_AWAIT_SYNC;
@@ -392,7 +371,7 @@ namespace impl {
         }
 
         // Check message
-        if (!impl::flagcheck(packet.flags, WFTS_MSG_DELAYRESPFLAGS, WFTS_MSG_DELAYRESPNFLAGS)) {
+        if (!detail::flagcheck(packet.flags, WFTS_MSG_DELAYRESPFLAGS, WFTS_MSG_DELAYRESPNFLAGS)) {
             tcLogger->error("Delayresp {} did not have expected flags", packet.packet_id);
             return WFTS_AWAIT_SYNC;
         }
