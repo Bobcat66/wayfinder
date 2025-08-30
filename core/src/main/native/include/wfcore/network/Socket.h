@@ -23,6 +23,7 @@
 #include <sys/socket.h>
 #include "wfcore/common/status.h"
 #include "wfcore/common/logging.h"
+#include <functional>
 
 namespace wf {
     class Socket {
@@ -80,6 +81,9 @@ namespace wf {
         }
         WFStatusResult Recv(void* buf, size_t len, int flags = 0) {
             return RecvFrom(buf, len, flags, NULL, NULL);
+        }
+        virtual WFResult<short> Poll(short events, uint32_t timeout_ms) {
+            return WFResult<short>::failure(WFStatus::NOT_IMPLEMENTED);
         }
     };
 }

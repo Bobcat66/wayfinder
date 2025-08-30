@@ -32,6 +32,7 @@ namespace wf {
         WFStatusResult RecvMsg(struct msghdr* msg, int flags = 0) override;
         WFStatusResult SetSockOpt(int level, int option, const void* optval, socklen_t optlen) override;
         WFStatusResult GetSockOpt(int level, int option, void* optval, socklen_t* optlen) override;
+        WFResult<short> Poll(short events,uint32_t timeout_ms) override;
     protected:
         int sockfd;
         int sockerr;

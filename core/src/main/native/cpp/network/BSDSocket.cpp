@@ -19,6 +19,7 @@
 
 #include "wfcore/network/BSDSocket.h"
 #include "wfcore/common/wfexcept.h"
+#include <poll.h>
 
 namespace wf {
     BSDSocket::BSDSocket(int socket_family, int socket_type, int protocol) {
@@ -73,5 +74,25 @@ namespace wf {
         }
         sockerr = 0;
         return WFStatusResult::success();
+    }
+
+    WFResult<short> BSDSocket::Poll(short events,uint32_t timeout_ms) {
+        struct pollfd pfd {
+            .fd = sockfd,
+            .events = events,
+            .revents = 0
+        };
+        int ret = poll(&pfd, 1, timeout_ms);
+        if (ret < 0) {
+            // Error
+            sockerr = errno;
+            return WFResult<short>::failure(WFStatus::POSIX_ERROR, strerror(sockerr));
+        } else if (ret == 0) {
+            // Timed out
+            sockerr = 0;
+            return WFResult<short>::failure(WFStatus::NETWORK_WAITING);
+        } else {
+            return pfd.revents;
+        }
     }
 }
