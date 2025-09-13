@@ -366,21 +366,25 @@ namespace wf {
             throw wf_status_error(WFStatus::POSIX_ERROR, strerror(errno));
         }
         baddr_in->sin_port = htons(WFTS_SERVER_PORT);
-        
-
 
     }
     WFTSServer::~WFTSServer() {
+        stop();
+        cleanup();
         
+    }
+    void WFTSServer::cleanup() {
+        if (server_closure) {
+            delete impl::getClosure(server_closure);
+        }
+    }
+    void WFTSServer::start() {
         
     }
-    void cleanup() {
+    void WFTSServer::stop() {
 
     }
-    void start() {
-
-    }
-    void stop() {
-
+    int64_t WFTSServer::getOffset() const {
+        return 0; // ts lwk scuffed
     }
 }
