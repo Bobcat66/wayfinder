@@ -109,6 +109,7 @@ namespace wf {
         CONFIG_BAD_LOCALDIR =       0x00900002,
         CONFIG_BAD_RESOURCEDIR =    0x00900003,
         CONFIG_SUBDIR_NOT_FOUND =   0x00900004,
+        CONFIG_INVALID_ATTRIBUTE =  0x00900005,
         CONFIG_UNKNOWN =            0x009fffff,
 
         SERDE_BASE =                0x00a00000,
@@ -198,6 +199,7 @@ namespace wf {
             case WFStatus::CONFIG_BAD_LOCALDIR:         return "CONFIG_BAD_LOCALDIR";
             case WFStatus::CONFIG_BAD_RESOURCEDIR:      return "CONFIG_BAD_RESOURCEDIR";
             case WFStatus::CONFIG_SUBDIR_NOT_FOUND:     return "CONFIG_SUBDIR_NOT_FOUND";
+            case WFStatus::CONFIG_INVALID_ATTRIBUTE:    return "CONFIG_INVALID_ATTRIBUTE";
             case WFStatus::CONFIG_UNKNOWN:              return "CONFIG_UNKNOWN";
 
             case WFStatus::SERDE_BASE:                  return "SERDE_BASE";
