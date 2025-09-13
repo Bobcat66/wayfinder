@@ -61,6 +61,8 @@ namespace wf {
 
         virtual CameraConfiguration getConfiguration() = 0;
 
+        virtual WFStatusResult setConfiguration(const CameraConfiguration& config) = 0;
+
         virtual void checkConnection() = 0;
 
         virtual void disable() = 0;

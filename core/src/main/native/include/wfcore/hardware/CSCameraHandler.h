@@ -58,6 +58,8 @@ namespace wf {
 
         CameraConfiguration getConfiguration() override;
 
+        WFStatusResult setConfiguration(const CameraConfiguration& config) override;
+
         static std::shared_ptr<CSCameraHandler> create(const CameraConfiguration& config) {
             return std::shared_ptr<CSCameraHandler>(new CSCameraHandler(config));
         }

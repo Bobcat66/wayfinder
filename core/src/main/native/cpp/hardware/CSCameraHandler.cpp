@@ -143,6 +143,11 @@ namespace wf {
         return WFResult<int>::success(property.Get());
     }
 
+
+    WFStatusResult setConfiguration(const CameraConfiguration& config) {
+        return WFStatusResult::failure(WFStatus::NOT_IMPLEMENTED);
+    }
+
     void CSCameraHandler::checkConnection() {
         auto status = getStatus();
         if (status == HARDWARE_DISCONNECT || status == HARDWARE_CONNECTING) {
