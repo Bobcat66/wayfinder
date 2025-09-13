@@ -23,7 +23,8 @@
 #include <opencv2/core.hpp>
 
 namespace wf {
-    bool cvmeq(const cv::Mat& a, const cv::Mat& b) {
-        
+    inline bool cvmeq(const cv::Mat& a, const cv::Mat& b) {
+        auto diff = a != b;
+        return cv::sum(diff) == cv::Scalar(0,0,0,0);
     }
 }
