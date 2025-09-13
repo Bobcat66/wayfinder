@@ -145,6 +145,7 @@ namespace wf {
 
 
     WFStatusResult setConfiguration(const CameraConfiguration& config) {
+        
         return WFStatusResult::failure(WFStatus::NOT_IMPLEMENTED);
     }
 
