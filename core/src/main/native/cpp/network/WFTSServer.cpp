@@ -22,6 +22,9 @@
 #include "wips/timesync_packet.wips.h"
 #include <linux/net_tstamp.h>
 #include <poll.h>
+#include "wfcore/common/wfexcept.h"
+#include <netinet/in.h>
+#include <arpa/inet.h>
 
 #define WFTS_SEND_SYNC 0           // Send SYNC message
 #define WFTS_PROCESS_SYNCCTL 1     // Process SYNC message ctl
@@ -34,6 +37,7 @@
 #define SERVER_FREQ_MS 40
 #define SYNCCTL_TIMEOUT_MS 500
 #define SRVDRQ_TIMEOUT_MS 5
+#define WFTS_SERVER_PORT 35000
 
 namespace impl {
     using namespace wf;
@@ -130,7 +134,7 @@ namespace impl {
             struct cmsghdr* cmsg;
             // loop through all control messages in socket response
             for (cmsg = CMSG_FIRSTHDR(&msg); cmsg != NULL; cmsg = CMSG_NXTHDR(&msg, cmsg)) {
-                if (cmsg->cmsg_type == SCM_TIMESTAMPING) {
+                if ((cmsg->cmsg_level == SOL_SOCKET) && (cmsg->cmsg_type == SCM_TIMESTAMPING)) {
                     struct timespec* ts = reinterpret_cast<struct timespec*>(CMSG_DATA(cmsg));
                     // pmo stands for "pointer memory offset", and nothing else
                     int pmo = (tsopts & SOF_TIMESTAMPING_TX_HARDWARE) ? 2 : 0;
@@ -174,12 +178,12 @@ namespace impl {
         }
     };
 
-    server_closure_t* getClosure(void* raw) {
+    static server_closure_t* getClosure(void* raw) {
         return static_cast<server_closure_t*>(raw);
     }
 
     // SYNC ID will be stored in cache.id after this operation
-    uint32_t send_sync_impl(FSMInterface* iface, void* rawClosure) {
+    static uint32_t send_sync_impl(FSMInterface* iface, void* rawClosure) {
         auto closure = getClosure(rawClosure);
         closure->clearBuffers();
         closure->offset = closure->server.getOffset();
@@ -201,7 +205,7 @@ namespace impl {
     }
 
     // SYNC TX timestamp will be stored in cache.ts after this operation
-    uint32_t process_syncctl_impl(FSMInterface* iface, void* rawClosure) {
+    static uint32_t process_syncctl_impl(FSMInterface* iface, void* rawClosure) {
         auto closure = getClosure(rawClosure);
         // We store the previous packet so we can match the error message to the packet
         closure->clearBuffers();
@@ -214,7 +218,7 @@ namespace impl {
     }
 
     // FOLLOWUP packet id will be stored in cache.id after this operation
-    uint32_t send_followup_impl(FSMInterface* iface, void* rawClosure) {
+    static uint32_t send_followup_impl(FSMInterface* iface, void* rawClosure) {
         auto closure = getClosure(rawClosure);
         wips_timesync_packet_t packet;
         closure->cache.id++;
@@ -235,7 +239,7 @@ namespace impl {
     }
 
     // TODO: Make the handler for fault-tolerant? This is just a test impl, so it doesn't really matter
-    uint32_t serve_delayreqs_impl(FSMInterface* iface, void* rawClosure) {
+    static uint32_t serve_delayreqs_impl(FSMInterface* iface, void* rawClosure) {
         auto closure = getClosure(rawClosure);
         while (closure->time_since_sync() < SERVER_FREQ_MS) {
             closure->cache.id = closure->last_broadcast_id;
@@ -296,10 +300,10 @@ namespace impl {
             struct cmsghdr* cmsg;
             // loop through all control messages in socket response
             for (cmsg = CMSG_FIRSTHDR(&(msg.hdr)); cmsg != NULL; cmsg = CMSG_NXTHDR(&(msg.hdr), cmsg)) {
-                if (cmsg->cmsg_type == SCM_TIMESTAMPING) {
+                if ((cmsg->cmsg_level == SOL_SOCKET) && (cmsg->cmsg_type == SCM_TIMESTAMPING)) {
                     struct timespec* ts = reinterpret_cast<struct timespec*>(CMSG_DATA(cmsg));
                     // pmo stands for "pointer memory offset", and nothing else
-                    int pmo = (closure->tsopts & SOF_TIMESTAMPING_TX_HARDWARE) ? 2 : 0;
+                    int pmo = (closure->tsopts & SOF_TIMESTAMPING_RX_HARDWARE) ? 2 : 0;
                     closure->cache.ts = (ts[pmo].tv_sec * 1e6) + (ts[pmo].tv_nsec/1000) - closure->offset;
                     fetchedTS = true;
                     break;
@@ -322,14 +326,52 @@ namespace impl {
         }
         return WFTS_SEND_SYNC;
     }
+
+    static StateHandler dispatch(uint32_t state, void* dispatchContext) {
+        switch (state) {
+            case WFTS_SEND_SYNC: return send_sync_impl;
+            case WFTS_PROCESS_SYNCCTL: return process_syncctl_impl;
+            case WFTS_SEND_FOLLOWUP: return send_followup_impl;
+            case WFTS_SERVE_DELAYREQS: return serve_delayreqs_impl;
+            default: return nullptr;
+        }
+    }
 }
 
 namespace wf {
-    WFTSServer::WFTSServer(std::unique_ptr<Socket> sock_, int64_t (*timesource_)(void))
+    WFTSServer::WFTSServer(std::unique_ptr<Socket> sock_, int64_t (*timesource_)(void), const char* addr)
     : sock(std::move(sock_)), timesource(timesource_) {
+        int enable = 1;
+        int tsopts = SOF_TIMESTAMPING_SOFTWARE | SOF_TIMESTAMPING_RX_SOFTWARE | SOF_TIMESTAMPING_TX_SOFTWARE;
+        auto tsopts_res = sock->SetSockOpt(SOL_SOCKET, SO_TIMESTAMPING, &tsopts, sizeof(tsopts));
+        if (!tsopts_res) {
+            throw wf_result_error(tsopts_res);
+        }
+        auto broadcast_res = sock->SetSockOpt(SOL_SOCKET, SO_BROADCAST, &enable, sizeof(enable));
+        if (!broadcast_res) {
+            cleanup();
+            throw wf_result_error(broadcast_res);
+        }
+
+        server_closure = new impl::server_closure_t {
+            .server = *this,
+            .sock = sock,
+            .tsopts = tsopts,
+            .sync_has_time = false
+        };
+        struct sockaddr_in* baddr_in = reinterpret_cast<struct sockaddr_in*>(&(impl::getClosure(server_closure)->broadcast_addr));
+        memset(baddr_in,0,sizeof(struct sockaddr_in));
+        baddr_in->sin_family = AF_INET;
+        if (inet_pton(AF_INET, addr, &baddr_in->sin_addr.s_addr) != 1) {
+            throw wf_status_error(WFStatus::POSIX_ERROR, strerror(errno));
+        }
+        baddr_in->sin_port = htons(WFTS_SERVER_PORT);
+        
+
 
     }
     WFTSServer::~WFTSServer() {
+        
         
     }
     void cleanup() {

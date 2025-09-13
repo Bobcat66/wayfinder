@@ -33,7 +33,8 @@ namespace wf {
     
     class WFTSClient {
     public:
-        WFTSClient(std::unique_ptr<Socket> sock_, void (*masterOffsetConsumer_)(int64_t));
+        // We allow changing the interface for unit testing, Wayfinder always uses eth0
+        WFTSClient(std::unique_ptr<Socket> sock_, void (*masterOffsetConsumer_)(int64_t), const char* iface = "eth0");
         ~WFTSClient();
         void start();
         void stop();

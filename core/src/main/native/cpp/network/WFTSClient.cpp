@@ -99,7 +99,7 @@ namespace impl {
         return static_cast<wfts_fsm_closure*>(raw);
     }
 
-    void clearBuffers(wfts_fsm_closure* closure) {
+    static void clearBuffers(wfts_fsm_closure* closure) {
         memset(closure->controlBuf, 0, sizeof(closure->controlBuf));
         memset(closure->payloadBuf, 0, sizeof(closure->payloadBuf));
     }
@@ -107,7 +107,7 @@ namespace impl {
     // Resets closure, Awaits for SYNC from the server, stores it in closure buffers,
     // reads rx timestamp from control messages and sets t1, shifts to PROCESS_SYNC
     // Shifts to AWAIT_SYNC on failure
-    uint32_t await_sync_impl(FSMInterface* iface, void* rawClosure) {
+    static uint32_t await_sync_impl(FSMInterface* iface, void* rawClosure) {
         WF_DEBUGLOG(tcLogger, "AWAITING SYNC");
         wfts_fsm_closure* closure = getClosure(rawClosure);
         clearBuffers(closure);
@@ -152,7 +152,7 @@ namespace impl {
     // Validates & processes SYNC, if SYNC has a time, sets t0 and shifts to SEND_DELAYREQ
     // Otherwise, shifts to AWAIT_FOLLOWUP
     // Shifts to AWAIT_SYNC on failure
-    uint32_t process_sync_impl(FSMInterface* iface, void* rawClosure) {
+    static uint32_t process_sync_impl(FSMInterface* iface, void* rawClosure) {
         WF_DEBUGLOG(tcLogger, "SHIFTING TO PROCESS_SYNC");
         wfts_fsm_closure* closure = getClosure(rawClosure);
 
@@ -192,7 +192,7 @@ namespace impl {
 
     // Awaits FOLLOWUP from server, stores result in closure, shifts to PROCESS_FOLLOWUP
     // shifts to AWAIT_SYNC on failure
-    uint32_t await_followup_impl(FSMInterface* iface, void* rawClosure) {
+    static uint32_t await_followup_impl(FSMInterface* iface, void* rawClosure) {
         // This function is causing segmentation faults. Fix ASAP
         WF_DEBUGLOG(tcLogger, "SHIFTING TO AWAIT_FOLLOWUP");
         wfts_fsm_closure* closure = getClosure(rawClosure);
@@ -217,7 +217,7 @@ namespace impl {
 
     // Validates and processes FOLLOWUP, sets t0 and shifts to SEND_DELAYREQ
     // Shifts to AWAIT_SYNC on failure
-    uint32_t process_followup_impl(FSMInterface* iface, void* rawClosure) {
+    static uint32_t process_followup_impl(FSMInterface* iface, void* rawClosure) {
         WF_DEBUGLOG(tcLogger, "SHIFTING TO PROCESS_FOLLOWUP");
         wfts_fsm_closure* closure = getClosure(rawClosure);
 
@@ -257,7 +257,7 @@ namespace impl {
 
     // Encodes and sends DELAYREQ to server, stores data in closure, shifts to PROCESS_DREQCTL
     // Shifts to AWAIT_SYNC on failure 
-    uint32_t send_delayreq_impl(FSMInterface* iface, void* rawClosure) {
+    static uint32_t send_delayreq_impl(FSMInterface* iface, void* rawClosure) {
         WF_DEBUGLOG(tcLogger, "SHIFTING TO SEND_DELAYREQ");
         wfts_fsm_closure* closure = getClosure(rawClosure);
         clearBuffers(closure);
@@ -301,7 +301,7 @@ namespace impl {
 
     // Reads control messages from socket Error Queue, processes them and sets t2, shifts to AWAIT_DELAYRESP
     // shifts to AWAIT_SYNC on failure
-    uint32_t process_dreqctl_impl(FSMInterface* iface, void* rawClosure) {
+    static uint32_t process_dreqctl_impl(FSMInterface* iface, void* rawClosure) {
         WF_DEBUGLOG(tcLogger, "SHIFTING TO PROCESS_DREQCTL");
         wfts_fsm_closure* closure = getClosure(rawClosure);
         clearBuffers(closure);
@@ -341,7 +341,7 @@ namespace impl {
 
     // Awaits DELAYRESP from server, stores DELAYRESP in closure, shifts to PROCESS_DELAYRESP
     // shifts to AWAIT_SYNC on failure
-    uint32_t await_delayresp_impl(FSMInterface* iface, void* rawClosure) {
+    static uint32_t await_delayresp_impl(FSMInterface* iface, void* rawClosure) {
         WF_DEBUGLOG(tcLogger, "SHIFTING TO AWAIT_DELAYRESP");
         wfts_fsm_closure* closure = getClosure(rawClosure);
         clearBuffers(closure);
@@ -363,7 +363,7 @@ namespace impl {
 
     // Processes DELAYRESP, sets t3, shifts to COMPUTE_OFFSET
     // shifts to AWAIT_SYNC on failure
-    uint32_t process_delayresp_impl(FSMInterface* iface, void* rawClosure) {
+    static uint32_t process_delayresp_impl(FSMInterface* iface, void* rawClosure) {
         WF_DEBUGLOG(tcLogger, "SHIFTING TO PROCESS_DELAYRESP");
         wfts_fsm_closure* closure = getClosure(rawClosure);
         
@@ -397,7 +397,7 @@ namespace impl {
     }
 
     // Computes offset with IEEE-1588 algorithm, send it to consumer. Shifts to AWAIT_SYNC
-    uint32_t compute_offset_impl(FSMInterface* iface, void* rawClosure) {
+    static uint32_t compute_offset_impl(FSMInterface* iface, void* rawClosure) {
         WF_DEBUGLOG(tcLogger, "SHIFTING TO COMPUTE_OFFSET");
         wfts_fsm_closure* closure = getClosure(rawClosure);
         
@@ -407,7 +407,7 @@ namespace impl {
         return WFTS_AWAIT_SYNC;
     }
 
-    inline StateHandler fsm_dispatcher(uint32_t state, void*) {
+    static inline StateHandler fsm_dispatcher(uint32_t state, void*) {
         switch (state) {
             case WFTS_AWAIT_SYNC: return await_sync_impl;
             case WFTS_PROCESS_SYNC: return process_sync_impl;
@@ -430,7 +430,7 @@ namespace impl {
 namespace wf {
     using impl::tcLogger;
     // TODO: Maybe make WFTSClient a statusful object?
-    WFTSClient::WFTSClient(std::unique_ptr<Socket> sock_, void (*masterOffsetConsumer_)(int64_t)) 
+    WFTSClient::WFTSClient(std::unique_ptr<Socket> sock_, void (*masterOffsetConsumer_)(int64_t), const char* iface) 
     : sock(std::move(sock_)) , servaddr{0}, servaddr_len{sizeof(servaddr)}
     , masterOffsetConsumer(masterOffsetConsumer_) {
 
@@ -463,7 +463,6 @@ namespace wf {
 
         if (fdopt) {
             // socket has a file descriptor, poll eth0 hardware timestamping capabilites
-            const char* iface = "eth0"; // Wayfinder always uses the eth0 interface for network communications
             struct ifreq ifr;
             memset(&ifr, 0, sizeof(ifr));
             strncpy(ifr.ifr_name, iface, sizeof(ifr.ifr_name)-1);

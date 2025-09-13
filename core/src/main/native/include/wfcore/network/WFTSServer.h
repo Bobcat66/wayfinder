@@ -30,7 +30,7 @@ namespace wf {
     
     class WFTSServer {
     public:
-        WFTSServer(std::unique_ptr<Socket> sock_, int64_t (*timesource_)(void));
+        WFTSServer(std::unique_ptr<Socket> sock_, int64_t (*timesource_)(void), const char* addr = "127.0.0.1");
         ~WFTSServer();
         void cleanup();
         void start();
