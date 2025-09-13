@@ -68,6 +68,7 @@ namespace wf {
         : resolution(std::move(resolution_)), cameraMatrix(std::move(cameraMatrix_)), distCoeffs(std::move(distCoeffs_)) {}
 
         CameraIntrinsics() = default;
+        bool operator==(const CameraIntrinsics other) const noexcept;
 
         static WFResult<JSON> toJSON_impl(const CameraIntrinsics& object);
         static WFResult<CameraIntrinsics> fromJSON_impl(const JSON& jobject);

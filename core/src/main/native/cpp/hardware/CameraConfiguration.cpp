@@ -157,6 +157,10 @@ namespace wf {
         );
     }
 
+    bool CameraIntrinsics::operator==(const CameraIntrinsics other) noexcept {
+        
+    }
+
     const jval::JSONValidationFunctor* CameraConfiguration::getValidator_impl() {
         return jval::get_CameraConfig_validator();
     }
