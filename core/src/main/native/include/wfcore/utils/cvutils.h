@@ -27,4 +27,7 @@ namespace wf {
         auto diff = a != b;
         return cv::sum(diff) == cv::Scalar(0,0,0,0);
     }
+    inline bool cvseq(const cv::Size& a, const cv::Size& b) {
+        return a.width == b.width && a.height == b.height;
+    }
 }

@@ -63,6 +63,8 @@ namespace wf {
 
         WFResult<CameraConfiguration> getCameraConfiguration(const std::string& nickname);
 
+        WFStatusResult setCameraConfiguration(const std::string& nickname, const CameraConfiguration& config);
+
         void periodic() noexcept;
 
         // Returns whether or not the camera with the given name has faults

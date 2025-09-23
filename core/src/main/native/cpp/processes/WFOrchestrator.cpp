@@ -134,7 +134,7 @@ namespace wf {
     }
 
     WFStatusResult WFOrchestrator::setCameraConfig(const std::string& nickname, CameraConfiguration config) {
-        return WFStatusResult::failure(WFStatus::NOT_IMPLEMENTED);
+        return hardwareManager_.setCameraConfiguration(nickname,config);
     }
 
     WFResult<VisionWorkerConfig> WFOrchestrator::getWorkerConfig(const std::string& name) {

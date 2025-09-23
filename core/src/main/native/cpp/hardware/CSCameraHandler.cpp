@@ -144,9 +144,36 @@ namespace wf {
     }
 
 
-    WFStatusResult setConfiguration(const CameraConfiguration& config) {
-        
-        return WFStatusResult::failure(WFStatus::NOT_IMPLEMENTED);
+    WFStatusResult CSCameraHandler::setConfiguration(const CameraConfiguration& config) {
+        if (config.nickname != this->name_ || config.devpath != this->devpath_ || config.backend != CameraBackend::CSCORE) {
+            return WFStatusResult::failure(
+                CONFIG_INVALID_ATTRIBUTE,
+                "Attempted to set incompatible camera configuration for camera {}",devpath_
+            );
+        }
+        if (config.controlAliases != this->controlAliases_) {
+            return WFStatusResult::failure(
+                CONFIG_INVALID_ATTRIBUTE,
+                "Attempted to set incompatible camera configuration for camera {}",devpath_
+            );
+        }
+        if (config.calibrations != this->calibrations_) {
+            return WFStatusResult::failure(
+                CONFIG_INVALID_ATTRIBUTE,
+                "Attempted to set incompatible camera configuration for camera {}",devpath_
+            );
+        }
+        if (config.controls != this->controls_) {
+            for (const auto& [control,value] : config.controls) {
+                auto cres = setControl(control,value);
+                if (!cres) return cres;
+            }
+        }
+        if (config.format != this->format_) {
+            auto fres = setStreamFormat(config.format);
+            if (!fres) return fres;
+        }
+        return WFStatusResult::success();
     }
 
     void CSCameraHandler::checkConnection() {

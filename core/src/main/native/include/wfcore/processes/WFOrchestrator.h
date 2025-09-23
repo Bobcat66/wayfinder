@@ -52,6 +52,13 @@ namespace wf {
         WFStatusResult configureHardware();
         WFStatusResult configureWorkers();
         WFStatusResult setCameraConfig(const std::string& nickname, CameraConfiguration config);
+        WFStatusResult setCameraConfig_JSON(const std::string& nickname, const JSON& config) {
+            return CameraConfiguration::fromJSON(config).and_then(
+                [this,nickname](const CameraConfiguration& cfg){
+                    return setCameraConfig(nickname,cfg);
+                }
+            );
+        }
         WFResult<CameraConfiguration> getCameraConfig(const std::string& nickname);
         WFResult<JSON> getCameraConfig_JSON(const std::string& nickname) {
             return getCameraConfig(nickname).and_then(CameraConfiguration::toJSON);

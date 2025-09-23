@@ -24,6 +24,7 @@
 #include <format>
 #include "jval/CameraConfig.jval.hpp"
 #include "jval/CameraIntrinsics.jval.hpp"
+#include "wfcore/utils/cvutils.h"
 
 // TODO: refactor to use getProperty();
 namespace impl {
@@ -157,8 +158,8 @@ namespace wf {
         );
     }
 
-    bool CameraIntrinsics::operator==(const CameraIntrinsics other) noexcept {
-        
+    bool CameraIntrinsics::operator==(const CameraIntrinsics other) const noexcept {
+        return cvmeq(cameraMatrix,other.cameraMatrix) && cvmeq(distCoeffs,other.distCoeffs) && cvseq(resolution,other.resolution);
     }
 
     const jval::JSONValidationFunctor* CameraConfiguration::getValidator_impl() {

@@ -320,4 +320,28 @@ namespace wfsrv {
             }
         };
     }
+
+    template <wf::WFStatusResult (wf::WFOrchestrator::*resourceSetter)(const std::string& name, const wf::JSON& jobject), typename NameGetter>
+    inline auto makeHandler_live_resource_PUT(NameGetter nameGetter, wf::WFOrchestrator& orch) {
+        return [&orch,nameGetter](const httplib::Request& req, httplib::Response& res){
+            std::string name;
+            try {
+                name = nameGetter(req);
+            } catch (...) {
+                res.status = 500;
+                setContent(res, getErrorResponse<500>("An unknown exception occurred while parsing resource name"));
+                return;
+            }
+            // TODO: Make ts better
+            wf::WFStatusResult res = (orch.*resourceSetter)(name, wf::JSON::parse(req.body));
+            if (!json_res) {
+                // TODO: more descriptive return codes
+                res.status = 500;
+                setContent(res, getErrorResponse<500>(json_res.what()));
+                return;
+            }
+            res.status = 204;
+            return;
+        };
+    }
 }

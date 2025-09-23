@@ -191,6 +191,14 @@ namespace impl {
                 orch
             )
         );
+
+        srv.Put(
+            "/api/live/hardware/([^/]+)",
+            makeHandler_live_resource_PUT<&wf::WFOrchestrator::setCameraConfig_JSON>(
+                [](const httplib::Request& req){ return req.matches[1].str(); },
+                orch
+            )
+        );
     }
 }
 
