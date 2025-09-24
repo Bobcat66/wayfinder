@@ -333,7 +333,7 @@ namespace wfsrv {
                 return;
             }
             // TODO: Make ts better
-            wf::WFStatusResult res = (orch.*resourceSetter)(name, wf::JSON::parse(req.body));
+            wf::WFStatusResult json_res = (orch.*resourceSetter)(name, wf::JSON::parse(req.body));
             if (!json_res) {
                 // TODO: more descriptive return codes
                 res.status = 500;
