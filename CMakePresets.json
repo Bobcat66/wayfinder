@@ -9,7 +9,8 @@
                 "WF_USE_SYSTEM_OPENCV": "OFF",
                 "WF_BOOTSTRAP": "ON",
                 "CMAKE_BUILD_TYPE": "Release",
-                "WF_BUILD_DEMOS": "OFF"
+                "WF_BUILD_DEMOS": "OFF",
+                "WF_INSTALL_BUILD": "ON"
             }
         },
         {

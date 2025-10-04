@@ -50,6 +50,22 @@ int main() {
             // main loop
             auto lock = wfd::getLock();
             orch.periodic();
+            if (wfd::shutdownRequested()) {
+                std::cout << "Shutdown requested, exiting..." << std::endl;
+                return WAYFINDER_SHUTDOWN;
+            }
+            if (wfd::reloadRequested()) {
+                std::cout << "Reload requested, exiting..." << std::endl;
+                return WAYFINDER_RELOAD;
+            }
+            if (wfd::restartRequested()) {
+                std::cout << "Restart requested, exiting..." << std::endl;
+                return WAYFINDER_RESTART;
+            }
+            if (wfd::rebootRequested()) {
+                std::cout << "Reboot requested, exiting..." << std::endl;
+                return WAYFINDER_REBOOT;
+            }
         }
     } catch (const std::exception& e) {
         // TODO: More descriptive error handling

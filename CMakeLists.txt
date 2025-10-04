@@ -36,6 +36,8 @@ option(WF_USE_OPENVINO "Enable support for Intel OpenVINO hardware-accelerated i
 
 option(WF_USE_SYSTEM_OPENCV "Use system OpenCV instead of bundled version" OFF)
 
+option(WF_INSTALL_BUILD "Build with install RPATH settings" OFF)
+
 option(WF_BUILD_TESTS "Build unit tests" ON)
 option(WF_BUILD_DEMOS "Build demos" OFF)
 
@@ -45,6 +47,9 @@ configure_file(
     @ONLY
 )
 
+if (WF_INSTALL_BUILD)
+    set(CMAKE_INSTALL_RPATH "$ORIGIN/../lib;$ORIGIN/../extern_deps/opencv/lib")
+endif()
 if (WF_BOOTSTRAP)
     add_subdirectory(thirdparty/opencv)
 else()
@@ -56,7 +61,6 @@ else()
     add_subdirectory(thirdparty/spdlog)
     add_subdirectory(thirdparty/nlohmann_json)
     add_subdirectory(thirdparty/cpp-httplib)
-    #add_subdirectory(thirdparty/cpr) # Add this back in when working on Daemon
     add_subdirectory(core)
     add_subdirectory(daemon)
     if (WF_BUILD_DEMOS)
