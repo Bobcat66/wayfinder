@@ -16,6 +16,7 @@ WF_PIPELINE_LSUBDIR: path to the pipelines/ directory, relative to the local/ di
 WF_NT_SERVER: whether or not the coprocessor should host a NetworkTables server
 WF_EXEC: path to the wayfinderd executable, relative to the working directory
 WF_SCRIPTS: path to wayfinder auxiliary scripts, relative to the working directory
+WF_LDPATH: absolute path to the shared libraries wayfinderd relies on
 
 In general, the working directory will be /opt/wayfinder in deployment. values that are meant to be strings should
 be quoted, values meant to be interpreted as doubles/ints/bools should be left unquoted. bools are denoted with true and false

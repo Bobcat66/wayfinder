@@ -66,7 +66,7 @@ target_link_libraries(wfcore
     nlohmann_json::nlohmann_json
     PRIVATE
     apriltag
-) # In deployment builds, this will link statically, and there will be a cmake build type variable set in the top-level CMake file. I'll put that in eventually. For now, this is nowhere near deployment
+)
 
 target_include_directories(wfcore 
     PUBLIC 
@@ -97,21 +97,24 @@ if(WF_USE_GSTREAMER)
     
 endif()
 
-file(GLOB_RECURSE TESTSOURCES 
-    CONFIGURE_DEPENDS 
-    "${CMAKE_CURRENT_SOURCE_DIR}/src/test/native/*.cpp"
-)
-add_executable(wfcore_tests ${TESTSOURCES})
+if(WF_INSTALL_BUILD)
+    message(STATUS "wfcore_tests will not run correctly with RPATH settings enabled, skipping test build")
+else()
+    file(GLOB_RECURSE TESTSOURCES 
+        CONFIGURE_DEPENDS 
+        "${CMAKE_CURRENT_SOURCE_DIR}/src/test/native/*.cpp"
+    )
+    add_executable(wfcore_tests ${TESTSOURCES})
+    target_link_libraries(wfcore_tests 
+        PRIVATE
+        GTest::gtest
+        GTest::gtest_main
+        wfcore
+    )
 
-target_link_libraries(wfcore_tests 
-    PRIVATE
-    GTest::gtest
-    GTest::gtest_main
-    wfcore
-)
-
-include(GoogleTest)
-gtest_discover_tests(wfcore_tests)
+    include(GoogleTest)
+    gtest_discover_tests(wfcore_tests)
+endif()
 
 
 

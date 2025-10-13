@@ -7,9 +7,6 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 enable_testing()
 
-# As wayfinder is
-set(CMAKE_INSTALL_PREFIX "/opt/wayfinder" CACHE PATH "Install path" FORCE)
-
 # TODO: Fix dependency hierarchy. Right now the dependencies are a mess, eventually 
 # I should configure the build system to make sure dependencies are imported once and only once
 # Particular points i've identified as needing improvement are fmt and Eigen
@@ -48,8 +45,16 @@ configure_file(
 )
 
 if (WF_INSTALL_BUILD)
+    message(STATUS "Configuring install settings")
+    set(CMAKE_BUILD_RPATH_USE_ORIGIN TRUE)
+    set(CMAKE_INSTALL_PREFIX "/opt/wayfinder" CACHE PATH "Install path" FORCE)
+    set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
+    set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
     set(CMAKE_INSTALL_RPATH "$ORIGIN/../lib;$ORIGIN/../extern_deps/opencv/lib")
+    set(CMAKE_SKIP_INSTALL_RPATH FALSE)
+    set(CMAKE_SKIP_RPATH FALSE)
 endif()
+
 if (WF_BOOTSTRAP)
     add_subdirectory(thirdparty/opencv)
 else()
