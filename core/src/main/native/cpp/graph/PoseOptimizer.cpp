@@ -17,23 +17,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-
-
-#pragma once
-
-#include <gtsam/geometry/Pose3.h>
-#include <gtsam/nonlinear/ExpressionFactorGraph.h>
-#include <gtsam/nonlinear/Values.h>
-#include <gtsam/slam/BetweenFactor.h>
-#include <gtsam/nonlinear/NonlinearISAM.h>
-#include <gtsam/nonlinear/LevenbergMarquardtOptimizer.h>
+#include "wfcore/graph/PoseOptimizer.h"
 
 namespace wf {
-    class PoseOptimizer {
-    public:
-    private:
-        gtsam::NonlinearISAM isam;
-        gtsam::ExpressionFactorGraph graph;
-        gtsam::Values initialEstimate;
-    };
 }
