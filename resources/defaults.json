@@ -1,0 +1,36 @@
+{
+    "engineType": "default",
+    "modelArch": "YOLO",
+    "tensorParams": {
+        "interleaved": false,
+        "height": 640,
+        "width": 640,
+        "channels": 3,
+        "scale": 0.00392156862745098,
+        "stds": [1.0, 1.0, 1.0],
+        "means": [0.0, 0.0, 0.0]
+    },
+    "nmsThreshold": 0.5,
+    "confidenceThreshold": 0.5,
+    "modelFile": "model.onnx",
+    "modelColorSpace": "RGB24",
+    "qtps": {
+        "minClusterPixels": 5,
+        "maxNumMaxima": 10,
+        "criticalAngleRads": 0.0,
+        "maxLineFitMSE": 10.0,
+        "minWhiteBlackDiff": 5,
+        "deglitch": false
+    },
+    "tagDetectorConfig": {
+        "numThreads": 1,
+        "quadDecimate": 2.0,
+        "quadSigma": 0.0,
+        "refineEdges": true,
+        "decodeSharpening": 0.25,
+        "debug": false
+    },
+    "tagSize": 0.162,
+    "tagFamily": "tag36h11",
+    "tagField": "2025-reefscape-welded.json"
+}

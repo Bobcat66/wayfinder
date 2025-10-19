@@ -127,20 +127,43 @@ def sethost() -> int:
     subprocess.run(["hostnamectl","set-hostname",hostname],check=True)
     return 0
 
-# A restart is required for changes to take effect
-def ipctl(ip: Union[str,None], static: bool):
-    hres = sethost()
-    if hres != 0:
-        return hres
-    networkfile = Path("/etc/systemd/network/10-eth0.network")
+def netctl(ip: Union[str,None], enabled: Union[bool,None], hostname: Union[bool,None]):
+    envpath = os.environ.get("WF_ENV_PATH")
+    if (envpath is None):
+        return 1
+    load_env_file(envpath)
+    if hostname is not None:
+        hostres = putenv("WF_DEVICE_NAME",hostname)
+        if hostres != 0:
+            return hostres
+        shostres = sethost()
+        if shostres != 0:
+            return shostres
     if ip is not None:
-        sed_s(networkfile,"Address=.*",f"Address={ip}")
-    if static:
-        uncomment_key(networkfile,"Address")
-        comment_key(networkfile,"DHCP")
-    else:
-        uncomment_key(networkfile,"DHCP")
-        comment_key(networkfile,"Address")
+        ipres = putenv("WF_STATIC_IP",ip)
+        if ipres != 0:
+            return ipres
+    if enabled is not None:
+        if enabled:
+            ip = os.environ.get("WF_STATIC_IP")
+            if ip is None:
+                print("WF_STATIC_IP is not set in environment")
+                return 1
+            subprocess.run(
+                ["nmcli","connection","modify","frc-eth0"
+                ,"ipv4.method","auto"
+                ,"ipv4.addresses",f"{ip},192.168.99.67/24"],
+                check=True
+            )
+            #subprocess.run(["nmcli","connection","modify","frc-eth0","connection.may-fail","no"],check=True)
+        else:
+            subprocess.run(
+                ["nmcli","connection","modify","frc-eth0"
+                ,"ipv4.method","auto"
+                ,"ipv4.addresses","192.168.99.67/24"],
+                check=True
+            )
+            #subprocess.run(["nmcli","connection","modify","frc-eth0","connection.may-fail","no"],check=True)
     return 0
 
 def putenv_cli(args) -> int:
@@ -149,8 +172,8 @@ def putenv_cli(args) -> int:
 def getenv_cli(args) -> int:
     return getenv(args.key)
 
-def ipctl_cli(args) -> int:
-    return ipctl(args.ip,args.static)
+def netctl_cli(args) -> int:
+    return netctl(args.ip,args.static,args.hostname)
 
 def sethost_cli(args) -> int:
     return sethost()
@@ -177,10 +200,11 @@ if __name__ == "__main__":
     parser_getenv.add_argument("key",help="Environment variable name")
     parser_getenv.set_defaults(func=getenv_cli)
 
-    parser_ipctl = subparsers.add_parser("ipctl",help="Configure network")
-    parser_ipctl.add_argument("--ip",type=str,help="Static IP address")
-    parser_ipctl.add_argument("--static","-s",action="store_true")
-    parser_ipctl.set_defaults(func=ipctl_cli)
+    parser_netctl = subparsers.add_parser("netctl",help="Configure network")
+    parser_netctl.add_argument("--ip","-i",type=str,help="Static IP address")
+    parser_netctl.add_argument("--static","-s",action="store_true")
+    parser_netctl.add_argument("--hostname","-h",type=str,help="Set hostname")
+    parser_netctl.set_defaults(func=netctl_cli)
 
     parser_sethost = subparsers.add_parser("sethost",help="Set hostname to device name (FOR INTERNAL USE ONLY)")
     parser_sethost.set_defaults(func=sethost_cli)

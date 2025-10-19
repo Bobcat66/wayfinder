@@ -5,6 +5,7 @@ WF_ENV_PATH: Absolute path to wayfinder's .env file. This environment variable m
 WF_DEFAULTS_PATH: Path to the system defaults file, relative to the working directory
 WF_DEVICE_NAME: A unique name used by a device to identify itself. Also doubles as the device's local hostname
 WF_TEAM: FRC team number
+WF_STATIC_IP: Static ip address (will be ignored if static IP is disabled in NetworkManager)
 WF_SLAM_SERVER: Whether or not this device should act as a SLAM server
 WF_LOCAL: path to wayfinder's local/ directory, relative to the working directory
 WF_RESOURCE: path to wayfinder's resources/ directory, relative to the working directory

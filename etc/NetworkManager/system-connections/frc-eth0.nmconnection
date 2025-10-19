@@ -1,0 +1,23 @@
+[connection]
+id=frc-eth0
+type=ethernet
+interface-name=eth0
+autoconnect=true
+
+[ipv4]
+method=auto
+# Wayfinder will use DHCP if available
+# 192.168.99.67\24 is a rescue static IP that will always be available
+# Teams may also configure a static IP in the FRC radio subnet for use on the robot
+address1=192.168.99.67/24
+# Hopefully i'm the only one brainrotted enough to use 67 as a rescue IP
+
+# This ensures both DHCP and static coexist
+may-fail=false
+ignore-auto-dns=false
+ignore-auto-routes=false
+
+[ipv6]
+method=ignore
+
+[proxy]

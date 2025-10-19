@@ -19,14 +19,15 @@
 
 [Unit]
 Description=Wayfinder
-After=network.target
+After=network-online.target
+Wants=network-online.target
 
 [Service]
 Type=simple
 User=wayfinder
 Group=wayfinder
 WorkingDirectory=/opt/wayfinder
-Environment=WF_ENV_PATH=etc/wayfinder.env
+Environment=WF_ENV_PATH=/opt/wayfinder/etc/wayfinder.env
 ExecStart=/opt/wayfinder/scripts/launch.sh
 Restart=always
 RestartSec=5
