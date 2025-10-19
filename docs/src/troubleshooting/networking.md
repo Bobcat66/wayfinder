@@ -25,3 +25,6 @@ No warranty is provided.
 ## Help, I can't connect to my coprocessor!
 [WIP]
 192.168.99.67/24 is a rescue IP address that is always available
+If you are unable to connect through the FRC radio,
+you can connect directly to the rescue IP and SSH into the
+coprocessor
