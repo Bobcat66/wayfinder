@@ -15,6 +15,15 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-cmake_minimum_required(VERSION 3.25)
-project(wayfinder-client C)
+set(CMAKE_SYSTEM_NAME Linux)
+set(CMAKE_SYSTEM_PROCESSOR aarch64)
+set(CMAKE_C_COMPILER   /usr/bin/aarch64-linux-gnu-gcc)
+set(CMAKE_CXX_COMPILER /usr/bin/aarch64-linux-gnu-g++)
 
+# No manual sysroot — rely on compiler’s internal one
+
+# Tell CMake not to look in the host system
+set(CMAKE_FIND_ROOT_PATH /usr/aarch64-linux-gnu)
+set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
+set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
+set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)

@@ -41,7 +41,7 @@ if [[ ! -f "$IMAGE_PATH" ]]; then
 fi
 
 if [[ $# -ne 2 ]]; then
-    echo "Usage: $0 <path-to-iso> <path-to-staging-dir>"
+    echo "Usage: $0 <path-to-image> <path-to-staging-dir>"
     exit 1
 fi
 
@@ -52,10 +52,17 @@ if [[ ! -d "$STAGING_PATH" ]]; then
     exit 1
 fi
 
-LOOPDEV=$(losetup -Pf --show $IMAGE_PATH)
+unxz "$IMAGE_PATH"
+if [[ $? -ne 0 ]]; then
+    echo "Failed to uncompress image file"
+    exit 1
+fi
+IMAGE_FILE="${IMAGE_PATH%.xz}"
+
+LOOPDEV=$(losetup -Pf --show $IMAGE_FILE)
 echo "Loop device is: $LOOPDEV"
-BOOT_PARTITION="/dev/${LOOPDEV}p1"
-ROOT_PARTITION="/dev/${LOOPDEV}p2"
+BOOT_PARTITION="${LOOPDEV}p1"
+ROOT_PARTITION="${LOOPDEV}p2"
 echo "Boot partition: $BOOT_PARTITION"
 echo "Root partition: $ROOT_PARTITION"
 # Mount the root partition
@@ -67,7 +74,20 @@ if [[ $? -ne 0 ]]; then
     losetup -d "$LOOPDEV"
     exit 1
 fi
-echo "Mounted root partition at /mnt/wf_root"
+echo "Mounted root partition at $MOUNTPOINT"
+cleanup() {
+    echo "Cleaning up..."
+    umount -q "$MOUNTPOINT/dev/pts" 2>/dev/null || true
+    umount -q "$MOUNTPOINT/dev" 2>/dev/null || true
+    umount -q "$MOUNTPOINT/proc" 2>/dev/null || true
+    umount -q "$MOUNTPOINT/sys" 2>/dev/null || true
+    umount -q "$MOUNTPOINT/run" 2>/dev/null || true
+    umount -q "$MOUNTPOINT" 2>/dev/null || true
+    losetup -d "$LOOPDEV" 2>/dev/null || true
+    rm -f "$MOUNTPOINT/usr/bin/qemu-aarch64-static" 2>/dev/null || true
+    rmdir "$MOUNTPOINT" 2>/dev/null || true
+}
+trap cleanup EXIT
 # Copy Wayfinder files to the mounted root partition
 rsync -a "$STAGING_PATH/opt/wayfinder/" "$MOUNTPOINT/opt/wayfinder/"
 if [[ $? -ne 0 ]]; then
@@ -76,6 +96,29 @@ if [[ $? -ne 0 ]]; then
     losetup -d "$LOOPDEV"
     exit 1
 fi
-cp "$SCRIPT_DIR/../config/frc-eth0.nmconnection" "$MOUNTPOINT/etc/NetworkManager/system-connections/frc-eth0.nmconnection"
-cp "$SCRIPT_DIR/../config/wayfinder.service" "$MOUNTPOINT/etc/systemd/system/wayfinder.service"
 echo "Copied Wayfinder files to $MOUNTPOINT/opt/wayfinder"
+
+# Chroot into the mounted partition and run the install script
+sudo mount --bind /dev "$MOUNTPOINT/dev"
+sudo mount --bind /dev/pts "$MOUNTPOINT/dev/pts"
+sudo mount --bind /proc "$MOUNTPOINT/proc"
+sudo mount --bind /sys "$MOUNTPOINT/sys"
+sudo mount --bind /run "$MOUNTPOINT/run"
+# This enables chrooting into an aarch64 image on an x86_64 host
+cp /usr/bin/qemu-aarch64-static "$MOUNTPOINT/usr/bin/"
+chroot "$MOUNTPOINT" /bin/bash -c "/opt/wayfinder/scripts/install.sh"
+if [[ $? -ne 0 ]]; then
+    echo "Failed to run install script in chroot"
+    cleanup()
+    exit 1
+fi
+echo "Ran install script in chroot"
+# Exit chroot and unmount partitions
+exit
+# Cleanup chroot mounts
+cleanup()
+# Re-compress the image
+xz "$IMAGE_FILE"
+echo "Unmounted and cleaned up"
+echo "Wayfinder deployed to image successfully."
+

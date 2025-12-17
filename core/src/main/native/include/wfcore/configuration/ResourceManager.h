@@ -21,6 +21,7 @@
 
 #include "wfcore/common/status.h"
 #include "wfcore/fiducial/ApriltagField.h"
+#include <shared_mutex>
 #include <filesystem>
 #include <unordered_map>
 #include <optional>

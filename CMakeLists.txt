@@ -1,3 +1,22 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# Copyright (C) 2025 Jesse Kane
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+set(CMAKE_PROJECT_TOP_LEVEL_INCLUDES "${CMAKE_SOURCE_DIR}/cmake/TopLevelConfig.cmake")
+
 cmake_minimum_required(VERSION 3.25)
 project(wayfinder VERSION 0.0.1)
 
@@ -43,6 +62,8 @@ configure_file(
     ${CMAKE_CURRENT_BINARY_DIR}/meta/version.h
     @ONLY
 )
+
+# list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/modules")
 
 if (WF_INSTALL_BUILD)
     message(STATUS "Configuring install settings")

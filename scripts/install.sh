@@ -21,6 +21,8 @@
 # It must be run with root privileges.
 # Prebuilt images already have run this script during their creation, so it is not necessary to run it again on those images.
 
+set -euo pipefail
+
 # Set permissions and ownerships
 chown root:root /opt/wayfinder/etc/network/frc-eth0.nmconnection
 chmod 600 /opt/wayfinder/etc/network/frc-eth0.nmconnection
@@ -34,3 +36,20 @@ ln -s /opt/wayfinder/etc/systemd/system/wayfinder.service /etc/systemd/system/wa
 systemctl daemon-reload
 systemctl enable wayfinder.service
 systemctl enable avahi-daemon.service
+
+# wfdev user for ssh access and admin tasks
+if ! id -u wfdev >/dev/null 2>&1; then
+    useradd --create-home --shell /bin/bash wfdev
+fi
+usermod -aG wayfinder,sudo wfdev
+
+# Create wayfinder group if not exists
+if ! getent group wayfinder >/dev/null; then
+    groupadd --system wayfinder
+fi
+# Create wayfinder system user if not exists
+if ! id -u wayfinder >/dev/null 2>&1; then
+    useradd --system --create-home --shell /usr/sbin/nologin --gid wayfinder wayfinder
+fi
+usermod -aG video wayfinder
+# TODO: Figure out permissions needed and set them appropriately
