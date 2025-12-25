@@ -66,8 +66,8 @@ ROOT_PARTITION="${LOOPDEV}p2"
 echo "Boot partition: $BOOT_PARTITION"
 echo "Root partition: $ROOT_PARTITION"
 # Mount the root partition
-MOUNTPOINT="/mnt/wf_root"
-mkdir -p $MOUNTPOINT
+MOUNTPOINT=$(mktemp -d /mnt/wf_root.XXXXXX)
+mkdir -p "$MOUNTPOINT"
 mount "$ROOT_PARTITION" "$MOUNTPOINT"
 if [[ $? -ne 0 ]]; then
     echo "Failed to mount root partition"
@@ -99,11 +99,11 @@ fi
 echo "Copied Wayfinder files to $MOUNTPOINT/opt/wayfinder"
 
 # Chroot into the mounted partition and run the install script
-sudo mount --bind /dev "$MOUNTPOINT/dev"
-sudo mount --bind /dev/pts "$MOUNTPOINT/dev/pts"
-sudo mount --bind /proc "$MOUNTPOINT/proc"
-sudo mount --bind /sys "$MOUNTPOINT/sys"
-sudo mount --bind /run "$MOUNTPOINT/run"
+mount --bind /dev "$MOUNTPOINT/dev"
+mount --bind /dev/pts "$MOUNTPOINT/dev/pts"
+mount --bind /proc "$MOUNTPOINT/proc"
+mount --bind /sys "$MOUNTPOINT/sys"
+mount --bind /run "$MOUNTPOINT/run"
 # This enables chrooting into an aarch64 image on an x86_64 host
 cp /usr/bin/qemu-aarch64-static "$MOUNTPOINT/usr/bin/"
 chroot "$MOUNTPOINT" /bin/bash -c "/opt/wayfinder/scripts/install.sh"
@@ -113,10 +113,6 @@ if [[ $? -ne 0 ]]; then
     exit 1
 fi
 echo "Ran install script in chroot"
-# Exit chroot and unmount partitions
-exit
-# Cleanup chroot mounts
-cleanup()
 # Re-compress the image
 xz "$IMAGE_FILE"
 echo "Unmounted and cleaned up"
