@@ -32,10 +32,12 @@ set(WITH_TESTS OFF)
 set(WITH_GUI OFF)
 set(WITH_SIMULATION_MODULES OFF)
 set(WITH_PROTOBUF OFF)
+set(WITH_BENCHMARK OFF)
+set(WPILIB_INSTALL OFF)
 fetchcontent_declare(
     allwpilib
     GIT_REPOSITORY    https://github.com/wpilibsuite/allwpilib.git
-    GIT_TAG           v2025.3.2
+    GIT_TAG           v2026.1.1
 )
 FetchContent_MakeAvailable(allwpilib)
 

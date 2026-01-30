@@ -23,26 +23,31 @@
 
 set -euo pipefail
 
+echo "Installing Wayfinder..."
+
+echo "Installing dependencies..."
+# Install necessary dependencies
+apt-get update -qq
+apt-get install -y -qq \
+    network-manager \
+    avahi-daemon >> /dev/null
+echo "Dependencies installed."
+
+echo "Configuring..."
 # Set permissions and ownerships
-chown root:root /opt/wayfinder/etc/network/frc-eth0.nmconnection
-chmod 600 /opt/wayfinder/etc/network/frc-eth0.nmconnection
-chown root:root /opt/wayfinder/etc/systemd/wayfinder.service
-chmod 644 /opt/wayfinder/etc/systemd/wayfinder.service
+chown root:root /opt/wayfinder/etc/NetworkManager/system-connections/frc-eth0.nmconnection
+chmod 600 /opt/wayfinder/etc/NetworkManager/system-connections/frc-eth0.nmconnection
+chown root:root /opt/wayfinder/etc/systemd/system/wayfinder.service
+chmod 644 /opt/wayfinder/etc/systemd/system/wayfinder.service
 
 # Create symlinks
 ln -s /opt/wayfinder/etc/NetworkManager/system-connections/frc-eth0.nmconnection /etc/NetworkManager/system-connections/frc-eth0.nmconnection
 ln -s /opt/wayfinder/etc/systemd/system/wayfinder.service /etc/systemd/system/wayfinder.service
 
-systemctl daemon-reload
-systemctl enable wayfinder.service
-systemctl enable avahi-daemon.service
-
 # wfdev user for ssh access and admin tasks
 if ! id -u wfdev >/dev/null 2>&1; then
     useradd --create-home --shell /bin/bash wfdev
 fi
-usermod -aG wayfinder,sudo wfdev
-
 # Create wayfinder group if not exists
 if ! getent group wayfinder >/dev/null; then
     groupadd --system wayfinder
@@ -51,5 +56,14 @@ fi
 if ! id -u wayfinder >/dev/null 2>&1; then
     useradd --system --create-home --shell /usr/sbin/nologin --gid wayfinder wayfinder
 fi
+
+usermod -aG wayfinder,sudo wfdev
 usermod -aG video wayfinder
+
 # TODO: Figure out permissions needed and set them appropriately
+
+systemctl daemon-reload
+systemctl enable wayfinder.service
+systemctl enable avahi-daemon.service
+
+echo "Installation complete."

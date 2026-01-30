@@ -25,15 +25,12 @@
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 STAGING_DIR="${SCRIPT_DIR}/../staging"
 mkdir -p "$STAGING_DIR/opt/wayfinder/local"
-mkdir -p "$STAGING_DIR/opt/wayfinder/resources"
-mkdir -p "$STAGING_DIR/opt/wayfinder/scripts"
-mkdir -p "$STAGING_DIR/opt/wayfinder/etc"
 # Copy scripts
-cp -r "$SCRIPT_DIR/../scripts/" "$STAGING_DIR/opt/wayfinder/scripts/"
+cp -r "$SCRIPT_DIR/../scripts/" "$STAGING_DIR/opt/wayfinder/"
 # Copy resource files
-cp -r "$SCRIPT_DIR/../resources/" "$STAGING_DIR/opt/wayfinder/resources/"
+cp -r "$SCRIPT_DIR/../resources/" "$STAGING_DIR/opt/wayfinder/"
 # Copy config files
-cp -r "$SCRIPT_DIR/../etc/" "$STAGING_DIR/opt/wayfinder/etc/"
+cp -r "$SCRIPT_DIR/../etc/" "$STAGING_DIR/opt/wayfinder/"
 
 
 

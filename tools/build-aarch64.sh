@@ -28,6 +28,6 @@ cmake --build "${SCRIPT_DIR}/../build_aarch64/main"
 # Stage 4: Stage
 echo "Staging Wayfinder..."
 cmake -E env DESTDIR=$STAGING_DIR cmake --install "${SCRIPT_DIR}/../build_aarch64/main"
-Fix RPATHs in staged binaries and shared libraries
+# Fix RPATHs in staged binaries and shared libraries
 find "${SCRIPT_DIR}/../staging/opt/wayfinder/lib" -name '*.so*' -exec patchelf --set-rpath '$ORIGIN;$ORIGIN/../extern_deps/opencv/lib' {} \;
 find "${SCRIPT_DIR}/../staging/opt/wayfinder/bin" -name 'wayfinderd' -exec patchelf --set-rpath '$ORIGIN/../lib;$ORIGIN/../extern_deps/opencv/lib' {} \;
