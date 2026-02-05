@@ -1,0 +1,11 @@
+{
+    "$schema": "../jval_schema.schema.json",
+    "$name": "FrameFormat",
+    "type": "struct",
+    "properties": {
+        "width": { "type": "integer" },
+        "height": { "type": "integer" },
+        "encoding": { "$ref": "ImageEncoding" }
+    },
+    "required": ["width","height","encoding"]
+}

@@ -55,6 +55,46 @@ extern "C" {
 #include <assert.h>
 #include <stddef.h>
 
+#if defined(_MSC_VER)
+    #define wips_htonll(x) _byteswap_uint64(x)
+    #define wips_ntohll(x) _byteswap_uint64(x)
+#elif defined(__GNUC__) || defined(__clang__)
+    #if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
+        // little endian
+        #define wips_htonll(x) __builtin_bswap64(x)
+        #define wips_ntohll(x) __builtin_bswap64(x)
+    #elif __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
+        // big endian
+        #define wips_htonll(x) (x)
+        #define wips_ntohll(x) (x)
+    #endif
+    
+#else
+    static inline uint64_t bswap64(uint64_t x) {
+        return  ((x & 0xFF00000000000000ULL) >> 56) |
+                ((x & 0x00FF000000000000ULL) >> 40) |
+                ((x & 0x0000FF0000000000ULL) >> 24) |
+                ((x & 0x000000FF00000000ULL) >> 8)  |
+                ((x & 0x00000000FF000000ULL) << 8)  |
+                ((x & 0x0000000000FF0000ULL) << 24) |
+                ((x & 0x000000000000FF00ULL) << 40) |
+                ((x & 0x00000000000000FFULL) << 56);
+    }
+    #define wips_htonll(x) bswap64(x)
+    #define wips_ntohll(x) bswap64(x)
+#endif
+
+#if defined(_WIN32)
+    #include <winsock2.h>
+#elif defined (__unix__) || (defined (__APPLE__) && defined (__MACH__))
+    #include <arpa/inet.h>
+#endif
+
+#define wips_htonl(x) htonl(x)
+#define wips_ntohl(x) ntohl(x)
+#define wips_htons(x) htons(x)
+#define wips_ntohs(x) ntohs(x)
+
 #define EXPAND(x) x
 #define CONCAT3(a, b, c) a ## b ## c
 #define EXPAND_CONCAT3(a, b, c) CONCAT3(a, b, c)
@@ -172,9 +212,28 @@ struct tm* wips_localtime(const time_t* timer);
             data->allocated = new_allocated;                                                                    \
             data->base = newBase;                                                                               \
         }                                                                                                       \
-        memcpy(data->base+data->offset,in, GET_SIZE(wips_typename));                                            \
+        memcpy(data->base+data->offset, in, GET_SIZE(wips_typename));                                           \
         data->offset = newOffset;                                                                               \
         WIPS_TRACELOG("Finished encoding %s\n",STRINGIZE(wips_typename));                                       \
+        return wips_make_result(GET_SIZE(wips_typename),WIPS_STATUS_OK);                                        \
+    }
+
+#define DEFINE_TRIVIAL_ENCODE_NRB(wips_typename)                                                                \
+    wips_result_t wips_encode_nrb_##wips_typename(wips_blob_t* data, GET_CTYPE(wips_typename)* in){             \
+        WIPS_Assert(in != NULL && data != NULL,0);                                                              \
+        WIPS_TRACELOG("No resize buffer (nrb) encoding %s\n",STRINGIZE(wips_typename));                         \
+        if (data->offset > (SIZE_MAX - GET_SIZE(wips_typename))){                                               \
+            WIPS_DEBUGLOG("Fatal error while nrb encoding %s: Integer overflow\n",STRINGIZE(wips_typename));    \
+            return wips_make_result(0,WIPS_STATUS_OVERFLOW);                                                    \
+        }                                                                                                       \
+        size_t newOffset = data->offset + GET_SIZE(wips_typename);                                              \
+        if (newOffset > data->allocated){                                                                       \
+            WIPS_DEBUGLOG("Fatal error while nrb encoding %s: Buffer overflow\n",STRINGIZE(wips_typename));     \
+            return wips_make_result(0,WIPS_STATUS_BUF_OVERFLOW);                                                \
+        }                                                                                                       \
+        memcpy(data->base+data->offset, in, GET_SIZE(wips_typename));                                           \
+        data->offset = newOffset;                                                                               \
+        WIPS_TRACELOG("Finished nrb encoding %s\n",STRINGIZE(wips_typename));                                   \
         return wips_make_result(GET_SIZE(wips_typename),WIPS_STATUS_OK);                                        \
     }
     

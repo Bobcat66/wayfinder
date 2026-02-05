@@ -52,14 +52,24 @@ wips_blob_t *wips_blob_create(size_t size) {
     return newbin;
 }
 
-wips_blob_t *wips_blob_wrap(unsigned char *base, size_t size) {
+wips_blob_t *wips_blob_wrap(void *base, size_t size) {
     WIPS_FatalAssert(base != NULL);
     wips_blob_t *newbin = malloc(sizeof(wips_blob_t));
     if (!newbin) return NULL;
-    newbin->base = base;
+    newbin->base = (unsigned char *)base;
     newbin->offset = 0;
     newbin->allocated = size;
     return newbin;
+}
+
+
+wips_blob_t wips_blob_stackwrap(void *base, size_t size) {
+    WIPS_FatalAssert(base != NULL);
+    wips_blob_t newblob;
+    newblob.base = (unsigned char *)base;
+    newblob.offset = 0;
+    newblob.allocated = size;
+    return newblob;
 }
 
 void wips_blob_destroy(wips_blob_t *bin) {
@@ -69,33 +79,43 @@ void wips_blob_destroy(wips_blob_t *bin) {
 }
 
 DEFINE_TRIVIAL_ENCODE(u8)
+DEFINE_TRIVIAL_ENCODE_NRB(u8)
 DEFINE_TRIVIAL_DECODE(u8)
 
 DEFINE_TRIVIAL_ENCODE(i8)
+DEFINE_TRIVIAL_ENCODE_NRB(i8)
 DEFINE_TRIVIAL_DECODE(i8)
 
 DEFINE_TRIVIAL_ENCODE(u16)
+DEFINE_TRIVIAL_ENCODE_NRB(u16)
 DEFINE_TRIVIAL_DECODE(u16)
 
 DEFINE_TRIVIAL_ENCODE(i16)
+DEFINE_TRIVIAL_ENCODE_NRB(i16)
 DEFINE_TRIVIAL_DECODE(i16)
 
 DEFINE_TRIVIAL_ENCODE(u32)
+DEFINE_TRIVIAL_ENCODE_NRB(u32)
 DEFINE_TRIVIAL_DECODE(u32)
 
 DEFINE_TRIVIAL_ENCODE(i32)
+DEFINE_TRIVIAL_ENCODE_NRB(i32)
 DEFINE_TRIVIAL_DECODE(i32)
 
 DEFINE_TRIVIAL_ENCODE(u64)
+DEFINE_TRIVIAL_ENCODE_NRB(u64)
 DEFINE_TRIVIAL_DECODE(u64)
 
 DEFINE_TRIVIAL_ENCODE(i64)
+DEFINE_TRIVIAL_ENCODE_NRB(i64)
 DEFINE_TRIVIAL_DECODE(i64)
 
 DEFINE_TRIVIAL_ENCODE(fp32)
+DEFINE_TRIVIAL_ENCODE_NRB(fp32)
 DEFINE_TRIVIAL_DECODE(fp32)
 
 DEFINE_TRIVIAL_ENCODE(fp64)
+DEFINE_TRIVIAL_ENCODE_NRB(fp64)
 DEFINE_TRIVIAL_DECODE(fp64)
 
 void wips_u8_free_resources(wips_u8_t *data) {}
@@ -113,34 +133,42 @@ wips_status_t wips_u8_copy(wips_u8_t *dest, const wips_u8_t *src) {
     *dest = *src;
     return WIPS_STATUS_OK;
 }
+
 wips_status_t wips_i8_copy(wips_i8_t *dest, const wips_i8_t *src) {
     *dest = *src;
     return WIPS_STATUS_OK;
 }
+
 wips_status_t wips_u16_copy(wips_u16_t *dest, const wips_u16_t *src) {
     *dest = *src;
     return WIPS_STATUS_OK;
 }
+
 wips_status_t wips_i16_copy(wips_i16_t *dest, const wips_i16_t *src) {
     *dest = *src;
     return WIPS_STATUS_OK;
 }
+
 wips_status_t wips_u32_copy(wips_u32_t *dest, const wips_u32_t *src) {
     *dest = *src;
     return WIPS_STATUS_OK;
 }
+
 wips_status_t wips_i32_copy(wips_i32_t *dest, const wips_i32_t *src) {
     *dest = *src;
     return WIPS_STATUS_OK;
 }
+
 wips_status_t wips_u64_copy(wips_u64_t *dest, const wips_u64_t *src) {
     *dest = *src;
     return WIPS_STATUS_OK;
 }
+
 wips_status_t wips_i64_copy(wips_i64_t *dest, const wips_i64_t *src) {
     *dest = *src;
     return WIPS_STATUS_OK;
 }
+
 wips_status_t wips_fp32_copy(wips_fp32_t *dest, const wips_fp32_t *src) {
     *dest = *src;
     return WIPS_STATUS_OK;
@@ -148,6 +176,81 @@ wips_status_t wips_fp32_copy(wips_fp32_t *dest, const wips_fp32_t *src) {
 wips_status_t wips_fp64_copy(wips_fp64_t *dest, const wips_fp64_t *src) {
     *dest = *src;
     return WIPS_STATUS_OK;
+}
+
+
+void wips_u8_hton(wips_u8_t *data) { (void)data; }
+void wips_u8_ntoh(wips_u8_t *data) { (void)data; }
+
+void wips_i8_hton(wips_i8_t *data) { (void)data; }
+void wips_i8_ntoh(wips_i8_t *data) { (void)data; }
+
+void wips_u16_hton(wips_u16_t *data) {
+    *data = wips_htons(*data);
+}
+void wips_u16_ntoh(wips_u16_t *data) {
+    *data = wips_ntohs(*data);
+}
+
+void wips_i16_hton(wips_i16_t *data) {
+    *data = wips_htons(*data);
+}
+void wips_i16_ntoh(wips_i16_t *data) {
+    *data = wips_ntohs(*data);
+}
+
+void wips_u32_hton(wips_u32_t *data) {
+    *data = wips_htonl(*data);
+}
+void wips_u32_ntoh(wips_u32_t *data) {
+    *data = wips_ntohl(*data);
+}
+
+void wips_i32_hton(wips_i32_t *data) {
+    *data = wips_htonl(*data);
+}
+void wips_i32_ntoh(wips_i32_t *data) {
+    *data = wips_ntohl(*data);
+}
+
+void wips_u64_hton(wips_u64_t *data) {
+    *data = wips_htonll(*data);
+}
+void wips_u64_ntoh(wips_u64_t *data) {
+    *data = wips_ntohll(*data);
+}
+
+void wips_i64_hton(wips_i64_t *data) {
+    *data = wips_htonll(*data);
+}
+void wips_i64_ntoh(wips_i64_t *data) {
+    *data = wips_ntohll(*data);
+}
+
+void wips_fp32_hton(wips_fp32_t *data) {
+    uint32_t tmp;
+    memcpy(&tmp, data, GET_SIZE(fp32));
+    tmp = wips_htonl(tmp);
+    memcpy(data, &tmp, GET_SIZE(fp32));
+}
+void wips_fp32_ntoh(wips_fp32_t *data) {
+    uint32_t tmp;
+    memcpy(&tmp, data, GET_SIZE(fp32));
+    tmp = wips_ntohl(tmp);
+    memcpy(data, &tmp, GET_SIZE(fp32));
+}
+
+void wips_fp64_hton(wips_fp64_t *data) {
+    uint64_t tmp;
+    memcpy(&tmp, data, GET_SIZE(fp64));
+    tmp = wips_htonll(tmp);
+    memcpy(data, &tmp, GET_SIZE(fp64));
+}
+void wips_fp64_ntoh(wips_fp64_t *data) {
+    uint64_t tmp;
+    memcpy(&tmp, data, GET_SIZE(fp64));
+    tmp = wips_ntohll(tmp);
+    memcpy(data, &tmp, GET_SIZE(fp64));
 }
 
 DEFINE_VLAGETTER(u8)

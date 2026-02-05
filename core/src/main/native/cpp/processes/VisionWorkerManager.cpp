@@ -29,6 +29,10 @@
 #include <format>
 #include <stdexcept>
 
+namespace impl {
+    using namespace wf;
+}
+
 namespace wf {
     //static auto logger = LoggerManager::getInstance().getLogger("VisionWorkerManager",LogGroup::General);
 
@@ -66,7 +70,7 @@ namespace wf {
                         : CameraIntrinsics{};
 
                     // Fetch frame provider from the hardware manager
-                    auto frameProviderRes = hardwareManager.getFrameProvider(
+                    auto frameProviderRes = hardwareManager.getCameraSink(
                         config.camera_nickname,
                         std::format("{}_frameprovider",config.camera_nickname)
                     );
@@ -81,31 +85,32 @@ namespace wf {
                     
                     auto hardwareFormat = std::move(hardwareFormatRes.value());
                     // Resolve input format and output format, if they are set to NULL
-                    StreamFormat nullFormat;
-                    if (config.inputFormat == nullFormat) 
-                        config.inputFormat = hardwareFormat;
+                    FrameFormat nullFrameFormat;
+                    StreamFormat nullStreamFormat;
+                    if (config.inputFormat == nullFrameFormat) 
+                        config.inputFormat = hardwareFormat.frameFormat;
 
-                    if (config.outputFormat == nullFormat)
+                    if (config.outputFormat == nullStreamFormat)
                         config.outputFormat = hardwareFormat;
 
                     // Build preprocesser
                     std::vector<std::unique_ptr<CVProcessNode<cv::Mat>>> nodes;
-                    if (config.inputFormat.frameFormat == hardwareFormat.frameFormat) {
+                    if (config.inputFormat == hardwareFormat.frameFormat) {
                         nodes.emplace_back(std::move(std::make_unique<IdentityNode<cv::Mat>>()));
                     } else {
                         if (
-                            config.inputFormat.frameFormat.height != hardwareFormat.frameFormat.height
-                            || config.inputFormat.frameFormat.width != hardwareFormat.frameFormat.width
+                            config.inputFormat.height != hardwareFormat.frameFormat.height
+                            || config.inputFormat.width != hardwareFormat.frameFormat.width
                         ) {
                             this->logger()->warn("Resolution for pipeline {} differs from native resolution for camera {}. This could cause issues with calibration",config.name,config.camera_nickname);
                             nodes.push_back(std::move(std::make_unique<ResizeNode<cv::Mat>>(
-                                config.inputFormat.frameFormat.width,
-                                config.inputFormat.frameFormat.height
+                                config.inputFormat.width,
+                                config.inputFormat.height
                             )));
                         }
-                        if (config.inputFormat.frameFormat.encoding != hardwareFormat.frameFormat.encoding) {
+                        if (config.inputFormat.encoding != hardwareFormat.frameFormat.encoding) {
                             nodes.push_back(std::move(std::make_unique<ColorConvertNode<cv::Mat>>(
-                                config.inputFormat.frameFormat.encoding
+                                config.inputFormat.encoding
                             )));
                         }
                     }
@@ -119,14 +124,13 @@ namespace wf {
                     auto outputConsumer = std::make_unique<ApriltagPipelineConsumer>(
                         config.name, config.camera_nickname,
                         intrinsics, 
-                        config.inputFormat.frameFormat, 
+                        config.inputFormat, 
                         config.raw_port, config.processed_port,
                         config.outputFormat,
                         pipelineConfig.apriltagSize,
                         ntManager.getDataPublisher(config.name)
                     );
                     outputConsumer->enableStreaming(config.stream);
-
                     // Build worker
                     auto worker = std::make_shared<VisionWorker>(
                         config.name,
@@ -161,11 +165,13 @@ namespace wf {
         WF_DEBUGLOG(this->logger(),"Getting worker {}",name);
         auto it = workers.find(name);
         if (it == workers.end()) {
-            throw vision_worker_not_found(std::format("Vision worker {} not found",name));
+            // TODO: More descriptive WFStatus
+            return WFResult<std::shared_ptr<VisionWorker>>::failure(WFStatus::UNKNOWN,std::format("Vision worker {} not found",name));
         }
         return it->second;
     }
 
+    // TODO: Switch to WFResult
     void VisionWorkerManager::startWorker(const std::string& name) {
         this->logger()->info("Starting worker {}",name);
         auto it = workers.find(name);
@@ -234,5 +240,11 @@ namespace wf {
             it->second->stop();
             it = workers.erase(it);
         }
+    }
+
+    WFResult<VisionWorkerConfig> VisionWorkerManager::getWorkerConfig(const std::string& name) {
+        return getWorker(name).and_then([](const std::shared_ptr<VisionWorker>& worker){
+            return worker->getConfig();
+        });
     }
 }

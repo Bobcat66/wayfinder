@@ -45,7 +45,7 @@ namespace wf {
     };
 
     // TODO: Change order to be (width,height,encoding)
-    struct FrameFormat {
+    struct FrameFormat : public JSONSerializable<FrameFormat> {
         ImageEncoding encoding;
         int width;
         int height;
@@ -63,6 +63,10 @@ namespace wf {
         cv::Size size() const {
             return cv::Size(width,height);
         }
+
+        static WFResult<JSON> toJSON_impl(const FrameFormat& object);
+        static WFResult<FrameFormat> fromJSON_impl(const JSON& jobject);
+        static const jval::JSONValidationFunctor* getValidator_impl();
     };
 
     struct StreamFormat : public JSONSerializable<StreamFormat> {
@@ -84,14 +88,15 @@ namespace wf {
 
     struct FrameMetadata {
         uint64_t micros;
+        int64_t server_time_us;
         FrameFormat format;
         const WFStatus status;
 
-        constexpr FrameMetadata(uint64_t micros_,FrameFormat format_, WFStatus status_) noexcept
-        : micros(micros_), format(std::move(format_)), status(status_) {}
+        constexpr FrameMetadata(uint64_t micros_, int64_t server_time_us_, FrameFormat format_, WFStatus status_) noexcept
+        : micros(micros_), server_time_us(server_time_us_), format(std::move(format_)), status(status_) {}
 
-        constexpr FrameMetadata(uint64_t micros_,FrameFormat format_) noexcept
-        : micros(micros_), format(std::move(format_)), status(WFStatus::OK) {}
+        constexpr FrameMetadata(uint64_t micros_, int64_t server_time_us_, FrameFormat format_) noexcept
+        : micros(micros_), server_time_us(server_time_us_), format(std::move(format_)), status(WFStatus::OK) {}
 
         // TODO: Replace this with ok() and boolean casts
         constexpr bool err() const noexcept { return !(status == WFStatus::OK); }
@@ -101,11 +106,11 @@ namespace wf {
         constexpr explicit operator bool() const noexcept { return ok(); }
 
         static constexpr FrameMetadata badFrame() noexcept {
-            return FrameMetadata(0,FrameFormat(),WFStatus::UNKNOWN);
+            return FrameMetadata(0,0,FrameFormat(),WFStatus::UNKNOWN);
         }
 
         static constexpr FrameMetadata badFrame(WFStatus status) noexcept {
-            return FrameMetadata(0,FrameFormat(),WFStatus::UNKNOWN);
+            return FrameMetadata(0,0,FrameFormat(),WFStatus::UNKNOWN);
         }
     };
 }

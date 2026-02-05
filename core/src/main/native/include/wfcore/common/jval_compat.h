@@ -19,9 +19,15 @@
 
 #pragma once
 
+#include <nlohmann/json.hpp>
 #include "jval/jvruntime.hpp"
 #include "wfcore/common/status.h"
 
 namespace wf {
     WFStatusResult JVResToWF(const jval::JVResult& result);
+    inline auto wrapJvalValidator(const jval::JSONValidationFunctor* validator) {
+        return [validator](const nlohmann::json& jobject){
+            return JVResToWF((*validator)(jobject));
+        };
+    }
 }

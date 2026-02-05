@@ -92,6 +92,26 @@ wips_result_t wips_encode_twist2(wips_blob_t *data, wips_twist2_t *in) {
     WIPS_TRACELOG("Encoded twist2\n");
     return wips_make_result(bytesEncoded,WIPS_STATUS_OK);
 }
+wips_result_t wips_encode_nrb_twist2(wips_blob_t *data, wips_twist2_t *in) {
+    WIPS_TRACELOG("No resize buffer (nrb) encoding twist2\n");
+    WIPS_Assert(data != NULL && in != NULL,0);
+    size_t bytesEncoded = 0;
+    wips_result_t result;
+    WIPS_TRACELOG("NRB encoding twist2 field dx (fp64)\n");
+    result = wips_encode_nrb_fp64(data, &(in->dx));
+    bytesEncoded += result.bytes_processed;
+    if (result.status_code != WIPS_STATUS_OK) return wips_make_result(bytesEncoded,result.status_code);
+    WIPS_TRACELOG("NRB encoding twist2 field dy (fp64)\n");
+    result = wips_encode_nrb_fp64(data, &(in->dy));
+    bytesEncoded += result.bytes_processed;
+    if (result.status_code != WIPS_STATUS_OK) return wips_make_result(bytesEncoded,result.status_code);
+    WIPS_TRACELOG("NRB encoding twist2 field dtheta (fp64)\n");
+    result = wips_encode_nrb_fp64(data, &(in->dtheta));
+    bytesEncoded += result.bytes_processed;
+    if (result.status_code != WIPS_STATUS_OK) return wips_make_result(bytesEncoded,result.status_code);
+    WIPS_TRACELOG("NRB Encoded twist2\n");
+    return wips_make_result(bytesEncoded,WIPS_STATUS_OK);
+}
 wips_result_t wips_decode_twist2(wips_twist2_t *out, wips_blob_t *data) {
     WIPS_TRACELOG("Decoding twist2\n");
     WIPS_Assert(out != NULL && data != NULL,0);
@@ -111,6 +131,19 @@ wips_result_t wips_decode_twist2(wips_twist2_t *out, wips_blob_t *data) {
     if (result.status_code != WIPS_STATUS_OK) return wips_make_result(bytesDecoded,result.status_code);
     WIPS_TRACELOG("Decoded twist2\n");
     return wips_make_result(bytesDecoded,WIPS_STATUS_OK);
+}
+
+void wips_twist2_hton(wips_twist2_t *data) {
+    WIPS_TRACELOG("Converting twist2 to network order\n");
+    wips_fp64_hton(&(data->dx));
+    wips_fp64_hton(&(data->dy));
+    wips_fp64_hton(&(data->dtheta));
+}
+void wips_twist2_ntoh(wips_twist2_t *data) {
+    WIPS_TRACELOG("Converting twist2 to host order\n");
+    wips_fp64_ntoh(&(data->dx));
+    wips_fp64_ntoh(&(data->dy));
+    wips_fp64_ntoh(&(data->dtheta));
 }
 
 DEFINE_VLAGETTER(twist2)

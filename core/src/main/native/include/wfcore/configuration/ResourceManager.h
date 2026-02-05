@@ -21,15 +21,17 @@
 
 #include "wfcore/common/status.h"
 #include "wfcore/fiducial/ApriltagField.h"
+#include <shared_mutex>
 #include <filesystem>
 #include <unordered_map>
 #include <optional>
 #include <vector>
 #include "wfcore/common/json_utils.h"
+#include <mutex>
 
 namespace wf {
 
-    // TODO: refactor this
+    // NOTE: ResourceManager's API is stable, and method signatures should not be changed
     class ResourceManager {
     public:
         ResourceManager() = default;
@@ -52,7 +54,12 @@ namespace wf {
         WFResult<std::filesystem::path> resolveResourceFile(const std::string& subdirName, const std::string& filename) const;
         WFStatusResult assignLocalSubdir(const std::string& subdirName,const std::filesystem::path& subdirRelpath);
         WFStatusResult assignResourceSubdir(const std::string& subdirName,const std::filesystem::path& subdirRelpath);
+        WFStatusResult deleteLocalJSON(const std::string& subdirName, const std::string& filename);
     private:
+        ResourceManager(const ResourceManager&) = delete;
+        ResourceManager& operator=(const ResourceManager&) = delete;
+        ResourceManager(ResourceManager&&) = delete;
+        ResourceManager& operator=(ResourceManager&&) = delete;
         // Path to the directory containing wayfinder resources (models, field configs, etc.)
         std::filesystem::path resourceDir_;
         // Path to the directory containing local configuration (hardware config, vision worker config)
@@ -60,5 +67,6 @@ namespace wf {
 
         std::unordered_map<std::string,std::filesystem::path> localSubdirs;
         std::unordered_map<std::string,std::filesystem::path> resourceSubdirs;
+        mutable std::shared_mutex mtx;
     };
 }

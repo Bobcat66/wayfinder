@@ -21,6 +21,7 @@
 #include "wfcore/common/wfexcept.h"
 #include <unordered_map>
 #include "jval/StreamFormat.jval.hpp"
+#include "jval/FrameFormat.jval.hpp"
 
 namespace impl {
     using namespace wf;
@@ -61,6 +62,35 @@ namespace wf {
 
     using enum WFStatus;
 
+
+    const jval::JSONValidationFunctor* FrameFormat::getValidator_impl() {
+        return jval::get_FrameFormat_validator();
+    }
+    WFResult<JSON> FrameFormat::toJSON_impl(const FrameFormat& object) {
+        try {
+            JSON jobject = {
+                {"width",object.width},
+                {"height",object.height},
+                {"encoding",impl::encodingToString(object.encoding)}
+            };
+            return WFResult<JSON>::success(std::move(jobject));
+        } catch (const nlohmann::json::exception& e) {
+            jsonLogger()->error("Error while serializing FrameFormat: {}",e.what());
+            return WFResult<JSON>::failure(JSON_UNKNOWN);
+        }
+    }
+    WFResult<FrameFormat> FrameFormat::fromJSON_impl(const JSON& jobject) {
+        auto valid = validate(jobject);
+        if (!valid) return WFResult<FrameFormat>::propagateFail(valid);
+
+        return WFResult<FrameFormat>::success(
+            std::in_place,
+            impl::parseEncoding(jobject["encoding"].get<std::string>()),
+            jobject["width"].get<int>(),
+            jobject["height"].get<int>()
+        );
+    }
+
     const jval::JSONValidationFunctor* StreamFormat::getValidator_impl() {
         return jval::get_StreamFormat_validator();
     }
@@ -89,14 +119,13 @@ namespace wf {
         if (!valid) return WFResult<StreamFormat>::propagateFail(valid);
 
         auto ff_jobject = jobject["frameFormat"];
+        auto ffres = FrameFormat::fromJSON(ff_jobject);
+        if (!ffres) return WFResult<StreamFormat>::propagateFail(ffres);
+
         return WFResult<StreamFormat>::success(
             std::in_place,
             jobject["fps"].get<int>(),
-            FrameFormat{
-                impl::parseEncoding(ff_jobject["encoding"].get<std::string>()),
-                ff_jobject["width"].get<int>(),
-                ff_jobject["height"].get<int>()
-            }
+            std::move(ffres.value())
         );
     }
 }

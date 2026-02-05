@@ -20,7 +20,7 @@
 #pragma once
 
 #include "wips/wips_runtime.h"
-#include "wfcore/pipeline/pnp.h"
+#include "wfcore/fiducial/pose/pnp.h"
 #include "wfcore/pipeline/Pipeline.h"
 #include "wfcore/inference/InferenceEngine.h"
 #include <gtsam/geometry/Pose3.h>

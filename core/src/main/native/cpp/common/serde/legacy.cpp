@@ -236,6 +236,7 @@ namespace impl {
         }
         return {
             pipelineResult.micros,
+            pipelineResult.server_time,
             static_cast<wips_u8_t>(pipelineResult.type),
             static_cast<wips_u32_t>(pipelineResult.aprilTagDetections.size()),
             detections_data,
@@ -270,6 +271,7 @@ namespace impl {
 
         return {
             pipelineResult.timestamp,
+            pipelineResult.server_timestamp,
             static_cast<wf::PipelineType>(pipelineResult.pipeline_type),
             std::move(detections),
             std::move(tagPoses),

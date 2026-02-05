@@ -1,3 +1,20 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# Copyright (C) 2025 Jesse Kane
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 cmake_minimum_required(VERSION 3.25)
 project(wayfinder-core CXX C)
 
@@ -66,7 +83,7 @@ target_link_libraries(wfcore
     nlohmann_json::nlohmann_json
     PRIVATE
     apriltag
-) # In deployment builds, this will link statically, and there will be a cmake build type variable set in the top-level CMake file. I'll put that in eventually. For now, this is nowhere near deployment
+)
 
 target_include_directories(wfcore 
     PUBLIC 
@@ -97,21 +114,24 @@ if(WF_USE_GSTREAMER)
     
 endif()
 
-file(GLOB_RECURSE TESTSOURCES 
-    CONFIGURE_DEPENDS 
-    "${CMAKE_CURRENT_SOURCE_DIR}/src/test/native/*.cpp"
-)
-add_executable(wfcore_tests ${TESTSOURCES})
+if(WF_INSTALL_BUILD)
+    message(STATUS "wfcore_tests will not run correctly with RPATH settings enabled, skipping test build")
+else()
+    file(GLOB_RECURSE TESTSOURCES 
+        CONFIGURE_DEPENDS 
+        "${CMAKE_CURRENT_SOURCE_DIR}/src/test/native/*.cpp"
+    )
+    add_executable(wfcore_tests ${TESTSOURCES})
+    target_link_libraries(wfcore_tests 
+        PRIVATE
+        GTest::gtest
+        GTest::gtest_main
+        wfcore
+    )
 
-target_link_libraries(wfcore_tests 
-    PRIVATE
-    GTest::gtest
-    GTest::gtest_main
-    wfcore
-)
-
-include(GoogleTest)
-gtest_discover_tests(wfcore_tests)
+    include(GoogleTest)
+    gtest_discover_tests(wfcore_tests)
+endif()
 
 
 

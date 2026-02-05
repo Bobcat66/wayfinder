@@ -63,7 +63,7 @@ namespace wf {
 
         [[nodiscard]]
         inline FrameMetadata processFrame(const cv::Mat& in, cv::Mat& out, FrameMetadata meta) noexcept {
-            FrameMetadata outmeta(meta.micros,this->outformat);
+            FrameMetadata outmeta(meta.micros,meta.server_time_us,this->outformat);
             inpad = in;
             process();
             out = *outpad;

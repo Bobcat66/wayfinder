@@ -1,0 +1,1 @@
+deploy.sh and modify-image-armbian.sh need to have permissions added

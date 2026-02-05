@@ -27,10 +27,6 @@
 #include <opencv2/core.hpp>
 
 namespace wf {
-    // TODO: Make more statuses and refactor frame provider code to use them
-    enum class FrameProviderStatus {
-        Ok
-    };
 
     // FrameProvider does not fully subclass StatusfulObject because they can also just act as proxies for the status of their handlers
     class FrameProvider {

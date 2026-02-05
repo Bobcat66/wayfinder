@@ -54,12 +54,12 @@ namespace jval {
                 { "debug", getPrimitiveValidator<bool>() }
             },
             {
-                "quadSigma", 
-                "decodeSharpening", 
+                "quadDecimate", 
                 "numThreads", 
-                "refineEdges", 
                 "debug", 
-                "quadDecimate"
+                "decodeSharpening", 
+                "refineEdges", 
+                "quadSigma"
             },
             {
             }

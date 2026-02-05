@@ -82,6 +82,8 @@ wips_status_t wips_pipeline_result_copy(wips_pipeline_result_t *dest,const wips_
     wips_pipeline_result_free_resources(dest);
     dest->timestamp = src->timestamp;
     
+    dest->server_timestamp = src->server_timestamp;
+    
     dest->pipeline_type = src->pipeline_type;
     
     dest->DETAILvlasize__tag_detections = src->DETAILvlasize__tag_detections;
@@ -161,6 +163,10 @@ wips_result_t wips_encode_pipeline_result(wips_blob_t *data, wips_pipeline_resul
     result = wips_encode_u64(data, &(in->timestamp));
     bytesEncoded += result.bytes_processed;
     if (result.status_code != WIPS_STATUS_OK) return wips_make_result(bytesEncoded,result.status_code);
+    WIPS_TRACELOG("Encoding pipeline_result field server_timestamp (i64)\n");
+    result = wips_encode_i64(data, &(in->server_timestamp));
+    bytesEncoded += result.bytes_processed;
+    if (result.status_code != WIPS_STATUS_OK) return wips_make_result(bytesEncoded,result.status_code);
     WIPS_TRACELOG("Encoding pipeline_result field pipeline_type (u8)\n");
     result = wips_encode_u8(data, &(in->pipeline_type));
     bytesEncoded += result.bytes_processed;
@@ -208,6 +214,66 @@ wips_result_t wips_encode_pipeline_result(wips_blob_t *data, wips_pipeline_resul
     WIPS_TRACELOG("Encoded pipeline_result\n");
     return wips_make_result(bytesEncoded,WIPS_STATUS_OK);
 }
+wips_result_t wips_encode_nrb_pipeline_result(wips_blob_t *data, wips_pipeline_result_t *in) {
+    WIPS_TRACELOG("No resize buffer (nrb) encoding pipeline_result\n");
+    WIPS_Assert(data != NULL && in != NULL,0);
+    size_t bytesEncoded = 0;
+    wips_result_t result;
+    WIPS_TRACELOG("NRB encoding pipeline_result field timestamp (u64)\n");
+    result = wips_encode_nrb_u64(data, &(in->timestamp));
+    bytesEncoded += result.bytes_processed;
+    if (result.status_code != WIPS_STATUS_OK) return wips_make_result(bytesEncoded,result.status_code);
+    WIPS_TRACELOG("NRB encoding pipeline_result field server_timestamp (i64)\n");
+    result = wips_encode_nrb_i64(data, &(in->server_timestamp));
+    bytesEncoded += result.bytes_processed;
+    if (result.status_code != WIPS_STATUS_OK) return wips_make_result(bytesEncoded,result.status_code);
+    WIPS_TRACELOG("NRB encoding pipeline_result field pipeline_type (u8)\n");
+    result = wips_encode_nrb_u8(data, &(in->pipeline_type));
+    bytesEncoded += result.bytes_processed;
+    if (result.status_code != WIPS_STATUS_OK) return wips_make_result(bytesEncoded,result.status_code);
+    WIPS_TRACELOG("NRB encoding pipeline_result field DETAILvlasize__tag_detections (u32)\n");
+    result = wips_encode_nrb_u32(data, &(in->DETAILvlasize__tag_detections));
+    bytesEncoded += result.bytes_processed;
+    if (result.status_code != WIPS_STATUS_OK) return wips_make_result(bytesEncoded,result.status_code);
+    WIPS_TRACELOG("NRB encoding pipeline_result field tag_detections (apriltag_detection,VLA,size=%u)\n",in->GET_DETAIL(tag_detections,vlasize));
+    for (wips_u32_t i = 0; i < in->GET_DETAIL(tag_detections,vlasize); i++) {
+        result = wips_encode_nrb_apriltag_detection(data, in->tag_detections + i);
+        bytesEncoded += result.bytes_processed;
+        if (result.status_code != WIPS_STATUS_OK) return wips_make_result(bytesEncoded,result.status_code);
+    }
+    WIPS_TRACELOG("NRB encoding pipeline_result field DETAILvlasize__tag_poses (u32)\n");
+    result = wips_encode_nrb_u32(data, &(in->DETAILvlasize__tag_poses));
+    bytesEncoded += result.bytes_processed;
+    if (result.status_code != WIPS_STATUS_OK) return wips_make_result(bytesEncoded,result.status_code);
+    WIPS_TRACELOG("NRB encoding pipeline_result field tag_poses (apriltag_relative_pose_observation,VLA,size=%u)\n",in->GET_DETAIL(tag_poses,vlasize));
+    for (wips_u32_t i = 0; i < in->GET_DETAIL(tag_poses,vlasize); i++) {
+        result = wips_encode_nrb_apriltag_relative_pose_observation(data, in->tag_poses + i);
+        bytesEncoded += result.bytes_processed;
+        if (result.status_code != WIPS_STATUS_OK) return wips_make_result(bytesEncoded,result.status_code);
+    }
+    WIPS_TRACELOG("NRB encoding pipeline_result field DETAILoptpresent__field_pose (u8)\n");
+    result = wips_encode_nrb_u8(data, &(in->DETAILoptpresent__field_pose));
+    bytesEncoded += result.bytes_processed;
+    if (result.status_code != WIPS_STATUS_OK) return wips_make_result(bytesEncoded,result.status_code);
+    WIPS_TRACELOG("NRB encoding pipeline_result field field_pose (apriltag_field_pose_observation,optional,present=%u)\n",in->GET_DETAIL(field_pose,optpresent));
+    if (in->GET_DETAIL(field_pose,optpresent)) {
+        result = wips_encode_nrb_apriltag_field_pose_observation(data, &(in->field_pose));
+        bytesEncoded += result.bytes_processed;
+        if (result.status_code != WIPS_STATUS_OK) return wips_make_result(bytesEncoded,result.status_code);
+    }
+    WIPS_TRACELOG("NRB encoding pipeline_result field DETAILvlasize__object_detections (u32)\n");
+    result = wips_encode_nrb_u32(data, &(in->DETAILvlasize__object_detections));
+    bytesEncoded += result.bytes_processed;
+    if (result.status_code != WIPS_STATUS_OK) return wips_make_result(bytesEncoded,result.status_code);
+    WIPS_TRACELOG("NRB encoding pipeline_result field object_detections (object_detection,VLA,size=%u)\n",in->GET_DETAIL(object_detections,vlasize));
+    for (wips_u32_t i = 0; i < in->GET_DETAIL(object_detections,vlasize); i++) {
+        result = wips_encode_nrb_object_detection(data, in->object_detections + i);
+        bytesEncoded += result.bytes_processed;
+        if (result.status_code != WIPS_STATUS_OK) return wips_make_result(bytesEncoded,result.status_code);
+    }
+    WIPS_TRACELOG("NRB Encoded pipeline_result\n");
+    return wips_make_result(bytesEncoded,WIPS_STATUS_OK);
+}
 wips_result_t wips_decode_pipeline_result(wips_pipeline_result_t *out, wips_blob_t *data) {
     WIPS_TRACELOG("Decoding pipeline_result\n");
     WIPS_Assert(out != NULL && data != NULL,0);
@@ -215,6 +281,10 @@ wips_result_t wips_decode_pipeline_result(wips_pipeline_result_t *out, wips_blob
     wips_result_t result;
     WIPS_TRACELOG("Decoding pipeline_result field timestamp (u64)\n");
     result = wips_decode_u64(&(out->timestamp), data);
+    bytesDecoded += result.bytes_processed;
+    if (result.status_code != WIPS_STATUS_OK) return wips_make_result(bytesDecoded,result.status_code);
+    WIPS_TRACELOG("Decoding pipeline_result field server_timestamp (i64)\n");
+    result = wips_decode_i64(&(out->server_timestamp), data);
     bytesDecoded += result.bytes_processed;
     if (result.status_code != WIPS_STATUS_OK) return wips_make_result(bytesDecoded,result.status_code);
     WIPS_TRACELOG("Decoding pipeline_result field pipeline_type (u8)\n");
@@ -302,6 +372,59 @@ wips_result_t wips_decode_pipeline_result(wips_pipeline_result_t *out, wips_blob
     }
     WIPS_TRACELOG("Decoded pipeline_result\n");
     return wips_make_result(bytesDecoded,WIPS_STATUS_OK);
+}
+
+void wips_pipeline_result_hton(wips_pipeline_result_t *data) {
+    WIPS_TRACELOG("Converting pipeline_result to network order\n");
+    wips_u64_hton(&(data->timestamp));
+    wips_i64_hton(&(data->server_timestamp));
+    wips_u8_hton(&(data->pipeline_type));
+    wips_u32_hton(&(data->DETAILvlasize__tag_detections));
+    if (data->tag_detections) {
+        for (wips_u32_t i = 0; i < data->GET_DETAIL(tag_detections,vlasize); ++i) {
+            wips_apriltag_detection_hton(data->tag_detections + i);
+        }
+    }
+    wips_u32_hton(&(data->DETAILvlasize__tag_poses));
+    if (data->tag_poses) {
+        for (wips_u32_t i = 0; i < data->GET_DETAIL(tag_poses,vlasize); ++i) {
+            wips_apriltag_relative_pose_observation_hton(data->tag_poses + i);
+        }
+    }
+    wips_u8_hton(&(data->DETAILoptpresent__field_pose));
+    wips_apriltag_field_pose_observation_hton(&(data->field_pose));
+    wips_u32_hton(&(data->DETAILvlasize__object_detections));
+    if (data->object_detections) {
+        for (wips_u32_t i = 0; i < data->GET_DETAIL(object_detections,vlasize); ++i) {
+            wips_object_detection_hton(data->object_detections + i);
+        }
+    }
+}
+void wips_pipeline_result_ntoh(wips_pipeline_result_t *data) {
+    WIPS_TRACELOG("Converting pipeline_result to host order\n");
+    wips_u64_ntoh(&(data->timestamp));
+    wips_i64_ntoh(&(data->server_timestamp));
+    wips_u8_ntoh(&(data->pipeline_type));
+    wips_u32_ntoh(&(data->DETAILvlasize__tag_detections));
+    if (data->tag_detections) {
+        for (wips_u32_t i = 0; i < data->GET_DETAIL(tag_detections,vlasize); ++i) {
+            wips_apriltag_detection_ntoh(data->tag_detections + i);
+        }
+    }
+    wips_u32_ntoh(&(data->DETAILvlasize__tag_poses));
+    if (data->tag_poses) {
+        for (wips_u32_t i = 0; i < data->GET_DETAIL(tag_poses,vlasize); ++i) {
+            wips_apriltag_relative_pose_observation_ntoh(data->tag_poses + i);
+        }
+    }
+    wips_u8_ntoh(&(data->DETAILoptpresent__field_pose));
+    wips_apriltag_field_pose_observation_ntoh(&(data->field_pose));
+    wips_u32_ntoh(&(data->DETAILvlasize__object_detections));
+    if (data->object_detections) {
+        for (wips_u32_t i = 0; i < data->GET_DETAIL(object_detections,vlasize); ++i) {
+            wips_object_detection_ntoh(data->object_detections + i);
+        }
+    }
 }
 
 DEFINE_VLAGETTER(pipeline_result)

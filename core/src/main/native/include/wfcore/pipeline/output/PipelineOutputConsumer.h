@@ -22,23 +22,23 @@
 
 #include "wfcore/pipeline/Pipeline.h"
 #include "wfcore/video/video_types.h"
-#include "wfcore/common/status/StatusfulObject.h"
+#include "wfcore/common/status.h"
 
 namespace wf {
-    enum class PipelineOutputConsumerStatus {
-        Ok,
-        NTDisconnected,
-        InvalidFormat
+
+    class ApriltagPipelineConsumer;
+    class ObjdetectPipelineConsumer;
+    struct PipelineOutputConsumerVisitor {
+        virtual WFStatusResult operator()(ApriltagPipelineConsumer& outputConsumer) = 0;
+        virtual WFStatusResult operator()(ObjdetectPipelineConsumer& outputConsumer) = 0;
     };
+
 
     class PipelineOutputConsumer {
     public:
         virtual ~PipelineOutputConsumer() = default;
-        virtual bool accept(cv::Mat& data, FrameMetadata meta, PipelineResult& result) noexcept = 0;
+        virtual bool consume(cv::Mat& data, FrameMetadata meta, PipelineResult& result) noexcept = 0;
         virtual PipelineType getPipelineType() const noexcept = 0;
-        virtual bool isStreaming() const noexcept { return this->streamingEnabled_; }
-        virtual void enableStreaming(bool streamingEnabled) noexcept { this->streamingEnabled_ = streamingEnabled; }
-    protected:
-        bool streamingEnabled_;
+        virtual WFStatusResult accept(PipelineOutputConsumerVisitor& visitor) = 0;
     };
 }

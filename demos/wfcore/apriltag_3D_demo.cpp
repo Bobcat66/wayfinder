@@ -18,12 +18,11 @@
  */
 
 #include "wfcore/fiducial/ApriltagDetector.h"
-#include "wfcore/fiducial/ArucoDetector.h"
 #include "wfcore/pipeline/annotations.h"
 #include <opencv2/opencv.hpp>
 #include "wfcore/video/processing.h"
 #include <iostream>
-#include "wfcore/pipeline/pnp.h"
+#include "wfcore/fiducial/pose/pnp.h"
 
 static cv::Mat createIntrinsicsMatrix(double fx, double fy, double cx, double cy) {
     return (cv::Mat_<double>(3, 3) <<
@@ -75,7 +74,6 @@ int main() {
         wf::FrameFormat(wf::ImageEncoding::BGR24,720,1280),
         std::move(nodes)
     );
-    wf::ArucoDetector arucoDetector;
     wf::ApriltagDetector detector;
     std::cout << "Initialized Demo" << std::endl;
     detector.addFamily("tag36h11");

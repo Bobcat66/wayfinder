@@ -21,6 +21,19 @@
 
 #pragma once
 
-namespace wf {
+#include <gtsam/geometry/Pose3.h>
+#include <gtsam/nonlinear/ExpressionFactorGraph.h>
+#include <gtsam/nonlinear/Values.h>
+#include <gtsam/slam/BetweenFactor.h>
+#include <gtsam/nonlinear/NonlinearISAM.h>
+#include <gtsam/nonlinear/LevenbergMarquardtOptimizer.h>
 
+namespace wf {
+    class PoseOptimizer {
+    public:
+    private:
+        gtsam::NonlinearISAM isam;
+        gtsam::ExpressionFactorGraph graph;
+        gtsam::Values initialEstimate;
+    };
 }

@@ -23,6 +23,7 @@ namespace wf {
     template <class... Lambdas>
     struct LambdaVisitor : Lambdas... {
         using Lambdas::operator()...;
+        constexpr LambdaVisitor(Lambdas... ls) : Lambdas(ls)... {}
     };
 
     // CTAD

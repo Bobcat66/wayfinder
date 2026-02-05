@@ -36,17 +36,25 @@ namespace wf {
             StreamFormat streamFormat,
             std::weak_ptr<NTDataPublisher> ntpub_
         );
-        bool accept(cv::Mat& data, FrameMetadata meta, PipelineResult& result) noexcept override;
+        bool consume(cv::Mat& data, FrameMetadata meta, PipelineResult& result) noexcept override;
         PipelineType getPipelineType() const noexcept override { return PipelineType::ObjDetect; }
+        WFStatusResult accept(PipelineOutputConsumerVisitor& visitor) override { return visitor(*this); }
+        int getRawPort();
+        int getProcessedPort();
+        StreamFormat getOutputFormat() { return outputFormat; }
+        void enableStreaming(bool streamingEnabled) noexcept { this->streamingEnabled = streamingEnabled; }
+        bool isStreaming() const noexcept { return this->streamingEnabled; }
     private:
         FrameFormat inputFormat;
         MJPEGVideoServerCS rawServer;
         MJPEGVideoServerCS processedServer;
+        StreamFormat outputFormat;
         std::weak_ptr<NTDataPublisher> ntpub;
         std::string pipelineName;
         std::string camLabel;
         std::unique_ptr<CVProcessPipe<cv::Mat>> prePostprocessor;
         cv::Mat pp_rawbuf;
         cv::Mat pp_procbuf;
+        bool streamingEnabled;
     };
 }

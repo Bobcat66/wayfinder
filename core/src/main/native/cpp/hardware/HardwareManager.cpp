@@ -96,13 +96,13 @@ namespace wf {
         return getCamera_(nickname)->getBackend();
     }
 
-    WFResult<std::shared_ptr<FrameProvider>> HardwareManager::getFrameProvider(const std::string& nickname, const std::string& name) {
+    WFResult<std::shared_ptr<CameraSink>> HardwareManager::getCameraSink(const std::string& nickname, const std::string& name) {
         std::shared_lock lock(cameras_mtx);
         if (!cameraRegistered_impl_(nickname)) {
             logger()->warn("Camera '{}' is not registered",nickname);
-            return WFResult<std::shared_ptr<FrameProvider>>::failure(HARDWARE_BAD_CAMERA);
+            return WFResult<std::shared_ptr<CameraSink>>::failure(HARDWARE_BAD_CAMERA);
         }
-        if (auto res = getCamera_(nickname)->getFrameProvider(name)) {
+        if (auto res = getCamera_(nickname)->getCameraSink(name)) {
             return res;
         } else {
             logger()->error(res.what());
@@ -198,6 +198,15 @@ namespace wf {
             return WFResult<CameraConfiguration>::failure(HARDWARE_BAD_CAMERA);
         }
         return getCamera_(nickname)->getConfiguration();
+    }
+    
+    WFStatusResult HardwareManager::setCameraConfiguration(const std::string& nickname, const CameraConfiguration& config) {
+        std::shared_lock lock(cameras_mtx);
+        if (!cameraRegistered_impl_(nickname)) {
+            logger()->warn("Camera '{}' is not registered",nickname);
+            return WFStatusResult::failure(HARDWARE_BAD_CAMERA);
+        }
+        return getCamera_(nickname)->setConfiguration(config);
     }
 
     void HardwareManager::periodic() noexcept {

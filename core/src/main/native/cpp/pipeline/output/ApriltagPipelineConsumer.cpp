@@ -38,7 +38,8 @@ namespace wf {
     , rawServer(streamFormat,std::format("{}_raw",pipelineName),rawPort)
     , processedServer(streamFormat,std::format("{}_processed",pipelineName),processedPort)
     , tagSize(tagSize_)
-    , ntpub(std::move(ntpub_)) {
+    , ntpub(std::move(ntpub_)) 
+    , outputFormat(streamFormat) {
         if (!(streamFormat.frameFormat.encoding == ImageEncoding::BGR24)) {
             throw invalid_image_encoding("As of now, output pixel format for OpenCV stream MUST be BGR24");
         }
@@ -61,13 +62,13 @@ namespace wf {
     }
 
     // TODO: Add error codes & error handling
-    bool ApriltagPipelineConsumer::accept(cv::Mat& data, FrameMetadata meta, PipelineResult& result) noexcept {
+    bool ApriltagPipelineConsumer::consume(cv::Mat& data, FrameMetadata meta, PipelineResult& result) noexcept {
         if (auto shared = ntpub.lock()) {
             shared->publishPipelineResult(result);
         } else {
             return false;
         }
-        if (this->streamingEnabled_) {
+        if (this->streamingEnabled) {
             // TODO: characterize
             auto rmeta = prePostprocessor->processFrame(data,pp_rawbuf,meta);
             pp_rawbuf.copyTo(pp_procbuf);
@@ -83,5 +84,12 @@ namespace wf {
             processedServer.acceptFrame(pp_procbuf,rmeta);
         }
         return true;
+    }
+
+    int ApriltagPipelineConsumer::getRawPort() {
+        return rawServer.getPort();
+    }
+    int ApriltagPipelineConsumer::getProcessedPort() {
+        return processedServer.getPort();
     }
 }

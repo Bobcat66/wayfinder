@@ -49,13 +49,13 @@ namespace wf {
         enable();
     }
 
-    WFResult<std::shared_ptr<FrameProvider>> CSCameraHandler::getFrameProvider(const std::string& name){
-        if (!ok()) return WFResult<std::shared_ptr<FrameProvider>>::failure(getStatus(),getError());
+    WFResult<std::shared_ptr<CameraSink>> CSCameraHandler::getCameraSink(const std::string& name){
+        if (!ok()) return WFResult<std::shared_ptr<CameraSink>>::failure(getStatus(),getError());
         auto it = sinks_.find(name);
         if (it != sinks_.end()) {
             // If a frame provider with that name already exists in the sink registry and the pointer is valid, return it
             if (auto locked = it->second.lock()) 
-                return WFResult<std::shared_ptr<FrameProvider>>::success(std::move(locked));
+                return WFResult<std::shared_ptr<CameraSink>>::success(std::move(locked));
             // If the pointer is not valid, remove the entry from the sink registry
             sinks_.erase(it);
         }
@@ -64,7 +64,7 @@ namespace wf {
         std::weak_ptr<CSCameraSink> provider_registry_ref(provider);
         sinks_.insert({name,provider_registry_ref});
         // TODO: Check if operation was successful
-        return WFResult<std::shared_ptr<FrameProvider>>::success(std::move(provider));
+        return WFResult<std::shared_ptr<CameraSink>>::success(std::move(provider));
     }
 
     WFStatusResult CSCameraHandler::setStreamFormat(const StreamFormat& format) {
@@ -141,6 +141,39 @@ namespace wf {
             );
         }
         return WFResult<int>::success(property.Get());
+    }
+
+
+    WFStatusResult CSCameraHandler::setConfiguration(const CameraConfiguration& config) {
+        if (config.nickname != this->name_ || config.devpath != this->devpath_ || config.backend != CameraBackend::CSCORE) {
+            return WFStatusResult::failure(
+                CONFIG_INVALID_ATTRIBUTE,
+                "Attempted to set incompatible camera configuration for camera {}",devpath_
+            );
+        }
+        if (config.controlAliases != this->controlAliases_) {
+            return WFStatusResult::failure(
+                CONFIG_INVALID_ATTRIBUTE,
+                "Attempted to set incompatible camera configuration for camera {}",devpath_
+            );
+        }
+        if (config.calibrations != this->calibrations_) {
+            return WFStatusResult::failure(
+                CONFIG_INVALID_ATTRIBUTE,
+                "Attempted to set incompatible camera configuration for camera {}",devpath_
+            );
+        }
+        if (config.controls != this->controls_) {
+            for (const auto& [control,value] : config.controls) {
+                auto cres = setControl(control,value);
+                if (!cres) return cres;
+            }
+        }
+        if (config.format != this->format_) {
+            auto fres = setStreamFormat(config.format);
+            if (!fres) return fres;
+        }
+        return WFStatusResult::success();
     }
 
     void CSCameraHandler::checkConnection() {

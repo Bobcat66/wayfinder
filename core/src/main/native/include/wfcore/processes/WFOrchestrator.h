@@ -24,7 +24,8 @@
 #include "wfcore/network/NetworkTablesManager.h"
 #include "wfcore/configuration/ResourceManager.h"
 #include "wfcore/configuration/WFSystemConfig.h"
-#include "wfcore/pipeline/ApriltagPipelineFactory.h"
+#include "wfcore/pipeline/pipelines/ApriltagPipelineFactory.h"
+#include "wfcore/network/WFTSManager.h"
 
 namespace wf {
     class WFOrchestrator : public WFLoggedStatusfulObject {
@@ -45,8 +46,27 @@ namespace wf {
         VisionWorkerManager& getWorkerManager() {
             return workerManager_;
         }
+        const WFSystemConfig getSystemConfig() {
+            return systemConfig_;
+        }
         WFStatusResult configureHardware();
         WFStatusResult configureWorkers();
+        WFStatusResult setCameraConfig(const std::string& nickname, CameraConfiguration config);
+        WFStatusResult setCameraConfig_JSON(const std::string& nickname, const JSON& config) {
+            return CameraConfiguration::fromJSON(config).and_then(
+                [this,nickname](const CameraConfiguration& cfg){
+                    return setCameraConfig(nickname,cfg);
+                }
+            );
+        }
+        WFResult<CameraConfiguration> getCameraConfig(const std::string& nickname);
+        WFResult<JSON> getCameraConfig_JSON(const std::string& nickname) {
+            return getCameraConfig(nickname).and_then(CameraConfiguration::toJSON);
+        }
+        WFResult<VisionWorkerConfig> getWorkerConfig(const std::string& name);
+        WFResult<JSON> getWorkerConfig_JSON(const std::string& name) {
+            return getWorkerConfig(name).and_then(VisionWorkerConfig::toJSON);
+        }
         static WFOrchestrator createFromEnv();
     private:
         NetworkTablesManager ntManager_;
@@ -55,5 +75,7 @@ namespace wf {
         VisionWorkerManager workerManager_;
         InferenceEngineFactory inferenceEngineFactory_;
         ApriltagPipelineFactory apriltagPipelineFactory_;
+        WFSystemConfig systemConfig_;
+        WFTSManager wftsManager_;
     };
 }

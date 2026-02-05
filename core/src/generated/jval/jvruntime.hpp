@@ -190,4 +190,11 @@ namespace jval {
         const std::regex patternMatcher;
     };
 
+    // Wraps a JSON validation functor pointer in a lambda
+    inline auto asLambda(const JSONValidationFunctor* validator) {
+        return [validator](const JSON& jobject) -> JVResult {
+            return (*validator)(jobject);
+        };
+    }
+
 }

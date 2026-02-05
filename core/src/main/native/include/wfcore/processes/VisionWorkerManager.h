@@ -28,7 +28,7 @@
 #include "wfcore/fiducial/ApriltagConfiguration.h"
 #include "wfcore/common/status.h"
 #include "wfcore/inference/InferenceEngineFactory.h"
-#include "wfcore/pipeline/ApriltagPipelineFactory.h"
+#include "wfcore/pipeline/pipelines/ApriltagPipelineFactory.h"
 #include <memory>
 
 namespace wf {
@@ -46,6 +46,7 @@ namespace wf {
         void stopAllWorkers();
         void destroyAllWorkers();
         void periodic() noexcept;
+        WFResult<VisionWorkerConfig> getWorkerConfig(const std::string& name);
     private:
         std::unordered_map<std::string,std::shared_ptr<VisionWorker>> workers;
 

@@ -63,10 +63,10 @@ namespace impl {
                 { "cy", getPrimitiveValidator<double>() }
             },
             {
-                "cx", 
                 "fy", 
-                "cy", 
-                "fx"
+                "fx", 
+                "cx", 
+                "cy"
             },
             {
             }
@@ -94,8 +94,8 @@ namespace jval {
             },
             {
                 "matrix", 
-                "distortion", 
-                "resolution"
+                "resolution", 
+                "distortion"
             },
             {
             }

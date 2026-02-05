@@ -54,6 +54,7 @@ extern "C" {
 #include "twist3_pyapi.wips.h"
 #include "twist2_pyapi.wips.h"
 #include "odometry_result_pyapi.wips.h"
+#include "timesync_packet_pyapi.wips.h"
 
 #define WIPSTYPE_READY(mod,wips_typename)                                                   \
     do {                                                                                    \
@@ -106,6 +107,7 @@ PyMODINIT_FUNC PyInit_wips(void) {
     WIPSTYPE_READY(m,twist3);
     WIPSTYPE_READY(m,twist2);
     WIPSTYPE_READY(m,odometry_result);
+    WIPSTYPE_READY(m,timesync_packet);
 
     return m;
 }

@@ -39,13 +39,14 @@ extern "C" {
 #endif
 
 #include "wips_runtime.h"
-#include "apriltag_detection.wips.h"
 #include "apriltag_relative_pose_observation.wips.h"
 #include "object_detection.wips.h"
+#include "apriltag_detection.wips.h"
 #include "apriltag_field_pose_observation.wips.h"
 
 typedef struct {
     wips_u64_t timestamp;
+    wips_i64_t server_timestamp;
     wips_u8_t pipeline_type;
     wips_u32_t DETAILvlasize__tag_detections;
     wips_apriltag_detection_t *tag_detections;
@@ -67,7 +68,11 @@ void wips_pipeline_result_destroy(wips_pipeline_result_t *struct_ptr);
 wips_status_t wips_pipeline_result_copy(wips_pipeline_result_t *dest, const wips_pipeline_result_t *src);
 
 wips_result_t wips_encode_pipeline_result(wips_blob_t *data, wips_pipeline_result_t *in);
+wips_result_t wips_encode_nrb_pipeline_result(wips_blob_t *data, wips_pipeline_result_t *in);
 wips_result_t wips_decode_pipeline_result(wips_pipeline_result_t *out, wips_blob_t *data);
+
+void wips_pipeline_result_hton(wips_pipeline_result_t *data);
+void wips_pipeline_result_ntoh(wips_pipeline_result_t *data);
 
 extern wips_vlamethods_t wips_pipeline_result_vlamethods;
 

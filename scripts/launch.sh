@@ -33,15 +33,28 @@ function load_env {
     set +a
 }
 
+function start_wayfinder {
+    if [[ -z "$WF_EXEC" ]]; then
+        echo "WF_EXEC is not set"
+        exit 1
+    fi
+    if [[ ! -x "$WF_EXEC" ]]; then
+        echo "WF_EXEC is not executable"
+        exit 1
+    fi
+    if [[ -z "$WF_LDPATH" ]]; then
+        echo "WF_LDPATH is not set"
+        exit 1
+    fi
+    echo "Starting Wayfinder with executable $WF_EXEC and LD_LIBRARY_PATH $WF_LDPATH"
+    LD_LIBRARY_PATH="$WF_LDPATH" "$WF_EXEC"
+}
+
 # Initial environment load
 load_env
 
 while $running; do
-    if [[ ! -x "./$WF_EXEC" ]]; then
-        echo "WF_EXEC either is not set or is not executable"
-        exit 1
-    fi
-    "./$WF_EXEC_PATH"
+    start_wayfinder
     ret_code=$?
     case $ret_code in
         0)

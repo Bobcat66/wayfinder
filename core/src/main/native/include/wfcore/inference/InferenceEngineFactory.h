@@ -21,7 +21,7 @@
 
 #include "wfcore/common/status.h"
 #include "wfcore/configuration/ResourceManager.h"
-#include "wfcore/pipeline/ObjectDetectionPipelineConfiguration.h"
+#include "wfcore/pipeline/config/ObjectDetectionPipelineConfiguration.h"
 #include "wfcore/inference/InferenceEngine.h"
 #include "unordered_map"
 #include <memory>

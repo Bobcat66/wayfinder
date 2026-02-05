@@ -49,6 +49,8 @@ namespace wf {
         FILE_NOT_FOUND =            0x00000006,
         NOT_IMPLEMENTED =           0x00000007,
         BAD_ACQUIRE =               0x00000008,
+        BAD_VARIANT =               0x00000009,
+        POSIX_ERROR =               0x0000000a,
         UNKNOWN =                   0x000fffff,
 
         PIPELINE_BASE =             0x00100000,
@@ -81,6 +83,12 @@ namespace wf {
         HARDWARE_UNKNOWN =          0x004fffff,
 
         NETWORK_BASE =              0x00500000,
+        NETWORK_BAD_SOCK =          0x00500001,
+        NETWORK_BAD_SEND =          0x00500002,
+        NETWORK_BAD_RECV =          0x00500003,
+        NETWORK_WAITING =           0x00500004,
+        NETWORK_BAD_SOCKOPT =       0x00500005,
+        NETWORK_BAD_ADDR =          0x00500006,
         NETWORK_UNKNOWN =           0x005fffff,
 
         JSON_BASE =                 0x00600000,
@@ -101,6 +109,7 @@ namespace wf {
         CONFIG_BAD_LOCALDIR =       0x00900002,
         CONFIG_BAD_RESOURCEDIR =    0x00900003,
         CONFIG_SUBDIR_NOT_FOUND =   0x00900004,
+        CONFIG_INVALID_ATTRIBUTE =  0x00900005,
         CONFIG_UNKNOWN =            0x009fffff,
 
         SERDE_BASE =                0x00a00000,
@@ -130,6 +139,8 @@ namespace wf {
             case WFStatus::FILE_NOT_FOUND:              return "FILE_NOT_FOUND";
             case WFStatus::NOT_IMPLEMENTED:             return "NOT_IMPLEMENTED";
             case WFStatus::BAD_ACQUIRE:                 return "BAD_ACQUIRE";
+            case WFStatus::BAD_VARIANT:                 return "BAD_VARIANT";
+            case WFStatus::POSIX_ERROR:                 return "POSIX_ERROR";
             case WFStatus::UNKNOWN:                     return "UNKNOWN";
 
             case WFStatus::PIPELINE_BASE:               return "PIPELINE_BASE";
@@ -158,9 +169,16 @@ namespace wf {
             case WFStatus::HARDWARE_BAD_CAMERA:         return "HARDWARE_BAD_CAMERA";
             case WFStatus::HARDWARE_NO_CALIB:           return "HARDWARE_NO_CALIB";
             case WFStatus::HARDWARE_DISABLED:           return "HARDWARE_DISABLED";
+            case WFStatus::HARDWARE_CONNECTING:         return "HARDWARE_CONNECTING";
             case WFStatus::HARDWARE_UNKNOWN:            return "HARDWARE_UNKNOWN";
 
             case WFStatus::NETWORK_BASE:                return "NETWORK_BASE";
+            case WFStatus::NETWORK_BAD_SOCK:            return "NETWORK_BAD_SOCK";
+            case WFStatus::NETWORK_BAD_SEND:            return "NETWORK_BAD_SEND";
+            case WFStatus::NETWORK_BAD_RECV:            return "NETWORK_BAD_RECV";
+            case WFStatus::NETWORK_WAITING:             return "NETWORK_WAITING";
+            case WFStatus::NETWORK_BAD_SOCKOPT:         return "NETWORK_BAD_SOCKOPT";
+            case WFStatus::NETWORK_BAD_ADDR:            return "NETWORK_BAD_ADDR";
             case WFStatus::NETWORK_UNKNOWN:             return "NETWORK_UNKNOWN";
 
             case WFStatus::JSON_BASE:                   return "JSON_BASE";
@@ -181,6 +199,7 @@ namespace wf {
             case WFStatus::CONFIG_BAD_LOCALDIR:         return "CONFIG_BAD_LOCALDIR";
             case WFStatus::CONFIG_BAD_RESOURCEDIR:      return "CONFIG_BAD_RESOURCEDIR";
             case WFStatus::CONFIG_SUBDIR_NOT_FOUND:     return "CONFIG_SUBDIR_NOT_FOUND";
+            case WFStatus::CONFIG_INVALID_ATTRIBUTE:    return "CONFIG_INVALID_ATTRIBUTE";
             case WFStatus::CONFIG_UNKNOWN:              return "CONFIG_UNKNOWN";
 
             case WFStatus::SERDE_BASE:                  return "SERDE_BASE";

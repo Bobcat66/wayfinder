@@ -31,36 +31,41 @@
 #include "wfcore/common/status.h"
 #include "wfcore/pipeline/Pipeline.h"
 #include "wfcore/pipeline/output/PipelineOutputConsumer.h"
-#include "wfcore/video/FrameProvider.h"
+#include "wfcore/hardware/CameraSink.h"
 #include "wfcore/video/processing/CVProcessPipe.h"
+#include "wfcore/processes/VisionWorkerConfig.h"
 
 #include <mutex>
 namespace wf {
 
+    // TODO: Make a threadsafe destructor
     class VisionWorker : public WFConcurrentLoggedStatusfulObject {
     public:
         VisionWorker(
             std::string name_,
-            std::shared_ptr<FrameProvider> frameProvider_, 
+            std::shared_ptr<CameraSink> frameProvider_, 
             CVProcessPipe<cv::Mat> preprocessor_,
             std::unique_ptr<Pipeline> pipeline_,
             std::unique_ptr<PipelineOutputConsumer> outputConsumer_
         );
+        ~VisionWorker();
         void start();
         void stop();
-        const char* getThreadName() const noexcept { return threadName; }
+        WFResult<VisionWorkerConfig> getConfig();
+        WFStatusResult applyConfig(VisionWorkerConfig& config);
+        const char* getThreadName() const noexcept { return threadName.c_str(); }
         const std::string& getName() const noexcept { return name; }
         const bool isRunning() const noexcept { return running.load(); }
     private:
         void run(std::stop_token stoken) noexcept;
-        const char* threadName;
+        std::string threadName;
         std::string name;
         std::jthread thread;
         std::atomic_bool running;
         CVProcessPipe<cv::Mat> preprocesser;
         std::unique_ptr<Pipeline> pipeline;
         std::unique_ptr<PipelineOutputConsumer> outputConsumer;
-        std::shared_ptr<FrameProvider> frameProvider;
+        std::shared_ptr<CameraSink> frameProvider;
         cv::Mat rawFrameBuffer;
         cv::Mat ppFrameBuffer;
     };

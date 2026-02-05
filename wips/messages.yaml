@@ -183,6 +183,9 @@
   - name: timestamp
     type: u64
   
+  - name: server_timestamp
+    type: i64
+  
   - name: pipeline_type
     type: u8
   
@@ -240,9 +243,19 @@
   name: odometry_result
   fields:
   - name: timestamps
-    type: u64
+    type: i64
     vla: True
   
   - name: twists
     type: twist2
     vla: True
+---
+# Timesync packet
+  name: timesync_packet
+  fields:
+  - name: packet_id # The server tags each packet with a packet id, clients will respond with the last packet ID they have received
+    type: u32
+  - name: timestamp
+    type: i64
+  - name: flags
+    type: u8

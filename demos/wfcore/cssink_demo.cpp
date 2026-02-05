@@ -47,7 +47,7 @@ int main() {
             {}
         }
     );
-    auto sinkres = manager.getFrameProvider("test_camera","test_sink");
+    auto sinkres = manager.getCameraSink("test_camera","test_sink");
     if (!sinkres)
         throw wf::wf_result_error(sinkres);
     auto sink = std::move(sinkres.value());

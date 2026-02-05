@@ -88,8 +88,8 @@ namespace impl {
             },
             {
                 "y", 
-                "z", 
-                "x"
+                "x", 
+                "z"
             },
             {
             }
@@ -119,10 +119,10 @@ namespace impl {
                 { "Z", getPrimitiveValidator<double>() }
             },
             {
+                "X", 
                 "W", 
-                "Z", 
                 "Y", 
-                "X"
+                "Z"
             },
             {
             }

@@ -22,6 +22,7 @@
 #include "wfcore/video/FrameProvider.h"
 #include "wfcore/video/video_types.h"
 #include "wfcore/hardware/CameraConfiguration.h"
+#include "wfcore/hardware/CameraSink.h"
 #include "wfcore/common/status.h"
 #include <memory>
 #include <vector>
@@ -37,7 +38,7 @@ namespace wf {
 
         virtual CameraBackend getBackend() const noexcept = 0;
 
-        virtual WFResult<std::shared_ptr<FrameProvider>> getFrameProvider(const std::string& name) = 0;
+        virtual WFResult<std::shared_ptr<CameraSink>> getCameraSink(const std::string& name) = 0;
 
         virtual WFStatusResult setStreamFormat(const StreamFormat& format) = 0;
 
@@ -59,6 +60,8 @@ namespace wf {
         virtual std::string getNickname() const = 0;
 
         virtual CameraConfiguration getConfiguration() = 0;
+
+        virtual WFStatusResult setConfiguration(const CameraConfiguration& config) = 0;
 
         virtual void checkConnection() = 0;
 

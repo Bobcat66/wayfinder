@@ -5,7 +5,7 @@
     "properties": {
         "camera_nickname": { "type": "string" },
         "name": { "type": "string" },
-        "inputFormat": { "$ref": "StreamFormat" },
+        "inputFormat": { "$ref": "FrameFormat" },
         "outputFormat": { "$ref": "StreamFormat" },
         "stream": { "type": "boolean" },
         "raw_port": { "type": "integer" },

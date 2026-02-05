@@ -94,7 +94,7 @@ static JSONUnionValidator validator(
     }
 );
 {%- elif schema.type == "pattern" %}
-static JSONPatternValidator validator({{ schema.get("regex","R\"(^.*$)\"") }});
+static JSONPatternValidator validator(R"({{ schema.get("regex","(^.*$)") }})");
 {%- elif schema.type == "any" %}
 static JSONNullValidator validator;
 {%- endif %}

@@ -1,0 +1,26 @@
+{
+    "$schema": "../jval_schema.schema.json",
+    "$name": "JSONPatchRFC6902",
+    "type": "array",
+    "items": {
+        "type": "struct",
+        "properties": {
+            "op": {
+                "type": "enum",
+                "enumValues": ["test","move","remove","add","copy","replace"]
+            },
+            "path": {
+                "type": "pattern",
+                "regex": "(?:\/(?:[^~\/]|~0|~1)*)*"
+            },
+            "from": {
+                "type": "pattern",
+                "regex": "(?:\/(?:[^~\/]|~0|~1)*)*"
+            },
+            "value": {
+                "type": "any"
+            }
+        },
+        "required": ["op","path"]
+    }
+}

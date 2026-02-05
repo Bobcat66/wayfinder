@@ -5,6 +5,7 @@ WF_ENV_PATH: Absolute path to wayfinder's .env file. This environment variable m
 WF_DEFAULTS_PATH: Path to the system defaults file, relative to the working directory
 WF_DEVICE_NAME: A unique name used by a device to identify itself. Also doubles as the device's local hostname
 WF_TEAM: FRC team number
+WF_STATIC_IP: Static ip address (will be ignored if static IP is disabled in NetworkManager)
 WF_SLAM_SERVER: Whether or not this device should act as a SLAM server
 WF_LOCAL: path to wayfinder's local/ directory, relative to the working directory
 WF_RESOURCE: path to wayfinder's resources/ directory, relative to the working directory
@@ -16,5 +17,7 @@ WF_PIPELINE_LSUBDIR: path to the pipelines/ directory, relative to the local/ di
 WF_NT_SERVER: whether or not the coprocessor should host a NetworkTables server
 WF_EXEC: path to the wayfinderd executable, relative to the working directory
 WF_SCRIPTS: path to wayfinder auxiliary scripts, relative to the working directory
+WF_LDPATH: absolute path to the shared libraries wayfinderd relies on
 
-In general, the working directory will be /opt/wayfinder in deployment
+In general, the working directory will be /opt/wayfinder in deployment. values that are meant to be strings should
+be quoted, values meant to be interpreted as doubles/ints/bools should be left unquoted. bools are denoted with true and false

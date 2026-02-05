@@ -21,6 +21,8 @@
 
 #include "version.h"
 #include "wfcore/processes/WFOrchestrator.h"
+#include "wfd.h"
+#include <exception>
 
 // signals to the launcher
 
@@ -41,14 +43,33 @@
 int main() {
     std::cout << "Starting Wayfinder v" << PROJECT_VERSION << std::endl;
     try {
-        auto wayfinder = wf::WFOrchestrator::createFromEnv();
-        wayfinder.configureHardware();
-        wayfinder.configureWorkers();
+        auto orch = wf::WFOrchestrator::createFromEnv();
+        orch.configureHardware();
+        orch.configureWorkers();
         while (true) {
-            wayfinder.periodic();
+            // main loop
+            auto lock = wfd::getLock();
+            orch.periodic();
+            if (wfd::shutdownRequested()) {
+                std::cout << "Shutdown requested, exiting..." << std::endl;
+                return WAYFINDER_SHUTDOWN;
+            }
+            if (wfd::reloadRequested()) {
+                std::cout << "Reload requested, exiting..." << std::endl;
+                return WAYFINDER_RELOAD;
+            }
+            if (wfd::restartRequested()) {
+                std::cout << "Restart requested, exiting..." << std::endl;
+                return WAYFINDER_RESTART;
+            }
+            if (wfd::rebootRequested()) {
+                std::cout << "Reboot requested, exiting..." << std::endl;
+                return WAYFINDER_REBOOT;
+            }
         }
-    } catch (...) {
+    } catch (const std::exception& e) {
         // TODO: More descriptive error handling
+        std::cerr << "Caught an unhandled exception: " << e.what() << std::endl;
         return WAYFINDER_ERROR;
     }
     return WAYFINDER_SUCCESS;

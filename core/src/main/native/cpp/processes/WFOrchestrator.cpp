@@ -31,11 +31,13 @@
 namespace wf {
     WFOrchestrator::WFOrchestrator(WFSystemConfig config)
     : WFLoggedStatusfulObject("WFOrchestrator",LogGroup::General)
+    , systemConfig_(config)
     , ntManager_(config.device_name,config.team,config.nt_server) 
     , resourceManager_(config.paths.resource_path,config.paths.local_path) 
     , inferenceEngineFactory_(resourceManager_) 
     , apriltagPipelineFactory_(resourceManager_) 
-    , workerManager_(ntManager_, hardwareManager_, inferenceEngineFactory_, apriltagPipelineFactory_) {
+    , workerManager_(ntManager_, hardwareManager_, inferenceEngineFactory_, apriltagPipelineFactory_)
+    , wftsManager_(ntManager_) {
         auto fields_res 
             = resourceManager_.assignResourceSubdir("fields", config.paths.fields_rsubdir);
         if (!fields_res) throw wf_result_error(fields_res);
@@ -125,5 +127,17 @@ namespace wf {
             }
         }
         return WFStatusResult::success();
+    }
+
+    WFResult<CameraConfiguration> WFOrchestrator::getCameraConfig(const std::string& nickname) {
+        return hardwareManager_.getCameraConfiguration(nickname);
+    }
+
+    WFStatusResult WFOrchestrator::setCameraConfig(const std::string& nickname, CameraConfiguration config) {
+        return hardwareManager_.setCameraConfiguration(nickname,config);
+    }
+
+    WFResult<VisionWorkerConfig> WFOrchestrator::getWorkerConfig(const std::string& name) {
+        return workerManager_.getWorkerConfig(name);
     }
 }

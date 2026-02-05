@@ -1,3 +1,22 @@
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# Copyright (C) 2025 Jesse Kane
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+set(CMAKE_PROJECT_TOP_LEVEL_INCLUDES "${CMAKE_SOURCE_DIR}/cmake/TopLevelConfig.cmake")
+
 cmake_minimum_required(VERSION 3.25)
 project(wayfinder VERSION 0.0.1)
 
@@ -6,9 +25,6 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 enable_testing()
-
-# As wayfinder is
-set(CMAKE_INSTALL_PREFIX "/opt/wayfinder" CACHE PATH "Install path" FORCE)
 
 # TODO: Fix dependency hierarchy. Right now the dependencies are a mess, eventually 
 # I should configure the build system to make sure dependencies are imported once and only once
@@ -36,6 +52,8 @@ option(WF_USE_OPENVINO "Enable support for Intel OpenVINO hardware-accelerated i
 
 option(WF_USE_SYSTEM_OPENCV "Use system OpenCV instead of bundled version" OFF)
 
+option(WF_INSTALL_BUILD "Build with install RPATH settings" OFF)
+
 option(WF_BUILD_TESTS "Build unit tests" ON)
 option(WF_BUILD_DEMOS "Build demos" OFF)
 
@@ -44,6 +62,19 @@ configure_file(
     ${CMAKE_CURRENT_BINARY_DIR}/meta/version.h
     @ONLY
 )
+
+# list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/modules")
+
+if (WF_INSTALL_BUILD)
+    message(STATUS "Configuring install settings")
+    set(CMAKE_BUILD_RPATH_USE_ORIGIN TRUE)
+    set(CMAKE_INSTALL_PREFIX "/opt/wayfinder" CACHE PATH "Install path" FORCE)
+    set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
+    set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
+    set(CMAKE_INSTALL_RPATH "$ORIGIN/../lib;$ORIGIN/../extern_deps/opencv/lib")
+    set(CMAKE_SKIP_INSTALL_RPATH FALSE)
+    set(CMAKE_SKIP_RPATH FALSE)
+endif()
 
 if (WF_BOOTSTRAP)
     add_subdirectory(thirdparty/opencv)
@@ -56,7 +87,6 @@ else()
     add_subdirectory(thirdparty/spdlog)
     add_subdirectory(thirdparty/nlohmann_json)
     add_subdirectory(thirdparty/cpp-httplib)
-    #add_subdirectory(thirdparty/cpr) # Add this back in when working on Daemon
     add_subdirectory(core)
     add_subdirectory(daemon)
     if (WF_BUILD_DEMOS)

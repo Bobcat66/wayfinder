@@ -38,13 +38,7 @@ TEST(JSONLoaderTests,localLoadTest) {
     fs::path mock_lpath(MOCK_LOCAL_PATH);
     fs::path mock_rpath(MOCK_RESOURCE_PATH);
     wf::globalLogger()->info("Created path objects");
-    wf::ResourceManager loader;
-    try {
-        loader = wf::ResourceManager(mock_rpath,mock_lpath);
-    } catch (const wf::wfexception& e) {
-        wf::globalLogger()->info("Caught wfexception");
-        FAIL() << e.what();
-    }
+    wf::ResourceManager loader(mock_rpath,mock_lpath);
 
     wf::globalLogger()->info("Created JSONLoader");
     ASSERT_TRUE(loader.assignLocalSubdir("hardware",fs::path("hardware")));

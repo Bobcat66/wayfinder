@@ -100,6 +100,34 @@ wips_result_t wips_encode_apriltag_relative_pose_observation(wips_blob_t *data, 
     WIPS_TRACELOG("Encoded apriltag_relative_pose_observation\n");
     return wips_make_result(bytesEncoded,WIPS_STATUS_OK);
 }
+wips_result_t wips_encode_nrb_apriltag_relative_pose_observation(wips_blob_t *data, wips_apriltag_relative_pose_observation_t *in) {
+    WIPS_TRACELOG("No resize buffer (nrb) encoding apriltag_relative_pose_observation\n");
+    WIPS_Assert(data != NULL && in != NULL,0);
+    size_t bytesEncoded = 0;
+    wips_result_t result;
+    WIPS_TRACELOG("NRB encoding apriltag_relative_pose_observation field fiducial_id (i32)\n");
+    result = wips_encode_nrb_i32(data, &(in->fiducial_id));
+    bytesEncoded += result.bytes_processed;
+    if (result.status_code != WIPS_STATUS_OK) return wips_make_result(bytesEncoded,result.status_code);
+    WIPS_TRACELOG("NRB encoding apriltag_relative_pose_observation field cam_pose_0 (pose3)\n");
+    result = wips_encode_nrb_pose3(data, &(in->cam_pose_0));
+    bytesEncoded += result.bytes_processed;
+    if (result.status_code != WIPS_STATUS_OK) return wips_make_result(bytesEncoded,result.status_code);
+    WIPS_TRACELOG("NRB encoding apriltag_relative_pose_observation field error_0 (fp64)\n");
+    result = wips_encode_nrb_fp64(data, &(in->error_0));
+    bytesEncoded += result.bytes_processed;
+    if (result.status_code != WIPS_STATUS_OK) return wips_make_result(bytesEncoded,result.status_code);
+    WIPS_TRACELOG("NRB encoding apriltag_relative_pose_observation field cam_pose_1 (pose3)\n");
+    result = wips_encode_nrb_pose3(data, &(in->cam_pose_1));
+    bytesEncoded += result.bytes_processed;
+    if (result.status_code != WIPS_STATUS_OK) return wips_make_result(bytesEncoded,result.status_code);
+    WIPS_TRACELOG("NRB encoding apriltag_relative_pose_observation field error_1 (fp64)\n");
+    result = wips_encode_nrb_fp64(data, &(in->error_1));
+    bytesEncoded += result.bytes_processed;
+    if (result.status_code != WIPS_STATUS_OK) return wips_make_result(bytesEncoded,result.status_code);
+    WIPS_TRACELOG("NRB Encoded apriltag_relative_pose_observation\n");
+    return wips_make_result(bytesEncoded,WIPS_STATUS_OK);
+}
 wips_result_t wips_decode_apriltag_relative_pose_observation(wips_apriltag_relative_pose_observation_t *out, wips_blob_t *data) {
     WIPS_TRACELOG("Decoding apriltag_relative_pose_observation\n");
     WIPS_Assert(out != NULL && data != NULL,0);
@@ -127,6 +155,23 @@ wips_result_t wips_decode_apriltag_relative_pose_observation(wips_apriltag_relat
     if (result.status_code != WIPS_STATUS_OK) return wips_make_result(bytesDecoded,result.status_code);
     WIPS_TRACELOG("Decoded apriltag_relative_pose_observation\n");
     return wips_make_result(bytesDecoded,WIPS_STATUS_OK);
+}
+
+void wips_apriltag_relative_pose_observation_hton(wips_apriltag_relative_pose_observation_t *data) {
+    WIPS_TRACELOG("Converting apriltag_relative_pose_observation to network order\n");
+    wips_i32_hton(&(data->fiducial_id));
+    wips_pose3_hton(&(data->cam_pose_0));
+    wips_fp64_hton(&(data->error_0));
+    wips_pose3_hton(&(data->cam_pose_1));
+    wips_fp64_hton(&(data->error_1));
+}
+void wips_apriltag_relative_pose_observation_ntoh(wips_apriltag_relative_pose_observation_t *data) {
+    WIPS_TRACELOG("Converting apriltag_relative_pose_observation to host order\n");
+    wips_i32_ntoh(&(data->fiducial_id));
+    wips_pose3_ntoh(&(data->cam_pose_0));
+    wips_fp64_ntoh(&(data->error_0));
+    wips_pose3_ntoh(&(data->cam_pose_1));
+    wips_fp64_ntoh(&(data->error_1));
 }
 
 DEFINE_VLAGETTER(apriltag_relative_pose_observation)
