@@ -17,27 +17,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-
-
 #pragma once
 
-#include <gtsam/geometry/Pose3.h>
-#include <gtsam/nonlinear/ExpressionFactorGraph.h>
-#include <gtsam/nonlinear/Values.h>
-#include <gtsam/slam/BetweenFactor.h>
-#include <gtsam/nonlinear/NonlinearISAM.h>
-#include <gtsam/nonlinear/LevenbergMarquardtOptimizer.h>
-#include "wfcore/pipeline/PipelineResult.h"
-
-namespace wf {
-    class PoseOptimizer {
-    public:
-        void Optimize();
-        void AddTagObservation(const PipelineResult result);
-        void Add
-    private:
-        gtsam::NonlinearISAM isam;
-        gtsam::ExpressionFactorGraph graph;
-        gtsam::Values initialEstimate;
-    };
-}
+struct TagCornerObservation {
+    uint64_t 
+};

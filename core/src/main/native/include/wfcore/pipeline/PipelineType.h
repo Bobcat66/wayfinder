@@ -30,8 +30,9 @@ namespace wf {
      * MonoSLAM (local single camera Simultaneous Mapping And Localization)
      */
     enum class PipelineType : uint8_t {
-        NullType,
-        Apriltag,
-        ObjDetect
+        NullType, // Placeholder
+        Apriltag, // PNP-based pose estimation using apriltags
+        ObjDetect, // Object detection
+        ApriltagSLAM, // SLAM-based pose estimation using apriltags, requires a SLAM server somewhere on the network
     };
 }
