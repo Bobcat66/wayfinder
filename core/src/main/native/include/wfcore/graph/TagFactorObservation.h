@@ -19,6 +19,21 @@
 
 #pragma once
 
+#include <cstdint>
+#include <array>
+#include <opencv2/core.hpp>
+#include <gtsam/geometry/Pose3.h>
+#include <gtsam/linear/NoiseModel.h>
+#include <gtsam/slam/expressions.h>
+
 struct TagCornerObservation {
-    uint64_t 
+    uint64_t micros;
+    int64_t server_time;
+    int tag_id;
+    std::array<cv::Point2f, 4> corners;
+    gtsam::Cal3_S2_ cameraCal;
+    // Offset from robot kinematic center -> camera optical center
+    gtsam::Pose3 robotTcamera;
+    // Pixel noise in camera
+    gtsam::SharedNoiseModel cameraNoise;
 };
