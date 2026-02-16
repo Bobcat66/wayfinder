@@ -33,8 +33,7 @@ namespace wf {
     class PoseOptimizer {
     public:
         void Optimize();
-        void AddTagObservation(const PipelineResult result);
-        void Add
+        void AddTagObservation();
     private:
         gtsam::NonlinearISAM isam;
         gtsam::ExpressionFactorGraph graph;

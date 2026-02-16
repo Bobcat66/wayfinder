@@ -177,6 +177,30 @@
   - name: error_1
     type: fp64
 ---
+# Represents camera data needed for SLAM, including the camera calibration and the pixel noise model
+  name: camera_data
+  fields:
+  - name: fx
+    type: fp64
+
+  - name: fy
+    type: fp64
+
+  - name: cx
+    type: fp64
+
+  - name: cy
+    type: fp64
+
+  - name: sigma_x
+    type: fp64
+
+  - name: sigma_y
+    type: fp64
+
+  - name: robot_to_cam
+    type: pose3
+---
 # Represents the result of a vision pipeline
   name: pipeline_result
   fields:

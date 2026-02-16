@@ -24,7 +24,8 @@
 #include "wfcore/fiducial/ApriltagDetection.h"
 #include "wfcore/pipeline/PipelineType.h"
 #include "wfcore/inference/ObjectDetection.h"
-
+#include <gtsam/geometry/Cal3_S2.h>
+#include "wfcore/graph/SLAMCamData.h"
 namespace wf {
 
     struct PipelineResult {
@@ -35,6 +36,7 @@ namespace wf {
         std::vector<ApriltagRelativePoseObservation> aprilTagPoses;
         std::optional<ApriltagFieldPoseObservation> cameraPose;
         std::vector<ObjectDetection> objectDetections;
+        std::optional<SLAMCamData> slamCamData;
 
         PipelineResult() = default;
         PipelineResult(PipelineResult&&) = default;
@@ -53,7 +55,21 @@ namespace wf {
         ) 
         : micros(micros_), server_time(server_time_), type(type_)
         , aprilTagDetections(std::move(aprilTagDetections_)), aprilTagPoses(std::move(aprilTagPoses_))
-        , cameraPose(std::move(cameraPose_)), objectDetections(std::move(objectDetections_)) {}
+        , cameraPose(std::move(cameraPose_)), objectDetections(std::move(objectDetections_)), slamCamData(std::nullopt) {}
+
+        PipelineResult(
+            uint64_t micros_,
+            int64_t server_time_,
+            PipelineType type_,
+            std::vector<ApriltagDetection> aprilTagDetections_,
+            std::vector<ApriltagRelativePoseObservation> aprilTagPoses_,
+            std::optional<ApriltagFieldPoseObservation> cameraPose_,
+            std::vector<ObjectDetection> objectDetections_,
+            std::optional<SLAMCamData> slamCamData_
+        ) 
+        : micros(micros_), server_time(server_time_), type(type_)
+        , aprilTagDetections(std::move(aprilTagDetections_)), aprilTagPoses(std::move(aprilTagPoses_))
+        , cameraPose(std::move(cameraPose_)), objectDetections(std::move(objectDetections_)), slamCamData(std::move(slamCamData_)) {}
         
         static PipelineResult ApriltagResult(
             uint64_t micros,
@@ -86,6 +102,24 @@ namespace wf {
                 {},
                 {},
                 std::move(detections_)
+            );
+        }
+
+        static PipelineResult ApriltagSLAMResult(
+            uint64_t micros,
+            int64_t server_time,
+            std::vector<ApriltagDetection> aprilTagDetections_,
+            std::optional<SLAMCamData> slamCamData_
+        ) {
+            return PipelineResult(
+                micros,
+                server_time,
+                PipelineType::ApriltagSLAM,
+                std::move(aprilTagDetections_),
+                {},
+                {},
+                {},
+                std::move(slamCamData_)
             );
         }
     };

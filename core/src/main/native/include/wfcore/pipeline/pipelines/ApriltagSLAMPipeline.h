@@ -19,23 +19,12 @@
 
 #pragma once
 
-#include <cstdint>
-#include <array>
-#include <opencv2/core.hpp>
-#include <gtsam/geometry/Pose3.h>
-#include <gtsam/linear/NoiseModel.h>
-#include <gtsam/slam/expressions.h>
+#include "wfcore/pipeline/Pipeline.h"
+#include "wfcore/fiducial/ApriltagDetector.h"
+#include "wfcore/fiducial/ApriltagField.h"
+#include "wfcore/fiducial/ApriltagConfiguration.h"
+#include "wfcore/hardware/CameraConfiguration.h"
+#include "wfcore/common/json_utils.h"
+#include "wfcore/pipeline/config/ApriltagPipelineConfiguration.h"
+#include "wfcore/fiducial/ApriltagFieldHandler.h"
 
-namespace wf {
-    struct TagCornerObservation {
-        uint64_t micros;
-        int64_t server_time;
-        int tag_id;
-        std::array<cv::Point2f, 4> corners;
-        gtsam::Cal3_S2_ cameraCal;
-        // Offset from robot kinematic center -> camera optical center
-        gtsam::Pose3 robotTcamera;
-        // Pixel noise in camera
-        gtsam::SharedNoiseModel cameraNoise;
-    };
-}
