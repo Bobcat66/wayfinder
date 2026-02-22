@@ -228,6 +228,10 @@
   - name: object_detections
     type: object_detection
     vla: True
+
+  - name: camera_data
+    type: camera_data
+    optional: True
 ---
 # Represents a 3D twist, the derivative of a 3D pose
   name: twist3

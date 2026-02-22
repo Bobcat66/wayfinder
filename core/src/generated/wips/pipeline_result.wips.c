@@ -139,6 +139,10 @@ wips_status_t wips_pipeline_result_copy(wips_pipeline_result_t *dest,const wips_
             return status;
         }
     }
+    dest->DETAILoptpresent__camera_data = src->DETAILoptpresent__camera_data;
+    
+    dest->camera_data = src->camera_data;
+    
     return status;
 }
 
@@ -211,6 +215,16 @@ wips_result_t wips_encode_pipeline_result(wips_blob_t *data, wips_pipeline_resul
         bytesEncoded += result.bytes_processed;
         if (result.status_code != WIPS_STATUS_OK) return wips_make_result(bytesEncoded,result.status_code);
     }
+    WIPS_TRACELOG("Encoding pipeline_result field DETAILoptpresent__camera_data (u8)\n");
+    result = wips_encode_u8(data, &(in->DETAILoptpresent__camera_data));
+    bytesEncoded += result.bytes_processed;
+    if (result.status_code != WIPS_STATUS_OK) return wips_make_result(bytesEncoded,result.status_code);
+    WIPS_TRACELOG("Encoding pipeline_result field camera_data (camera_data,optional,present=%u)\n",in->GET_DETAIL(camera_data,optpresent));
+    if (in->GET_DETAIL(camera_data,optpresent)) {
+        result = wips_encode_camera_data(data, &(in->camera_data));
+        bytesEncoded += result.bytes_processed;
+        if (result.status_code != WIPS_STATUS_OK) return wips_make_result(bytesEncoded,result.status_code);
+    }
     WIPS_TRACELOG("Encoded pipeline_result\n");
     return wips_make_result(bytesEncoded,WIPS_STATUS_OK);
 }
@@ -268,6 +282,16 @@ wips_result_t wips_encode_nrb_pipeline_result(wips_blob_t *data, wips_pipeline_r
     WIPS_TRACELOG("NRB encoding pipeline_result field object_detections (object_detection,VLA,size=%u)\n",in->GET_DETAIL(object_detections,vlasize));
     for (wips_u32_t i = 0; i < in->GET_DETAIL(object_detections,vlasize); i++) {
         result = wips_encode_nrb_object_detection(data, in->object_detections + i);
+        bytesEncoded += result.bytes_processed;
+        if (result.status_code != WIPS_STATUS_OK) return wips_make_result(bytesEncoded,result.status_code);
+    }
+    WIPS_TRACELOG("NRB encoding pipeline_result field DETAILoptpresent__camera_data (u8)\n");
+    result = wips_encode_nrb_u8(data, &(in->DETAILoptpresent__camera_data));
+    bytesEncoded += result.bytes_processed;
+    if (result.status_code != WIPS_STATUS_OK) return wips_make_result(bytesEncoded,result.status_code);
+    WIPS_TRACELOG("NRB encoding pipeline_result field camera_data (camera_data,optional,present=%u)\n",in->GET_DETAIL(camera_data,optpresent));
+    if (in->GET_DETAIL(camera_data,optpresent)) {
+        result = wips_encode_nrb_camera_data(data, &(in->camera_data));
         bytesEncoded += result.bytes_processed;
         if (result.status_code != WIPS_STATUS_OK) return wips_make_result(bytesEncoded,result.status_code);
     }
@@ -370,6 +394,16 @@ wips_result_t wips_decode_pipeline_result(wips_pipeline_result_t *out, wips_blob
             return wips_make_result(bytesDecoded,result.status_code);
         }
     }
+    WIPS_TRACELOG("Decoding pipeline_result field DETAILoptpresent__camera_data (u8)\n");
+    result = wips_decode_u8(&(out->DETAILoptpresent__camera_data), data);
+    bytesDecoded += result.bytes_processed;
+    if (result.status_code != WIPS_STATUS_OK) return wips_make_result(bytesDecoded,result.status_code);
+    WIPS_TRACELOG("Decoding pipeline_result field camera_data (camera_data,optional,present=%u)\n",out->GET_DETAIL(camera_data,optpresent));
+    if (out->GET_DETAIL(camera_data,optpresent)) {
+        result = wips_decode_camera_data(&(out->camera_data), data);
+        bytesDecoded += result.bytes_processed;
+        if (result.status_code != WIPS_STATUS_OK) return wips_make_result(bytesDecoded,result.status_code);
+    }
     WIPS_TRACELOG("Decoded pipeline_result\n");
     return wips_make_result(bytesDecoded,WIPS_STATUS_OK);
 }
@@ -399,6 +433,8 @@ void wips_pipeline_result_hton(wips_pipeline_result_t *data) {
             wips_object_detection_hton(data->object_detections + i);
         }
     }
+    wips_u8_hton(&(data->DETAILoptpresent__camera_data));
+    wips_camera_data_hton(&(data->camera_data));
 }
 void wips_pipeline_result_ntoh(wips_pipeline_result_t *data) {
     WIPS_TRACELOG("Converting pipeline_result to host order\n");
@@ -425,6 +461,8 @@ void wips_pipeline_result_ntoh(wips_pipeline_result_t *data) {
             wips_object_detection_ntoh(data->object_detections + i);
         }
     }
+    wips_u8_ntoh(&(data->DETAILoptpresent__camera_data));
+    wips_camera_data_ntoh(&(data->camera_data));
 }
 
 DEFINE_VLAGETTER(pipeline_result)

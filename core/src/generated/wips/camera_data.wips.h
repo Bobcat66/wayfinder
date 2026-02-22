@@ -39,45 +39,35 @@ extern "C" {
 #endif
 
 #include "wips_runtime.h"
-#include "apriltag_relative_pose_observation.wips.h"
-#include "object_detection.wips.h"
-#include "apriltag_detection.wips.h"
-#include "apriltag_field_pose_observation.wips.h"
-#include "camera_data.wips.h"
+#include "pose3.wips.h"
 
 typedef struct {
-    wips_u64_t timestamp;
-    wips_i64_t server_timestamp;
-    wips_u8_t pipeline_type;
-    wips_u32_t DETAILvlasize__tag_detections;
-    wips_apriltag_detection_t *tag_detections;
-    wips_u32_t DETAILvlasize__tag_poses;
-    wips_apriltag_relative_pose_observation_t *tag_poses;
-    wips_u8_t DETAILoptpresent__field_pose;
-    wips_apriltag_field_pose_observation_t field_pose;
-    wips_u32_t DETAILvlasize__object_detections;
-    wips_object_detection_t *object_detections;
-    wips_u8_t DETAILoptpresent__camera_data;
-    wips_camera_data_t camera_data;
-} wips_pipeline_result_t;
+    wips_fp64_t fx;
+    wips_fp64_t fy;
+    wips_fp64_t cx;
+    wips_fp64_t cy;
+    wips_fp64_t sigma_x;
+    wips_fp64_t sigma_y;
+    wips_pose3_t robot_to_cam;
+} wips_camera_data_t;
 
 // Recursive function to free all memory allocated by the struct and its members. Does NOT free the struct itself if it was dynamically allocated.
 // Warning: Calling this function on a struct that has not been written to from a WIPS binary will result in undefined behavior.
 // This function is intended to be used when the struct is no longer needed, to prevent memory leaks.
-void wips_pipeline_result_free_resources(wips_pipeline_result_t *struct_ptr);
-wips_pipeline_result_t *wips_pipeline_result_create();
-void wips_pipeline_result_destroy(wips_pipeline_result_t *struct_ptr);
+void wips_camera_data_free_resources(wips_camera_data_t *struct_ptr);
+wips_camera_data_t *wips_camera_data_create();
+void wips_camera_data_destroy(wips_camera_data_t *struct_ptr);
 
-wips_status_t wips_pipeline_result_copy(wips_pipeline_result_t *dest, const wips_pipeline_result_t *src);
+wips_status_t wips_camera_data_copy(wips_camera_data_t *dest, const wips_camera_data_t *src);
 
-wips_result_t wips_encode_pipeline_result(wips_blob_t *data, wips_pipeline_result_t *in);
-wips_result_t wips_encode_nrb_pipeline_result(wips_blob_t *data, wips_pipeline_result_t *in);
-wips_result_t wips_decode_pipeline_result(wips_pipeline_result_t *out, wips_blob_t *data);
+wips_result_t wips_encode_camera_data(wips_blob_t *data, wips_camera_data_t *in);
+wips_result_t wips_encode_nrb_camera_data(wips_blob_t *data, wips_camera_data_t *in);
+wips_result_t wips_decode_camera_data(wips_camera_data_t *out, wips_blob_t *data);
 
-void wips_pipeline_result_hton(wips_pipeline_result_t *data);
-void wips_pipeline_result_ntoh(wips_pipeline_result_t *data);
+void wips_camera_data_hton(wips_camera_data_t *data);
+void wips_camera_data_ntoh(wips_camera_data_t *data);
 
-extern wips_vlamethods_t wips_pipeline_result_vlamethods;
+extern wips_vlamethods_t wips_camera_data_vlamethods;
 
 #ifdef __cplusplus
 }

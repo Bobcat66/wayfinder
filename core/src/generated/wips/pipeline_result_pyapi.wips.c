@@ -47,6 +47,7 @@ extern "C" {
 #include "object_detection_pyapi.wips.h"
 #include "apriltag_detection_pyapi.wips.h"
 #include "apriltag_field_pose_observation_pyapi.wips.h"
+#include "camera_data_pyapi.wips.h"
 
 #define WIPS_INTERNAL
 #include "wips_detail.h"
@@ -644,6 +645,67 @@ static int wips_pipeline_result_PyObject_set_object_detections(PyObject *self, P
     obj->c_obj->GET_DETAIL(object_detections,vlasize) = new_vlasize;
     return 0;
 }
+static PyObject *wips_pipeline_result_PyObject_get_camera_data(PyObject *self, void *Py_UNUSED(closure)) {
+    wips_pipeline_result_PyObject *obj = (wips_pipeline_result_PyObject *)self;
+    if (!obj->c_obj) {
+        PyErr_SetString(PyExc_AttributeError,"Struct is not initialized");
+        return NULL;
+    }
+
+    if (obj->c_obj->GET_DETAIL(camera_data,optpresent)) {
+        wips_PyType *fieldtype = &wips_camera_data_PyType;
+        void *c_field = (void *)(&(obj->c_obj->camera_data));
+        PyObject *py_field = fieldtype->wrapper(c_field,obj->base.handler);
+        if (!py_field) {
+            // Failed to wrap value, propagate error
+            return NULL;
+        }
+        return py_field;
+    } else {
+        // Optional is not present, return None
+        Py_INCREF(Py_None);
+        return Py_None;
+    } 
+}
+static int wips_pipeline_result_PyObject_set_camera_data(PyObject *self, PyObject *value, void *Py_UNUSED(closure)) {
+    wips_pipeline_result_PyObject *obj = (wips_pipeline_result_PyObject *)self;
+    if (!obj->c_obj) {
+        PyErr_SetString(PyExc_AttributeError,"Struct is not initialized");
+        return -1;
+    }
+
+    if (value == Py_None) {
+        // value is None, clear optional
+        obj->c_obj->GET_DETAIL(camera_data,optpresent) = 0x00;
+        void *optval = (void *)(&(obj->c_obj->camera_data));
+        memset(optval,0,GET_SIZE(camera_data));
+        return 0;
+    }
+    // value is not None
+    // verify value is of the correct type
+    wips_PyType *valtype = &wips_camera_data_PyType;
+    if (Py_TYPE(value) != valtype->python_type) {
+        PyErr_SetString(PyExc_TypeError,"Argument type does not match field type");
+        return -1;
+    }
+    // assign value
+    wips_camera_data_t *c_src = (wips_camera_data_t *)(valtype->unwrapper(value));
+    if (!c_src) {
+        // Failed to unwrap value, propagate error
+        return -1;
+    }
+    wips_camera_data_t *c_dest = &(obj->c_obj->camera_data);
+    wips_status_t copy_status = wips_camera_data_copy(
+        c_dest,
+        c_src
+    );
+    if (copy_status != WIPS_STATUS_OK) {
+        PyErr_SetString(PyExc_RuntimeError,"Failed to copy value");
+        return -1;
+    }
+    obj->c_obj->GET_DETAIL(camera_data,optpresent) = 0x01;
+    return 0;
+}
 
 static PyGetSetDef wips_pipeline_result_PyObject_getsetters[] = {
     {
@@ -693,6 +755,13 @@ static PyGetSetDef wips_pipeline_result_PyObject_getsetters[] = {
         (getter)wips_pipeline_result_PyObject_get_object_detections,
         (setter)wips_pipeline_result_PyObject_set_object_detections,
         "Sequence[object_detection]",
+        NULL
+    },
+    {
+        "camera_data",
+        (getter)wips_pipeline_result_PyObject_get_camera_data,
+        (setter)wips_pipeline_result_PyObject_set_camera_data,
+        "Optional[camera_data]",
         NULL
     },
     {NULL}
@@ -981,6 +1050,32 @@ static PyObject *wips_pipeline_result_extractor(void *obj) {
         }
         // Prevent memory leaks, dict assignment does not steal references
         Py_DECREF(value);
+    }
+    if (c_obj->GET_DETAIL(camera_data,optpresent)) {
+        // Optional is present, extract it
+        wips_PyType *valtype = &wips_camera_data_PyType;
+        void *c_value = (void *)(&(c_obj->camera_data));
+        PyObject *value = valtype->extractor(c_value);
+        if (!value) {
+            // failed to extract, give up
+            Py_DECREF(dict);
+            return NULL;
+        }
+        if (PyDict_SetItemString(dict, "camera_data", value) != 0) {
+            // Failed to assign value, give up and propagate error
+            Py_DECREF(dict);
+            Py_DECREF(value);
+            return NULL;
+        }
+        // Prevent memory leaks, dict assignment does not steal reference
+        Py_DECREF(value);
+    } else {
+        // Optional is not present, pass None to dict
+        if (PyDict_SetItemString(dict, "camera_data", Py_None) != 0) {
+            // failed to assign value, give up and propagate error
+            Py_DECREF(dict);
+            return NULL;
+        }
     }
 
     return dict;

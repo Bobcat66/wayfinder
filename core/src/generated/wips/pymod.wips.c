@@ -50,6 +50,7 @@ extern "C" {
 #include "apriltag_detection_pyapi.wips.h"
 #include "apriltag_field_pose_observation_pyapi.wips.h"
 #include "apriltag_relative_pose_observation_pyapi.wips.h"
+#include "camera_data_pyapi.wips.h"
 #include "pipeline_result_pyapi.wips.h"
 #include "twist3_pyapi.wips.h"
 #include "twist2_pyapi.wips.h"
@@ -103,6 +104,7 @@ PyMODINIT_FUNC PyInit_wips(void) {
     WIPSTYPE_READY(m,apriltag_detection);
     WIPSTYPE_READY(m,apriltag_field_pose_observation);
     WIPSTYPE_READY(m,apriltag_relative_pose_observation);
+    WIPSTYPE_READY(m,camera_data);
     WIPSTYPE_READY(m,pipeline_result);
     WIPSTYPE_READY(m,twist3);
     WIPSTYPE_READY(m,twist2);
