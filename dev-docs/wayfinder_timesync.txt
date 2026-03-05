@@ -1,5 +1,5 @@
 ##### Wayfinder Timesync #####
-For RIO-Coprocessor time synchronization, Wayfinder uses a PTP-like time synchronization scheme,
+For RIO-Coprocessor time synchronization, Wayfinder is planned to use a PTP-like time synchronization scheme,
 called Wayfinder Timesync (WFTS). WFTS operates over UDP/IP broadcast to the RoboRIO's subnet (10.TE.AM.255).
 Each message consists of a Wayfinder Timesync packet, which is exactly 13 bytes long. Each WFTS packet
 starts with a 4-byte unsigned integer packet ID, followed by an 8 byte signed integer timestamp, and a
