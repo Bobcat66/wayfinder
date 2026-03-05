@@ -23,6 +23,7 @@
 #include "wips/apriltag_relative_pose_observation.wips.h"
 #include "wips/apriltag_field_pose_observation.wips.h"
 #include "wips/pipeline_result.wips.h"
+#include "wips/camera_data.wips.h"
 
 #include <gtsam/geometry/Point3.h>
 #include <gtsam/geometry/Rot3.h>
@@ -281,6 +282,31 @@ namespace impl {
             std::move(objectDetections)
         };
     }
+
+    // IDK lol
+    static wips_camera_data_t wfcore2wips_cameradata_shim(const wf::SLAMCamData& camData) {
+        return {
+            camData.fx,
+            camData.fy,
+            camData.cx,
+            camData.cy,
+            camData.sigma_x,
+            camData.sigma_y,
+            wfcore2wips_pose3_shim(camData.robotTcamera)
+        };
+    }
+
+    static wf::SLAMCamData wips2wfcore_cameradata_shim(const wips_camera_data_t& camData) {
+        return {
+            camData.fx,
+            camData.fy,
+            camData.cx,
+            camData.cy,
+            camData.sigma_x,
+            camData.sigma_y,
+            wips2wfcore_pose3_shim(camData.robotTcamera)
+        };
+    }
 }
 
 namespace wf {
@@ -373,5 +399,17 @@ namespace wf {
         auto out = impl::wips2wfcore_pipeline_result_shim(wipspipelineresult);
         wips_pipeline_result_free_resources(&wipspipelineresult);
         return out;
+    }
+
+    wips_blob_t* packCameraData(const SLAMCamData& camData) {
+        wips_camera_data_t wipscamdata = impl::wfcore2wips_cameradata_shim(camData);
+        wips_blob_t* bin = wips_blob_create(sizeof(wips_camera_data_t));
+        wips_encode_camera_data(bin, &wipscamdata);
+        return bin;
+    }
+    SLAMCamData unpackCameraData(wips_blob_t* data) {
+        wips_camera_data_t wipscamdata;
+        wips_decode_camera_data(&wipscamdata, data);
+        return impl::wips2wfcore_cameradata_shim(wipscamdata);
     }
 }
