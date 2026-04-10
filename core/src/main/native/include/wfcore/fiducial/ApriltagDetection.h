@@ -30,7 +30,7 @@
 
 namespace wf {
 
-    struct ApriltagDetection : public WIPSSerializable<ApriltagDetection,wips_apriltag_detection_t> {
+    struct ApriltagDetection : public WIPSSerializable<ApriltagDetection,wips_apriltag_detection_t,&wips_apriltag_detection_voidmethods> {
         int id;
         std::array<cv::Point2d, 4> corners;
         double decisionMargin;
@@ -45,10 +45,9 @@ namespace wf {
             corners(std::move(corners_)),
             decisionMargin(decisionMargin_), hammingDistance(hammingDistance_),
             family(std::move(family_)) {}
-        static ApriltagDetection toWIPS_impl(const wips_apriltag_detection_t& wips_struct);
-        static wips_apriltag_detection_t fromWIPS_impl(const ApriltagDetection& wfcore_object);
-        static wips_blob_t* pack_impl(const ApriltagDetection& wfcore_object);
-        static ApriltagDetection unpack_impl(wips_blob_t* data);
+
+        static wips_apriltag_detection_t toWIPS_impl(const ApriltagDetection& wfcore_object);
+        static ApriltagDetection fromWIPS_impl(const wips_apriltag_detection_t& wips_struct);
     };
     
 }

@@ -21,19 +21,7 @@
 
 namespace wf {
 
-    ObjectDetection ObjectDetection::toWIPS_impl(const wips_object_detection_t& wips_struct) {
-        return {
-            wips_struct.object_class,
-            wips_struct.confidence,
-            wips_struct.percent_area,
-            {wips_struct.topleft_x_pixels,wips_struct.topleft_y_pixels},
-            {wips_struct.bottomright_x_pixels,wips_struct.bottomright_y_pixels},
-            {wips_struct.topleft_x_norm,wips_struct.topleft_y_norm},
-            {wips_struct.bottomright_x_norm,wips_struct.bottomright_y_norm}
-        };
-    }
-
-    wips_object_detection_t ObjectDetection::fromWIPS_impl(const ObjectDetection& wfcore_object) {
+    wips_object_detection_t ObjectDetection::toWIPS_impl(const ObjectDetection& wfcore_object) {
         return {
             wfcore_object.objectClass,
             wfcore_object.confidence,
@@ -45,19 +33,16 @@ namespace wf {
         };
     }
 
-    wips_blob_t* ObjectDetection::toWIPSBin_impl(const ObjectDetection& wfcore_object) {
-        wips_object_detection_t wips_struct = fromWIPS_impl(wfcore_object);
-        wips_blob_t* bin = wips_blob_create(sizeof(wips_object_detection_t));
-        wips_encode_object_detection(bin, &wips_struct);
-        wips_object_detection_free_resources(&wips_struct);
-        return bin;
-    }
-
-    ObjectDetection ObjectDetection::fromWIPSBin_impl(wips_blob_t* data) {
-        wips_object_detection_t wips_struct;
-        wips_decode_object_detection(&wips_struct, data);
-        wips_object_detection_free_resources(&wips_struct);
-        return toWIPS_impl(wips_struct);
+    ObjectDetection ObjectDetection::fromWIPS_impl(const wips_object_detection_t& wips_struct) {
+        return {
+            wips_struct.object_class,
+            wips_struct.confidence,
+            wips_struct.percent_area,
+            {wips_struct.topleft_x_pixels,wips_struct.topleft_y_pixels},
+            {wips_struct.bottomright_x_pixels,wips_struct.bottomright_y_pixels},
+            {wips_struct.topleft_x_norm,wips_struct.topleft_y_norm},
+            {wips_struct.bottomright_x_norm,wips_struct.bottomright_y_norm}
+        };
     }
 
 }

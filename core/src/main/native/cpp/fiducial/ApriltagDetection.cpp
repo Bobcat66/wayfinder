@@ -48,8 +48,21 @@ namespace impl {
 }
 
 namespace wf {
+
+    wips_apriltag_detection_t ApriltagDetection::toWIPS_impl(const ApriltagDetection& wfcore_object) {
+        return {
+            wfcore_object.id,
+            wfcore_object.corners[0].x,wfcore_object.corners[0].y,
+            wfcore_object.corners[1].x,wfcore_object.corners[1].y,
+            wfcore_object.corners[2].x,wfcore_object.corners[2].y,
+            wfcore_object.corners[3].x,wfcore_object.corners[3].y,
+            wfcore_object.decisionMargin,
+            wfcore_object.hammingDistance,
+            impl::tagFamilyIDs.at(wfcore_object.family)
+        };
+    }
     
-    ApriltagDetection ApriltagDetection::toWIPS_impl(const wips_apriltag_detection_t& wips_struct) {
+    ApriltagDetection ApriltagDetection::fromWIPS_impl(const wips_apriltag_detection_t& wips_struct) {
         return {
             wips_struct.fiducial_id,
             {
@@ -62,34 +75,5 @@ namespace wf {
             wips_struct.hamming_distance,
             impl::tagFamilyNames.at(wips_struct.tag_family_id)
         };
-    }
-
-    wips_apriltag_detection_t ApriltagDetection::fromWIPS_impl(const ApriltagDetection& wfcore_object) {
-        return {
-            wfcore_object.id,
-            wfcore_object.corners[0].x,wfcore_object.corners[0].y,
-            wfcore_object.corners[1].x,wfcore_object.corners[1].y,
-            wfcore_object.corners[2].x,wfcore_object.corners[2].y,
-            wfcore_object.corners[3].x,wfcore_object.corners[3].y,
-            wfcore_object.decisionMargin,
-            wfcore_object.hammingDistance,
-            impl::tagFamilyIDs.at(wfcore_object.family)
-        };
-    }
-
-    wips_blob_t* ApriltagDetection::pack_impl(const ApriltagDetection& wfcore_object) {
-        auto wipsStruct = fromWIPS_impl(wfcore_object);
-        wips_blob_t* blob = wips_blob_create(sizeof(wips_apriltag_detection_t));
-        wips_encode_apriltag_detection(blob, &wipsStruct);
-        wips_apriltag_detection_free_resources(&wipsStruct);
-        return blob;
-    }
-
-    ApriltagDetection ApriltagDetection::unpack_impl(wips_blob_t* data) {
-        wips_apriltag_detection_t wipsStruct;
-        wips_decode_apriltag_detection(&wipsStruct, data);
-        auto out = toWIPS_impl(wipsStruct);
-        wips_apriltag_detection_free_resources(&wipsStruct);
-        return out;
     }
 }

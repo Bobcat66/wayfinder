@@ -28,38 +28,33 @@ namespace wf {
 
     // Every derived type of WIPSSerializable
     // MUST implement public methods with the following signatures:
-    // `static DerivedType toWIPS_impl(const WipsType&)`
-    // `static WipsType fromWIPS_impl(const DerivedType&)`
-    // `static wips_blob_t* pack_impl(const DerivedType&)`
-    // `static DerivedType unpack_impl(wips_blob_t*)`
-    template <typename DerivedType,typename WipsType>
+    // `static WipsType toWIPS_impl(const DerivedType&)`
+    // `static DerivedType fromWIPS_impl(const WipsType&)`
+    template <typename DerivedType,typename WipsType,wips_voidmethods_t* WipsMethods>
     class WIPSSerializable {
     public:
-        static DerivedType toWIPS(const WipsType& wips_struct) {
-            return DerivedType::toWIPS_impl(wips_struct);
+        static WipsType toWIPS(const DerivedType& wfcore_object) {
+            return DerivedType::toWIPS_impl(wfcore_object);
         }
 
-        static WipsType fromWIPS(const DerivedType& wfcore_object) {
-            return DerivedType::fromWIPS_impl(wfcore_object);
+        static DerivedType fromWIPS(const WipsType& wips_struct) {
+            return DerivedType::fromWIPS_impl(wips_struct);
         }
 
         static wips_blob_t* pack(const DerivedType& wfcore_object) {
-            auto wipsStruct = fromWIPS_impl(wfcore_object);
-            wips_blob_t* blob = wips_blob_create(sizeof(DerivedType));
-            wips_encode_apriltag_detection(blob, &wipsStruct);
-            wips_apriltag_detection_free_resources(&wipsStruct);
+            auto wipsStruct = DerivedType::toWIPS_impl(wfcore_object);
+            wips_blob_t* blob = wips_blob_create(sizeof(WipsType));
+            WipsMethods->encode(blob, (void*)&wipsStruct);
+            WipsMethods->free_resources((void*)&wipsStruct);
             return blob;
         }
 
         static DerivedType unpack(wips_blob_t* data) {
-            return DerivedType::unpack_impl(data);
-        }
-    protected:
-        static wips_blob_t* pack_default_impl(const DerivedType& wfcore_object) {
-            WipsType wips_struct = fromWIPS(wfcore_object);
-            wips_blob_t* bin = wips_blob_create(sizeof(WipsType));
-            
-            return bin;
+            WipsType wipsStruct;
+            WipsMethods->decode((void*)&wipsStruct, data);
+            auto out = DerivedType::fromWIPS_impl(wipsStruct);
+            WipsMethods->free_resources((void*)&wipsStruct);
+            return out;
         }
     };
 

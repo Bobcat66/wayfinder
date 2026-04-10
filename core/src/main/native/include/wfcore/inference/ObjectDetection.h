@@ -35,7 +35,7 @@ namespace wf {
         float confidence;
     };
 
-    struct ObjectDetection : public WIPSSerializable<ObjectDetection,wips_object_detection_t> {
+    struct ObjectDetection : public WIPSSerializable<ObjectDetection,wips_object_detection_t,&wips_object_detection_voidmethods> {
         int objectClass;
         float confidence;
         float percentArea;
@@ -54,10 +54,8 @@ namespace wf {
             bboxBottomRightPixels(std::move(bboxBottomRightPixels_)),
             bboxTopLeftNorm(std::move(bboxTopLeftNorm)),
             bboxBottomRightNorm(std::move(bboxBottomRightNorm)) {}
-        static ObjectDetection toWIPS_impl(const wips_object_detection_t& wips_struct);
-        static wips_object_detection_t fromWIPS_impl(const ObjectDetection& wfcore_object);
-        static wips_blob_t* toWIPSBin_impl(const ObjectDetection& wfcore_object);
-        static ObjectDetection fromWIPSBin_impl(wips_blob_t* data);
+        static wips_object_detection_t toWIPS_impl(const ObjectDetection& wfcore_object);
+        static ObjectDetection fromWIPS_impl(const wips_object_detection_t& wips_struct);
     };
     
 }
