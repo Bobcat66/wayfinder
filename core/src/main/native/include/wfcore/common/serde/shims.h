@@ -19,5 +19,13 @@
 
 #pragma once
 
-#include "wfcore/fiducial/pose/ApriltagFieldPoseObservation.h"
-#include "wfcore/fiducial/pose/ApriltagRelativePoseObservation.h"
+#include "wips/wips_runtime.h"
+#include "wips/pose3.wips.h"
+#include <gtsam/geometry/Pose3.h>
+
+namespace wf {
+    wips_pose3_t pose3_wfcore2wips(const gtsam::Pose3& pose);
+    gtsam::Pose3 pose3_wips2wfcore(const wips_pose3_t& pose);
+    wips_blob_t* packPose3(const gtsam::Pose3& pose);
+    gtsam::Pose3 unpackPose3(wips_blob_t* data);
+}

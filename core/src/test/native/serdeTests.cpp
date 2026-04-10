@@ -24,6 +24,7 @@
 #include "wips/apriltag_field_pose_observation.wips.h"
 #include "wips/apriltag_relative_pose_observation.wips.h"
 #include "wips/wips_runtime.h"
+#include "wfcore/common/serde/shims.h"
 
 #include <chrono>
 #include <gtest/gtest.h>

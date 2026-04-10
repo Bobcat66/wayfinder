@@ -311,21 +311,6 @@ namespace impl {
 
 namespace wf {
 
-    wips_blob_t* packPose3(const gtsam::Pose3& pose) {
-        wips_pose3_t wipspose = impl::wfcore2wips_pose3_shim(pose);
-        wips_blob_t* bin = wips_blob_create(sizeof(wips_pose3_t));
-        wips_encode_pose3(bin, &wipspose);
-        wips_pose3_free_resources(&wipspose);
-        return bin;
-    }
-    gtsam::Pose3 unpackPose3(wips_blob_t* data) {
-        wips_pose3_t wipspose;
-        wips_decode_pose3(&wipspose,data);
-        auto out = impl::wips2wfcore_pose3_shim(wipspose);
-        wips_pose3_free_resources(&wipspose);
-        return out;
-    }
-
     wips_blob_t* packApriltagDetection(const ApriltagDetection& detection) {
         wips_apriltag_detection_t wipsdetection = impl::wfcore2wips_atd_shim(detection);
         wips_blob_t* bin = wips_blob_create(sizeof(wips_apriltag_detection_t));

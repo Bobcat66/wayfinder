@@ -1,7 +1,7 @@
 /*
  * SPDX-License-Identifier: GPL-3.0-or-later
  *
- * Copyright (C) 2025 Jesse Kane
+ * Copyright (C) 2026 Jesse Kane
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,7 +17,21 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#pragma once
+#include <gtsam/geometry/Pose3.h>
 
-#include "wfcore/fiducial/pose/ApriltagFieldPoseObservation.h"
-#include "wfcore/fiducial/pose/ApriltagRelativePoseObservation.h"
+namespace wf {
+    struct ApriltagRelativePoseObservation  {
+        int id; // Apriltag ID
+        gtsam::Pose3 camPose0;
+        double error0;
+        gtsam::Pose3 camPose1;
+        double error1;
+        ApriltagRelativePoseObservation(
+            int id_,
+            gtsam::Pose3 camPose0_, double error0_,
+            gtsam::Pose3 camPose1_, double error1_
+        ) : id(id_), 
+            camPose0(std::move(camPose0_)), error0(error0_), 
+            camPose1(std::move(camPose1_)), error1(error1_) {}
+    };
+}

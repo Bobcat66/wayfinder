@@ -30,8 +30,6 @@
 // This file breaks that rule, should refactor eventually
 
 namespace wf {
-    wips_blob_t* packPose3(const gtsam::Pose3& pose);
-    gtsam::Pose3 unpackPose3(wips_blob_t* data);
 
     wips_blob_t* packApriltagDetection(const ApriltagDetection& detection);
     ApriltagDetection unpackApriltagDetection(wips_blob_t* data);
