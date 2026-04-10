@@ -72,6 +72,8 @@ void wips_object_detection_ntoh(wips_object_detection_t *data);
 
 extern wips_vlamethods_t wips_object_detection_vlamethods;
 
+extern wips_voidmethods_t wips_object_detection_voidmethods;
+
 #ifdef __cplusplus
 }
 #endif

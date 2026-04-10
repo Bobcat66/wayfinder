@@ -298,3 +298,5 @@ wips_vlamethods_t wips_apriltag_field_pose_observation_vlamethods = {
     wips_apriltag_field_pose_observation_vlasetter,
     wips_apriltag_field_pose_observation_vlapushback
 };
+
+DEFINE_VOIDMETHODS(apriltag_field_pose_observation)

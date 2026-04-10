@@ -21,6 +21,8 @@
 
 #include <array>
 #include <opencv2/core.hpp>
+#include "wips/object_detection.wips.h"
+#include "wfcore/common/serde/WIPSSerializable.h"
 
 namespace wf {
 
@@ -33,7 +35,7 @@ namespace wf {
         float confidence;
     };
 
-    struct ObjectDetection {
+    struct ObjectDetection : public WIPSSerializable<ObjectDetection,wips_object_detection_t> {
         int objectClass;
         float confidence;
         float percentArea;
@@ -52,6 +54,10 @@ namespace wf {
             bboxBottomRightPixels(std::move(bboxBottomRightPixels_)),
             bboxTopLeftNorm(std::move(bboxTopLeftNorm)),
             bboxBottomRightNorm(std::move(bboxBottomRightNorm)) {}
+        static ObjectDetection toWIPS_impl(const wips_object_detection_t& wips_struct);
+        static wips_object_detection_t fromWIPS_impl(const ObjectDetection& wfcore_object);
+        static wips_blob_t* toWIPSBin_impl(const ObjectDetection& wfcore_object);
+        static ObjectDetection fromWIPSBin_impl(wips_blob_t* data);
     };
     
 }

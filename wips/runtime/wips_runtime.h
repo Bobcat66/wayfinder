@@ -47,6 +47,16 @@ extern "C" {
 #define GET_WIPS_DETAIL_IMPL(field,detail) DETAIL ## detail ## __ ## field
 #define GET_WIPS_DETAIL(wips_struct,field,detail) (wips_struct)->GET_WIPS_DETAIL_IMPL(field,detail)
 
+#define WIPS_FREE_RESOURCES(wips_typename, data) wips_##wips_typename##_free_resources(data)
+#define WIPS_DESTROY(wips_typename, data) wips_##wips_typename##_destroy(data)
+#define WIPS_CREATE(wips_typename) wips_##wips_typename##_create()
+#define WIPS_COPY(wips_typename, dest, src) wips_##wips_typename##_copy(dest, src)
+#define WIPS_DECODE(wips_typename, out, data) wips_decode_##wips_typename(out, data)
+#define WIPS_ENCODE(wips_typename, data, in) wips_encode_##wips_typename(data, in)
+#define WIPS_ENCODE_NRB(wips_typename, data, in) wips_encode_nrb_##wips_typename(data, in)
+#define WIPS_HTON(wips_typename, data) wips_##wips_typename##_hton(data)
+#define WIPS_NTOH(wips_typename, data) wips_##wips_typename##_ntoh(data)
+
 // Status codes
 #define WIPS_STATUS_OK 0x00 // No error
 #define WIPS_STATUS_OOM 0x01  // out of memory
@@ -144,6 +154,19 @@ typedef struct {
     size_t allocated; // The amount of memory allocated
 } wips_blob_t;
 
+// Holds type-erased methods for a WIPS type. This is used for reflection and dynamic manipulation of WIPS structs.
+typedef struct {
+    void (* const free_resources)(void *);
+    void (* const destroy)(void *);
+    void *(* const create)();
+    wips_status_t (* const copy)(void *, const void *);
+    wips_result_t (* const encode)(wips_blob_t *, void *);
+    wips_result_t (* const encode_nrb)(wips_blob_t *, void *);
+    wips_result_t (* const decode)(void *, wips_blob_t *);
+    void (* const hton)(void *);
+    void (* const ntoh)(void *);
+} wips_voidmethods_t;
+
 // Dynamically allocates a blob. In general, blobs created with wips_blob_create are the
 // safest to use, and have the fewest footguns. Use this unless you know what you're doing
 wips_blob_t *wips_blob_create(size_t size);
@@ -209,6 +232,28 @@ void wips_i64_free_resources(wips_i64_t *data);
 void wips_fp32_free_resources(wips_fp32_t *data);
 void wips_fp64_free_resources(wips_fp64_t *data);
 
+void wips_u8_destroy(wips_u8_t *data);
+void wips_i8_destroy(wips_i8_t *data);
+void wips_u16_destroy(wips_u16_t *data);
+void wips_i16_destroy(wips_i16_t *data);
+void wips_u32_destroy(wips_u32_t *data);
+void wips_i32_destroy(wips_i32_t *data);
+void wips_u64_destroy(wips_u64_t *data);
+void wips_i64_destroy(wips_i64_t *data);
+void wips_fp32_destroy(wips_fp32_t *data);
+void wips_fp64_destroy(wips_fp64_t *data);
+
+wips_u8_t *wips_u8_create();
+wips_i8_t *wips_i8_create();
+wips_u16_t *wips_u16_create();
+wips_i16_t *wips_i16_create();
+wips_u32_t *wips_u32_create();
+wips_i32_t *wips_i32_create();
+wips_u64_t *wips_u64_create();
+wips_i64_t *wips_i64_create();
+wips_fp32_t *wips_fp32_create();
+wips_fp64_t *wips_fp64_create();
+
 wips_status_t wips_u8_copy(wips_u8_t *dest, const wips_u8_t *src);
 wips_status_t wips_i8_copy(wips_i8_t *dest, const wips_i8_t *src);
 wips_status_t wips_u16_copy(wips_u16_t *dest, const wips_u16_t *src);
@@ -260,6 +305,17 @@ extern wips_vlamethods_t wips_u64_vlamethods;
 extern wips_vlamethods_t wips_i64_vlamethods;
 extern wips_vlamethods_t wips_fp32_vlamethods;
 extern wips_vlamethods_t wips_fp64_vlamethods;
+
+extern wips_voidmethods_t wips_u8_methods;
+extern wips_voidmethods_t wips_i8_methods;
+extern wips_voidmethods_t wips_u16_methods;
+extern wips_voidmethods_t wips_i16_methods;
+extern wips_voidmethods_t wips_u32_methods;
+extern wips_voidmethods_t wips_i32_methods;
+extern wips_voidmethods_t wips_u64_methods;
+extern wips_voidmethods_t wips_i64_methods;
+extern wips_voidmethods_t wips_fp32_methods;
+extern wips_voidmethods_t wips_fp64_methods;
 
 #ifdef __cplusplus
 }

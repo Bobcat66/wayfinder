@@ -267,3 +267,5 @@ wips_vlamethods_t wips_odometry_result_vlamethods = {
     wips_odometry_result_vlasetter,
     wips_odometry_result_vlapushback
 };
+
+DEFINE_VOIDMETHODS(odometry_result)

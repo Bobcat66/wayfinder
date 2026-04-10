@@ -39,11 +39,11 @@ extern "C" {
 #endif
 
 #include "wips_runtime.h"
-#include "apriltag_relative_pose_observation.wips.h"
-#include "object_detection.wips.h"
 #include "apriltag_detection.wips.h"
-#include "apriltag_field_pose_observation.wips.h"
 #include "camera_data.wips.h"
+#include "object_detection.wips.h"
+#include "apriltag_field_pose_observation.wips.h"
+#include "apriltag_relative_pose_observation.wips.h"
 
 typedef struct {
     wips_u64_t timestamp;
@@ -78,6 +78,8 @@ void wips_pipeline_result_hton(wips_pipeline_result_t *data);
 void wips_pipeline_result_ntoh(wips_pipeline_result_t *data);
 
 extern wips_vlamethods_t wips_pipeline_result_vlamethods;
+
+extern wips_voidmethods_t wips_pipeline_result_voidmethods;
 
 #ifdef __cplusplus
 }

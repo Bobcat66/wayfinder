@@ -210,3 +210,5 @@ wips_vlamethods_t wips_camera_data_vlamethods = {
     wips_camera_data_vlasetter,
     wips_camera_data_vlapushback
 };
+
+DEFINE_VOIDMETHODS(camera_data)

@@ -69,6 +69,8 @@ void wips_camera_data_ntoh(wips_camera_data_t *data);
 
 extern wips_vlamethods_t wips_camera_data_vlamethods;
 
+extern wips_voidmethods_t wips_camera_data_voidmethods;
+
 #ifdef __cplusplus
 }
 #endif

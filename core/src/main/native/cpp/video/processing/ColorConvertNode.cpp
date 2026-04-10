@@ -48,6 +48,7 @@ namespace wf {
         colorConverter(*(this->inpad),this->outpad);
     }
 
+    // TODO: Update to use WF's error framework instead of throwing exceptions
     template <CVImage T>
     void ColorConvertNode<T>::updateColorConverter() {
         switch (*(this->incoding)) {

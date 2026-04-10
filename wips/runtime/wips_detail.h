@@ -316,6 +316,47 @@ struct tm* wips_localtime(const time_t* timer);
         (out)->buffer_pt = buffer_pt;                                                                           \
     } while (0)
 
+#define DEFINE_VOIDMETHODS(wips_typename)                                                                       \
+    static void wips_ ## wips_typename ## _free_resources_void(void *data) {                                    \
+        WIPS_FREE_RESOURCES(wips_typename, (GET_CTYPE(wips_typename) *)data);                                   \
+    }                                                                                                           \
+    static void wips_ ## wips_typename ## _destroy_void(void *data) {                                           \
+        WIPS_DESTROY(wips_typename, (GET_CTYPE(wips_typename) *)data);                                          \
+    }                                                                                                           \
+    static void *wips_ ## wips_typename ## _create_void() {                                                     \
+        return WIPS_CREATE(wips_typename);                                                                      \
+    }                                                                                                           \
+    static wips_status_t wips_ ## wips_typename ## _copy_void(void *dst, const void *src) {                     \
+        return WIPS_COPY(wips_typename,                                                                         \
+            (GET_CTYPE(wips_typename) *)dst, (const GET_CTYPE(wips_typename) *)src                              \
+        );                                                                                                      \
+    }                                                                                                           \
+    static wips_result_t wips_ ## wips_typename ## _encode_void(wips_blob_t *blob, void *data) {                \
+        return WIPS_ENCODE(wips_typename, blob, (GET_CTYPE(wips_typename) *)data);                              \
+    }                                                                                                           \
+    static wips_result_t wips_ ## wips_typename ## _encode_nrb_void(wips_blob_t *blob, void *data) {            \
+        return WIPS_ENCODE_NRB(wips_typename, blob, (GET_CTYPE(wips_typename) *)data);                          \
+    }                                                                                                           \
+    static wips_result_t wips_ ## wips_typename ## _decode_void(void *data, wips_blob_t *blob) {                \
+        return WIPS_DECODE(wips_typename, (GET_CTYPE(wips_typename) *)data, blob);                              \
+    }                                                                                                           \
+    static void wips_ ## wips_typename ## _hton_void(void *data) {                                              \
+        WIPS_HTON(wips_typename, (GET_CTYPE(wips_typename) *)data);                                             \
+    }                                                                                                           \
+    static void wips_ ## wips_typename ## _ntoh_void(void *data) {                                              \
+        WIPS_NTOH(wips_typename, (GET_CTYPE(wips_typename) *)data);                                             \
+    }                                                                                                           \
+    wips_voidmethods_t wips_ ## wips_typename ## _voidmethods = {                                               \
+        &wips_ ## wips_typename ## _free_resources_void,                                                        \
+        &wips_ ## wips_typename ## _destroy_void,                                                               \
+        &wips_ ## wips_typename ## _create_void,                                                                \
+        &wips_ ## wips_typename ## _copy_void,                                                                  \
+        &wips_ ## wips_typename ## _encode_void,                                                                \
+        &wips_ ## wips_typename ## _encode_nrb_void,                                                            \
+        &wips_ ## wips_typename ## _decode_void,                                                                \
+        &wips_ ## wips_typename ## _hton_void,                                                                  \
+        &wips_ ## wips_typename ## _ntoh_void                                                                   \
+    };
 #ifdef __cplusplus
 }
 #endif

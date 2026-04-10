@@ -473,3 +473,5 @@ wips_vlamethods_t wips_pipeline_result_vlamethods = {
     wips_pipeline_result_vlasetter,
     wips_pipeline_result_vlapushback
 };
+
+DEFINE_VOIDMETHODS(pipeline_result)

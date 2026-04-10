@@ -280,3 +280,5 @@ wips_vlamethods_t wips_apriltag_detection_vlamethods = {
     wips_apriltag_detection_vlasetter,
     wips_apriltag_detection_vlapushback
 };
+
+DEFINE_VOIDMETHODS(apriltag_detection)

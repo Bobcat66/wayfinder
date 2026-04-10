@@ -67,6 +67,8 @@ void wips_twist3_ntoh(wips_twist3_t *data);
 
 extern wips_vlamethods_t wips_twist3_vlamethods;
 
+extern wips_voidmethods_t wips_twist3_voidmethods;
+
 #ifdef __cplusplus
 }
 #endif

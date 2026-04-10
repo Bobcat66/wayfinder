@@ -43,11 +43,11 @@ extern "C" {
 
 #define PY_SSIZE_T_CLEAN
 #include "pipeline_result_pyapi.wips.h"
-#include "apriltag_relative_pose_observation_pyapi.wips.h"
-#include "object_detection_pyapi.wips.h"
 #include "apriltag_detection_pyapi.wips.h"
-#include "apriltag_field_pose_observation_pyapi.wips.h"
 #include "camera_data_pyapi.wips.h"
+#include "object_detection_pyapi.wips.h"
+#include "apriltag_field_pose_observation_pyapi.wips.h"
+#include "apriltag_relative_pose_observation_pyapi.wips.h"
 
 #define WIPS_INTERNAL
 #include "wips_detail.h"

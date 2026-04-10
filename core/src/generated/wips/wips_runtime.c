@@ -129,6 +129,28 @@ void wips_i64_free_resources(wips_i64_t *data) {}
 void wips_fp32_free_resources(wips_fp32_t *data) {}
 void wips_fp64_free_resources(wips_fp64_t *data) {}
 
+void wips_u8_destroy(wips_u8_t *data) {free(data);}
+void wips_i8_destroy(wips_i8_t *data) {free(data);}
+void wips_u16_destroy(wips_u16_t *data) {free(data);}
+void wips_i16_destroy(wips_i16_t *data) {free(data);}
+void wips_u32_destroy(wips_u32_t *data) {free(data);}
+void wips_i32_destroy(wips_i32_t *data) {free(data);}
+void wips_u64_destroy(wips_u64_t *data) {free(data);}
+void wips_i64_destroy(wips_i64_t *data) {free(data);}
+void wips_fp32_destroy(wips_fp32_t *data) {free(data);}
+void wips_fp64_destroy(wips_fp64_t *data) {free(data);}
+
+wips_u8_t *wips_u8_create() {return (wips_u8_t *)calloc(1, sizeof(wips_u8_t));}
+wips_i8_t *wips_i8_create() {return (wips_i8_t *)calloc(1, sizeof(wips_i8_t));}
+wips_u16_t *wips_u16_create() {return (wips_u16_t *)calloc(1, sizeof(wips_u16_t));}
+wips_i16_t *wips_i16_create() {return (wips_i16_t *)calloc(1, sizeof(wips_i16_t));}
+wips_u32_t *wips_u32_create() {return (wips_u32_t *)calloc(1, sizeof(wips_u32_t));}
+wips_i32_t *wips_i32_create() {return (wips_i32_t *)calloc(1, sizeof(wips_i32_t));}
+wips_u64_t *wips_u64_create() {return (wips_u64_t *)calloc(1, sizeof(wips_u64_t));}
+wips_i64_t *wips_i64_create() {return (wips_i64_t *)calloc(1, sizeof(wips_i64_t));}
+wips_fp32_t *wips_fp32_create() {return (wips_fp32_t *)calloc(1, sizeof(wips_fp32_t));}
+wips_fp64_t *wips_fp64_create() {return (wips_fp64_t *)calloc(1, sizeof(wips_fp64_t));}
+
 wips_status_t wips_u8_copy(wips_u8_t *dest, const wips_u8_t *src) {
     *dest = *src;
     return WIPS_STATUS_OK;
@@ -342,3 +364,14 @@ wips_vlamethods_t wips_fp64_vlamethods = {
     wips_fp64_vlasetter,
     wips_fp64_vlapushback
 };
+
+DEFINE_VOIDMETHODS(u8)
+DEFINE_VOIDMETHODS(i8)
+DEFINE_VOIDMETHODS(u16)
+DEFINE_VOIDMETHODS(i16)
+DEFINE_VOIDMETHODS(u32)
+DEFINE_VOIDMETHODS(i32)
+DEFINE_VOIDMETHODS(u64)
+DEFINE_VOIDMETHODS(i64)
+DEFINE_VOIDMETHODS(fp32)
+DEFINE_VOIDMETHODS(fp64)

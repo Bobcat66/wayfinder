@@ -30,8 +30,8 @@ namespace wf {
     // MUST implement public methods with the following signatures:
     // `static DerivedType toWIPS_impl(const WipsType&)`
     // `static WipsType fromWIPS_impl(const DerivedType&)`
-    // `static wips_blob_t* toWIPSBin_impl(const DerivedType&)`
-    // `static DerivedType fromWIPSBin_impl(wips_blob_t*)`
+    // `static wips_blob_t* pack_impl(const DerivedType&)`
+    // `static DerivedType unpack_impl(wips_blob_t*)`
     template <typename DerivedType,typename WipsType>
     class WIPSSerializable {
     public:
@@ -43,12 +43,23 @@ namespace wf {
             return DerivedType::fromWIPS_impl(wfcore_object);
         }
 
-        static wips_blob_t* toWIPSBin(const DerivedType& wfcore_object) {
-            return DerivedType::toWIPSBin_impl(wfcore_object);
+        static wips_blob_t* pack(const DerivedType& wfcore_object) {
+            auto wipsStruct = fromWIPS_impl(wfcore_object);
+            wips_blob_t* blob = wips_blob_create(sizeof(DerivedType));
+            wips_encode_apriltag_detection(blob, &wipsStruct);
+            wips_apriltag_detection_free_resources(&wipsStruct);
+            return blob;
         }
 
-        static DerivedType fromWIPSBin(wips_blob_t* data) {
-            return DerivedType::fromWIPSBin_impl(data);
+        static DerivedType unpack(wips_blob_t* data) {
+            return DerivedType::unpack_impl(data);
+        }
+    protected:
+        static wips_blob_t* pack_default_impl(const DerivedType& wfcore_object) {
+            WipsType wips_struct = fromWIPS(wfcore_object);
+            wips_blob_t* bin = wips_blob_create(sizeof(WipsType));
+            
+            return bin;
         }
     };
 

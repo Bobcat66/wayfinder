@@ -266,3 +266,5 @@ wips_vlamethods_t wips_object_detection_vlamethods = {
     wips_object_detection_vlasetter,
     wips_object_detection_vlapushback
 };
+
+DEFINE_VOIDMETHODS(object_detection)

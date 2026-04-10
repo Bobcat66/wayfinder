@@ -154,3 +154,5 @@ wips_vlamethods_t wips_timesync_packet_vlamethods = {
     wips_timesync_packet_vlasetter,
     wips_timesync_packet_vlapushback
 };
+
+DEFINE_VOIDMETHODS(timesync_packet)

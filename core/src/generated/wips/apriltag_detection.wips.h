@@ -73,6 +73,8 @@ void wips_apriltag_detection_ntoh(wips_apriltag_detection_t *data);
 
 extern wips_vlamethods_t wips_apriltag_detection_vlamethods;
 
+extern wips_voidmethods_t wips_apriltag_detection_voidmethods;
+
 #ifdef __cplusplus
 }
 #endif

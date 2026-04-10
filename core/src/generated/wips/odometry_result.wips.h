@@ -66,6 +66,8 @@ void wips_odometry_result_ntoh(wips_odometry_result_t *data);
 
 extern wips_vlamethods_t wips_odometry_result_vlamethods;
 
+extern wips_voidmethods_t wips_odometry_result_voidmethods;
+
 #ifdef __cplusplus
 }
 #endif

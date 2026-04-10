@@ -67,6 +67,8 @@ void wips_apriltag_relative_pose_observation_ntoh(wips_apriltag_relative_pose_ob
 
 extern wips_vlamethods_t wips_apriltag_relative_pose_observation_vlamethods;
 
+extern wips_voidmethods_t wips_apriltag_relative_pose_observation_voidmethods;
+
 #ifdef __cplusplus
 }
 #endif

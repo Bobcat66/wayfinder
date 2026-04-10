@@ -196,3 +196,5 @@ wips_vlamethods_t wips_twist3_vlamethods = {
     wips_twist3_vlasetter,
     wips_twist3_vlapushback
 };
+
+DEFINE_VOIDMETHODS(twist3)

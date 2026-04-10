@@ -210,3 +210,5 @@ wips_vlamethods_t wips_pose3_vlamethods = {
     wips_pose3_vlasetter,
     wips_pose3_vlapushback
 };
+
+DEFINE_VOIDMETHODS(pose3)

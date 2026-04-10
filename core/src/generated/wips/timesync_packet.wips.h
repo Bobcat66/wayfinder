@@ -64,6 +64,8 @@ void wips_timesync_packet_ntoh(wips_timesync_packet_t *data);
 
 extern wips_vlamethods_t wips_timesync_packet_vlamethods;
 
+extern wips_voidmethods_t wips_timesync_packet_voidmethods;
+
 #ifdef __cplusplus
 }
 #endif

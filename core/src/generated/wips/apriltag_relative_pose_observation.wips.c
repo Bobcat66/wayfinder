@@ -182,3 +182,5 @@ wips_vlamethods_t wips_apriltag_relative_pose_observation_vlamethods = {
     wips_apriltag_relative_pose_observation_vlasetter,
     wips_apriltag_relative_pose_observation_vlapushback
 };
+
+DEFINE_VOIDMETHODS(apriltag_relative_pose_observation)

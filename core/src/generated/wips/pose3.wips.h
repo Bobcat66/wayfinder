@@ -68,6 +68,8 @@ void wips_pose3_ntoh(wips_pose3_t *data);
 
 extern wips_vlamethods_t wips_pose3_vlamethods;
 
+extern wips_voidmethods_t wips_pose3_voidmethods;
+
 #ifdef __cplusplus
 }
 #endif

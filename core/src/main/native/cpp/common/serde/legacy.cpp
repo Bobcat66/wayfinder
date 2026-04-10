@@ -304,7 +304,7 @@ namespace impl {
             camData.cy,
             camData.sigma_x,
             camData.sigma_y,
-            wips2wfcore_pose3_shim(camData.robotTcamera)
+            wips2wfcore_pose3_shim(camData.robot_to_cam)
         };
     }
 }
